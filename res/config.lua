@@ -9,4 +9,4 @@ local config = {
     entryScene = "main_scene.json"
 }
 
-return config;
+return config

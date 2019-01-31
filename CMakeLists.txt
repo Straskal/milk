@@ -41,7 +41,7 @@ find_package(SDL2_image REQUIRED)
 find_package(Lua53 REQUIRED)
 
 # not quite yet
-#find_package(PhysFS REQUIRED)
+# find_package(PhysFS REQUIRED)
 
 #---------------------------------------------------------------------------
 # code coverage configuration
@@ -77,4 +77,4 @@ add_subdirectory(test)
 #---------------------------------------------------------------------------
 # set start up project for visual studio
 #---------------------------------------------------------------------------
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT milkengine)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT milk)
