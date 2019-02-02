@@ -16,6 +16,11 @@ namespace milk
                 return actor.name();
             }
 
+            Vector2d position(Actor& actor)
+            {
+                return actor.position();
+            }
+
             void move(Actor& actor, float x, float y)
             {
                 auto velocity = actor.getComponent<Velocity>();

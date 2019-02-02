@@ -48,6 +48,13 @@ void milk::Logic::update()
         it.second->update();
 }
 
+
+void milk::Logic::lateUpdate()
+{
+    for (auto& it : scriptByActorId_)
+        it.second->lateUpdate();
+}
+
 void milk::Logic::onActorSpawned(Actor& actor)
 {
     auto script = actor.getComponent<Script>();

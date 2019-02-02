@@ -2,8 +2,6 @@
 
 #include <cmath>
 
-#include "SDL.h"
-
 #include "Animator.h"
 #include "Sprite.h"
 #include "Texture.h"
@@ -50,17 +48,22 @@ void milk::Graphics::render(milk::Scene& scene)
     auto& tilemap = scene.tilemap();
     auto& camera = scene.camera();
 
+    auto screenSize = renderer_.resolution();
+    // camera has to handle all of this stuff.
+    // if we want the camera to clamp from a script, this already has to be calculated, or the clamp will be overridden
+    Vector2d camOffset = {camera.position().x - screenSize.width * 0.5f, camera.position().y - screenSize.height * 0.5f};
+
     for (auto& layer : tilemap.layers)
     {
         for (auto& tile : layer->tiles)
         {
             Rectangle destinationRect;
-            destinationRect.x = tile->x - (int)camera.position().x;
-            destinationRect.y = tile->y - (int)camera.position().y;
+            destinationRect.x = tile->x - (int)camOffset.x;
+            destinationRect.y = tile->y - (int)camOffset.y;
             destinationRect.width = tile->type.sourceRect.width;
             destinationRect.height = tile->type.sourceRect.height;
 
-            renderer_.draw(*tilemap.texture, tile->type.sourceRect, destinationRect, SDL_FLIP_NONE);
+            renderer_.draw(*tilemap.texture, tile->type.sourceRect, destinationRect, 0);
         }
     }
 
@@ -74,8 +77,8 @@ void milk::Graphics::render(milk::Scene& scene)
         auto texture = it.second->texture();
         auto sourceRect = it.second->sourceRect();
         auto destinationRect = it.second->destinationRect();
-        destinationRect.x -= (int)camera.position().x;
-        destinationRect.y -= (int)camera.position().y;
+        destinationRect.x -= (int)camOffset.x;
+        destinationRect.y -= (int)camOffset.y;
 
         renderer_.draw(*texture, sourceRect, destinationRect, it.second->rendererFlip());
     }

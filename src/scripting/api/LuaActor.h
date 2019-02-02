@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "math/Vector2d.h"
+
 namespace milk
 {
     class Actor;
@@ -13,7 +15,7 @@ namespace milk
         {
             std::string name(Actor& actor);
 
-            void setAsCameraTarget(Actor& actor);
+            Vector2d position(Actor& actor);
 
             void move(Actor& actor, float x, float y);
 

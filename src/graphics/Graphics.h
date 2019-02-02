@@ -20,17 +20,20 @@ namespace milk
 
     struct Tilemap;
 
-    // Graphics handles loading textures, and drawing scenes.
     class Graphics
     {
     public:
-        // Graphics makes draw calls to the renderer, and loads necessary textures for rendering.
+        /// Graphics handles drawing sprites, updating animators. etc...
+        /// \param renderer: A reference to the Game's Renderer.
+        /// \param textureCache: A reference to the Game's TextureCache.
         Graphics(Renderer& renderer, AssetCache<Texture>& textureCache);
 
-        // Graphics works on actor components, so it needs to be updated when they are spawned, destroyed, etc...
+        /// Handles a GameEvent.
+        /// \param gameEvent: The GameEvent to handle.
         void handleEvent(GameEvent& gameEvent);
 
-        // Render the current scene and all of its components.
+        /// Renders the current Scene.
+        /// \param scene: The Game's current Scene.
         void render(Scene& scene);
 
     private:

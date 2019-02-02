@@ -8,9 +8,8 @@
 #include "events/GameEvents.h"
 #include "window/Window.h"
 
-milk::Scene::Scene(milk::EventQueue& eventQueue, unsigned virtualWidth, unsigned virtualHeight)
+milk::Scene::Scene(milk::EventQueue& eventQueue)
         : eventQueue_(eventQueue),
-          camera_(*this, virtualWidth, virtualHeight),
           ended_(false)
 {
 }
@@ -21,17 +20,18 @@ milk::Actor* milk::Scene::spawnActor(const std::string& name)
 {
     int id = idGenerator_.popId();
 
-    auto actor = std::make_unique<Actor>(id, name, Vector2d(0, 0));
-    auto pActor = actor.get();
+    auto pActor = std::make_unique<Actor>(id, name, Vector2d(0, 0));
+    auto pActorRaw = pActor.get();
 
-    actorsToSpawn_.emplace_back(std::move(actor));
+    actorsToSpawn_.emplace_back(std::move(pActor));
 
-    // If the scene has been unloaded, then let's not push an actor spawned event.
-    // We don't want any systems to hold a reference to an invalid actor.
-    if (!ended_)
-        eventQueue_.pushEvent<ActorSpawnedEvent>(*pActor);
+    // If the scene has been ended, then let's not push an actor spawned event.
+    // We don't want any systems to hold a reference an actor of a scene freed from memory.
+    if (ended_)
+        return pActorRaw;
 
-    return pActor;
+    eventQueue_.pushEvent<ActorSpawnedEvent>(*pActorRaw);
+    return pActorRaw;
 }
 
 bool milk::Scene::destroyActor(int id)
@@ -52,7 +52,7 @@ bool milk::Scene::destroyActor(int id)
 
 milk::Actor* milk::Scene::findActor(const std::string& name) const
 {
-    // TODO: Brute force implementation. revisit.
+    // TODO: Find a better solution than brute force implementation.
     for (auto& it : actorsById_)
     {
         if (it.second->name() == name)

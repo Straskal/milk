@@ -8,9 +8,9 @@ namespace milk
     {
         namespace scene
         {
-            void setCameraTarget(Scene& scene, Actor& actor)
+            void setCameraPosition(Scene& scene, Vector2d& position)
             {
-                scene.camera().setTarget(&actor);
+                scene.camera().position(position.x, position.y);
             }
         }
     }

@@ -4,11 +4,7 @@ local player = {
  }
 
 function player:begin()
-	-- start with idle animation
 	self.actor:set_animation('idle')
-
-	-- set player as the camera target to follow
-	SceneManager.current:set_cam_target(self.actor);
 end
 
 function player:update()
@@ -63,6 +59,14 @@ function player:on_collision(e)
 end
 
 function player:destroyed()
+end
+
+function player:late_update()
+	local clamped_cam_pos = Vector2D.new()
+	clamped_cam_pos.x = Mathf.clamp(self.actor.position.x, 320, 320)
+	clamped_cam_pos.y = Mathf.clamp(self.actor.position.y, 180, 360)
+
+	SceneManager.current:set_cam_pos(clamped_cam_pos)
 end
 
 return player

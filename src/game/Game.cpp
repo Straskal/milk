@@ -153,7 +153,7 @@ void milk::Game::update()
     logic_->update();
     physics_->update();
 
-    sceneManager_->lateUpdate();
+    logic_->lateUpdate();
 }
 
 void milk::Game::render()
@@ -169,6 +169,8 @@ void milk::Game::render()
 #endif
     }
 
+    // TODO: This is being called BEFORE any systems start processing their newly aquired Actors
+    // TODO: This is causing artifacts because the scene's tilemap is rendered BEFORE a script can center or CLAMP the camera.
     window_->renderer().present();
 }
 
@@ -246,10 +248,11 @@ bool milk::Game::initFromConfig()
     sceneLoader_ = std::make_unique<SceneLoader>(*this);
     sceneManager_ = std::make_unique<SceneManager>(*events_, *sceneLoader_);
 
+
     Keyboard::initialize();
 
 #ifdef _DEBUG
-    debugTools_ = std::make_unique<DebugTools>(*window_->rendererAdapter().sdlRenderer());
+    debugTools_ = std::make_unique<DebugTools>(window_->renderer());
 #endif
 
     logic_ = std::make_unique<Logic>(luaState_);

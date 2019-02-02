@@ -4,8 +4,8 @@
 namespace milk
 {
     class Actor;
-    class ResourceManager;
 
+    /// Different types of ActorComponents
     enum ComponentType
     {
         SCRIPT = 1 << 0,
@@ -19,11 +19,13 @@ namespace milk
     class ActorComponent
     {
     public:
+        /// An ActorComponent is the building block of an Actor's behavior.
+        /// \param actor: The Actor that owns this ActorComponent
         explicit ActorComponent(Actor& actor);
 
         virtual ~ActorComponent() = default;
 
-        // Returns the components actor.
+        // \returns the ActorComponent's Actor
         Actor& actor() const;
 
     protected:

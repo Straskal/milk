@@ -16,15 +16,21 @@ namespace milk
     class SceneManager
     {
     public:
+        /// The SceneManager manages Scene state.
+        /// \param eventQueue: The SceneManager emits GameEvents such as SCENE_LOADED, SCENE_CHANGED, etc...
+        /// \param sceneLoader: The SceneManager uses the SceneLoader to load Scenes.
         explicit SceneManager(EventQueue& eventQueue, SceneLoader& sceneLoader);
 
         ~SceneManager();
 
+        /// Updates the state of the current Scene
         void update();
-        void lateUpdate();
 
+        /// Loads a new Scene
+        /// \param scene: The name of the Scene to load
         void loadScene(const std::string& scene);
 
+        /// \returns the current Scene
         Scene* currentScene() const;
 
     private:

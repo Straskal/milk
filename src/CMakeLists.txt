@@ -29,9 +29,14 @@ set(MILK_SRC_FILES
         input/Keyboard.cpp
         input/Keyboard.h
 
+        # game
+        game/Game.h
+        game/Game.cpp
+
         # graphics
         graphics/Animator.cpp
         graphics/Animator.h
+        graphics/Color.h
         graphics/Graphics.cpp
         graphics/Graphics.h
         graphics/Sprite.cpp
@@ -41,6 +46,7 @@ set(MILK_SRC_FILES
         graphics/Tilemap.h
 
         # math
+        math/Mathf.h
         math/Rectangle.h
         math/Vector2d.h
 
@@ -53,10 +59,6 @@ set(MILK_SRC_FILES
         physics/SpatialPartitionGrid.h
         physics/Velocity.cpp
         physics/Velocity.h
-
-        # game
-        game/Game.h
-        game/Game.cpp
 
         #scene
         scene/Actor.cpp

@@ -20,35 +20,41 @@ namespace milk
     class Scene
     {
     public:
-        Scene(EventQueue& eventQueue, unsigned virtualWidth, unsigned virtualHeight);
+        /// A Scene represents the current state that the game is in.
+        /// Some examples: Main menu, dungeon level, cinematic, turn based combat sequence, etc...
+        /// \param eventQueue: Scenes emit GameEvents such as ACTOR_SPAWNED and ACTOR_DESTROYED
+        explicit Scene(EventQueue& eventQueue);
 
         ~Scene();
 
-        // Spawns a new actor in the games current scene.
-        // Components are to be added immediately after spawned actor is returned.
+        /// Spawns an Actor into the current Scene and returns it.
+        /// \param name: The Actor's name
+        /// \returns newly spawned Actor
         Actor* spawnActor(const std::string& name);
 
-        // Attempts to destroy and actor with the given id.
-        // Returns true if successful.
+        /// Attempts to destroy an Actor with the given id.
+        /// \param id: The id of the Actor to destroy
+        /// \returns true if the Actor is successfully deleted
         bool destroyActor(int id);
 
-        // Attempts to find an actor with the given name.
-        // Returns nullptr if not actor is found.
+        /// Attempts to find an actor with the given name.
+        /// \param name: The name of the Actor to find
+        /// \returns Actor if found and nullptr if not found
         Actor* findActor(const std::string& name) const;
 
-        // Returns the scenes camera.
+        /// \returns The Scene's Camera
         Camera& camera();
 
-        // Returns the scenes tilemap.
+        /// \returns the Scene's Tilemap
         Tilemap& tilemap();
 
-        // Updates the scenes internal lists after spawning and destroying actors.
+        /// Synchronizes the Scene's internal Actor data after the last frame's actor spawnes or destroys.
         void syncActorLists();
 
-        // Return the scene boundaries.
+        /// \returns The Scene's boundaries
         Rectangle bounds() const;
 
-        // Mark the scene and ended.
+        /// Mark the scene as ended. After a Scene has been added, all newly spawned Actors will not emit an ACTOR_SPAWNED event.
         void end();
 
     private:
@@ -56,6 +62,9 @@ namespace milk
 
         IdGenerator idGenerator_;
         Camera camera_;
+
+        // TODO: break this out into an actor component.
+        // This implies that every single scene needs a tilemap. What about the title screen, or a cinematic, etc...
         Tilemap tilemap_;
 
         bool ended_;

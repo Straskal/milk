@@ -11,6 +11,7 @@
 #include "events/GameEvents.h"
 #include "input/Keyboard.h"
 #include "game/Game.h"
+#include "math/Mathf.h"
 #include "math/Vector2d.h"
 #include "physics/BoxCollider.h"
 #include "scene/Actor.h"
@@ -35,6 +36,7 @@ void milk::LuaApi::init(sol::state& luaState)
     /////////////////////////////////////////////////////////////////
     luaState.new_usertype<Actor>("Actor",
                                  "name", sol::readonly_property(&lua::actor::name),
+                                 "position", sol::readonly_property(&lua::actor::position),
                                  "move", &lua::actor::move,
                                  "set_animation", &lua::actor::setAnimation,
                                  "flip_x", &lua::actor::flipX,
@@ -43,8 +45,12 @@ void milk::LuaApi::init(sol::state& luaState)
     // Collision Event
     /////////////////////////////////////////////////////////////////
     luaState.new_usertype<ActorCollisionEvent>("ActorCollisionEvent",
-                                               "other",
-                                               sol::readonly_property(&lua::collision_event::other));
+                                               "other", sol::readonly_property(&lua::collision_event::other));
+
+    // Math Functions
+    /////////////////////////////////////////////////////////////////
+    luaState.new_usertype<Mathf>("Mathf",
+                                 "clamp", &Mathf::clamp);
 
     // Input
     /////////////////////////////////////////////////////////////////
@@ -56,7 +62,7 @@ void milk::LuaApi::init(sol::state& luaState)
     // Scene
     /////////////////////////////////////////////////////////////////
     luaState.new_usertype<Scene>("Scene",
-                                 "set_cam_target", &lua::scene::setCameraTarget);
+                                 "set_cam_pos", &lua::scene::setCameraPosition);
 
     luaState.new_usertype<SceneManager>("SceneManager",
                                         "current", sol::readonly_property(&lua::scene_manager::current),

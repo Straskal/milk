@@ -8,8 +8,10 @@
 #include "physics/BoxCollider.h"
 #include "physics/SpatialPartitionGrid.h"
 
-milk::DebugTools::DebugTools(SDL_Renderer& renderer)
-        : sdlRenderer_(renderer)
+#include "window/Renderer.h"
+
+milk::DebugTools::DebugTools(Renderer& renderer)
+        : renderer_(renderer)
 {
 }
 
@@ -59,6 +61,13 @@ void milk::DebugTools::render(Scene& scene)
     if (!show)
         return;
 
+    auto& camera = scene.camera();
+
+    auto screenSize = renderer_.resolution();
+    // camera has to handle all of this stuff.
+    // if we want the camera to clamp from a script, this already has to be calculated, or the clamp will be overridden
+    Vector2d camOffset = {camera.position().x - screenSize.width * 0.5f, camera.position().y - screenSize.height * 0.5f};
+
     int cells = SpatialPartitionGrid::NUM_CELLS;
     int size = SpatialPartitionGrid::CELL_SIZE;
 
@@ -66,14 +75,12 @@ void milk::DebugTools::render(Scene& scene)
     {
         for (int j = 0; j < cells; j++)
         {
-            SDL_Rect dest;
-            dest.x = j * size - scene.camera().position().x;
-            dest.y = i * size - scene.camera().position().y;
-            dest.w = size;
-            dest.h = size;
+            Rectangle dest = {(int)(j * size - camOffset.x),
+                              (int)(i * size - camOffset.y),
+                              size,
+                              size};
 
-            SDL_SetRenderDrawColor(&sdlRenderer_, 0x00, 0xff, 0x00, 90);
-            SDL_RenderDrawRect(&sdlRenderer_, &dest);
+            renderer_.drawRectangleOutline(dest, {0x00, 0xFF, 0x00, 0x5A});
         }
     }
 
@@ -83,11 +90,9 @@ void milk::DebugTools::render(Scene& scene)
 
         if (coll != nullptr)
         {
-            SDL_Rect destinationRect = coll->rect();
-            destinationRect.x -= scene.camera().position().x;
-            destinationRect.y -= scene.camera().position().y;
-            SDL_SetRenderDrawColor(&sdlRenderer_, 0xFF, 0x00, 0x00, 75);
-            SDL_RenderFillRect(&sdlRenderer_, &destinationRect);
+            auto collRect = coll->rect();
+            Rectangle dest = {(int)(collRect.x - camOffset.x), (int)(collRect.y - camOffset.y), collRect.w, collRect.h};
+            renderer_.drawRectangle(dest, {0xFF, 0x00, 0x00, 0x46});
         }
     }
 }

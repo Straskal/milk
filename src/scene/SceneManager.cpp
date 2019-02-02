@@ -58,9 +58,3 @@ milk::Scene* milk::SceneManager::currentScene() const
 {
     return scene_.get();
 }
-
-void milk::SceneManager::lateUpdate()
-{
-    if (scene_ != nullptr)
-        scene_->camera().update();
-}

@@ -45,6 +45,17 @@ void milk::Script::update()
     luaScript_[SCRIPT_CALLBACK_UPDATE](self);
 }
 
+void milk::Script::lateUpdate()
+{
+    sol::function onLateUpdate = luaScript_[SCRIPT_CALLBACK_LATE_UPDATE];
+
+    if (!onLateUpdate.valid())
+        return;
+
+    sol::table self = luaScript_;
+    luaScript_[SCRIPT_CALLBACK_LATE_UPDATE](self);
+}
+
 void milk::Script::onCollision(ActorCollisionEvent& collisionEvent)
 {
     sol::function onCollision = luaScript_[SCRIPT_CALLBACK_ON_COLLISION];

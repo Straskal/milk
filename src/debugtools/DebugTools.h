@@ -3,19 +3,18 @@
 
 #include <unordered_map>
 
-struct SDL_Renderer;
-
 namespace milk
 {
     class Actor;
-    class GameEvent;
     class BoxCollider;
+    class GameEvent;
+    class Renderer;
     class Scene;
 
     class DebugTools
     {
     public:
-        explicit DebugTools(SDL_Renderer& renderer);
+        explicit DebugTools(Renderer& renderer);
 
         void handleEvent(GameEvent& gameEvent);
 
@@ -24,7 +23,7 @@ namespace milk
         bool show = false;
 
     private:
-        SDL_Renderer& sdlRenderer_;
+        Renderer& renderer_;
 
         std::unordered_map<int, Actor*> actorsById_;
 

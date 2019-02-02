@@ -1,16 +1,16 @@
-#ifndef _LUASCENE_H
-#define _LUASCENE_H
+#ifndef LUASCENE_H
+#define LUASCENE_H
 
 namespace milk
 {
-    class Actor;
     class Scene;
+    class Vector2d;
 
     namespace lua
     {
         namespace scene
         {
-            void setCameraTarget(Scene& scene, Actor& actor);
+            void setCameraPosition(Scene& scene, Vector2d& position);
         }
     }
 }
