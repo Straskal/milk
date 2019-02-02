@@ -19,7 +19,7 @@ TEST_F(SceneTests, Ctor_Constructs)
     milk::EventQueue eventQueue;
 
     // Act & Assert
-    ASSERT_NO_THROW(milk::Scene(eventQueue, 640, 360));
+    ASSERT_NO_THROW(milk::Scene{eventQueue});
 }
 
 TEST_F(SceneTests, SpawnActor_SpawnsActor)
@@ -27,7 +27,7 @@ TEST_F(SceneTests, SpawnActor_SpawnsActor)
     // Arrange
     milk::EventQueue eventQueue;
 
-    milk::Scene scene{eventQueue, 640, 360};
+    milk::Scene scene{eventQueue};
 
     // Act
     auto actor = scene.spawnActor("steve");
@@ -41,7 +41,7 @@ TEST_F(SceneTests, SpawnActor_SetsActorName)
     // Arrange
     milk::EventQueue eventQueue;
 
-    milk::Scene scene{eventQueue, 640, 360};
+    milk::Scene scene{eventQueue};
 
     // Act
     auto actor = scene.spawnActor("steve");
@@ -55,7 +55,7 @@ TEST_F(SceneTests, SpawnActor_SetsActorId)
     // Arrange
     milk::EventQueue eventQueue;
 
-    milk::Scene scene{eventQueue, 640, 360};
+    milk::Scene scene{eventQueue};
 
     // Act
     auto waddap = scene.spawnActor("waddap");
@@ -77,7 +77,7 @@ TEST_F(SceneTests, SpawnActor_GeneratesActorSpawnedEvent)
     // Arrange
     milk::EventQueue eventQueue;
 
-    milk::Scene scene{eventQueue, 640, 360};
+    milk::Scene scene{eventQueue};
 
     auto actor = scene.spawnActor("steve");
 
@@ -98,7 +98,7 @@ TEST_F(SceneTests, DestroyActor_GivenActorDoesntExist_DoesNotGenerateActorDestro
     // Arrange
     milk::EventQueue eventQueue;
 
-    milk::Scene scene{eventQueue, 640, 360};
+    milk::Scene scene{eventQueue};
 
     // Act
     scene.destroyActor(76);
@@ -118,7 +118,7 @@ TEST_F(SceneTests, DestroyActor_GeneratesActorDestroyedEvent)
     // Arrange
     milk::EventQueue eventQueue;
 
-    milk::Scene scene{eventQueue, 640, 360};
+    milk::Scene scene{eventQueue};
 
     auto actor = scene.spawnActor("steve");
 
@@ -150,7 +150,7 @@ TEST_F(SceneTests, FindActor_FindsActor)
     // Arrange
     milk::EventQueue eventQueue;
 
-    milk::Scene scene{eventQueue, 640, 360};
+    milk::Scene scene{eventQueue};
 
     auto actor = scene.spawnActor("steve");
 
@@ -172,7 +172,7 @@ TEST_F(SceneTests, FindActor_GivenActorDoesntExist_DoesNotFindActor)
     // Arrange
     milk::EventQueue eventQueue;
 
-    milk::Scene scene{eventQueue, 640, 360};
+    milk::Scene scene{eventQueue};
 
     // Act
     auto foundActor = scene.findActor("steve");

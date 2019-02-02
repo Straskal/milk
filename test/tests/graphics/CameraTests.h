@@ -15,16 +15,13 @@ class CameraTests : public ::testing::Test
 TEST_F(CameraTests, Ctor_Constructs)
 {
     milk::EventQueue eventQueue;
-    milk::Scene scene{eventQueue, 640, 360};
-    ASSERT_NO_THROW(milk::Camera(scene, 640, 360));
+    ASSERT_NO_THROW(milk::Camera());
 }
 
 TEST_F(CameraTests, Position_SetsPosition)
 {
     // Arrange
-    milk::EventQueue eventQueue;
-    milk::Scene scene{eventQueue, 640, 360};
-    milk::Camera camera{scene, 640, 360};
+    milk::Camera camera;
 
     // Act
     camera.position(10, 10);
