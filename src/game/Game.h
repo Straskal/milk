@@ -21,7 +21,6 @@ namespace milk
     class DebugTools;
 #endif
 
-    class EventQueue;
     class Filesystem;
     class GameState;
     class Graphics;
@@ -79,9 +78,6 @@ namespace milk
         // Returns the games resource manager.
         AssetCache<Texture>& textureCache() const;
 
-        // Returns the games event queue.
-        EventQueue& events() const;
-
         /// \returns the Game's current Scene.
         Scene* currentScene() const;
 
@@ -103,8 +99,6 @@ namespace milk
         std::unique_ptr<adapter::WindowAdapter> window_;
         std::unique_ptr<adapter::FilesystemAdapter> fileSystem_;
         std::unique_ptr<adapter::TextureCacheAdapter> textureCache_;
-
-        std::unique_ptr<EventQueue> events_;
 
         sol::state luaState_;
 

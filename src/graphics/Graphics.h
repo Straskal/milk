@@ -3,13 +3,10 @@
 
 #include <unordered_map>
 
-struct SDL_Renderer;
-
 namespace milk
 {
     class Actor;
     class Camera;
-    class GameEvent;
     class Renderer;
     class Scene;
     class Sprite;
@@ -27,10 +24,6 @@ namespace milk
         /// \param renderer: A reference to the Game's Renderer.
         /// \param textureCache: A reference to the Game's TextureCache.
         Graphics(Renderer& renderer, AssetCache<Texture>& textureCache);
-
-        /// Handles a GameEvent.
-        /// \param gameEvent: The GameEvent to handle.
-        void handleEvent(GameEvent& gameEvent);
 
         /// Renders the current Scene.
         /// \param scene: The Game's current Scene.

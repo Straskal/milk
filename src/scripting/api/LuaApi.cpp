@@ -3,17 +3,17 @@
 #include "externals/sol.hpp"
 
 #include "LuaActor.h"
-#include "LuaCollisionEvent.h"
+#include "LuaCollision.h"
 #include "LuaGame.h"
 #include "LuaScene.h"
 #include "LuaWindow.h"
 
-#include "events/GameEvents.h"
 #include "input/Keyboard.h"
 #include "game/Game.h"
 #include "math/Mathf.h"
 #include "math/Vector2d.h"
 #include "physics/BoxCollider.h"
+#include "physics/Collision.h"
 #include "scene/Actor.h"
 #include "scene/Scene.h"
 #include "window/Window.h"
@@ -43,8 +43,8 @@ void milk::LuaApi::init(sol::state& luaState)
 
     // Collision Event
     /////////////////////////////////////////////////////////////////
-    luaState.new_usertype<ActorCollisionEvent>("ActorCollisionEvent",
-                                               "other", sol::readonly_property(&lua::collision_event::other));
+    luaState.new_usertype<Collision>("Collision",
+                                     "other", sol::readonly_property(&lua::collision_event::other));
 
     // Math Functions
     /////////////////////////////////////////////////////////////////

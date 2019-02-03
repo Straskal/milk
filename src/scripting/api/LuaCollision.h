@@ -4,13 +4,13 @@
 namespace milk
 {
     class Actor;
-    class ActorCollisionEvent;
+    class Collision;
 
     namespace lua
     {
         namespace collision_event
         {
-            Actor& other(ActorCollisionEvent& collisionEvent);
+            Actor& other(Collision& collision);
         }
     }
 }

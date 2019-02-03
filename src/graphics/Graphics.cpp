@@ -6,41 +6,15 @@
 #include "Sprite.h"
 #include "Texture.h"
 
-#include "events/GameEvents.h"
 #include "scene/Actor.h"
 #include "scene/Scene.h"
+
 #include "window/Renderer.h"
 
 milk::Graphics::Graphics(Renderer& renderer, AssetCache<Texture>& textureCache)
         : renderer_(renderer),
           textureCache_(textureCache)
 {
-}
-
-void milk::Graphics::handleEvent(milk::GameEvent& gameEvent)
-{
-    switch (gameEvent.type())
-    {
-        case GameEventType::ACTOR_SPAWNED:
-        {
-            auto& spawnedEvent = dynamic_cast<ActorSpawnedEvent&>(gameEvent);
-            onActorSpawned(spawnedEvent.actor());
-        }
-            break;
-        case GameEventType::ACTOR_DETROYED:
-        {
-            auto& destroyedEvent = dynamic_cast<ActorDestroyedEvent&>(gameEvent);
-            onActorDestroyed(destroyedEvent.actor());
-        }
-            break;
-        case GameEventType::SCENE_CHANGED:
-        {
-            spritesByActorId_.clear();
-        }
-            break;
-        default:
-            break;
-    }
 }
 
 void milk::Graphics::render(milk::Scene& scene)

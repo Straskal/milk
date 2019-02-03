@@ -22,16 +22,6 @@ milk::GameState_Scene::GameState_Scene(milk::Game& game, milk::Scene& scene)
 {
 }
 
-void milk::GameState_Scene::handleEvent(GameEvent& gameEvent)
-{
-    game_.physics_->handleEvent(gameEvent);
-    game_.graphics_->handleEvent(gameEvent);
-#if _DEBUG
-    game_.debugTools_->handleEvent(gameEvent);
-#endif
-    game_.logic_->handleEvent(gameEvent);
-}
-
 std::unique_ptr<milk::GameState> milk::GameState_Scene::checkState()
 {
     return game_.sceneToLoad_.empty() ? nullptr : std::make_unique<GameState_SceneTransition>(game_);
@@ -39,6 +29,7 @@ std::unique_ptr<milk::GameState> milk::GameState_Scene::checkState()
 
 void milk::GameState_Scene::update()
 {
+    // Lets handle all of the actors that were spawned last frame!
     while (auto spawned = scene_.pollSpawned())
     {
         game_.physics_->onActorSpawned(*spawned);
@@ -49,6 +40,7 @@ void milk::GameState_Scene::update()
         game_.logic_->onActorSpawned(*spawned);
     }
 
+    // Now lets all of the actors that were destroyed last frame!
     while (auto destroyed = scene_.pollDestroyed())
     {
         game_.physics_->onActorDestroyed(*destroyed);
@@ -57,6 +49,12 @@ void milk::GameState_Scene::update()
         game_.debugTools_->onActorDestroyed(*destroyed);
 #endif
         game_.logic_->onActorDestroyed(*destroyed);
+    }
+
+    // NOW lets handle all of the collisions last frame!
+    while (auto collisionEvent = game_.physics_->pollCollisions())
+    {
+        game_.logic_->onActorCollision(*collisionEvent);
     }
 
     game_.logic_->update();

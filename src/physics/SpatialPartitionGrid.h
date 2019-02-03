@@ -5,42 +5,15 @@
 
 #include <vector>
 
-#include "SDL.h"
+#include "Collision.h"
 
 namespace milk
 {
     class BoxCollider;
 
-    enum class CollisionSide
-    {
-        TOP,
-        BOTTOM,
-        LEFT,
-        RIGHT
-    };
-
-    struct CollisionEvent
-    {
-        CollisionEvent(BoxCollider* o, CollisionSide dir, SDL_Rect depth)
-                : other(o),
-                  direction(dir),
-                  depthRect(depth)
-        {
-        }
-
-        // The other collider.
-        BoxCollider* other;
-
-        // The direction of collision from subject to other.
-        CollisionSide direction;
-
-        // The intersection depth between the two colliders.
-        SDL_Rect depthRect;
-    };
-
-// The spatial partition grid divides the scene into cells.
-// Each cell contains collidable actors.
-// When checking for collisions with a given collider, it only queries the current and neighboring cells.
+    // The spatial partition grid divides the scene into cells.
+    // Each cell contains collidable actors.
+    // When checking for collisions with a given collider, it only queries the current and neighboring cells.
     class SpatialPartitionGrid
     {
     public:
@@ -56,7 +29,7 @@ namespace milk
         void move(BoxCollider* collider);
 
         // Get all colliders than intersect with a given collider.
-        std::vector<CollisionEvent> getCollisions(BoxCollider* collider);
+        std::vector<Collision> getCollisions(BoxCollider* collider);
 
         // Clear all colliders from grid.
         void clear();
@@ -68,7 +41,7 @@ namespace milk
     private:
         BoxCollider* cells_[NUM_CELLS][NUM_CELLS];
 
-        void getCollisionForCell(BoxCollider* collider, BoxCollider* cell, std::vector<CollisionEvent>* collisions);
+        void getCollisionForCell(BoxCollider* collider, BoxCollider* cell, std::vector<Collision>* collisions);
     };
 }
 

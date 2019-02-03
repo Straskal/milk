@@ -70,9 +70,9 @@ void milk::SpatialPartitionGrid::move(BoxCollider* collider)
     add(collider);
 }
 
-std::vector<milk::CollisionEvent> milk::SpatialPartitionGrid::getCollisions(BoxCollider* collider)
+std::vector<milk::Collision> milk::SpatialPartitionGrid::getCollisions(BoxCollider* collider)
 {
-    std::vector<CollisionEvent> collisions;
+    std::vector<Collision> collisions;
 
     int cellX = collider->rect().x / SpatialPartitionGrid::CELL_SIZE;
     int cellY = collider->rect().y / SpatialPartitionGrid::CELL_SIZE;
@@ -118,19 +118,19 @@ std::vector<milk::CollisionEvent> milk::SpatialPartitionGrid::getCollisions(BoxC
 }
 
 void milk::SpatialPartitionGrid::getCollisionForCell(BoxCollider* collider, BoxCollider* cell,
-                                                     std::vector<CollisionEvent>* collisions)
+                                                     std::vector<Collision>* collisions)
 {
     // TODO dont keep recalculating
     int oldTop = collider->oldRect_.y;
-    int oldBottom = collider->oldRect_.y + collider->oldRect_.h;
+    int oldBottom = collider->oldRect_.y + collider->oldRect_.height;
     int oldLeft = collider->oldRect_.x;
-    int oldRight = collider->oldRect_.x + collider->oldRect_.w;
+    int oldRight = collider->oldRect_.x + collider->oldRect_.width;
 
     while (cell != nullptr)
     {
         if (collider != cell)
         {
-            SDL_Rect intersectionDepth;
+            Rectangle intersectionDepth;
 
             if (collider->overlaps(cell->rect(), &intersectionDepth))
             {
@@ -145,7 +145,7 @@ void milk::SpatialPartitionGrid::getCollisionForCell(BoxCollider* collider, BoxC
                 else if (oldTop >= cell->bottom() && collider->top() < cell->bottom())
                     dir = CollisionSide::TOP;
 
-                collisions->emplace_back(cell, dir, intersectionDepth);
+                collisions->emplace_back(*collider, *cell, dir, intersectionDepth);
             }
         }
 

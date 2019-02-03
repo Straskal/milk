@@ -11,11 +11,6 @@ set(MILK_SRC_FILES
         debugtools/DebugTools.cpp
         debugtools/DebugTools.h
 
-        # events
-        events/EventQueue.cpp
-        events/EventQueue.h
-        events/GameEvents.h
-
         # externals
         externals/json.hpp
         externals/sol.hpp
@@ -58,6 +53,7 @@ set(MILK_SRC_FILES
         # physics
         physics/BoxCollider.cpp
         physics/BoxCollider.h
+        physics/Collision.h
         physics/Physics.cpp
         physics/Physics.h
         physics/SpatialPartitionGrid.cpp
@@ -82,8 +78,8 @@ set(MILK_SRC_FILES
         scripting/api/LuaApi.h
         scripting/api/LuaActor.cpp
         scripting/api/LuaActor.h
-        scripting/api/LuaCollisionEvent.cpp
-        scripting/api/LuaCollisionEvent.h
+        scripting/api/LuaCollision.cpp
+        scripting/api/LuaCollision.h
         scripting/api/LuaGame.cpp
         scripting/api/LuaGame.h
         scripting/api/LuaScene.cpp

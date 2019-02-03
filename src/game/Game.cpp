@@ -11,9 +11,6 @@
 #include "debugtools/DebugTools.h"
 #endif
 
-#include "events/EventQueue.h"
-#include "events/GameEvents.h"
-
 #include "filesystem/Filesystem.h"
 #include "filesystem/adapter/FilesystemAdapter.h"
 
@@ -150,10 +147,6 @@ void milk::Game::handleEvents()
     // It is important that this is called AFTER polling all SDL events.
     // SDL_PollEvent internally updates SDL key/mouse/gamepad states..
     Keyboard::updateKeyboardState();
-
-    // Let systems handle game events enqueued last frame.
-    while (auto gameEvent = events_->poll())
-        states_.back()->handleEvent(*gameEvent);
 }
 
 void milk::Game::update()
@@ -186,11 +179,6 @@ milk::Filesystem& milk::Game::filesystem() const
 milk::AssetCache<milk::Texture>& milk::Game::textureCache() const
 {
     return *textureCache_;
-}
-
-milk::EventQueue& milk::Game::events() const
-{
-    return *events_;
 }
 
 bool milk::Game::initFromConfig()
@@ -237,8 +225,6 @@ bool milk::Game::initFromConfig()
 
     fileSystem_ = std::make_unique<adapter::FilesystemAdapter>(assetRootDir);
 
-    events_ = std::make_unique<EventQueue>();
-
     Keyboard::initialize();
 
 #ifdef _DEBUG
@@ -246,7 +232,7 @@ bool milk::Game::initFromConfig()
 #endif
 
     logic_ = std::make_unique<Logic>(luaState_);
-    physics_ = std::make_unique<Physics>(*events_);
+    physics_ = std::make_unique<Physics>();
     graphics_ = std::make_unique<Graphics>(window_->renderer(), *textureCache_);
 
     LuaApi::init(luaState_);

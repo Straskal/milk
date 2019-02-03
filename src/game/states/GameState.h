@@ -21,10 +21,6 @@ namespace milk
         /// Called once when the Game enters the State.
         virtual void begin() {};
 
-        /// Called once at the beginning of each frame.
-        /// \param gameEvent
-        virtual void handleEvent(GameEvent& gameEvent) {};
-
         /// Called once per frame.
         /// \returns the new GameState or nullptr if there is not change
         virtual std::unique_ptr<GameState> checkState() = 0;

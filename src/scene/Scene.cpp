@@ -4,13 +4,10 @@
 
 #include "scene/Actor.h"
 #include "scene/ActorComponent.h"
-#include "events/EventQueue.h"
-#include "events/GameEvents.h"
 #include "window/Window.h"
 
-milk::Scene::Scene(milk::EventQueue& eventQueue)
-        : eventQueue_(eventQueue),
-          ended_(false)
+milk::Scene::Scene()
+        : ended_(false)
 {
 }
 

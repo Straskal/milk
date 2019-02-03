@@ -14,18 +14,17 @@
 namespace milk
 {
     class Actor;
-    class EventQueue;
 
     class Scene
     {
     public:
         /// A Scene represents the current state that the game is in.
         /// Some examples: Main menu, dungeon level, cinematic, turn based combat sequence, etc...
-        /// \param eventQueue: Scenes emit GameEvents such as ACTOR_SPAWNED and ACTOR_DESTROYED
-        explicit Scene(EventQueue& eventQueue);
+        Scene();
 
         ~Scene();
 
+        /// Spawns an Actor into the current Scene and returns it.
         /// Spawns an Actor into the current Scene and returns it.
         /// \param name: The Actor's name
         /// \returns newly spawned Actor
@@ -60,8 +59,6 @@ namespace milk
         void end();
 
     private:
-        EventQueue& eventQueue_;
-
         IdGenerator idGenerator_;
         Camera camera_;
 

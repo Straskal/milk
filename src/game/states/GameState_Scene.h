@@ -15,8 +15,6 @@ namespace milk
         /// This state is active when a Scene is being processed
         explicit GameState_Scene(Game& game, Scene& scene);
 
-        void handleEvent(GameEvent& gameEvent) override;
-
         std::unique_ptr<GameState> checkState() override;
 
         void update() override;

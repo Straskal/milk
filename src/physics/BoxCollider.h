@@ -1,10 +1,9 @@
 #ifndef MILK_BOX_COLLIDER_H
 #define MILK_BOX_COLLIDER_H
 
-#include "SDL.h"
-
 #include "scene/ActorComponent.h"
 
+#include "math/Rectangle.h"
 #include "math/Vector2d.h"
 
 #include "utilities/Alignment.h"
@@ -13,8 +12,6 @@ namespace milk
 {
     class SpatialPartitionGrid;
 
-// Actors with a box collider will be static collidable objects.
-// Actors with a box collider and velocity will be dynamic collidable objects.
     class BoxCollider : public ActorComponent
     {
     public:
@@ -22,54 +19,62 @@ namespace milk
 
         friend class SpatialPartitionGrid;
 
+        /// Actors with a box collider will be static collidable objects.
+        /// Actors with a box collider and velocity will be dynamic collidable objects.
+        /// \param actor: The BoxCollider's Actor
         explicit BoxCollider(Actor& actor);
 
         ~BoxCollider() override = default;
 
-        // Initializes the collider so it can become one with the collision grid.
+        /// Initializes the collider so it can become one with the collision grid.
+        /// \param grid: The SpatialPartitionGrid
         void init(SpatialPartitionGrid* grid);
 
-        // Centers the collider's origin.
+        /// Center the collider's origin.
         void center();
 
-        // Updates the bounding box. If the actor's position is changed, this method must be called in order to update the collider's bounding box.
+        /// Updates the bounding box. If the actor's position is changed, this method must be called in order to update the collider's bounding box.
         void updateBBox();
 
-        // Returns the collider's bounding box.
-        SDL_Rect rect() const;
+        /// \returns the BoxCollider's bounding box.
+        Rectangle rect() const;
 
-        // Sets the width of the collider.
+        /// Set the width of the collider.
+        /// \param width
         void width(int width);
 
-        // Sets the height of the collider.
+        /// Set the height of the collider.
+        /// \param height
         void height(int height);
 
-        // Offsets the collider.
-        void offset(int x, int y);
+        /// Offsets the collider
+        /// \param xOffset
+        /// \param yOffset
+        void offset(int xOffset, int yOffset);
 
-        // Returns true if collider's bounding box is overlapping another collider's bounding box.
-        bool overlaps(SDL_Rect otherRect) const;
+        /// \returns true if collider's bounding box is overlapping another collider's bounding box.
+        bool overlaps(Rectangle otherRect);
 
-        // Returns true if collider's bounding box is overlapping another collider's bounding box, and outputs the depth rect.
-        bool overlaps(SDL_Rect otherRect, SDL_Rect* result) const;
+        /// \returns true if collider's bounding box is overlapping another collider's bounding box, and outputs the depth rect.
+        bool overlaps(Rectangle otherRect, Rectangle* result);
 
-        // Top of collider.
+        /// Top of collider.
         int top();
 
-        // Bottom of collider.
+        /// Bottom of collider.
         int bottom();
 
-        // Left of collider.
+        /// Left of collider.
         int left();
 
-        // Right of collider;
+        /// Right of collider;
         int right();
 
     private:
         Alignment origin_;
 
-        SDL_Rect rect_;
-        SDL_Rect oldRect_;
+        Rectangle rect_;
+        Rectangle oldRect_;
 
         Vector2d offset_;
 

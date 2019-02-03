@@ -45,7 +45,7 @@ std::unique_ptr<milk::Scene> milk::SceneLoader::load(const std::string& file) co
     auto sceneJsonString = game_.filesystem().contents(file);
     json sceneJson = json::parse(sceneJsonString);
 
-    auto scene = std::make_unique<Scene>(game_.events());
+    auto scene = std::make_unique<Scene>();
     auto& tilemap = scene->tilemap();
 
     tilemap.sourceImageFile = sceneJson["source"].get<std::string>();

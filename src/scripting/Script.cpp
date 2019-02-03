@@ -1,7 +1,8 @@
 #include "Script.h"
 
+#include "physics/Collision.h"
+
 #include "scene/Actor.h"
-#include "events/GameEvents.h"
 
 const milk::ComponentType milk::Script::type = SCRIPT;
 
@@ -56,7 +57,7 @@ void milk::Script::lateUpdate()
     luaScript_[SCRIPT_CALLBACK_LATE_UPDATE](self);
 }
 
-void milk::Script::onCollision(ActorCollisionEvent& collisionEvent)
+void milk::Script::onCollision(Collision& collision)
 {
     sol::function onCollision = luaScript_[SCRIPT_CALLBACK_ON_COLLISION];
 
@@ -64,7 +65,7 @@ void milk::Script::onCollision(ActorCollisionEvent& collisionEvent)
         return;
 
     sol::table self = luaScript_;
-    luaScript_[SCRIPT_CALLBACK_ON_COLLISION](self, collisionEvent);
+    luaScript_[SCRIPT_CALLBACK_ON_COLLISION](self, collision);
 }
 
 void milk::Script::end()

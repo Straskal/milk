@@ -8,8 +8,7 @@
 namespace milk
 {
     class Actor;
-    class ActorCollisionEvent;
-    class GameEvent;
+    class Collision;
     class Script;
 
     class Logic
@@ -21,10 +20,6 @@ namespace milk
 
         ~Logic() = default;
 
-        /// Handles a GameEvent.
-        /// \param gameEvent: The GameEvent to handle.
-        void handleEvent(GameEvent& gameEvent);
-
         /// Called once every frame. Calls update() method in Script components.
         void update();
 
@@ -32,7 +27,7 @@ namespace milk
 
         void onActorDestroyed(Actor& actor);
 
-        void onActorCollision(ActorCollisionEvent& collisionEvent);
+        void onActorCollision(Collision& collisionEvent);
 
         /// Called once at the end of each frame. Calls lateUpdate() method in Script components.
         /// This method is best used for any Camera manipulation.

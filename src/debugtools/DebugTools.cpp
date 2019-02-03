@@ -3,8 +3,6 @@
 #include "scene/Actor.h"
 #include "scene/Scene.h"
 
-#include "events/GameEvents.h"
-
 #include "physics/BoxCollider.h"
 #include "physics/SpatialPartitionGrid.h"
 
@@ -13,32 +11,6 @@
 milk::DebugTools::DebugTools(Renderer& renderer)
         : renderer_(renderer)
 {
-}
-
-void milk::DebugTools::handleEvent(GameEvent& gameEvent)
-{
-    switch (gameEvent.type())
-    {
-        case GameEventType::ACTOR_SPAWNED:
-        {
-            auto& spawnedEvent = dynamic_cast<ActorSpawnedEvent&>(gameEvent);
-            onActorSpawned(spawnedEvent.actor());
-        }
-            break;
-        case GameEventType::ACTOR_DETROYED:
-        {
-            auto& destroyedEvent = dynamic_cast<ActorDestroyedEvent&>(gameEvent);
-            onActorDestroyed(destroyedEvent.actor());
-        }
-            break;
-        case GameEventType::SCENE_CHANGED:
-        {
-            onSceneChanged();
-        }
-            break;
-        default:
-            break;
-    }
 }
 
 void milk::DebugTools::onActorSpawned(Actor& actor)
@@ -91,7 +63,7 @@ void milk::DebugTools::render(Scene& scene)
         if (coll != nullptr)
         {
             auto collRect = coll->rect();
-            Rectangle dest = {(int)(collRect.x - camOffset.x), (int)(collRect.y - camOffset.y), collRect.w, collRect.h};
+            Rectangle dest = {(int)(collRect.x - camOffset.x), (int)(collRect.y - camOffset.y), collRect.width, collRect.height};
             renderer_.drawRectangle(dest, {0xFF, 0x00, 0x00, 0x46});
         }
     }

@@ -2,25 +2,23 @@
 #define MILK_PHYSICS_H
 
 #include <memory>
+#include <queue>
 #include <unordered_map>
 
 namespace milk
 {
     class Actor;
     class BoxCollider;
-    class EventQueue;
-    class GameEvent;
+    class Collision;
     class SpatialPartitionGrid;
     class Velocity;
 
     class Physics
     {
     public:
-        explicit Physics(EventQueue& eventQueue);
+        Physics();
 
         ~Physics();
-
-        void handleEvent(GameEvent& gameEvent);
 
         void update();
 
@@ -28,13 +26,14 @@ namespace milk
 
         void onActorDestroyed(Actor& actor);
 
+        Collision* pollCollisions();
+
         void flush();
 
     private:
-        EventQueue& eventQueue_;
-
         std::unordered_map<int, Velocity*> velocityByActorId_;
         std::unique_ptr<SpatialPartitionGrid> partitionGrid_;
+        std::queue<std::unique_ptr<Collision>> collisionEvents_;
     };
 }
 

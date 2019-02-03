@@ -15,7 +15,7 @@
 
 namespace milk
 {
-    class ActorCollisionEvent;
+    class Collision;
 
     class Script : public ActorComponent
     {
@@ -47,7 +47,7 @@ namespace milk
 
         /// Called when a collision has been detected.
         /// \param collisionEvent: The CollisionEvent for the Script to handle
-        virtual void onCollision(ActorCollisionEvent& collisionEvent);
+        virtual void onCollision(Collision& collision);
 
         /// Called once before the actor is about to be destroyed.
         virtual void end();

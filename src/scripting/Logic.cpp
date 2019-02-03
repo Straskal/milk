@@ -1,45 +1,15 @@
 #include "Logic.h"
 
 #include "Script.h"
+
+#include "physics/BoxCollider.h"
+#include "physics/Collision.h"
+
 #include "scene/Actor.h"
-#include "events/GameEvents.h"
 
 milk::Logic::Logic(sol::state& luaState)
         : luaState_(luaState)
 {
-}
-
-void milk::Logic::handleEvent(GameEvent& gameEvent)
-{
-    switch (gameEvent.type())
-    {
-        case GameEventType::ACTOR_SPAWNED:
-        {
-            auto& spawnedEvent = dynamic_cast<ActorSpawnedEvent&>(gameEvent);
-            onActorSpawned(spawnedEvent.actor());
-        }
-            break;
-        case GameEventType::ACTOR_DETROYED:
-        {
-            auto& destroyedEvent = dynamic_cast<ActorDestroyedEvent&>(gameEvent);
-            onActorDestroyed(destroyedEvent.actor());
-        }
-            break;
-        case GameEventType::ACTOR_COLLISION:
-        {
-            auto& collisionEvent = dynamic_cast<ActorCollisionEvent&>(gameEvent);
-            onActorCollision(collisionEvent);
-        }
-            break;
-        case GameEventType::SCENE_CHANGED:
-        {
-            // TODO: should probably have a scne ending callback for scripts.
-            scriptByActorId_.clear();
-        }
-            break;
-        default:
-            break;
-    }
 }
 
 void milk::Logic::update()
@@ -86,12 +56,12 @@ void milk::Logic::onActorDestroyed(Actor& actor)
     scriptByActorId_.erase(actor.id());
 }
 
-void milk::Logic::onActorCollision(ActorCollisionEvent& collisionEvent)
+void milk::Logic::onActorCollision(Collision& collision)
 {
-    auto script = scriptByActorId_.find(collisionEvent.actor().id());
+    auto script = scriptByActorId_.find(collision.actor.actor().id());
 
     if (script != scriptByActorId_.end())
-        script->second->onCollision(collisionEvent);
+        script->second->onCollision(collision);
 }
 
 void milk::Logic::flush()

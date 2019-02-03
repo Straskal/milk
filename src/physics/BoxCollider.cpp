@@ -1,5 +1,7 @@
 #include "BoxCollider.h"
 
+#include "SDL.h"
+
 #include "SpatialPartitionGrid.h"
 
 #include "scene/Actor.h"
@@ -46,8 +48,8 @@ void milk::BoxCollider::updateBBox()
             rect_.y = (int)(actorPosition.y + offset_.y);
             break;
         case Alignment::CENTER_ORIGIN:
-            rect_.x = (int)(actorPosition.x - (rect_.w / 2) + offset_.x);
-            rect_.y = (int)(actorPosition.y - (rect_.h / 2) + offset_.y);
+            rect_.x = (int)(actorPosition.x - (rect_.width / 2) + offset_.x);
+            rect_.y = (int)(actorPosition.y - (rect_.height / 2) + offset_.y);
             break;
     }
 
@@ -55,35 +57,47 @@ void milk::BoxCollider::updateBBox()
         grid_->move(this);
 }
 
-SDL_Rect milk::BoxCollider::rect() const
+milk::Rectangle milk::BoxCollider::rect() const
 {
     return rect_;
 }
 
 void milk::BoxCollider::width(int width)
 {
-    rect_.w = width;
+    rect_.width = width;
 }
 
 void milk::BoxCollider::height(int height)
 {
-    rect_.h = height;
+    rect_.height = height;
 }
 
-void milk::BoxCollider::offset(int x, int y)
+void milk::BoxCollider::offset(int xOffset, int yOffset)
 {
-    offset_.x = x;
-    offset_.y = y;
+    offset_.x = xOffset;
+    offset_.y = yOffset;
 }
 
-bool milk::BoxCollider::overlaps(SDL_Rect otherRect) const
+bool milk::BoxCollider::overlaps(Rectangle otherRect)
 {
-    return SDL_HasIntersection(&rect_, &otherRect);
+    return rect_.overlaps(otherRect);
 }
 
-bool milk::BoxCollider::overlaps(SDL_Rect otherRect, SDL_Rect* result) const
+// TODO: Fix this. Get rid of SDL. For now it is gross because i am refactoring the way we poll collisions from physics.
+bool milk::BoxCollider::overlaps(Rectangle otherRect, Rectangle* result)
 {
-    return SDL_IntersectRect(&rect_, &otherRect, result);
+    SDL_Rect rect = {rect_.x, rect_.y, rect_.width, rect_.height};
+    SDL_Rect other = {otherRect.x, otherRect.y, otherRect.width, otherRect.height};
+    SDL_Rect res;
+
+    bool overlaps = SDL_IntersectRect(&rect, &other, &res);
+
+    result->x = res.x;
+    result->y = res.y;
+    result->width = res.w;
+    result->height = res.h;
+
+    return overlaps;
 }
 
 int milk::BoxCollider::top()
@@ -93,7 +107,7 @@ int milk::BoxCollider::top()
 
 int milk::BoxCollider::bottom()
 {
-    return rect_.y + rect_.h;
+    return rect_.y + rect_.height;
 }
 
 int milk::BoxCollider::left()
@@ -103,5 +117,5 @@ int milk::BoxCollider::left()
 
 int milk::BoxCollider::right()
 {
-    return rect_.x + rect_.w;
+    return rect_.x + rect_.width;
 }

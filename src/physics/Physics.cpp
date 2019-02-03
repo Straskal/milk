@@ -8,43 +8,12 @@
 
 #include "scene/Actor.h"
 
-#include "events/EventQueue.h"
-#include "events/GameEvents.h"
-
-milk::Physics::Physics(milk::EventQueue& eventQueue)
-        : eventQueue_(eventQueue),
-          partitionGrid_(new SpatialPartitionGrid())
+milk::Physics::Physics()
+        : partitionGrid_(new SpatialPartitionGrid())
 {
 }
 
 milk::Physics::~Physics() = default;
-
-void milk::Physics::handleEvent(milk::GameEvent& gameEvent)
-{
-    switch (gameEvent.type())
-    {
-        case GameEventType::ACTOR_SPAWNED:
-        {
-            auto& spawnedEvent = dynamic_cast<ActorSpawnedEvent&>(gameEvent);
-            onActorSpawned(spawnedEvent.actor());
-        }
-            break;
-        case GameEventType::ACTOR_DETROYED:
-        {
-            auto& destroyedEvent = dynamic_cast<ActorDestroyedEvent&>(gameEvent);
-            onActorDestroyed(destroyedEvent.actor());
-        }
-            break;
-        case GameEventType::SCENE_CHANGED:
-        {
-            partitionGrid_->clear();
-            velocityByActorId_.clear();
-        }
-            break;
-        default:
-            break;
-    }
-}
 
 void milk::Physics::update()
 {
@@ -77,14 +46,14 @@ void milk::Physics::update()
         // For now, simply reverting back to the actors previous axis position is fine.
         for (auto collItr : collisions)
         {
-            eventQueue_.pushEvent<ActorCollisionEvent>(actor, *collItr.other);
+            collisionEvents_.push(std::make_unique<Collision>(collItr));
 
             auto pos = actor.position();
 
             actor.position(actor.position().x, oldActorPosition.y);
             collider->updateBBox();
 
-            if (collider->overlaps(collItr.other->rect()))
+            if (collider->overlaps(collItr.other.rect()))
             {
                 actor.position(oldActorPosition.x, pos.y);
                 collider->updateBBox();
@@ -124,4 +93,24 @@ void milk::Physics::flush()
 {
     partitionGrid_->clear();
     velocityByActorId_.clear();
+}
+
+milk::Collision* milk::Physics::pollCollisions()
+{
+    static std::unique_ptr<Collision> lastPolled = nullptr;
+
+    if (lastPolled != nullptr)
+    {
+        lastPolled.reset();
+        lastPolled = nullptr;
+    }
+
+    if (collisionEvents_.empty())
+        return nullptr;
+
+    auto& collisionEvent = collisionEvents_.front();
+    lastPolled = std::move(collisionEvent);
+    collisionEvents_.pop();
+
+    return lastPolled.get();
 }
