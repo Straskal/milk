@@ -93,6 +93,9 @@ void milk::Physics::flush()
 {
     partitionGrid_->clear();
     velocityByActorId_.clear();
+
+    std::queue<std::unique_ptr<Collision>> empty;
+    std::swap(collisionEvents_, empty);
 }
 
 milk::Collision* milk::Physics::pollCollisions()

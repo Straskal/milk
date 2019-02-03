@@ -20,7 +20,7 @@
         },
         {
             "id": 3,
-            "name": "door",
+            "name": "door_to_inside",
             "x": 0,
             "y": 64,            
             "collidable": true

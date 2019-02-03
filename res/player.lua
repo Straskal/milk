@@ -53,7 +53,10 @@ function player:update()
 end
 
 function player:on_collision(e)
-	if e.other.name == 'door' then
+	if e.other.name == 'door_to_inside' then
+		Game:load_scene('other_scene.json')
+	end
+	if e.other.name == 'door_to_outside' then
 		Game:load_scene('main_scene.json')
 	end
 end
