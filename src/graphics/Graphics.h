@@ -36,6 +36,12 @@ namespace milk
         /// \param scene: The Game's current Scene.
         void render(Scene& scene);
 
+        void onActorSpawned(Actor& actor);
+
+        void onActorDestroyed(Actor& actor);
+
+        void flush();
+
     private:
         Renderer& renderer_;
         AssetCache<Texture>& textureCache_;
@@ -44,9 +50,6 @@ namespace milk
         // Every frame, if the sprite also has an animator, we update the animator.
         std::unordered_map<int, Sprite*> spritesByActorId_;
 
-        void onActorSpawned(Actor& actor);
-
-        void onActorDestroyed(Actor& actor);
     };
 }
 

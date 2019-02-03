@@ -32,6 +32,11 @@ set(MILK_SRC_FILES
         # game
         game/Game.h
         game/Game.cpp
+        game/states/GameState.h
+        game/states/GameState_Scene.cpp
+        game/states/GameState_Scene.h
+        game/states/GameState_SceneTransition.cpp
+        game/states/GameState_SceneTransition.h
 
         # graphics
         graphics/Animator.cpp
@@ -71,8 +76,6 @@ set(MILK_SRC_FILES
         scene/Scene.h
         scene/SceneLoader.cpp
         scene/SceneLoader.h
-        scene/SceneManager.cpp
-        scene/SceneManager.h
 
         # scripting
         scripting/api/LuaApi.cpp
@@ -81,10 +84,10 @@ set(MILK_SRC_FILES
         scripting/api/LuaActor.h
         scripting/api/LuaCollisionEvent.cpp
         scripting/api/LuaCollisionEvent.h
+        scripting/api/LuaGame.cpp
+        scripting/api/LuaGame.h
         scripting/api/LuaScene.cpp
         scripting/api/LuaScene.h
-        scripting/api/LuaSceneManager.cpp
-        scripting/api/LuaSceneManager.h
         scripting/api/LuaWindow.cpp
         scripting/api/LuaWindow.h
         scripting/Logic.cpp

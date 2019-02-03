@@ -20,16 +20,18 @@ namespace milk
 
         void render(Scene& scene);
 
+        void onActorSpawned(Actor& actor);
+
+        void onActorDestroyed(Actor& actor);
+
+        void flush();
+
         bool show = false;
 
     private:
         Renderer& renderer_;
 
         std::unordered_map<int, Actor*> actorsById_;
-
-        void onActorSpawned(Actor& actor);
-
-        void onActorDestroyed(Actor& actor);
 
         void onSceneChanged();
     };

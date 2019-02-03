@@ -13,7 +13,7 @@ function player:update()
 	end
 
 	if Input.get_key_pressed(Keys.R) then
-		SceneManager:load_scene('main_scene.json')
+		Game:load_scene('main_scene.json')
 	end
 
 	local inputvec = Vector2D.new(0, 0)
@@ -54,7 +54,7 @@ end
 
 function player:on_collision(e)
 	if e.other.name == 'door' then
-		SceneManager:load_scene('main_scene.json')
+		Game:load_scene('main_scene.json')
 	end
 end
 
@@ -66,7 +66,7 @@ function player:late_update()
 	clamped_cam_pos.x = Mathf.clamp(self.actor.position.x, 320, 320)
 	clamped_cam_pos.y = Mathf.clamp(self.actor.position.y, 180, 360)
 
-	SceneManager.current:set_cam_pos(clamped_cam_pos)
+	Game.scene:set_cam_pos(clamped_cam_pos)
 end
 
 return player

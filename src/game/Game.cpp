@@ -25,10 +25,12 @@
 
 #include "scene/Scene.h"
 #include "scene/SceneLoader.h"
-#include "scene/SceneManager.h"
 
 #include "scripting/api/LuaApi.h"
 #include "scripting/Logic.h"
+
+#include "states/GameState.h"
+#include "states/GameState_SceneTransition.h"
 
 #include "utilities/Timer.h"
 
@@ -97,6 +99,30 @@ int milk::Game::run()
     return MILK_SUCCESS;
 }
 
+void milk::Game::changeState(std::unique_ptr<milk::GameState> state)
+{
+    for (auto& it : states_)
+        it->end();
+
+    states_.clear();
+
+    state->begin();
+    states_.emplace_back(std::move(state));
+}
+
+void milk::Game::pushState(std::unique_ptr<milk::GameState> state)
+{
+    state->begin();
+    states_.emplace_back(std::move(state));
+}
+
+void milk::Game::popState()
+{
+    auto& state = states_.back();
+    state->end();
+    states_.pop_back();
+}
+
 void milk::Game::handleEvents()
 {
     SDL_Event sdlEvent;
@@ -106,11 +132,11 @@ void milk::Game::handleEvents()
         switch (sdlEvent.type)
         {
             case SDL_QUIT:
-                isRunning_ = false;
+                quit();
                 break;
             case SDL_KEYUP:
                 if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
-                    isRunning_ = false;
+                    quit();
 #ifdef _DEBUG
                 if (sdlEvent.key.keysym.sym == SDLK_BACKQUOTE)
                     debugTools_->show = !debugTools_->show;
@@ -127,50 +153,21 @@ void milk::Game::handleEvents()
 
     // Let systems handle game events enqueued last frame.
     while (auto gameEvent = events_->poll())
-    {
-        physics_->handleEvent(*gameEvent);
-        graphics_->handleEvent(*gameEvent);
-
-#ifdef _DEBUG
-        debugTools_->handleEvent(*gameEvent);
-#endif
-
-        // It is important to let logic handle it's event last.
-        // This is because the previous systems may load resources or init components that a script depends on.
-        logic_->handleEvent(*gameEvent);
-
-        // If scene loaded, then lets free any unreferenced assets left over from the last scene.
-        if (gameEvent->type() == GameEventType::SCENE_LOADED)
-        {
-            textureCache_->freeUnreferencedAssets();
-        }
-    }
+        states_.back()->handleEvent(*gameEvent);
 }
 
 void milk::Game::update()
 {
-    sceneManager_->update();
-    logic_->update();
-    physics_->update();
+    auto pNewState = states_.back()->update();
 
-    logic_->lateUpdate();
+    if (pNewState != nullptr)
+        changeState(std::move(pNewState));
 }
 
 void milk::Game::render()
 {
     window_->renderer().clear();
-
-    if (auto scene = sceneManager_->currentScene())
-    {
-        graphics_->render(*scene);
-
-#ifdef _DEBUG
-        debugTools_->render(*scene);
-#endif
-    }
-
-    // TODO: This is being called BEFORE any systems start processing their newly aquired Actors
-    // TODO: This is causing artifacts because the scene's tilemap is rendered BEFORE a script can center or CLAMP the camera.
+    states_.back()->render();
     window_->renderer().present();
 }
 
@@ -192,11 +189,6 @@ milk::AssetCache<milk::Texture>& milk::Game::textureCache() const
 milk::EventQueue& milk::Game::events() const
 {
     return *events_;
-}
-
-milk::SceneManager& milk::Game::sceneManager() const
-{
-    return *sceneManager_;
 }
 
 bool milk::Game::initFromConfig()
@@ -245,10 +237,6 @@ bool milk::Game::initFromConfig()
 
     events_ = std::make_unique<EventQueue>();
 
-    sceneLoader_ = std::make_unique<SceneLoader>(*this);
-    sceneManager_ = std::make_unique<SceneManager>(*events_, *sceneLoader_);
-
-
     Keyboard::initialize();
 
 #ifdef _DEBUG
@@ -261,23 +249,33 @@ bool milk::Game::initFromConfig()
 
     LuaApi::init(luaState_);
 
+    luaState_["Game"] = this;
     luaState_["Window"] = dynamic_cast<Window*>(window_.get());
-    luaState_["SceneManager"] = sceneManager_.get();
 
-    sceneManager_->loadScene(entryScene);
+    sceneToLoad_ = entryScene;
+    changeState(std::make_unique<GameState_SceneTransition>(*this));
 
     return true;
 }
 
 void milk::Game::shutDown()
 {
-    sceneManager_->loadScene(MILK_NULL_SCENE);
-    // Let systems handle the newly enqueued actor destroyed events.
-    handleEvents();
-    // Lets load NULL_SCENE and free the previous one.
-    sceneManager_->update();
-
     textureCache_->free();
 
     window_->free();
+}
+
+void milk::Game::loadScene(const std::string& sceneToLoad)
+{
+    sceneToLoad_ = sceneToLoad;
+}
+
+milk::Scene* milk::Game::currentScene() const
+{
+    return currentScene_.get();
+}
+
+void milk::Game::quit()
+{
+    sceneToLoad_ = NULL_SCENE;
 }

@@ -106,3 +106,8 @@ void milk::Graphics::onActorDestroyed(Actor& actor)
     if (spritesByActorId_.find(actor.id()) != spritesByActorId_.end())
         spritesByActorId_.erase(actor.id());
 }
+
+void milk::Graphics::flush()
+{
+    spritesByActorId_.clear();
+}

@@ -93,3 +93,11 @@ void milk::Logic::onActorCollision(ActorCollisionEvent& collisionEvent)
     if (script != scriptByActorId_.end())
         script->second->onCollision(collisionEvent);
 }
+
+void milk::Logic::flush()
+{
+    for (auto& scriptItr : scriptByActorId_)
+        scriptItr.second->end();
+
+    scriptByActorId_.clear();
+}

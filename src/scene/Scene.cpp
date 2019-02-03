@@ -21,16 +21,14 @@ milk::Actor* milk::Scene::spawnActor(const std::string& name)
     int id = idGenerator_.popId();
 
     auto pActor = std::make_unique<Actor>(id, name, Vector2d(0, 0));
+
     auto pActorRaw = pActor.get();
 
-    actorsToSpawn_.emplace_back(std::move(pActor));
-
-    // If the scene has been ended, then let's not push an actor spawned event.
-    // We don't want any systems to hold a reference an actor of a scene freed from memory.
     if (ended_)
         return pActorRaw;
 
-    eventQueue_.pushEvent<ActorSpawnedEvent>(*pActorRaw);
+    actorsToSpawn_.emplace_back(std::move(pActor));
+
     return pActorRaw;
 }
 
@@ -43,16 +41,18 @@ bool milk::Scene::destroyActor(int id)
 
     actorsToDestroy_.emplace_back(id);
 
-    // We can push actor destroyed events whenever. If a system is written properly,
-    // it will check if it even holds a reference to the actor before making any decisions.
-    eventQueue_.pushEvent<ActorDestroyedEvent>(*foundActor->second);
-
     return true;
 }
 
 milk::Actor* milk::Scene::findActor(const std::string& name) const
 {
     // TODO: Find a better solution than brute force implementation.
+    for (auto& itr : actorsToSpawn_)
+    {
+        if (itr->name() == name)
+            return itr.get();
+    }
+
     for (auto& it : actorsById_)
     {
         if (it.second->name() == name)
@@ -72,22 +72,6 @@ milk::Tilemap& milk::Scene::tilemap()
     return tilemap_;
 }
 
-void milk::Scene::syncActorLists()
-{
-    for (auto& it : actorsToDestroy_)
-    {
-        idGenerator_.pushId(it);
-        actorsById_.erase(it);
-    }
-
-    actorsToDestroy_.clear();
-
-    for (auto& it : actorsToSpawn_)
-        actorsById_.insert(std::make_pair(it->id(), std::move(it)));
-
-    actorsToSpawn_.clear();
-}
-
 milk::Rectangle milk::Scene::bounds() const
 {
     return { 0, 0, tilemap_.width, tilemap_.height };
@@ -96,4 +80,42 @@ milk::Rectangle milk::Scene::bounds() const
 void milk::Scene::end()
 {
     ended_ = true;
+}
+
+milk::Actor* milk::Scene::pollSpawned()
+{
+    if (actorsToSpawn_.empty())
+        return nullptr;
+
+    auto& pSpawned = actorsToSpawn_.back();
+
+    auto pSpawnedRaw = pSpawned.get();
+
+    actorsById_.insert(std::make_pair(pSpawned->id(), std::move(pSpawned)));
+
+    actorsToSpawn_.pop_back();
+
+    return pSpawnedRaw;
+}
+
+milk::Actor* milk::Scene::pollDestroyed()
+{
+    static int lastPolledId = -1;
+
+    if (actorsToDestroy_.empty())
+    {
+        lastPolledId = -1;
+        return nullptr;
+    }
+
+    if (lastPolledId > -1)
+        actorsById_.erase(lastPolledId);
+
+    int destroyedId = actorsToDestroy_.back();
+
+    lastPolledId = destroyedId;
+
+    actorsToDestroy_.pop_back();
+
+    return actorsById_.at(destroyedId).get();
 }

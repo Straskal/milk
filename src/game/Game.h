@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "externals/sol.hpp"
 
@@ -22,11 +23,12 @@ namespace milk
 
     class EventQueue;
     class Filesystem;
+    class GameState;
     class Graphics;
     class Logic;
     class Physics;
+    class Scene;
     class SceneLoader;
-    class SceneManager;
     class Texture;
     class Window;
 
@@ -37,21 +39,36 @@ namespace milk
         class WindowAdapter;
     }
 
-    // THE Game class.
-    // Handles running the game, updating subsystems, managing scenes, handling input, etc..
     class Game
     {
     public:
+        // Game states
+        friend class GameState_Scene;
+        friend class GameState_SceneTransition;
+
         Game();
 
+        /// The Game is in charge of startup, shutdown, state and scene management.
+        /// \param configFile: Path to the config file
         explicit Game(const std::string& configFile);
 
         ~Game();
 
-        // Initializes and runs the game
-        // Returns MILK_SUCCESS on successful run
-        // Returns MILK_FAIL on unsuccessful run
+        /// Initializes and runs the game
+        /// Returns MILK_SUCCESS on successful run
+        /// Returns MILK_FAIL on unsuccessful run
         int run();
+
+        /// Changes the Game's current state.
+        /// \param state: The new state of the Game.
+        void changeState(std::unique_ptr<GameState> state);
+
+        /// Pushes a GameState onto the top of the GameState stack.
+        /// \param state: The state to push onto the Game's state stack.
+        void pushState(std::unique_ptr<GameState> state);
+
+        /// Pops a GameState off of the game state stack.
+        void popState();
 
         // Returns the game window.
         Window& window() const;
@@ -65,18 +82,28 @@ namespace milk
         // Returns the games event queue.
         EventQueue& events() const;
 
-        // Returns the games scene manager.
-        SceneManager& sceneManager() const;
+        /// \returns the Game's current Scene.
+        Scene* currentScene() const;
+
+        /// Loads the requested Scene.
+        /// \param sceneToLoad: The Scene to load.
+        void loadScene(const std::string& sceneToLoad);
+
+        /// Quits the Game and shuts down all sub systems.
+        void quit();
 
     private:
+        std::vector<std::unique_ptr<GameState>> states_;
+
+        std::unique_ptr<Scene> currentScene_;
+        std::string sceneToLoad_;
+
         std::string configFile_;
 
         std::unique_ptr<adapter::WindowAdapter> window_;
         std::unique_ptr<adapter::FilesystemAdapter> fileSystem_;
         std::unique_ptr<adapter::TextureCacheAdapter> textureCache_;
 
-        std::unique_ptr<SceneLoader> sceneLoader_;
-        std::unique_ptr<SceneManager> sceneManager_;
         std::unique_ptr<EventQueue> events_;
 
         sol::state luaState_;

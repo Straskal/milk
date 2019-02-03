@@ -28,20 +28,22 @@ namespace milk
         /// Called once every frame. Calls update() method in Script components.
         void update();
 
-        /// Called once at the end of each frame. Calls lateUpdate() method in Script components.
-        /// This method is best used for any Camera manipulation.
-        void lateUpdate();
-
-    private:
-        sol::state& luaState_;
-
-        std::unordered_map<int, Script*> scriptByActorId_;
-
         void onActorSpawned(Actor& actor);
 
         void onActorDestroyed(Actor& actor);
 
         void onActorCollision(ActorCollisionEvent& collisionEvent);
+
+        /// Called once at the end of each frame. Calls lateUpdate() method in Script components.
+        /// This method is best used for any Camera manipulation.
+        void lateUpdate();
+
+        void flush();
+
+    private:
+        sol::state& luaState_;
+
+        std::unordered_map<int, Script*> scriptByActorId_;
     };
 }
 

@@ -24,15 +24,17 @@ namespace milk
 
         void update();
 
+        void onActorSpawned(Actor& actor);
+
+        void onActorDestroyed(Actor& actor);
+
+        void flush();
+
     private:
         EventQueue& eventQueue_;
 
         std::unordered_map<int, Velocity*> velocityByActorId_;
         std::unique_ptr<SpatialPartitionGrid> partitionGrid_;
-
-        void onActorSpawned(Actor& actor);
-
-        void onActorDestroyed(Actor& actor);
     };
 }
 

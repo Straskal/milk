@@ -4,8 +4,8 @@
 
 #include "LuaActor.h"
 #include "LuaCollisionEvent.h"
+#include "LuaGame.h"
 #include "LuaScene.h"
-#include "LuaSceneManager.h"
 #include "LuaWindow.h"
 
 #include "events/GameEvents.h"
@@ -16,7 +16,6 @@
 #include "physics/BoxCollider.h"
 #include "scene/Actor.h"
 #include "scene/Scene.h"
-#include "scene/SceneManager.h"
 #include "window/Window.h"
 
 void milk::LuaApi::init(sol::state& luaState)
@@ -52,6 +51,12 @@ void milk::LuaApi::init(sol::state& luaState)
     luaState.new_usertype<Mathf>("Mathf",
                                  "clamp", &Mathf::clamp);
 
+    // Game
+    /////////////////////////////////////////////////////////////////
+    luaState.new_usertype<Game>("Game",
+                                "scene", sol::readonly_property(&lua::game::currentScene),
+                                "load_scene", &lua::game::loadScene);
+
     // Input
     /////////////////////////////////////////////////////////////////
     luaState.new_usertype<Keyboard>("Input",
@@ -63,10 +68,6 @@ void milk::LuaApi::init(sol::state& luaState)
     /////////////////////////////////////////////////////////////////
     luaState.new_usertype<Scene>("Scene",
                                  "set_cam_pos", &lua::scene::setCameraPosition);
-
-    luaState.new_usertype<SceneManager>("SceneManager",
-                                        "current", sol::readonly_property(&lua::scene_manager::current),
-                                        "load_scene", &lua::scene_manager::loadScene);
 
     // Vector2D
     /////////////////////////////////////////////////////////////////

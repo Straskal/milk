@@ -96,3 +96,8 @@ void milk::DebugTools::render(Scene& scene)
         }
     }
 }
+
+void milk::DebugTools::flush()
+{
+    onSceneChanged();
+}

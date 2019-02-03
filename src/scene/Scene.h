@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 #include "Camera.h"
 
@@ -48,8 +47,11 @@ namespace milk
         /// \returns the Scene's Tilemap
         Tilemap& tilemap();
 
-        /// Synchronizes the Scene's internal Actor data after the last frame's actor spawnes or destroys.
-        void syncActorLists();
+        /// \returns the next spawned Actor in the "to spawn" queue.
+        Actor* pollSpawned();
+
+        /// \returns the next spawned Actor in the "to destroy" queue.
+        Actor* pollDestroyed();
 
         /// \returns The Scene's boundaries
         Rectangle bounds() const;

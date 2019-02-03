@@ -119,3 +119,9 @@ void milk::Physics::onActorDestroyed(Actor& actor)
     if (collider != nullptr)
         partitionGrid_->remove(collider);
 }
+
+void milk::Physics::flush()
+{
+    partitionGrid_->clear();
+    velocityByActorId_.clear();
+}
