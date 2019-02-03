@@ -7,20 +7,24 @@
 
 #include "Camera.h"
 
-#include "graphics/Tilemap.h"
 #include "math/Rectangle.h"
+
 #include "utilities/IdGenerator.h"
 
 namespace milk
 {
     class Actor;
+    class Tilemap;
 
     class Scene
     {
     public:
         /// A Scene represents the current state that the game is in.
         /// Some examples: Main menu, dungeon level, cinematic, turn based combat sequence, etc...
-        Scene();
+        /// \param id: The Scene's unique indentifier.
+        /// \param name: The Scene's name.
+        /// \param tilemap: If provided, then the scene will also render with a tilemap.
+        Scene(int id, const std::string& name, std::unique_ptr<Tilemap> tilemap = nullptr);
 
         ~Scene();
 
@@ -43,8 +47,8 @@ namespace milk
         /// \returns The Scene's Camera
         Camera& camera();
 
-        /// \returns the Scene's Tilemap
-        Tilemap& tilemap();
+        /// \returns the Scene's Tilemap, or nullptr if the Scene doesn't have a tilemap.
+        Tilemap* tilemap();
 
         /// \returns the next spawned Actor in the "to spawn" queue.
         Actor* pollSpawned();
@@ -55,16 +59,17 @@ namespace milk
         /// \returns The Scene's boundaries
         Rectangle bounds() const;
 
-        /// Mark the scene as ended. After a Scene has been added, all newly spawned Actors will not emit an ACTOR_SPAWNED event.
+        /// Mark the scene as ended. After a Scene has ended, no new spawns be processed.
         void end();
 
     private:
+        int id_;
+        std::string name_;
+
         IdGenerator idGenerator_;
         Camera camera_;
 
-        // TODO: break this out into an actor component.
-        // This implies that every single scene needs a tilemap. What about the title screen, or a cinematic, etc...
-        Tilemap tilemap_;
+        std::unique_ptr<Tilemap> tilemap_;
 
         bool ended_;
 

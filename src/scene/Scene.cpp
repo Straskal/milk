@@ -1,13 +1,19 @@
-#include <memory>
-
 #include "Scene.h"
 
-#include "scene/Actor.h"
-#include "scene/ActorComponent.h"
+#include <memory>
+
+#include "Actor.h"
+#include "ActorComponent.h"
+
+#include "graphics/Tilemap.h"
+
 #include "window/Window.h"
 
-milk::Scene::Scene()
-        : ended_(false)
+milk::Scene::Scene(int id, const std::string& name, std::unique_ptr<Tilemap> tilemap)
+        : id_(id),
+          name_(name),
+          tilemap_(std::move(tilemap)),
+          ended_(false)
 {
 }
 
@@ -64,14 +70,14 @@ milk::Camera& milk::Scene::camera()
     return camera_;
 }
 
-milk::Tilemap& milk::Scene::tilemap()
+milk::Tilemap* milk::Scene::tilemap()
 {
-    return tilemap_;
+    return tilemap_.get();
 }
 
 milk::Rectangle milk::Scene::bounds() const
 {
-    return { 0, 0, tilemap_.width, tilemap_.height };
+    return { 0, 0, tilemap_->width, tilemap_->height };
 }
 
 void milk::Scene::end()

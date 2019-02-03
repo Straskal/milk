@@ -3,6 +3,7 @@
 
 namespace milk
 {
+    class Actor;
     class Scene;
     class Vector2d;
 

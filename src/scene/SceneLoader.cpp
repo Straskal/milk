@@ -11,15 +11,17 @@
 #include "SDL.h"
 
 #include "scene/Actor.h"
-#include "game/Game.h"
 #include "scene/Scene.h"
 
 #include "filesystem/Filesystem.h"
 
 #include "externals/json.hpp"
 
+#include "game/Game.h"
+
 #include "graphics/Animator.h"
 #include "graphics/Sprite.h"
+#include "graphics/Tilemap.h"
 
 #include "physics/BoxCollider.h"
 #include "physics/Velocity.h"
@@ -45,13 +47,15 @@ std::unique_ptr<milk::Scene> milk::SceneLoader::load(const std::string& file) co
     auto sceneJsonString = game_.filesystem().contents(file);
     json sceneJson = json::parse(sceneJsonString);
 
-    auto scene = std::make_unique<Scene>();
-    auto& tilemap = scene->tilemap();
+    auto ptilemap = std::make_unique<Tilemap>();
+    auto tilemap = ptilemap.get();
 
-    tilemap.sourceImageFile = sceneJson["source"].get<std::string>();
-    tilemap.width = sceneJson["width"].get<int>();
-    tilemap.height = sceneJson["height"].get<int>();
-    tilemap.tileSize = sceneJson["tileSize"].get<int>();
+    auto scene = std::make_unique<Scene>(1, file, std::move(ptilemap));
+
+    tilemap->sourceImageFile = sceneJson["source"].get<std::string>();
+    tilemap->width = sceneJson["width"].get<int>();
+    tilemap->height = sceneJson["height"].get<int>();
+    tilemap->tileSize = sceneJson["tileSize"].get<int>();
 
     auto& tilesetJson = sceneJson["tileset"];
 
@@ -65,17 +69,17 @@ std::unique_ptr<milk::Scene> milk::SceneLoader::load(const std::string& file) co
         int y = tileTypeJson["y"].get<int>();
         bool collidable = tileTypeJson["collidable"].get<bool>();
 
-        tilemap.addTileType(tileTypeId, x, y, collidable, name);
+        tilemap->addTileType(tileTypeId, x, y, collidable, name);
     }
 
-    int rows = tilemap.height / tilemap.tileSize;
-    int columns = tilemap.width / tilemap.tileSize;
+    int rows = tilemap->height / tilemap->tileSize;
+    int columns = tilemap->width / tilemap->tileSize;
 
     auto& layersJson = sceneJson["layers"];
 
     for (auto& it : layersJson.items())
     {
-        auto& tilemapLayer = tilemap.addLayer();
+        auto& tilemapLayer = tilemap->addLayer();
 
         auto& layerJson = it.value();
 
@@ -90,10 +94,10 @@ std::unique_ptr<milk::Scene> milk::SceneLoader::load(const std::string& file) co
 
                 if (typeId > 0)
                 {
-                    auto tile = tilemap.tileTypes[typeId];
+                    auto tile = tilemap->tileTypes[typeId];
 
-                    int x = j * tilemap.tileSize;
-                    int y = i * tilemap.tileSize;
+                    int x = j * tilemap->tileSize;
+                    int y = i * tilemap->tileSize;
 
                     tilemapLayer.addTile(*tile, x, y);
 
@@ -103,8 +107,8 @@ std::unique_ptr<milk::Scene> milk::SceneLoader::load(const std::string& file) co
                         actor->position((float)x, (float)y);
 
                         auto collider = actor->addComponent<BoxCollider>();
-                        collider->width(tilemap.tileSize);
-                        collider->height(tilemap.tileSize);
+                        collider->width(tilemap->tileSize);
+                        collider->height(tilemap->tileSize);
                     }
                 }
             }
@@ -196,7 +200,7 @@ std::unique_ptr<milk::Scene> milk::SceneLoader::load(const std::string& file) co
         }
     }
 
-    tilemap.texture = textureCache.load(tilemap.sourceImageFile);
+    tilemap->texture = textureCache.load(tilemap->sourceImageFile);
 
     return scene;
 }

@@ -5,6 +5,7 @@
 #include "Animator.h"
 #include "Sprite.h"
 #include "Texture.h"
+#include "Tilemap.h"
 
 #include "scene/Actor.h"
 #include "scene/Scene.h"
@@ -19,25 +20,30 @@ milk::Graphics::Graphics(Renderer& renderer, AssetCache<Texture>& textureCache)
 
 void milk::Graphics::render(milk::Scene& scene)
 {
-    auto& tilemap = scene.tilemap();
     auto& camera = scene.camera();
 
     auto screenSize = renderer_.resolution();
+
     // camera has to handle all of this stuff.
     // if we want the camera to clamp from a script, this already has to be calculated, or the clamp will be overridden
     Vector2d camOffset = {camera.position().x - screenSize.width * 0.5f, camera.position().y - screenSize.height * 0.5f};
 
-    for (auto& layer : tilemap.layers)
-    {
-        for (auto& tile : layer->tiles)
-        {
-            Rectangle destinationRect;
-            destinationRect.x = tile->x - (int)camOffset.x;
-            destinationRect.y = tile->y - (int)camOffset.y;
-            destinationRect.width = tile->type.sourceRect.width;
-            destinationRect.height = tile->type.sourceRect.height;
+    auto tilemap = scene.tilemap();
 
-            renderer_.draw(*tilemap.texture, tile->type.sourceRect, destinationRect, 0);
+    if (tilemap != nullptr)
+    {
+        for (auto& layer : tilemap->layers)
+        {
+            for (auto& tile : layer->tiles)
+            {
+                Rectangle destinationRect;
+                destinationRect.x = tile->x - (int)camOffset.x;
+                destinationRect.y = tile->y - (int)camOffset.y;
+                destinationRect.width = tile->type.sourceRect.width;
+                destinationRect.height = tile->type.sourceRect.height;
+
+                renderer_.draw(*(tilemap->texture), tile->type.sourceRect, destinationRect, 0);
+            }
         }
     }
 
