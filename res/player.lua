@@ -69,7 +69,7 @@ function player:late_update()
 	clamped_cam_pos.x = Mathf.clamp(self.actor.position.x, 320, 320)
 	clamped_cam_pos.y = Mathf.clamp(self.actor.position.y, 180, 360)
 
-	Game.scene:set_cam_pos(clamped_cam_pos)
+	self.scene:set_cam_pos(clamped_cam_pos)
 end
 
 return player

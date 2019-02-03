@@ -13,8 +13,6 @@ namespace milk
         namespace game
         {
             void loadScene(Game& game, const std::string& sceneToLoad);
-
-            Scene& currentScene(Game& game);
         }
     }
 }

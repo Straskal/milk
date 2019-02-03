@@ -6,9 +6,9 @@
 #define MILK_FAIL 1
 
 #include <memory>
+#include <stack>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 #include "externals/sol.hpp"
 
@@ -23,11 +23,6 @@ namespace milk
 
     class Filesystem;
     class GameState;
-    class Graphics;
-    class Logic;
-    class Physics;
-    class Scene;
-    class SceneLoader;
     class Texture;
     class Window;
 
@@ -41,10 +36,6 @@ namespace milk
     class Game
     {
     public:
-        // Game states
-        friend class GameState_Scene;
-        friend class GameState_SceneTransition;
-
         Game();
 
         /// The Game is in charge of startup, shutdown, state and scene management.
@@ -69,30 +60,32 @@ namespace milk
         /// Pops a GameState off of the game state stack.
         void popState();
 
-        // Returns the game window.
+        /// \returns the game window.
         Window& window() const;
 
-        // Returns the games filesystem.
+        /// \returns the games filesystem.
         Filesystem& filesystem() const;
 
-        // Returns the games resource manager.
+        /// \returns the games resource manager.
         AssetCache<Texture>& textureCache() const;
 
-        /// \returns the Game's current Scene.
-        Scene* currentScene() const;
+        /// \returns the games lua state.
+        sol::state& luaState();
 
-        /// Loads the requested Scene.
-        /// \param sceneToLoad: The Scene to load.
-        void loadScene(const std::string& sceneToLoad);
+#if _DEBUG
+        /// \returns the Game's debug tools if in debug mode.
+        DebugTools& debugTools() const;
+#endif
 
-        /// Quits the Game and shuts down all sub systems.
+        /// Attempts to load the requested Scene.
+        /// \param name
+        void loadScene(const std::string& name);
+
+        /// Quits and shuts down the Game.
         void quit();
 
     private:
-        std::vector<std::unique_ptr<GameState>> states_;
-
-        std::unique_ptr<Scene> currentScene_;
-        std::string sceneToLoad_;
+        std::stack<std::unique_ptr<GameState>> stateStack_;
 
         std::string configFile_;
 
@@ -105,10 +98,6 @@ namespace milk
 #ifdef _DEBUG
         std::unique_ptr<DebugTools> debugTools_;
 #endif
-
-        std::unique_ptr<Logic> logic_;
-        std::unique_ptr<Physics> physics_;
-        std::unique_ptr<Graphics> graphics_;
 
         bool isRunning_;
 

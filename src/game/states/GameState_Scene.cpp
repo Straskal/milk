@@ -16,73 +16,90 @@
 #include "window/adapter/RendererAdapter.h"
 #include "window/adapter/WindowAdapter.h"
 
-milk::GameState_Scene::GameState_Scene(milk::Game& game, milk::Scene& scene)
+milk::GameState_Scene::GameState_Scene(milk::Game& game, std::unique_ptr<milk::Scene> scene)
         : GameState(game),
-          scene_(scene)
+          scene_(std::move(scene)),
+          logic_(nullptr),
+          physics_(nullptr),
+          graphics_(nullptr)
 {
+}
+
+milk::GameState_Scene::~GameState_Scene() = default;
+
+void milk::GameState_Scene::begin()
+{
+    logic_ = std::make_unique<Logic>(game_.luaState());
+    physics_ = std::make_unique<Physics>();
+    graphics_ = std::make_unique<Graphics>(game_.window().renderer(), game_.textureCache());
 }
 
 std::unique_ptr<milk::GameState> milk::GameState_Scene::checkState()
 {
-    return game_.sceneToLoad_.empty() ? nullptr : std::make_unique<GameState_SceneTransition>(game_);
+    return sceneToLoad_.empty() ? nullptr : std::make_unique<GameState_SceneTransition>(game_, sceneToLoad_);
 }
 
 void milk::GameState_Scene::update()
 {
     // Lets handle all of the actors that were spawned last frame!
-    while (auto spawned = scene_.pollSpawned())
+    while (auto spawned = scene_->pollSpawned())
     {
-        game_.physics_->onActorSpawned(*spawned);
-        game_.graphics_->onActorSpawned(*spawned);
+        physics_->onActorSpawned(*spawned);
+        graphics_->onActorSpawned(*spawned);
 #if _DEBUG
-        game_.debugTools_->onActorSpawned(*spawned);
+        game_.debugTools().onActorSpawned(*spawned);
 #endif
-        game_.logic_->onActorSpawned(*spawned);
+        logic_->onActorSpawned(*spawned);
     }
 
     // Now lets all of the actors that were destroyed last frame!
-    while (auto destroyed = scene_.pollDestroyed())
+    while (auto destroyed = scene_->pollDestroyed())
     {
-        game_.physics_->onActorDestroyed(*destroyed);
-        game_.graphics_->onActorDestroyed(*destroyed);
+        physics_->onActorDestroyed(*destroyed);
+        graphics_->onActorDestroyed(*destroyed);
 #if _DEBUG
-        game_.debugTools_->onActorDestroyed(*destroyed);
+        game_.debugTools().onActorDestroyed(*destroyed);
 #endif
-        game_.logic_->onActorDestroyed(*destroyed);
+        logic_->onActorDestroyed(*destroyed);
     }
 
     // NOW lets handle all of the collisions last frame!
-    while (auto collisionEvent = game_.physics_->pollCollisions())
+    while (auto collisionEvent = physics_->pollCollisions())
     {
-        game_.logic_->onActorCollision(*collisionEvent);
+        logic_->onActorCollision(*collisionEvent);
     }
 
-    game_.logic_->update();
-    game_.physics_->update();
-    game_.logic_->lateUpdate();
+    logic_->update();
+    physics_->update();
+    logic_->lateUpdate();
 }
 
 void milk::GameState_Scene::render()
 {
-    game_.graphics_->render(scene_);
+    graphics_->render(*scene_);
 #if _DEBUG
-    game_.debugTools_->render(scene_);
+    game_.debugTools().render(*scene_);
 #endif
 }
 
 void milk::GameState_Scene::end()
 {
-    scene_.end();
+    scene_->end();
 
-    game_.logic_->flush();
-    game_.physics_->flush();
-    game_.graphics_->flush();
+    logic_->flush();
+    physics_->flush();
+    graphics_->flush();
 #if _DEBUG
-    game_.debugTools_->flush();
+    game_.debugTools().flush();
 #endif
 }
 
 bool milk::GameState_Scene::transparent()
 {
     return false;
+}
+
+void milk::GameState_Scene::loadScene(const std::string& sceneToLoad)
+{
+    sceneToLoad_ = sceneToLoad;
 }

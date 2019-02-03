@@ -10,6 +10,7 @@
 namespace milk
 {
     class ActorComponent;
+    class Scene;
 
     class Actor
     {
@@ -20,9 +21,12 @@ namespace milk
         /// \param id: The Actor's unique identifier
         /// \param name: The Actor's name
         /// \param position: The Actor's position
-        Actor(int id, const std::string& name, const Vector2d& position);
+        Actor(Scene& scene, int id, const std::string& name, const Vector2d& position);
 
         ~Actor() = default;
+
+        /// \returns the Actor's Scene.
+        Scene& scene() const;
 
         /// \returns the actor's unique id.
         int id() const;
@@ -76,6 +80,8 @@ namespace milk
         }
 
     private:
+        Scene& scene_;
+
         int id_;
         std::string name_;
         Vector2d position_;

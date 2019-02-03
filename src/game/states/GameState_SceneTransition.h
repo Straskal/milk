@@ -13,9 +13,7 @@ namespace milk
     {
     public:
         /// This state is active when one scene is transitioning to another
-        explicit GameState_SceneTransition(Game& game);
-
-        void begin() override;
+        explicit GameState_SceneTransition(Game& game, const std::string& sceneToLoad);
 
         std::unique_ptr<GameState> checkState() override;
 
@@ -23,6 +21,7 @@ namespace milk
 
     private:
         SceneLoader sceneLoader_;
+        std::string sceneToLoad_;
     };
 }
 

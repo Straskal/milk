@@ -17,7 +17,7 @@ milk::Actor* milk::Scene::spawnActor(const std::string& name)
 {
     int id = idGenerator_.popId();
 
-    auto pActor = std::make_unique<Actor>(id, name, Vector2d(0, 0));
+    auto pActor = std::make_unique<Actor>(*this, id, name, Vector2d(0, 0));
 
     auto pActorRaw = pActor.get();
 

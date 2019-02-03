@@ -54,7 +54,6 @@ void milk::LuaApi::init(sol::state& luaState)
     // Game
     /////////////////////////////////////////////////////////////////
     luaState.new_usertype<Game>("Game",
-                                "scene", sol::readonly_property(&lua::game::currentScene),
                                 "load_scene", &lua::game::loadScene);
 
     // Input

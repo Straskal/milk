@@ -3,6 +3,7 @@
 #include "physics/Collision.h"
 
 #include "scene/Actor.h"
+#include "scene/Scene.h"
 
 const milk::ComponentType milk::Script::type = SCRIPT;
 
@@ -21,7 +22,9 @@ void milk::Script::load(sol::state& luaState)
     luaScript_ = luaState.script_file(scriptName_);
 
     // Set "self.actor"
+    // Set "self.scene"
     luaScript_["actor"] = &actor_;
+    luaScript_["scene"] = &actor_.scene();
 }
 
 void milk::Script::begin()

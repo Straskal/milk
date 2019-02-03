@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "SDL.h"
-#include "SDL_image.h"
 
 #include "assetcache/adapter/TextureCacheAdapter.h"
 
@@ -14,17 +13,9 @@
 #include "filesystem/Filesystem.h"
 #include "filesystem/adapter/FilesystemAdapter.h"
 
-#include "graphics/Graphics.h"
-
 #include "input/Keyboard.h"
 
-#include "physics/Physics.h"
-
-#include "scene/Scene.h"
-#include "scene/SceneLoader.h"
-
 #include "scripting/api/LuaApi.h"
-#include "scripting/Logic.h"
 
 #include "states/GameState.h"
 #include "states/GameState_SceneTransition.h"
@@ -98,26 +89,28 @@ int milk::Game::run()
 
 void milk::Game::changeState(std::unique_ptr<milk::GameState> state)
 {
-    for (auto& it : states_)
-        it->end();
-
-    states_.clear();
+    while (!stateStack_.empty())
+        popState();
 
     state->begin();
-    states_.emplace_back(std::move(state));
+
+    stateStack_.push(std::move(state));
 }
 
 void milk::Game::pushState(std::unique_ptr<milk::GameState> state)
 {
     state->begin();
-    states_.emplace_back(std::move(state));
+
+    stateStack_.push(std::move(state));
 }
 
 void milk::Game::popState()
 {
-    auto& state = states_.back();
+    auto& state = stateStack_.top();
+
     state->end();
-    states_.pop_back();
+
+    stateStack_.pop();
 }
 
 void milk::Game::handleEvents()
@@ -151,18 +144,20 @@ void milk::Game::handleEvents()
 
 void milk::Game::update()
 {
-    auto pNewState = states_.back()->checkState();
+    auto newState = stateStack_.top()->checkState();
 
-    if (pNewState != nullptr)
-        changeState(std::move(pNewState));
+    if (newState != nullptr)
+        changeState(std::move(newState));
 
-    states_.back()->update();
+    stateStack_.top()->update();
 }
 
 void milk::Game::render()
 {
     window_->renderer().clear();
-    states_.back()->render();
+
+    stateStack_.top()->render();
+
     window_->renderer().present();
 }
 
@@ -179,6 +174,21 @@ milk::Filesystem& milk::Game::filesystem() const
 milk::AssetCache<milk::Texture>& milk::Game::textureCache() const
 {
     return *textureCache_;
+}
+
+sol::state& milk::Game::luaState()
+{
+    return luaState_;
+}
+
+milk::DebugTools& milk::Game::debugTools() const
+{
+    return *debugTools_;
+}
+
+void milk::Game::loadScene(const std::string& name)
+{
+    stateStack_.top()->loadScene(name);
 }
 
 bool milk::Game::initFromConfig()
@@ -231,39 +241,27 @@ bool milk::Game::initFromConfig()
     debugTools_ = std::make_unique<DebugTools>(window_->renderer());
 #endif
 
-    logic_ = std::make_unique<Logic>(luaState_);
-    physics_ = std::make_unique<Physics>();
-    graphics_ = std::make_unique<Graphics>(window_->renderer(), *textureCache_);
-
     LuaApi::init(luaState_);
 
     luaState_["Game"] = this;
     luaState_["Window"] = dynamic_cast<Window*>(window_.get());
 
-    sceneToLoad_ = entryScene;
-    changeState(std::make_unique<GameState_SceneTransition>(*this));
+    changeState(std::make_unique<GameState_SceneTransition>(*this, entryScene));
 
     return true;
 }
 
 void milk::Game::shutDown()
 {
+    while (!stateStack_.empty())
+        popState();
+
     textureCache_->free();
 
     window_->free();
 }
 
-void milk::Game::loadScene(const std::string& sceneToLoad)
-{
-    sceneToLoad_ = sceneToLoad;
-}
-
-milk::Scene* milk::Game::currentScene() const
-{
-    return currentScene_.get();
-}
-
 void milk::Game::quit()
 {
-    sceneToLoad_ = NULL_SCENE;
+    isRunning_ = false;
 }
