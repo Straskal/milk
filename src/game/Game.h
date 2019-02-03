@@ -72,7 +72,7 @@ namespace milk
         /// \returns the games lua state.
         sol::state& luaState();
 
-#if _DEBUG
+#ifdef _DEBUG
         /// \returns the Game's debug tools if in debug mode.
         DebugTools& debugTools() const;
 #endif

@@ -235,11 +235,11 @@ bool milk::Game::initFromConfig()
 
     fileSystem_ = std::make_unique<adapter::FilesystemAdapter>(assetRootDir);
 
-    Keyboard::initialize();
-
 #ifdef _DEBUG
     debugTools_ = std::make_unique<DebugTools>(window_->renderer());
 #endif
+
+    Keyboard::initialize();
 
     LuaApi::init(luaState_);
 
