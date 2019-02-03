@@ -23,17 +23,17 @@ namespace milk
 
         /// Called once at the beginning of each frame.
         /// \param gameEvent
-        virtual void handleEvent(GameEvent& gameEvent) = 0;
+        virtual void handleEvent(GameEvent& gameEvent) {};
 
         /// Called once per frame.
         /// \returns the new GameState or nullptr if there is not change
         virtual std::unique_ptr<GameState> update() = 0;
 
         /// Called once at the end of each frame.
-        virtual void render() = 0;
+        virtual void render() {}
 
         /// Called once this state has ended
-        virtual void end() = 0;
+        virtual void end() {};
 
         /// Returns true if the state below on the stack will be rendered "behind" this state.
         virtual bool transparent() = 0;

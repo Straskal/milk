@@ -17,13 +17,7 @@ namespace milk
 
         void begin() override;
 
-        void handleEvent(GameEvent& gameEvent) override;
-
         std::unique_ptr<GameState> update() override;
-
-        void render() override;
-
-        void end() override;
 
         bool transparent() override;
 

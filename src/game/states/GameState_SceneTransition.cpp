@@ -25,21 +25,9 @@ void milk::GameState_SceneTransition::begin()
     game_.textureCache_->freeUnreferencedAssets();
 }
 
-void milk::GameState_SceneTransition::handleEvent(milk::GameEvent& gameEvent)
-{
-}
-
 std::unique_ptr<milk::GameState> milk::GameState_SceneTransition::update()
 {
     return std::make_unique<GameState_Scene>(game_, *game_.currentScene_);
-}
-
-void milk::GameState_SceneTransition::render()
-{
-}
-
-void milk::GameState_SceneTransition::end()
-{
 }
 
 bool milk::GameState_SceneTransition::transparent()
