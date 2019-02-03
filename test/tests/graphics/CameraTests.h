@@ -3,7 +3,6 @@
 
 #include "gtest/gtest.h"
 
-#include "events/EventQueue.h"
 #include "scene/Camera.h"
 #include "scene/Actor.h"
 #include "scene/Scene.h"
@@ -14,7 +13,6 @@ class CameraTests : public ::testing::Test
 
 TEST_F(CameraTests, Ctor_Constructs)
 {
-    milk::EventQueue eventQueue;
     ASSERT_NO_THROW(milk::Camera());
 }
 

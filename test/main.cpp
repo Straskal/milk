@@ -1,8 +1,5 @@
 #include "gtest/gtest.h"
 
-// events
-#include "../test/tests/events/EventQueueTests.h"
-
 // graphics
 #include "../test/tests/graphics/AnimatorTests.h"
 #include "../test/tests/graphics/CameraTests.h"

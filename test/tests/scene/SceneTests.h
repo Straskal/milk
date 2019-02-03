@@ -6,28 +6,20 @@
 #include "scene/Actor.h"
 #include "scene/Scene.h"
 
-#include "events/EventQueue.h"
-#include "events/GameEvents.h"
-
 class SceneTests : public ::testing::Test
 {
 };
 
 TEST_F(SceneTests, Ctor_Constructs)
 {
-    // Arrange
-    milk::EventQueue eventQueue;
-
     // Act & Assert
-    ASSERT_NO_THROW(milk::Scene{eventQueue});
+    ASSERT_NO_THROW(milk::Scene{});
 }
 
 TEST_F(SceneTests, SpawnActor_SpawnsActor)
 {
     // Arrange
-    milk::EventQueue eventQueue;
-
-    milk::Scene scene{eventQueue};
+    milk::Scene scene{};
 
     // Act
     auto actor = scene.spawnActor("steve");
@@ -39,9 +31,7 @@ TEST_F(SceneTests, SpawnActor_SpawnsActor)
 TEST_F(SceneTests, SpawnActor_SetsActorName)
 {
     // Arrange
-    milk::EventQueue eventQueue;
-
-    milk::Scene scene{eventQueue};
+    milk::Scene scene{};
 
     // Act
     auto actor = scene.spawnActor("steve");
@@ -53,9 +43,7 @@ TEST_F(SceneTests, SpawnActor_SetsActorName)
 TEST_F(SceneTests, SpawnActor_SetsActorId)
 {
     // Arrange
-    milk::EventQueue eventQueue;
-
-    milk::Scene scene{eventQueue};
+    milk::Scene scene{};
 
     // Act
     auto waddap = scene.spawnActor("waddap");
@@ -66,18 +54,12 @@ TEST_F(SceneTests, SpawnActor_SetsActorId)
     ASSERT_EQ(0, waddap->id());
     ASSERT_EQ(1, boi->id());
     ASSERT_EQ(2, ahaha->id());
-
-    // Clean up
-    while (auto e = eventQueue.poll())
-    {}
 }
 
 TEST_F(SceneTests, FindActor_FindsActor)
 {
     // Arrange
-    milk::EventQueue eventQueue;
-
-    milk::Scene scene{eventQueue};
+    milk::Scene scene{};
 
     auto actor = scene.spawnActor("steve");
 
@@ -86,18 +68,12 @@ TEST_F(SceneTests, FindActor_FindsActor)
 
     // Assert
     ASSERT_EQ(actor, foundActor);
-
-    // Clean up
-    while (auto e = eventQueue.poll())
-    {}
 }
 
 TEST_F(SceneTests, FindActor_GivenActorDoesntExist_DoesNotFindActor)
 {
     // Arrange
-    milk::EventQueue eventQueue;
-
-    milk::Scene scene{eventQueue};
+    milk::Scene scene{};
 
     // Act
     auto foundActor = scene.findActor("steve");
