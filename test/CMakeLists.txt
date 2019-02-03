@@ -36,13 +36,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 # create test exe
 #-------------------------------------------------------
-set (TESTS
-        tests/graphics/AnimatorTests.h
-        tests/graphics/CameraTests.h
-        tests/graphics/SpriteTests.h
-        tests/scene/ActorTests.h
-        tests/scene/SceneTests.h
-        )
+set (TESTS "")
 
 set(MOCKS
         mocks/scene/MockActorComponent.h
