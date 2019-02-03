@@ -181,10 +181,12 @@ sol::state& milk::Game::luaState()
     return luaState_;
 }
 
+#ifdef _DEBUG
 milk::DebugTools& milk::Game::debugTools() const
 {
     return *debugTools_;
 }
+#endif
 
 void milk::Game::loadScene(const std::string& name)
 {

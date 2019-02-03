@@ -46,7 +46,7 @@ void milk::GameState_Scene::update()
     {
         physics_->onActorSpawned(*spawned);
         graphics_->onActorSpawned(*spawned);
-#if _DEBUG
+#ifdef _DEBUG
         game_.debugTools().onActorSpawned(*spawned);
 #endif
         logic_->onActorSpawned(*spawned);
@@ -57,7 +57,7 @@ void milk::GameState_Scene::update()
     {
         physics_->onActorDestroyed(*destroyed);
         graphics_->onActorDestroyed(*destroyed);
-#if _DEBUG
+#ifdef _DEBUG
         game_.debugTools().onActorDestroyed(*destroyed);
 #endif
         logic_->onActorDestroyed(*destroyed);
@@ -77,7 +77,7 @@ void milk::GameState_Scene::update()
 void milk::GameState_Scene::render()
 {
     graphics_->render(*scene_);
-#if _DEBUG
+#ifdef _DEBUG
     game_.debugTools().render(*scene_);
 #endif
 }
@@ -89,7 +89,7 @@ void milk::GameState_Scene::end()
     logic_->flush();
     physics_->flush();
     graphics_->flush();
-#if _DEBUG
+#ifdef _DEBUG
     game_.debugTools().flush();
 #endif
 }
