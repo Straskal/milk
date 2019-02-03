@@ -22,29 +22,6 @@ milk::GameState_Scene::GameState_Scene(milk::Game& game, milk::Scene& scene)
 {
 }
 
-void milk::GameState_Scene::begin()
-{
-    while (auto spawned = scene_.pollSpawned())
-    {
-        game_.physics_->onActorSpawned(*spawned);
-        game_.graphics_->onActorSpawned(*spawned);
-        game_.debugTools_->onActorSpawned(*spawned);
-        game_.logic_->onActorSpawned(*spawned);
-    }
-
-    while (auto destroyed = scene_.pollDestroyed())
-    {
-        game_.physics_->onActorDestroyed(*destroyed);
-        game_.graphics_->onActorDestroyed(*destroyed);
-        game_.debugTools_->onActorDestroyed(*destroyed);
-        game_.logic_->onActorDestroyed(*destroyed);
-    }
-
-    game_.logic_->update();
-    game_.physics_->update();
-    game_.logic_->lateUpdate();
-}
-
 void milk::GameState_Scene::handleEvent(GameEvent& gameEvent)
 {
     game_.physics_->handleEvent(gameEvent);
@@ -53,11 +30,13 @@ void milk::GameState_Scene::handleEvent(GameEvent& gameEvent)
     game_.logic_->handleEvent(gameEvent);
 }
 
-std::unique_ptr<milk::GameState> milk::GameState_Scene::update()
+std::unique_ptr<milk::GameState> milk::GameState_Scene::checkState()
 {
-    if (!game_.sceneToLoad_.empty())
-        return std::make_unique<GameState_SceneTransition>(game_);
+    return game_.sceneToLoad_.empty() ? nullptr : std::make_unique<GameState_SceneTransition>(game_);
+}
 
+void milk::GameState_Scene::update()
+{
     while (auto spawned = scene_.pollSpawned())
     {
         game_.physics_->onActorSpawned(*spawned);
@@ -77,8 +56,6 @@ std::unique_ptr<milk::GameState> milk::GameState_Scene::update()
     game_.logic_->update();
     game_.physics_->update();
     game_.logic_->lateUpdate();
-
-    return nullptr;
 }
 
 void milk::GameState_Scene::render()

@@ -17,7 +17,7 @@ namespace milk
 
         void begin() override;
 
-        std::unique_ptr<GameState> update() override;
+        std::unique_ptr<GameState> checkState() override;
 
         bool transparent() override;
 

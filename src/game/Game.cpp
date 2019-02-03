@@ -158,10 +158,12 @@ void milk::Game::handleEvents()
 
 void milk::Game::update()
 {
-    auto pNewState = states_.back()->update();
+    auto pNewState = states_.back()->checkState();
 
     if (pNewState != nullptr)
         changeState(std::move(pNewState));
+
+    states_.back()->update();
 }
 
 void milk::Game::render()

@@ -27,7 +27,10 @@ namespace milk
 
         /// Called once per frame.
         /// \returns the new GameState or nullptr if there is not change
-        virtual std::unique_ptr<GameState> update() = 0;
+        virtual std::unique_ptr<GameState> checkState() = 0;
+
+        /// Called once per frame.
+        virtual void update() {};
 
         /// Called once at the end of each frame.
         virtual void render() {}
@@ -35,7 +38,7 @@ namespace milk
         /// Called once this state has ended
         virtual void end() {};
 
-        /// Returns true if the state below on the stack will be rendered "behind" this state.
+        /// \returns true if the state below on the stack will be rendered "behind" this state.
         virtual bool transparent() = 0;
 
     protected:
