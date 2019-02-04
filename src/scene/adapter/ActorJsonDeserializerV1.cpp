@@ -111,6 +111,7 @@ void milk::adapter::ActorJsonDeserializerV1::deserialize(Actor& actor, nlohmann:
             auto collider = actor.addComponent<BoxCollider>(width, height);
             collider->offset(xOffset, yOffset);
             collider->center();
+            collider->updateBBox();
         }
     }
 }

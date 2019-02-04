@@ -1,5 +1,5 @@
 local player = {
-	speed = 2,
+	speed = 3,
 	flipped_x = false
  }
 
@@ -54,10 +54,7 @@ end
 
 function player:on_collision(e)
 	if e.other.name == 'door' then
-		Game:load_scene('scene.json')
-	end
-	if e.other.name == 'door_to_outside' then
-		Game:load_scene('scene.json')
+		Game:load_scene('inside_scene.json')
 	end
 end
 

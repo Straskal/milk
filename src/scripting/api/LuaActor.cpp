@@ -24,6 +24,7 @@ namespace milk
             void move(Actor& actor, float x, float y)
             {
                 auto velocity = actor.getComponent<Velocity>();
+
                 if (velocity == nullptr)
                     return;
 
@@ -33,6 +34,7 @@ namespace milk
             void setAnimation(Actor& actor, const std::string& name)
             {
                 auto animator = actor.getComponent<Animator>();
+
                 if (animator == nullptr)
                     return;
 
@@ -42,6 +44,7 @@ namespace milk
             void flipX(Actor& actor)
             {
                 auto sprite = actor.getComponent<Sprite>();
+
                 if (sprite == nullptr)
                     return;
 
@@ -51,6 +54,7 @@ namespace milk
             void flipY(Actor& actor)
             {
                 auto sprite = actor.getComponent<Sprite>();
+
                 if (sprite == nullptr)
                     return;
 

@@ -17,7 +17,6 @@ milk::BoxCollider::BoxCollider(Actor& actor, int width, int height)
           next_(nullptr),
           prev_(nullptr)
 {
-
     updateBBox();
 }
 
@@ -25,7 +24,7 @@ void milk::BoxCollider::init(SpatialPartitionGrid* grid)
 {
     grid_ = grid;
 
-    updateBBox();
+    grid->add(this);
 }
 
 void milk::BoxCollider::center()

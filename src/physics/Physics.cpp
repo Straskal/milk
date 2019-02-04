@@ -72,10 +72,7 @@ void milk::Physics::onActorSpawned(Actor& actor)
     auto collider = actor.getComponent<BoxCollider>();
 
     if (collider != nullptr)
-    {
         collider->init(partitionGrid_.get());
-        partitionGrid_->add(collider);
-    }
 }
 
 void milk::Physics::onActorDestroyed(Actor& actor)

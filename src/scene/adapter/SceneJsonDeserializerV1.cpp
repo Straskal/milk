@@ -78,18 +78,22 @@ std::unique_ptr<milk::Scene> milk::adapter::SceneJsonDeserializerV1::deserialize
                 {
                     int typeId = column.get<int>();
 
-                    int xPosition = columnIndex * tilemap->tileSize;
-                    int yPosition = rowIndex * tilemap->tileSize;
-
-                    auto tileType = tilemap->tileTypes.at(typeId);
-
-                    tileLayer.addTile(*tileType, xPosition, yPosition);
-
-                    if (tileType->collidable)
+                    // 0 means empty tile
+                    if (typeId > 0)
                     {
-                        auto tileActor = scene->spawnActor(tileType->name);
-                        tileActor->position(xPosition, yPosition);
-                        tileActor->addComponent<BoxCollider>(tilemap->tileSize, tilemap->tileSize);
+                        int xPosition = columnIndex * tilemap->tileSize;
+                        int yPosition = rowIndex * tilemap->tileSize;
+
+                        auto tileType = tilemap->tileTypes.at(typeId);
+
+                        tileLayer.addTile(*tileType, xPosition, yPosition);
+
+                        if (tileType->collidable)
+                        {
+                            auto tileActor = scene->spawnActor(tileType->name);
+                            tileActor->position(xPosition, yPosition);
+                            tileActor->addComponent<BoxCollider>(tilemap->tileSize, tilemap->tileSize);
+                        }
                     }
 
                     columnIndex++;

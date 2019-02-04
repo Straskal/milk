@@ -58,11 +58,9 @@ namespace milk
 
             componentBitmask_ |= type;
 
-            auto component = new TComponent(*this, std::forward<Args>(args)...);
+            componentsByType_.insert(std::make_pair(type, std::make_unique<TComponent>(*this, std::forward<Args>(args)...)));
 
-            componentsByType_.insert(std::make_pair(type, std::unique_ptr<ActorComponent>(component)));
-
-            return component;
+            return getComponent<TComponent>();
         }
         /// \tparam TComponent: The type of ActorComponent
         /// \returns ActorComponent of given type if found, nullptr if not

@@ -20,7 +20,7 @@ std::string milk::adapter::FilesystemAdapter::contents(const std::string& filena
 
     Sint64 fileSize = SDL_RWsize(rwops);
 
-    auto fileContents = (char*)std::malloc((size_t)(fileSize + 1));
+    auto fileContents = (char*)malloc((size_t)(fileSize + 1));
 
     Sint64 readTotal = 0;
     Sint64 read = 1;
