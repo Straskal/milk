@@ -8,9 +8,10 @@
 
 const milk::ComponentType milk::BoxCollider::type = BOX_COLLIDER;
 
-milk::BoxCollider::BoxCollider(Actor& actor)
+milk::BoxCollider::BoxCollider(Actor& actor, int width, int height)
         : ActorComponent::ActorComponent(actor),
           origin_(Alignment::TOP_LEFT),
+          rect_(0, 0, width, height),
           offset_(0, 0),
           grid_(nullptr),
           next_(nullptr),
@@ -60,16 +61,6 @@ void milk::BoxCollider::updateBBox()
 milk::Rectangle milk::BoxCollider::rect() const
 {
     return rect_;
-}
-
-void milk::BoxCollider::width(int width)
-{
-    rect_.width = width;
-}
-
-void milk::BoxCollider::height(int height)
-{
-    rect_.height = height;
 }
 
 void milk::BoxCollider::offset(int xOffset, int yOffset)

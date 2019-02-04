@@ -67,7 +67,7 @@ namespace milk
     struct Tilemap
     {
         Tilemap()
-                : sourceImageFile(""),
+                : textureName(""),
                   width(0),
                   height(0),
                   tileSize(0),
@@ -90,7 +90,7 @@ namespace milk
             }
         }
 
-        std::string sourceImageFile;
+        std::string textureName;
         int width;
         int height;
         int tileSize;

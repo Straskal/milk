@@ -5,7 +5,7 @@
 
 #include "GameState.h"
 
-#include "scene/SceneLoader.h"
+#include "scene/adapter/SceneLoaderAdapter.h"
 
 namespace milk
 {
@@ -20,7 +20,7 @@ namespace milk
         bool transparent() override;
 
     private:
-        SceneLoader sceneLoader_;
+        adapter::SceneLoaderAdapter sceneLoader_;
         std::string sceneToLoad_;
     };
 }

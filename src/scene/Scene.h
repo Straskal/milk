@@ -14,6 +14,7 @@
 namespace milk
 {
     class Actor;
+    class ActorLoader;
     class Tilemap;
 
     class Scene
@@ -24,15 +25,21 @@ namespace milk
         /// \param id: The Scene's unique indentifier.
         /// \param name: The Scene's name.
         /// \param tilemap: If provided, then the scene will also render with a tilemap.
-        Scene(int id, const std::string& name, std::unique_ptr<Tilemap> tilemap = nullptr);
+        Scene(std::unique_ptr<ActorLoader> actorLoader, int id, const std::string& name);
 
         ~Scene();
 
         /// Spawns an Actor into the current Scene and returns it.
         /// Spawns an Actor into the current Scene and returns it.
-        /// \param name: The Actor's name
+        /// \param actorName: The Actor's name
         /// \returns newly spawned Actor
-        Actor* spawnActor(const std::string& name);
+        Actor* spawnActor(const std::string& actorName);
+
+        /// Spawns an Actor from a json template.
+        /// \param actorName
+        /// \param templateName
+        /// \return
+        Actor* spawnActorFromTemplate(const std::string& actorName, const std::string& templateName);
 
         /// Attempts to destroy an Actor with the given id.
         /// \param id: The id of the Actor to destroy
@@ -50,6 +57,10 @@ namespace milk
         /// \returns the Scene's Tilemap, or nullptr if the Scene doesn't have a tilemap.
         Tilemap* tilemap();
 
+        /// Sets the Scene's Tilemap.
+        /// \param tilemap
+        void tilemap(std::unique_ptr<Tilemap> tilemap);
+
         /// \returns the next spawned Actor in the "to spawn" queue.
         Actor* pollSpawned();
 
@@ -63,6 +74,8 @@ namespace milk
         void end();
 
     private:
+        std::unique_ptr<ActorLoader> actorLoader_;
+
         int id_;
         std::string name_;
 

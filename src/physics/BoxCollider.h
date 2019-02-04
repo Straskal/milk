@@ -22,7 +22,7 @@ namespace milk
         /// Actors with a box collider will be static collidable objects.
         /// Actors with a box collider and velocity will be dynamic collidable objects.
         /// \param actor: The BoxCollider's Actor
-        explicit BoxCollider(Actor& actor);
+        explicit BoxCollider(Actor& actor, int width, int height);
 
         ~BoxCollider() override = default;
 
@@ -38,14 +38,6 @@ namespace milk
 
         /// \returns the BoxCollider's bounding box.
         Rectangle rect() const;
-
-        /// Set the width of the collider.
-        /// \param width
-        void width(int width);
-
-        /// Set the height of the collider.
-        /// \param height
-        void height(int height);
 
         /// Offsets the collider
         /// \param xOffset

@@ -24,13 +24,9 @@ namespace milk
 
         /// A Script is what controls an actor's behavior.
         /// \param actor
-        explicit Script(Actor& actor);
+        explicit Script(Actor& actor, const std::string& scriptName);
 
         ~Script() override = default;
-
-        /// Sets the name of the lua script to load
-        /// \param scriptName: The name of the script to load
-        void script(const std::string& scriptName);
 
         /// Loads the lua script
         /// \param luaState: A reference to the Game's Lua State

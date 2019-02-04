@@ -1,0 +1,39 @@
+{
+    "version": 1,
+    "name": "testtileset",
+    "tileTypes": [
+        {
+            "id": 1,
+            "name": "grass",
+            "sourcePosition": {
+                "x": 0,
+                "y": 0
+            },
+            "flags": {
+                "collidable": false
+            }
+        },
+        {
+            "id": 2,
+            "name": "wall",
+            "sourcePosition": {
+              "x": 64,
+              "y": 0
+            },
+            "flags": {
+              "collidable": true
+            }
+        },
+        {
+            "id": 3,
+            "name": "door",
+            "sourcePosition": {
+                "x": 0,
+                "y": 64
+            },
+            "flags": {
+                "collidable": true
+            }
+        }
+    ]
+}

@@ -4,6 +4,8 @@ set(MILK_SRC_FILES
 
         # asset cache
         assetcache/AssetCache.h
+        assetcache/adapter/ActorTemplateCacheAdapter.cpp
+        assetcache/adapter/ActorTemplateCacheAdapter.h
         assetcache/adapter/TextureCacheAdapter.cpp
         assetcache/adapter/TextureCacheAdapter.h
 
@@ -66,12 +68,22 @@ set(MILK_SRC_FILES
         scene/Actor.h
         scene/ActorComponent.cpp
         scene/ActorComponent.h
+        scene/ActorLoader.h
         scene/Camera.cpp
         scene/Camera.h
         scene/Scene.cpp
         scene/Scene.h
-        scene/SceneLoader.cpp
         scene/SceneLoader.h
+        scene/adapter/ActorLoaderAdapter.cpp
+        scene/adapter/ActorLoaderAdapter.h
+        scene/adapter/ActorJsonDeserializer.h
+        scene/adapter/ActorJsonDeserializerV1.cpp
+        scene/adapter/ActorJsonDeserializerV1.h
+        scene/adapter/SceneLoaderAdapter.cpp
+        scene/adapter/SceneLoaderAdapter.h
+        scene/adapter/SceneJsonDeserializerV1.cpp
+        scene/adapter/SceneJsonDeserializerV1.h
+        scene/adapter/SceneJsonDeserializer.h
 
         # scripting
         scripting/api/LuaApi.cpp

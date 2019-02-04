@@ -13,7 +13,7 @@ function player:update()
 	end
 
 	if Input.get_key_pressed(Keys.R) then
-		Game:load_scene('main_scene.json')
+		Game:load_scene('scene.json')
 	end
 
 	local inputvec = Vector2D.new(0, 0)
@@ -53,11 +53,11 @@ function player:update()
 end
 
 function player:on_collision(e)
-	if e.other.name == 'door_to_inside' then
-		Game:load_scene('other_scene.json')
+	if e.other.name == 'door' then
+		Game:load_scene('scene.json')
 	end
 	if e.other.name == 'door_to_outside' then
-		Game:load_scene('main_scene.json')
+		Game:load_scene('scene.json')
 	end
 end
 

@@ -11,6 +11,7 @@
 #include <unordered_map>
 
 #include "externals/sol.hpp"
+#include "externals/json.hpp"
 
 namespace milk
 {
@@ -28,6 +29,7 @@ namespace milk
 
     namespace adapter
     {
+        class ActorTemplateCacheAdapter;
         class FilesystemAdapter;
         class TextureCacheAdapter;
         class WindowAdapter;
@@ -66,8 +68,11 @@ namespace milk
         /// \returns the games filesystem.
         Filesystem& filesystem() const;
 
-        /// \returns the games resource manager.
+        /// \returns the games texture cache.
         AssetCache<Texture>& textureCache() const;
+
+        /// \returns the game actor template cache.
+        AssetCache<nlohmann::json>& actorTemplateCache() const;
 
         /// \returns the games lua state.
         sol::state& luaState();
@@ -92,6 +97,7 @@ namespace milk
         std::unique_ptr<adapter::WindowAdapter> window_;
         std::unique_ptr<adapter::FilesystemAdapter> fileSystem_;
         std::unique_ptr<adapter::TextureCacheAdapter> textureCache_;
+        std::unique_ptr<adapter::ActorTemplateCacheAdapter> actorTemplateCache_;
 
         sol::state luaState_;
 

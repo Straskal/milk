@@ -11,6 +11,8 @@ milk::Actor::Actor(Scene& scene, int id, const std::string& name, const Vector2d
 {
 }
 
+milk::Actor::~Actor() = default;
+
 milk::Scene& milk::Actor::scene() const
 {
     return scene_;

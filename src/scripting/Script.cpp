@@ -7,14 +7,10 @@
 
 const milk::ComponentType milk::Script::type = SCRIPT;
 
-milk::Script::Script(Actor& actor)
-        : ActorComponent::ActorComponent(actor)
+milk::Script::Script(Actor& actor, const std::string& scriptName)
+        : ActorComponent::ActorComponent(actor),
+          scriptName_(scriptName)
 {
-}
-
-void milk::Script::script(const std::string& scriptName)
-{
-    scriptName_ = scriptName;
 }
 
 void milk::Script::load(sol::state& luaState)

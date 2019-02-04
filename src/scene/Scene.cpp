@@ -4,26 +4,28 @@
 
 #include "Actor.h"
 #include "ActorComponent.h"
+#include "ActorLoader.h"
 
 #include "graphics/Tilemap.h"
 
 #include "window/Window.h"
 
-milk::Scene::Scene(int id, const std::string& name, std::unique_ptr<Tilemap> tilemap)
-        : id_(id),
+milk::Scene::Scene(std::unique_ptr<ActorLoader> actorLoader, int id, const std::string& name)
+        : actorLoader_(std::move(actorLoader)),
+          id_(id),
           name_(name),
-          tilemap_(std::move(tilemap)),
+          tilemap_(nullptr),
           ended_(false)
 {
 }
 
 milk::Scene::~Scene() = default;
 
-milk::Actor* milk::Scene::spawnActor(const std::string& name)
+milk::Actor* milk::Scene::spawnActor(const std::string& actorName)
 {
     int id = idGenerator_.popId();
 
-    auto pActor = std::make_unique<Actor>(*this, id, name, Vector2d(0, 0));
+    auto pActor = std::make_unique<Actor>(*this, id, actorName, Vector2d(0, 0));
 
     auto pActorRaw = pActor.get();
 
@@ -33,6 +35,15 @@ milk::Actor* milk::Scene::spawnActor(const std::string& name)
     actorsToSpawn_.emplace_back(std::move(pActor));
 
     return pActorRaw;
+}
+
+milk::Actor* milk::Scene::spawnActorFromTemplate(const std::string& actorName, const std::string& templateName)
+{
+    auto actor = spawnActor(actorName);
+
+    actorLoader_->load(*actor, templateName);
+
+    return actor;
 }
 
 bool milk::Scene::destroyActor(int id)
@@ -75,9 +86,14 @@ milk::Tilemap* milk::Scene::tilemap()
     return tilemap_.get();
 }
 
+void milk::Scene::tilemap(std::unique_ptr<milk::Tilemap> tilemap)
+{
+    tilemap_ = std::move(tilemap);
+}
+
 milk::Rectangle milk::Scene::bounds() const
 {
-    return { 0, 0, tilemap_->width, tilemap_->height };
+    return {0, 0, tilemap_->width, tilemap_->height};
 }
 
 void milk::Scene::end()

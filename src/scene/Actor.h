@@ -23,7 +23,7 @@ namespace milk
         /// \param position: The Actor's position
         Actor(Scene& scene, int id, const std::string& name, const Vector2d& position);
 
-        ~Actor() = default;
+        ~Actor();
 
         /// \returns the Actor's Scene.
         Scene& scene() const;

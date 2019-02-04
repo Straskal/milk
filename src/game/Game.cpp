@@ -4,6 +4,7 @@
 
 #include "SDL.h"
 
+#include "assetcache/adapter/ActorTemplateCacheAdapter.h"
 #include "assetcache/adapter/TextureCacheAdapter.h"
 
 #ifdef _DEBUG
@@ -43,12 +44,7 @@ int milk::Game::run()
 
     const int MILLISECONDS_PER_FRAME = 1000 / 60; // = 16
 
-    Timer fpsTimer;
     Timer frameCapTimer;
-
-    int countedFrames = 0;
-
-    fpsTimer.start();
 
     try
     {
@@ -56,17 +52,9 @@ int milk::Game::run()
         {
             frameCapTimer.start();
 
-            float averageFps = countedFrames / fpsTimer.seconds();
-            if (averageFps > 2000000)
-                averageFps = 0;
-
-            std::cout << averageFps << std::endl;
-
             handleEvents();
             update();
             render();
-
-            countedFrames++;
 
             int frameTicks = frameCapTimer.milliseconds();
             if (frameTicks < MILLISECONDS_PER_FRAME)
@@ -176,6 +164,11 @@ milk::AssetCache<milk::Texture>& milk::Game::textureCache() const
     return *textureCache_;
 }
 
+milk::AssetCache<nlohmann::json>& milk::Game::actorTemplateCache() const
+{
+    return *actorTemplateCache_;
+}
+
 sol::state& milk::Game::luaState()
 {
     return luaState_;
@@ -240,6 +233,8 @@ bool milk::Game::initFromConfig()
 #ifdef _DEBUG
     debugTools_ = std::make_unique<DebugTools>(window_->renderer());
 #endif
+
+    actorTemplateCache_ = std::make_unique<adapter::ActorTemplateCacheAdapter>(assetRootDir, *fileSystem_);
 
     Keyboard::initialize();
 
