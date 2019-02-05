@@ -22,24 +22,25 @@ namespace milk
     public:
         /// A Scene represents the current state that the game is in.
         /// Some examples: Main menu, dungeon level, cinematic, turn based combat sequence, etc...
-        /// \param id: The Scene's unique indentifier.
-        /// \param name: The Scene's name.
-        /// \param tilemap: If provided, then the scene will also render with a tilemap.
-        Scene(std::unique_ptr<ActorLoader> actorLoader, int id, const std::string& name);
+        /// \param id: The Scene's unique indentifier
+        /// \param name: The Scene's name
+        /// \param actorLoader: The scene uses the ActorLoader when spawning Actors from templates
+        Scene(int id, const std::string& name, std::unique_ptr<ActorLoader> actorLoader);
 
         ~Scene();
 
-        /// Spawns an Actor into the current Scene and returns it.
-        /// Spawns an Actor into the current Scene and returns it.
+        /// Spawns an Actor with the given name and position.
         /// \param actorName: The Actor's name
+        /// \param position: The Actor's position
         /// \returns newly spawned Actor
-        Actor* spawnActor(const std::string& actorName);
+        Actor* spawnActor(const std::string& actorName, Vector2d position);
 
-        /// Spawns an Actor from a json template.
-        /// \param actorName
-        /// \param templateName
-        /// \return
-        Actor* spawnActorFromTemplate(const std::string& actorName, const std::string& templateName);
+        /// Spawns an Actor with the given name, position, and template.
+        /// \param actorName: The Actor's name
+        /// \param position: The Actor's position
+        /// \param templateName: The Actor's component template
+        /// \returns newly spawned Actor
+        Actor* spawnActor(const std::string& actorName, Vector2d position, const std::string& templateName);
 
         /// Attempts to destroy an Actor with the given id.
         /// \param id: The id of the Actor to destroy

@@ -10,7 +10,7 @@
 
 #include "window/Window.h"
 
-milk::Scene::Scene(std::unique_ptr<ActorLoader> actorLoader, int id, const std::string& name)
+milk::Scene::Scene(int id, const std::string& name, std::unique_ptr<ActorLoader> actorLoader)
         : actorLoader_(std::move(actorLoader)),
           id_(id),
           name_(name),
@@ -21,36 +21,34 @@ milk::Scene::Scene(std::unique_ptr<ActorLoader> actorLoader, int id, const std::
 
 milk::Scene::~Scene() = default;
 
-milk::Actor* milk::Scene::spawnActor(const std::string& actorName)
+milk::Actor* milk::Scene::spawnActor(const std::string& actorName, milk::Vector2d position)
 {
     int id = idGenerator_.popId();
 
-    auto pActor = std::make_unique<Actor>(*this, id, actorName, Vector2d(0, 0));
+    auto actor = std::make_unique<Actor>(*this, id, actorName, position);
 
-    auto pActorRaw = pActor.get();
+    auto pActor = actor.get();
 
     if (ended_)
-        return pActorRaw;
+        return pActor;
 
-    actorsToSpawn_.emplace_back(std::move(pActor));
+    actorsToSpawn_.emplace_back(std::move(actor));
 
-    return pActorRaw;
+    return pActor;
 }
 
-milk::Actor* milk::Scene::spawnActorFromTemplate(const std::string& actorName, const std::string& templateName)
+milk::Actor* milk::Scene::spawnActor(const std::string& actorName, Vector2d position, const std::string& templateName)
 {
-    auto actor = spawnActor(actorName);
+    auto pActor = spawnActor(actorName, position);
 
-    actorLoader_->load(*actor, templateName);
+    actorLoader_->load(*pActor, templateName);
 
-    return actor;
+    return pActor;
 }
 
 bool milk::Scene::destroyActor(int id)
 {
-    auto foundActor = actorsById_.find(id);
-
-    if (foundActor == actorsById_.end())
+    if (actorsById_.find(id) == actorsById_.end())
         return false;
 
     actorsToDestroy_.emplace_back(id);

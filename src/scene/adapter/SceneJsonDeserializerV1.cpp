@@ -25,7 +25,7 @@ std::unique_ptr<milk::Scene> milk::adapter::SceneJsonDeserializerV1::deserialize
 
     auto sceneName = sceneJson["name"].get<std::string>();
 
-    auto scene = std::make_unique<Scene>(std::make_unique<ActorLoaderAdapter>(game_), 1, sceneName);;
+    auto scene = std::make_unique<Scene>(1, sceneName, std::make_unique<ActorLoaderAdapter>(game_));;
 
     json tilemapJson = sceneJson["tilemap"];
 
@@ -90,8 +90,7 @@ std::unique_ptr<milk::Scene> milk::adapter::SceneJsonDeserializerV1::deserialize
 
                         if (tileType->collidable)
                         {
-                            auto tileActor = scene->spawnActor(tileType->name);
-                            tileActor->position(xPosition, yPosition);
+                            auto tileActor = scene->spawnActor(tileType->name, {float(xPosition), (float)yPosition});
                             tileActor->addComponent<BoxCollider>(tilemap->tileSize, tilemap->tileSize);
                         }
                     }
@@ -109,11 +108,11 @@ std::unique_ptr<milk::Scene> milk::adapter::SceneJsonDeserializerV1::deserialize
     for (const auto& actorJson : actorsJson)
     {
         auto actorName = actorJson["name"].get<std::string>();
-        int xPosition = actorJson["position"]["x"].get<int>();
-        int yPosition = actorJson["position"]["y"].get<int>();
+        auto xPosition = actorJson["position"]["x"].get<float>();
+        auto yPosition = actorJson["position"]["y"].get<float>();
         auto actorTemplate = actorJson["template"].get<std::string>();
 
-        auto actor = scene->spawnActorFromTemplate(actorName, actorTemplate);
+        auto actor = scene->spawnActor(actorName, {xPosition, yPosition}, actorTemplate);
 
         actor->position(xPosition, yPosition);
     }
