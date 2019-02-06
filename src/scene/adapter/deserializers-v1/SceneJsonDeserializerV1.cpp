@@ -90,7 +90,7 @@ std::unique_ptr<milk::Scene> milk::adapter::SceneJsonDeserializerV1::deserialize
 
                         if (tileType->collidable)
                         {
-                            auto tileActor = scene->spawnActor(tileType->name, {float(xPosition), (float)yPosition});
+                            auto tileActor = scene->spawnActor(tileType->name, {(float)xPosition, (float)yPosition});
                             tileActor->addComponent<BoxCollider>(tilemap->tileSize, tilemap->tileSize);
                         }
                     }
@@ -112,9 +112,7 @@ std::unique_ptr<milk::Scene> milk::adapter::SceneJsonDeserializerV1::deserialize
         auto yPosition = actorJson["position"]["y"].get<float>();
         auto actorTemplate = actorJson["template"].get<std::string>();
 
-        auto actor = scene->spawnActor(actorName, {xPosition, yPosition}, actorTemplate);
-
-        actor->position(xPosition, yPosition);
+        scene->spawnActor(actorName, {xPosition, yPosition}, actorTemplate);
     }
 
     return scene;

@@ -77,13 +77,13 @@ set(MILK_SRC_FILES
         scene/adapter/ActorLoaderAdapter.cpp
         scene/adapter/ActorLoaderAdapter.h
         scene/adapter/ActorJsonDeserializer.h
-        scene/adapter/ActorJsonDeserializerV1.cpp
-        scene/adapter/ActorJsonDeserializerV1.h
         scene/adapter/SceneLoaderAdapter.cpp
         scene/adapter/SceneLoaderAdapter.h
-        scene/adapter/SceneJsonDeserializerV1.cpp
-        scene/adapter/SceneJsonDeserializerV1.h
         scene/adapter/SceneJsonDeserializer.h
+        scene/adapter/deserializers-v1/ActorJsonDeserializerV1.cpp
+        scene/adapter/deserializers-v1/ActorJsonDeserializerV1.h
+        scene/adapter/deserializers-v1/SceneJsonDeserializerV1.cpp
+        scene/adapter/deserializers-v1/SceneJsonDeserializerV1.h
 
         # scripting
         scripting/api/LuaApi.cpp

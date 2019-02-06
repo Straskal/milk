@@ -1,7 +1,7 @@
 #ifndef MILK_ACTORJSONPARSERV1_H
 #define MILK_ACTORJSONPARSERV1_H
 
-#include "ActorJsonDeserializer.h"
+#include "scene/adapter/ActorJsonDeserializer.h"
 
 namespace milk
 {

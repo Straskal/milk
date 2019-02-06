@@ -8,7 +8,7 @@
 
 #include "scene/Actor.h"
 #include "scene/Scene.h"
-#include "scene/adapter/ActorJsonDeserializerV1.h"
+#include "scene/adapter/deserializers-v1/ActorJsonDeserializerV1.h"
 
 milk::adapter::ActorLoaderAdapter::ActorLoaderAdapter(milk::Game& game)
     : game_(game)

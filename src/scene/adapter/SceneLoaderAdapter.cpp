@@ -1,6 +1,6 @@
 #include "SceneLoaderAdapter.h"
 
-#include "scene/adapter/SceneJsonDeserializerV1.h"
+#include "scene/adapter/deserializers-v1/SceneJsonDeserializerV1.h"
 
 #include "filesystem/Filesystem.h"
 
