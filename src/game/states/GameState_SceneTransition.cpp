@@ -19,6 +19,7 @@ std::unique_ptr<milk::GameState> milk::GameState_SceneTransition::checkState()
     auto scene = sceneLoader_.load(sceneToLoad_);
 
     game_.textureCache().freeUnreferencedAssets();
+    game_.actorTemplateCache().freeUnreferencedAssets();
 
     return std::make_unique<GameState_Scene>(game_, std::move(scene));
 }

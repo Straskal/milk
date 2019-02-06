@@ -1,5 +1,5 @@
 local player = {
-	speed = 3,
+	speed = 2,
 	flipped_x = false
  }
 

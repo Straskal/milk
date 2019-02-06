@@ -254,6 +254,7 @@ void milk::Game::shutDown()
         popState();
 
     textureCache_->free();
+    actorTemplateCache_->free();
 
     window_->free();
 }

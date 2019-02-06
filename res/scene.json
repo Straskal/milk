@@ -27,7 +27,7 @@
             "name": "steve",
             "position": {
                 "x": 100,
-                "y": 100
+                "y": 300
             },
             "template": "player"
         }
