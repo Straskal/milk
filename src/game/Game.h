@@ -33,6 +33,7 @@ namespace milk
 
     namespace adapter
     {
+        class ActorLoaderAdapter;
         class ActorTemplateCacheAdapter;
         class FilesystemAdapter;
         class RendererAdapter;
@@ -95,6 +96,7 @@ namespace milk
         adapter::RendererAdapter* renderer_;
         adapter::FilesystemAdapter* fileSystem_;
         adapter::SceneLoaderAdapter* sceneLoader_;
+        adapter::ActorLoaderAdapter* actorLoader_;
         adapter::TextureCacheAdapter* textureCache_;
         adapter::ActorTemplateCacheAdapter* actorTemplateCache_;
 

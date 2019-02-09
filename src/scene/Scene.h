@@ -25,7 +25,7 @@ namespace milk
         /// \param id: The Scene's unique indentifier
         /// \param name: The Scene's name
         /// \param actorLoader: The scene uses the ActorLoader when spawning Actors from templates
-        Scene(int id, const std::string& name, std::unique_ptr<ActorLoader> actorLoader);
+        Scene(int id, const std::string& name, ActorLoader& actorLoader);
 
         ~Scene();
 
@@ -75,7 +75,7 @@ namespace milk
         void end();
 
     private:
-        std::unique_ptr<ActorLoader> actorLoader_;
+        ActorLoader& actorLoader_;
 
         int id_;
         std::string name_;

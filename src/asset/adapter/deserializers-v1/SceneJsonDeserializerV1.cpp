@@ -25,7 +25,7 @@ std::unique_ptr<milk::Scene> milk::adapter::SceneJsonDeserializerV1::deserialize
 
     auto sceneName = sceneJson["name"].get<std::string>();
 
-    auto scene = std::make_unique<Scene>(1, sceneName, std::make_unique<ActorLoaderAdapter>(game_));;
+    auto scene = std::make_unique<Scene>(1, sceneName, ActorLoaderAdapter::getInstance());;
 
     json tilemapJson = sceneJson["tilemap"];
 

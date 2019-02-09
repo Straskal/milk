@@ -10,18 +10,15 @@
 #include "scene/Actor.h"
 #include "scene/Scene.h"
 
-milk::adapter::ActorLoaderAdapter::ActorLoaderAdapter(milk::Game& game)
-    : game_(game)
-{
-}
-
 milk::adapter::ActorLoaderAdapter::~ActorLoaderAdapter() = default;
 
 void milk::adapter::ActorLoaderAdapter::load(Actor& actor, const std::string& templateName) const
 {
     using json = nlohmann::json;
 
-    json& actorJson = *(game_.actorTemplateCache().load(templateName));
+    auto& game = Game::getInstance();
+
+    json& actorJson = *(game.actorTemplateCache().load(templateName));
 
     int version = actorJson["version"].get<int>();
 
@@ -31,7 +28,7 @@ void milk::adapter::ActorLoaderAdapter::load(Actor& actor, const std::string& te
     switch (version)
     {
         case 1:
-            parser = std::make_unique<ActorJsonDeserializerV1>(game_);
+            parser = std::make_unique<ActorJsonDeserializerV1>(game);
             break;
         default:
             break;

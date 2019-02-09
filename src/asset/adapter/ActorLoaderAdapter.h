@@ -12,14 +12,18 @@ namespace milk
         class ActorLoaderAdapter : public ActorLoader
         {
         public:
-            explicit ActorLoaderAdapter(Game& game);
+            static ActorLoaderAdapter& getInstance()
+            {
+                static ActorLoaderAdapter instance;
+                return instance;
+            }
 
             ~ActorLoaderAdapter();
 
             void load(Actor& actor, const std::string& templateName) const override;
 
         private:
-            Game& game_;
+            ActorLoaderAdapter() = default;
         };
     }
 }

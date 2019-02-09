@@ -10,8 +10,8 @@
 
 #include "window/Window.h"
 
-milk::Scene::Scene(int id, const std::string& name, std::unique_ptr<ActorLoader> actorLoader)
-        : actorLoader_(std::move(actorLoader)),
+milk::Scene::Scene(int id, const std::string& name, ActorLoader& actorLoader)
+        : actorLoader_(actorLoader),
           id_(id),
           name_(name),
           tilemap_(nullptr),
@@ -41,7 +41,7 @@ milk::Actor* milk::Scene::spawnActor(const std::string& actorName, Vector2d posi
 {
     auto pActor = spawnActor(actorName, position);
 
-    actorLoader_->load(*pActor, templateName);
+    actorLoader_.load(*pActor, templateName);
 
     return pActor;
 }
