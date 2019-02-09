@@ -10,6 +10,7 @@ namespace milk
 {
     namespace adapter
     {
+        /// SDL implementation of Renderer.
         class RendererAdapter : public Renderer
         {
         public:
@@ -19,10 +20,11 @@ namespace milk
                       unsigned int resolutionWidth,
                       unsigned int resolutionHeight);
 
-            void clear() override;
+            void clear(const Color& color) override;
 
-            void drawRectangle(Rectangle& destinationRectangle, Color color) override;
-            void drawRectangleOutline(Rectangle& destinationRectangle, Color color) override;
+            void drawRectangle(Rectangle& destinationRectangle, const Color& color) override;
+
+            void drawRectangleOutline(Rectangle& destinationRectangle, const Color& color) override;
 
             void draw(Texture& texture,
                       Rectangle& sourceRectangle,
@@ -38,8 +40,7 @@ namespace milk
             SDL_Renderer* sdlRenderer() const;
 
         private:
-            unsigned int resolutionWidth_;
-            unsigned int resolutionHeight_;
+            Resolution resolution_;
 
             SDL_Renderer* sdlRenderer_;
         };

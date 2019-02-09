@@ -7,22 +7,23 @@ namespace milk
 {
     class Renderer;
 
+    /// The Game's Window.
     class Window
     {
     public:
-        // Get width of window.
+        /// \returns the Window's width.
         virtual unsigned int width() const = 0;
 
-        // Get height of window.
+        /// \returns the Window's height.
         virtual unsigned int height() const = 0;
 
-        // Returns true if window is in fullscreen mode.
+        /// \returns true if Window is in fullscreen mode.
         virtual bool fullscreen() const = 0;
 
-        // Toggles fullscreen mode.
+        /// Toggles fullscreen mode.
         virtual void toggleFullscreen() = 0;
 
-        // Get window's renderer.
+        /// \returns the Window's Renderer.
         virtual Renderer& renderer() const = 0;
     };
 }

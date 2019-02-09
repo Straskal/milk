@@ -1,25 +1,27 @@
+#include "RendererAdapter.h"
+
 #include <iostream>
 
 #include "SDL_hints.h"
 #include "SDL_render.h"
 
-#include "RendererAdapter.h"
-
+#include "graphics/Color.h"
 #include "graphics/Texture.h"
+
 #include "math/Rectangle.h"
 
 milk::adapter::RendererAdapter::RendererAdapter()
-        : resolutionWidth_(0),
-          resolutionHeight_(0)
 {
+    resolution_.width = 0;
+    resolution_.height = 0;
 }
 
 bool milk::adapter::RendererAdapter::init(SDL_Window* sdlWindow,
                                           unsigned int resolutionWidth,
                                           unsigned int resolutionHeight)
 {
-    resolutionWidth_ = resolutionWidth;
-    resolutionHeight_ = resolutionHeight;
+    resolution_.width = resolutionWidth;
+    resolution_.height = resolutionHeight;
 
     sdlRenderer_ = SDL_CreateRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
@@ -37,13 +39,13 @@ bool milk::adapter::RendererAdapter::init(SDL_Window* sdlWindow,
     return true;
 }
 
-void milk::adapter::RendererAdapter::clear()
+void milk::adapter::RendererAdapter::clear(const Color& color)
 {
-    SDL_SetRenderDrawColor(sdlRenderer_, 0x00, 0x00, 0x00, 0xFF);
+    SDL_SetRenderDrawColor(sdlRenderer_, color.red, color.blue, color.green, color.alpha);
     SDL_RenderClear(sdlRenderer_);
 }
 
-void milk::adapter::RendererAdapter::drawRectangle(milk::Rectangle& destinationRectangle, milk::Color color)
+void milk::adapter::RendererAdapter::drawRectangle(milk::Rectangle& destinationRectangle, const milk::Color& color)
 {
     SDL_Rect dst = {destinationRectangle.x, destinationRectangle.y, destinationRectangle.width, destinationRectangle.height};
 
@@ -51,7 +53,7 @@ void milk::adapter::RendererAdapter::drawRectangle(milk::Rectangle& destinationR
     SDL_RenderFillRect(sdlRenderer_, &dst);
 }
 
-void milk::adapter::RendererAdapter::drawRectangleOutline(milk::Rectangle& destinationRectangle, milk::Color color)
+void milk::adapter::RendererAdapter::drawRectangleOutline(milk::Rectangle& destinationRectangle, const milk::Color& color)
 {
     SDL_Rect dst = {destinationRectangle.x, destinationRectangle.y, destinationRectangle.width, destinationRectangle.height};
 
@@ -77,11 +79,7 @@ void milk::adapter::RendererAdapter::present()
 
 milk::Resolution milk::adapter::RendererAdapter::resolution() const
 {
-    Resolution res = {};
-    res.width = resolutionWidth_;
-    res.height = resolutionHeight_;
-
-    return res;
+    return resolution_;
 }
 
 void milk::adapter::RendererAdapter::free()

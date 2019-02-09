@@ -12,7 +12,7 @@ namespace milk
         /// \param blue: unsigned 8 bit integer
         /// \param green: unsigned 8 bit integer
         /// \param alpha: unsigned 8 bit integer
-        Color(uint8_t red = 0x00, uint8_t blue = 0x00, uint8_t green = 0x00, uint8_t alpha = 0xFF)
+        explicit Color(uint8_t red = 0x00, uint8_t blue = 0x00, uint8_t green = 0x00, uint8_t alpha = 0xFF)
                 : red(red),
                   blue(blue),
                   green(green),
@@ -25,10 +25,16 @@ namespace milk
         uint8_t green;
         uint8_t alpha;
 
-        /// \returns transparent color.
+        /// \returns transparent.
         static Color clear()
         {
-            return {0x00, 0xFF, 0x00, 0xFF};
+            return Color{0x00, 0x00, 0x00, 0x00};
+        }
+
+        /// \returns black.
+        static Color black()
+        {
+            return Color{0x00, 0x00, 0x00, 0xFF};
         }
     };
 }

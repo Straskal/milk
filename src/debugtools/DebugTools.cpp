@@ -1,5 +1,7 @@
 #include "DebugTools.h"
 
+#include "graphics/Color.h"
+
 #include "scene/Actor.h"
 #include "scene/Scene.h"
 
@@ -52,7 +54,7 @@ void milk::DebugTools::render(Scene& scene)
                               size,
                               size};
 
-            renderer_.drawRectangleOutline(dest, {0x00, 0xFF, 0x00, 0x5A});
+            renderer_.drawRectangleOutline(dest, Color{0x00, 0xFF, 0x00, 0x5A});
         }
     }
 
@@ -64,7 +66,7 @@ void milk::DebugTools::render(Scene& scene)
         {
             auto collRect = coll->rect();
             Rectangle dest = {(int)(collRect.x - camOffset.x), (int)(collRect.y - camOffset.y), collRect.width, collRect.height};
-            renderer_.drawRectangle(dest, {0xFF, 0x00, 0x00, 0x46});
+            renderer_.drawRectangle(dest, Color{0xFF, 0x00, 0x00, 0x46});
         }
     }
 }

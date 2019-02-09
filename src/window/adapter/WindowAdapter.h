@@ -14,6 +14,7 @@ namespace milk
     {
         class RendererAdapter;
 
+        /// SDL implementation of Window.
         class WindowAdapter : public Window
         {
         public:

@@ -14,6 +14,8 @@
 #include "filesystem/Filesystem.h"
 #include "filesystem/adapter/FilesystemAdapter.h"
 
+#include "graphics/Color.h"
+
 #include "input/Keyboard.h"
 
 #include "scripting/api/LuaApi.h"
@@ -142,7 +144,7 @@ void milk::Game::update()
 
 void milk::Game::render()
 {
-    window_->renderer().clear();
+    window_->renderer().clear(Color::black());
 
     stateStack_.top()->render();
 

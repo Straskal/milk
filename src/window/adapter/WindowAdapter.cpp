@@ -7,7 +7,6 @@
 #include "RendererAdapter.h"
 
 milk::adapter::WindowAdapter::WindowAdapter()
-
         : title_(""),
           width_(0),
           height_(0),
@@ -57,6 +56,7 @@ bool milk::adapter::WindowAdapter::init(const std::string& title,
     }
 
     rendererAdapter_ = std::make_unique<RendererAdapter>();
+
     if (!rendererAdapter_->init(sdlWindow_, resolutionWidth, resolutionHeight))
     {
         SDL_DestroyWindow(sdlWindow_);
@@ -90,7 +90,8 @@ void milk::adapter::WindowAdapter::toggleFullscreen()
         const int WINDOWED = 0;
         SDL_SetWindowFullscreen(sdlWindow_, WINDOWED);
         SDL_SetWindowSize(sdlWindow_, width_, height_);
-    } else
+    }
+    else
     {
         int displayIndex = SDL_GetWindowDisplayIndex(sdlWindow_);
 
