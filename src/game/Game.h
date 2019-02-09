@@ -95,8 +95,8 @@ namespace milk
         std::unique_ptr<Scene> scene_;
 
         adapter::WindowAdapter* window_;
+        adapter::FilesystemAdapter* fileSystem_;
 
-        std::unique_ptr<adapter::FilesystemAdapter> fileSystem_;
         std::unique_ptr<adapter::SceneLoaderAdapter> sceneLoader_;
         std::unique_ptr<adapter::TextureCacheAdapter> textureCache_;
         std::unique_ptr<adapter::ActorTemplateCacheAdapter> actorTemplateCache_;

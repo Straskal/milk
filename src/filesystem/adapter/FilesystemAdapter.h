@@ -10,11 +10,19 @@ namespace milk
         class FilesystemAdapter : public Filesystem
         {
         public:
-            explicit FilesystemAdapter(std::string rootDir);
+            static FilesystemAdapter& getInstance()
+            {
+                static FilesystemAdapter instance;
+                return instance;
+            }
+
+            void init(std::string rootDirectory);
 
             std::string contents(const std::string& filename) override;
 
         private:
+            FilesystemAdapter();
+
             std::string rootDir_;
         };
     }

@@ -85,11 +85,8 @@ void milk::Game::init(std::string configFilepath)
         return;
     }
 
-    fileSystem_ = std::make_unique<adapter::FilesystemAdapter>(assetRootDir);
-
-#ifdef _DEBUG
-    debugTools_ = std::make_unique<DebugTools>(window_->renderer());
-#endif
+    fileSystem_ = &adapter::FilesystemAdapter::getInstance();
+    fileSystem_->init(assetRootDir);
 
     sceneLoader_ = std::make_unique<adapter::SceneLoaderAdapter>(*this);
 
@@ -102,6 +99,10 @@ void milk::Game::init(std::string configFilepath)
     logic_ = std::make_unique<Logic>(luaState());
     physics_ = std::make_unique<Physics>();
     graphics_ = std::make_unique<Graphics>(window().renderer(), textureCache());
+
+#ifdef _DEBUG
+    debugTools_ = std::make_unique<DebugTools>(window().renderer());
+#endif
 
     luaState_["Game"] = this;
     luaState_["Window"] = &window();

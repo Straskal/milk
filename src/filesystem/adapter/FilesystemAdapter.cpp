@@ -3,9 +3,14 @@
 #include "SDL_rwops.h"
 #include "SDL_types.h"
 
-milk::adapter::FilesystemAdapter::FilesystemAdapter(std::string rootDir)
-    : rootDir_(std::move(rootDir))
+milk::adapter::FilesystemAdapter::FilesystemAdapter()
 {
+    rootDir_ = "";
+}
+
+void milk::adapter::FilesystemAdapter::init(std::string rootDirectory)
+{
+    rootDir_ = std::move(rootDirectory);
 }
 
 std::string milk::adapter::FilesystemAdapter::contents(const std::string& filename)
