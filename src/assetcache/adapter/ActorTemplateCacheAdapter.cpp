@@ -21,14 +21,14 @@ std::shared_ptr<json> milk::adapter::ActorTemplateCacheAdapter::load(const std::
 
 void milk::adapter::ActorTemplateCacheAdapter::freeUnreferencedAssets()
 {
-    auto templateItr = templateCache_.begin();
-
-    while (templateItr != templateCache_.end())
+    auto it = templateCache_.cbegin();
+    while (it != templateCache_.cend())
     {
-        if (templateItr->second.use_count() == 0)
-            templateCache_.erase(templateItr->first);
-
-        templateItr++;
+        auto curr = it++;
+        if (templateCache_.find(curr->first) != templateCache_.cend())
+        {
+            templateCache_.erase(curr);
+        }
     }
 }
 
