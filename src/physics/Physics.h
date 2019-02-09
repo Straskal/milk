@@ -13,6 +13,7 @@ namespace milk
     class SpatialPartitionGrid;
     class Velocity;
 
+    /// The Physics system handles moving Actor's with velocity, and detecting collisions between Actor's with BoxColliders.
     class Physics
     {
     public:
@@ -26,6 +27,7 @@ namespace milk
 
         void onActorDestroyed(Actor& actor);
 
+        /// Polls all Collisions detected last frame. Returns nullptr once queue is empty.
         Collision* pollCollisions();
 
         void flush();

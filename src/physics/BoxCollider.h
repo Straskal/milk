@@ -12,42 +12,40 @@ namespace milk
 {
     class SpatialPartitionGrid;
 
+    /// Actors with a BoxCollider are static collidable objects.
+    /// Actors with a BoxCollider and Velocity will be dynamic collidable objects.
     class BoxCollider : public ActorComponent
     {
     public:
         static const ComponentType type;
 
+
+        /// Updates the bounding box. If the Actor's position has changed, this method must be called in order to update the bounding box.
+        void updateBBox();
+
+        /// \returns the BoxCollider's bounding box.
+        Rectangle rect() const;
         friend class SpatialPartitionGrid;
 
-        /// Actors with a box collider will be static collidable objects.
-        /// Actors with a box collider and velocity will be dynamic collidable objects.
         /// \param actor: The BoxCollider's Actor
         explicit BoxCollider(Actor& actor, int width, int height);
 
-        ~BoxCollider() override = default;
-
-        /// Initializes the collider so it can become one with the collision grid.
+        /// Initializes the BoxCollider so it can become one with the collision grid.
         /// \param grid: The SpatialPartitionGrid
         void init(SpatialPartitionGrid* grid);
 
         /// Center the collider's origin.
         void center();
 
-        /// Updates the bounding box. If the actor's position is changed, this method must be called in order to update the collider's bounding box.
-        void updateBBox();
-
-        /// \returns the BoxCollider's bounding box.
-        Rectangle rect() const;
-
         /// Offsets the collider
         /// \param xOffset
         /// \param yOffset
         void offset(int xOffset, int yOffset);
 
-        /// \returns true if collider's bounding box is overlapping another collider's bounding box.
+        /// \returns true if BoxCollider's bounding box is overlapping another collider's bounding box.
         bool overlaps(Rectangle otherRect);
 
-        /// \returns true if collider's bounding box is overlapping another collider's bounding box, and outputs the depth rect.
+        /// \returns true if BoxCollider's bounding box is overlapping another collider's bounding box, and outputs the depth rect.
         bool overlaps(Rectangle otherRect, Rectangle* result);
 
         /// Top of collider.
@@ -72,6 +70,7 @@ namespace milk
 
         SpatialPartitionGrid* grid_;
 
+        // TODO: Remove these. They exist because of the collision grid implementation, which needs to be changed.
         BoxCollider* prev_;
         BoxCollider* next_;
     };

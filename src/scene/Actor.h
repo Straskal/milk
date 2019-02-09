@@ -18,6 +18,7 @@ namespace milk
         /// An actor is an object that exists within a scene.
         /// An actor can range from a rock on the ground to a dragon boss monster.
         /// Attach components to an actor in order to define it and give it behavior.
+        /// \param scene: The Scene that the Actor exists within
         /// \param id: The Actor's unique identifier
         /// \param name: The Actor's name
         /// \param position: The Actor's position
@@ -28,23 +29,21 @@ namespace milk
         /// \returns the Actor's Scene.
         Scene& scene() const;
 
-        /// \returns the actor's unique id.
+        /// \returns the Actor's unique id.
         int id() const;
 
-        // \returns the actor's name.
+        // \returns the Actor's name.
         std::string name() const;
 
-        // \returns the actor's position.
+        // \returns the Actor's position.
         Vector2d position() const;
 
-        /// Sets the actor's position.
+        /// Sets the Actor's position.
         /// \param x: Actor's x coordinate
         /// \param y: Actor's x coordinate
         void position(float x, float y);
 
-        // Returns the added component and nullptr if addition fails.
-
-        /// Attemps to add an ActorComponent of the given type to the Actor.
+        /// Attempts to add an ActorComponent of the given type to the Actor.
         /// \tparam TComponent: The type of ActorComponent
         /// \param args The ActorComponent's constructor parameters
         /// \returns newly added ActorComponent if successfull, nullptr if not

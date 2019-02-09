@@ -29,7 +29,7 @@ void milk::BoxCollider::init(SpatialPartitionGrid* grid)
 
 void milk::BoxCollider::center()
 {
-    origin_ = Alignment::CENTER_ORIGIN;
+    origin_ = Alignment::CENTER;
 
     updateBBox();
 }
@@ -47,7 +47,7 @@ void milk::BoxCollider::updateBBox()
             rect_.x = (int)(actorPosition.x + offset_.x);
             rect_.y = (int)(actorPosition.y + offset_.y);
             break;
-        case Alignment::CENTER_ORIGIN:
+        case Alignment::CENTER:
             rect_.x = (int)(actorPosition.x - (rect_.width / 2) + offset_.x);
             rect_.y = (int)(actorPosition.y - (rect_.height / 2) + offset_.y);
             break;

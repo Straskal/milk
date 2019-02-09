@@ -14,11 +14,9 @@ namespace milk
     class Logic
     {
     public:
-        /// Logic handles all Game specific logic through Lua Scripts.
+        /// Logic handles all Game specific logic through Lua scripts.
         /// \param luaState: A reference to the Game's Lua State.
         explicit Logic(sol::state& luaState);
-
-        ~Logic() = default;
 
         /// Called once every frame. Calls update() method in Script components.
         void update();
@@ -29,7 +27,7 @@ namespace milk
 
         void onActorCollision(Collision& collisionEvent);
 
-        /// Called once at the end of each frame. Calls lateUpdate() method in Script components.
+        /// Called once at the end of each frame, right before rendering. Calls lateUpdate() method in Script components.
         /// This method is best used for any Camera manipulation.
         void lateUpdate();
 

@@ -22,13 +22,12 @@ namespace milk
     public:
         static const ComponentType type;
 
-        /// A Script is what controls an actor's behavior.
-        /// \param actor
+        /// A Script allows an Actor to be controlled via Lua scripts.
+        /// \param actor: The Actor that the Script is attached to
+        /// \param scriptName: The name of the Lua script to attach to the Actor
         explicit Script(Actor& actor, const std::string& scriptName);
 
-        ~Script() override = default;
-
-        /// Loads the lua script
+        /// Loads the Lua script.
         /// \param luaState: A reference to the Game's Lua State
         void load(sol::state& luaState);
 
@@ -38,14 +37,14 @@ namespace milk
         /// Called once per frame.
         virtual void update();
 
-        /// Called at the end of frame, right before rendering.
+        /// Called at the end of each frame, right before rendering.
         virtual void lateUpdate();
 
-        /// Called when a collision has been detected.
-        /// \param collisionEvent: The CollisionEvent for the Script to handle
+        /// Called when a Collision has been detected.
+        /// \param collisionEvent: The Collision for the Script to handle
         virtual void onCollision(Collision& collision);
 
-        /// Called once before the actor is about to be destroyed.
+        /// Called once before the Actor is about to be destroyed.
         virtual void end();
 
     private:

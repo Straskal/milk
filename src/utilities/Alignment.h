@@ -6,7 +6,7 @@ namespace milk
     enum class Alignment
     {
         TOP_LEFT,
-        CENTER_ORIGIN
+        CENTER
     };
 }
 

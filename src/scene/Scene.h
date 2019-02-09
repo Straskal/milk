@@ -71,7 +71,7 @@ namespace milk
         /// \returns The Scene's boundaries
         Rectangle bounds() const;
 
-        /// Mark the scene as ended. After a Scene has ended, no new spawns be processed.
+        /// Mark the scene as ended. After a Scene has ended, no new spawns are processed.
         void end();
 
     private:

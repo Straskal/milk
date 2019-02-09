@@ -39,7 +39,7 @@ std::shared_ptr<milk::Texture> milk::Sprite::texture() const
 
 void milk::Sprite::center()
 {
-    alignment_ = Alignment::CENTER_ORIGIN;
+    alignment_ = Alignment::CENTER;
 }
 
 void milk::Sprite::sourceRect(int x, int y, int width, int height)
@@ -69,7 +69,7 @@ milk::Rectangle milk::Sprite::destinationRect() const
             destinationRect.x = (int)std::floor(actorPosition.x);
             destinationRect.y = (int)std::floor(actorPosition.y);
             break;
-        case Alignment::CENTER_ORIGIN:
+        case Alignment::CENTER:
             destinationRect.x = (int)std::floor(actorPosition.x) - (sourceRect_.width / 2);
             destinationRect.y = (int)std::floor(actorPosition.y) - (sourceRect_.height / 2);
             break;

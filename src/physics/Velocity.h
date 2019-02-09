@@ -7,8 +7,8 @@
 
 namespace milk
 {
-    // All objects that move should own a velocity component.
-    // In regards to movement, directly setting an objects position is ill advised as the collision system operates on Velocity.
+    /// All objects that move should contain a Velocity component.
+    /// In regards to movement, directly setting an objects position is ill advised as the collision system operates on Velocity.
     class Velocity : public ActorComponent
     {
     public:
@@ -16,15 +16,13 @@ namespace milk
 
         explicit Velocity(Actor& actor);
 
-        ~Velocity() override = default;
-
-        // Sets the velocity.
+        /// Sets the velocity.
         void value(float x, float y);
 
-        // Sets the velocity.
+        /// Sets the velocity.
         void value(Vector2d velocity);
 
-        // Gets the velocity.
+        /// \returns the velocity.
         Vector2d value() const;
 
     private:

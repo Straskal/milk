@@ -3,7 +3,7 @@
 const milk::ComponentType milk::Velocity::type = VELOCITY;
 
 milk::Velocity::Velocity(Actor& actor)
-        : ActorComponent::ActorComponent(actor),
+        : ActorComponent(actor),
           value_(0, 0)
 {
 }
