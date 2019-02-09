@@ -4,8 +4,8 @@
 
 #include "SDL.h"
 
-#include "assetcache/adapter/ActorTemplateCacheAdapter.h"
-#include "assetcache/adapter/TextureCacheAdapter.h"
+#include "asset/adapter/ActorTemplateCacheAdapter.h"
+#include "asset/adapter/TextureCacheAdapter.h"
 
 #ifdef _DEBUG
 #include "debugtools/DebugTools.h"
@@ -25,7 +25,7 @@
 #include "scripting/api/LuaApi.h"
 
 #include "scene/Scene.h"
-#include "scene/adapter/SceneLoaderAdapter.h"
+#include "asset/adapter/SceneLoaderAdapter.h"
 
 #include "utilities/Timer.h"
 
@@ -84,8 +84,6 @@ void milk::Game::init(std::string configFilepath)
         return;
     }
 
-    fileSystem_ = &adapter::FilesystemAdapter::getInstance();
-
     textureCache_ = &adapter::TextureCacheAdapter::getInstance();
 
     if (!textureCache_->init())
@@ -95,9 +93,9 @@ void milk::Game::init(std::string configFilepath)
         return;
     }
 
+    fileSystem_ = &adapter::FilesystemAdapter::getInstance();
+    sceneLoader_ = &adapter::SceneLoaderAdapter::getInstance();
     actorTemplateCache_ = &adapter::ActorTemplateCacheAdapter::getInstance();
-
-    sceneLoader_ = std::make_unique<adapter::SceneLoaderAdapter>(*this);
 
     Keyboard::initialize();
 

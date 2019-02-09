@@ -1,6 +1,6 @@
 #include "SceneLoaderAdapter.h"
 
-#include "scene/adapter/deserializers-v1/SceneJsonDeserializerV1.h"
+#include "asset/adapter/deserializers-v1/SceneJsonDeserializerV1.h"
 
 #include "filesystem/Filesystem.h"
 
@@ -8,20 +8,15 @@
 
 #include "scene/Scene.h"
 
-milk::adapter::SceneLoaderAdapter::SceneLoaderAdapter(Game& game)
-        : game_(game)
-{
-}
-
 milk::adapter::SceneLoaderAdapter::~SceneLoaderAdapter() = default;
 
 std::unique_ptr<milk::Scene> milk::adapter::SceneLoaderAdapter::load(const std::string& file) const
 {
-    using json = nlohmann::json;
+    auto& game = Game::getInstance();
 
-    std::string sceneJsonString = game_.filesystem().contents(file);
+    std::string sceneJsonString = game.filesystem().contents(file);
 
-    json sceneJson = json::parse(sceneJsonString);
+    nlohmann::json sceneJson = nlohmann::json::parse(sceneJsonString);
 
     int version = sceneJson["version"].get<int>();
 
@@ -31,7 +26,7 @@ std::unique_ptr<milk::Scene> milk::adapter::SceneLoaderAdapter::load(const std::
     switch (version)
     {
         case 1:
-            parser = std::make_unique<SceneJsonDeserializerV1>(game_);
+            parser = std::make_unique<SceneJsonDeserializerV1>(game);
             break;
         default:
             break;

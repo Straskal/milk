@@ -4,7 +4,7 @@
 
 #include "Actor.h"
 #include "ActorComponent.h"
-#include "ActorLoader.h"
+#include "asset/ActorLoader.h"
 
 #include "graphics/Tilemap.h"
 

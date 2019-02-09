@@ -1,6 +1,6 @@
 #include "SceneJsonDeserializerV1.h"
 
-#include "assetcache/AssetCache.h"
+#include "asset/AssetCache.h"
 
 #include "filesystem/Filesystem.h"
 
@@ -12,7 +12,7 @@
 
 #include "scene/Actor.h"
 #include "scene/Scene.h"
-#include "scene/adapter/ActorLoaderAdapter.h"
+#include "asset/adapter/ActorLoaderAdapter.h"
 
 milk::adapter::SceneJsonDeserializerV1::SceneJsonDeserializerV1(milk::Game& game)
         : game_(game)

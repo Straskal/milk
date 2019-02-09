@@ -1,7 +1,7 @@
 #ifndef MILK_SCENELOADERV1_H
 #define MILK_SCENELOADERV1_H
 
-#include "scene/adapter/SceneJsonDeserializer.h"
+#include "asset/adapter/SceneJsonDeserializer.h"
 
 namespace milk
 {

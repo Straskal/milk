@@ -5,7 +5,7 @@
 
 #include "SDL.h"
 
-#include "assetcache/AssetCache.h"
+#include "asset/AssetCache.h"
 #include "math/Rectangle.h"
 #include "scene/ActorComponent.h"
 #include "utilities/Alignment.h"

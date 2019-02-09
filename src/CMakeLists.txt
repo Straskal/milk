@@ -7,11 +7,23 @@ set(MILK_SRC_FILES
         ../libs/sol/sol.hpp
 
         # asset cache
-        assetcache/AssetCache.h
-        assetcache/adapter/ActorTemplateCacheAdapter.cpp
-        assetcache/adapter/ActorTemplateCacheAdapter.h
-        assetcache/adapter/TextureCacheAdapter.cpp
-        assetcache/adapter/TextureCacheAdapter.h
+        asset/AssetCache.h
+        asset/ActorLoader.h
+        asset/SceneLoader.h
+        asset/adapter/ActorLoaderAdapter.cpp
+        asset/adapter/ActorLoaderAdapter.h
+        asset/adapter/ActorJsonDeserializer.h
+        asset/adapter/ActorTemplateCacheAdapter.cpp
+        asset/adapter/ActorTemplateCacheAdapter.h
+        asset/adapter/SceneLoaderAdapter.cpp
+        asset/adapter/SceneLoaderAdapter.h
+        asset/adapter/SceneJsonDeserializer.h
+        asset/adapter/TextureCacheAdapter.cpp
+        asset/adapter/TextureCacheAdapter.h
+        asset/adapter/deserializers-v1/ActorJsonDeserializerV1.cpp
+        asset/adapter/deserializers-v1/ActorJsonDeserializerV1.h
+        asset/adapter/deserializers-v1/SceneJsonDeserializerV1.cpp
+        asset/adapter/deserializers-v1/SceneJsonDeserializerV1.h
 
         # debug tools
         debugtools/DebugTools.cpp
@@ -63,22 +75,10 @@ set(MILK_SRC_FILES
         scene/Actor.h
         scene/ActorComponent.cpp
         scene/ActorComponent.h
-        scene/ActorLoader.h
         scene/Camera.cpp
         scene/Camera.h
         scene/Scene.cpp
         scene/Scene.h
-        scene/SceneLoader.h
-        scene/adapter/ActorLoaderAdapter.cpp
-        scene/adapter/ActorLoaderAdapter.h
-        scene/adapter/ActorJsonDeserializer.h
-        scene/adapter/SceneLoaderAdapter.cpp
-        scene/adapter/SceneLoaderAdapter.h
-        scene/adapter/SceneJsonDeserializer.h
-        scene/adapter/deserializers-v1/ActorJsonDeserializerV1.cpp
-        scene/adapter/deserializers-v1/ActorJsonDeserializerV1.h
-        scene/adapter/deserializers-v1/SceneJsonDeserializerV1.cpp
-        scene/adapter/deserializers-v1/SceneJsonDeserializerV1.h
 
         # scripting
         scripting/api/LuaApi.cpp

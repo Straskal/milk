@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "assetcache/AssetCache.h"
+#include "asset/AssetCache.h"
 
 #include "json/json.hpp"
 

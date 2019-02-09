@@ -3,25 +3,27 @@
 
 #include <memory>
 
-#include "scene/SceneLoader.h"
+#include "asset/SceneLoader.h"
 
 namespace milk
 {
-    class Game;
-
     namespace adapter
     {
         class SceneLoaderAdapter : public SceneLoader
         {
         public:
-            explicit SceneLoaderAdapter(Game& game);
+            static SceneLoaderAdapter& getInstance()
+            {
+                static SceneLoaderAdapter instance;
+                return instance;
+            }
 
             ~SceneLoaderAdapter();
 
             std::unique_ptr<Scene> load(const std::string& file) const override;
 
         private:
-            Game& game_;
+            SceneLoaderAdapter() = default;
         };
     }
 }

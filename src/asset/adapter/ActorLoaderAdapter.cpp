@@ -1,6 +1,7 @@
 #include "ActorLoaderAdapter.h"
 
-#include "assetcache/adapter/ActorTemplateCacheAdapter.h"
+#include "asset/adapter/ActorTemplateCacheAdapter.h"
+#include "asset/adapter/deserializers-v1/ActorJsonDeserializerV1.h"
 
 #include "filesystem/Filesystem.h"
 
@@ -8,7 +9,6 @@
 
 #include "scene/Actor.h"
 #include "scene/Scene.h"
-#include "scene/adapter/deserializers-v1/ActorJsonDeserializerV1.h"
 
 milk::adapter::ActorLoaderAdapter::ActorLoaderAdapter(milk::Game& game)
     : game_(game)

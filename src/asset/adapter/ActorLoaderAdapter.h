@@ -1,7 +1,7 @@
 #ifndef MILK_ACTORLOADERADAPTER_H
 #define MILK_ACTORLOADERADAPTER_H
 
-#include "scene/ActorLoader.h"
+#include "asset/ActorLoader.h"
 
 namespace milk
 {
