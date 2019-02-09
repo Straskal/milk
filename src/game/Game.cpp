@@ -15,13 +15,17 @@
 #include "filesystem/adapter/FilesystemAdapter.h"
 
 #include "graphics/Color.h"
+#include "graphics/Graphics.h"
 
 #include "input/Keyboard.h"
 
+#include "physics/Physics.h"
+
+#include "scripting/Logic.h"
 #include "scripting/api/LuaApi.h"
 
-#include "states/GameState.h"
-#include "states/GameState_SceneTransition.h"
+#include "scene/Scene.h"
+#include "scene/adapter/SceneLoaderAdapter.h"
 
 #include "utilities/Timer.h"
 
@@ -41,9 +45,7 @@ void milk::Game::init(std::string configFilepath)
     if (initialized_)
         return;
 
-    configFile_ = std::move(configFilepath);
-
-    if (configFile_.empty())
+    if (configFilepath.empty())
     {
         std::cout << "Cannot find config file" << std::endl;
         return;
@@ -51,7 +53,7 @@ void milk::Game::init(std::string configFilepath)
 
     luaState_.open_libraries(sol::lib::base, sol::lib::math, sol::lib::package);
 
-    sol::load_result loadResult = luaState_.load_file(configFile_);
+    sol::load_result loadResult = luaState_.load_file(configFilepath);
 
     if (!loadResult.valid())
     {
@@ -89,16 +91,22 @@ void milk::Game::init(std::string configFilepath)
     debugTools_ = std::make_unique<DebugTools>(window_->renderer());
 #endif
 
+    sceneLoader_ = std::make_unique<adapter::SceneLoaderAdapter>(*this);
+
     actorTemplateCache_ = std::make_unique<adapter::ActorTemplateCacheAdapter>(assetRootDir, *fileSystem_);
 
     Keyboard::initialize();
 
     LuaApi::init(luaState_);
 
+    logic_ = std::make_unique<Logic>(luaState());
+    physics_ = std::make_unique<Physics>();
+    graphics_ = std::make_unique<Graphics>(window().renderer(), textureCache());
+
     luaState_["Game"] = this;
     luaState_["Window"] = dynamic_cast<Window*>(window_.get());
 
-    changeState(std::make_unique<GameState_SceneTransition>(*this, entryScene));
+    loadScene(entryScene);
 
     initialized_ = true;
 }
@@ -143,32 +151,6 @@ int milk::Game::run()
     return MILK_SUCCESS;
 }
 
-void milk::Game::changeState(std::unique_ptr<milk::GameState> state)
-{
-    while (!stateStack_.empty())
-        popState();
-
-    state->begin();
-
-    stateStack_.push(std::move(state));
-}
-
-void milk::Game::pushState(std::unique_ptr<milk::GameState> state)
-{
-    state->begin();
-
-    stateStack_.push(std::move(state));
-}
-
-void milk::Game::popState()
-{
-    auto& state = stateStack_.top();
-
-    state->end();
-
-    stateStack_.pop();
-}
-
 void milk::Game::handleEvents()
 {
     SDL_Event sdlEvent;
@@ -200,19 +182,75 @@ void milk::Game::handleEvents()
 
 void milk::Game::update()
 {
-    auto newState = stateStack_.top()->checkState();
+    if (!sceneToLoad_.empty())
+    {
+        if (scene_ != nullptr)
+        {
+            scene_->end();
 
-    if (newState != nullptr)
-        changeState(std::move(newState));
+            logic_->flush();
+            physics_->flush();
+            graphics_->flush();
 
-    stateStack_.top()->update();
+#ifdef _DEBUG
+            debugTools_->flush();
+#endif
+        }
+
+        scene_ = sceneLoader_->load(sceneToLoad_);
+
+        sceneToLoad_.erase();
+
+        textureCache_->freeUnreferencedAssets();
+        actorTemplateCache_->freeUnreferencedAssets();
+    }
+
+    // Lets handle all of the actors that were spawned last frame!
+    while (auto spawned = scene_->pollSpawned())
+    {
+        physics_->onActorSpawned(*spawned);
+        graphics_->onActorSpawned(*spawned);
+
+#ifdef _DEBUG
+        debugTools_->onActorSpawned(*spawned);
+#endif
+
+        logic_->onActorSpawned(*spawned);
+    }
+
+    // Now lets all of the actors that were destroyed last frame!
+    while (auto destroyed = scene_->pollDestroyed())
+    {
+        physics_->onActorDestroyed(*destroyed);
+        graphics_->onActorDestroyed(*destroyed);
+
+#ifdef _DEBUG
+        debugTools_->onActorDestroyed(*destroyed);
+#endif
+
+        logic_->onActorDestroyed(*destroyed);
+    }
+
+    // NOW lets handle all of the collisions last frame!
+    while (auto collisionEvent = physics_->pollCollisions())
+    {
+        logic_->onActorCollision(*collisionEvent);
+    }
+
+    logic_->update();
+    physics_->update();
+    logic_->lateUpdate();
 }
 
 void milk::Game::render()
 {
     window_->renderer().clear(Color::black());
 
-    stateStack_.top()->render();
+    graphics_->render(*scene_);
+
+#ifdef _DEBUG
+    debugTools_->render(*scene_);
+#endif
 
     window_->renderer().present();
 }
@@ -251,13 +289,22 @@ milk::DebugTools& milk::Game::debugTools() const
 
 void milk::Game::loadScene(const std::string& name)
 {
-    stateStack_.top()->loadScene(name);
+    sceneToLoad_ = name;
 }
 
 void milk::Game::shutDown()
 {
-    while (!stateStack_.empty())
-        popState();
+    scene_->end();
+
+    logic_->flush();
+    physics_->flush();
+    graphics_->flush();
+
+#ifdef _DEBUG
+    debugTools_->flush();
+#endif
+
+    scene_.reset();
 
     textureCache_->free();
     actorTemplateCache_->free();

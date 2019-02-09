@@ -23,7 +23,10 @@ namespace milk
 #endif
 
     class Filesystem;
-    class GameState;
+    class Graphics;
+    class Logic;
+    class Physics;
+    class Scene;
     class Texture;
     class Window;
 
@@ -31,6 +34,7 @@ namespace milk
     {
         class ActorTemplateCacheAdapter;
         class FilesystemAdapter;
+        class SceneLoaderAdapter;
         class TextureCacheAdapter;
         class WindowAdapter;
     }
@@ -56,17 +60,6 @@ namespace milk
         /// Returns MILK_SUCCESS on successful run
         /// Returns MILK_FAIL on unsuccessful run
         int run();
-
-        /// Changes the Game's current state.
-        /// \param state: The new state of the Game.
-        void changeState(std::unique_ptr<GameState> state);
-
-        /// Pushes a GameState onto the top of the GameState stack.
-        /// \param state: The state to push onto the Game's state stack.
-        void pushState(std::unique_ptr<GameState> state);
-
-        /// Pops a GameState off of the game state stack.
-        void popState();
 
         /// \returns the game window.
         Window& window() const;
@@ -99,12 +92,16 @@ namespace milk
         /// \param configFile: Path to the config file
         Game();
 
-        std::stack<std::unique_ptr<GameState>> stateStack_;
+        std::string sceneToLoad_;
+        std::unique_ptr<Scene> scene_;
 
-        std::string configFile_;
+        std::unique_ptr<Logic> logic_;
+        std::unique_ptr<Physics> physics_;
+        std::unique_ptr<Graphics> graphics_;
 
         std::unique_ptr<adapter::WindowAdapter> window_;
         std::unique_ptr<adapter::FilesystemAdapter> fileSystem_;
+        std::unique_ptr<adapter::SceneLoaderAdapter> sceneLoader_;
         std::unique_ptr<adapter::TextureCacheAdapter> textureCache_;
         std::unique_ptr<adapter::ActorTemplateCacheAdapter> actorTemplateCache_;
 

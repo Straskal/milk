@@ -29,11 +29,6 @@ set(MILK_SRC_FILES
         # game
         game/Game.h
         game/Game.cpp
-        game/states/GameState.h
-        game/states/GameState_Scene.cpp
-        game/states/GameState_Scene.h
-        game/states/GameState_SceneTransition.cpp
-        game/states/GameState_SceneTransition.h
 
         # graphics
         graphics/Animator.cpp
