@@ -17,10 +17,10 @@ namespace milk
 
     struct Tilemap;
 
+    /// Graphics handles drawing sprites, updating animators. etc...
     class Graphics
     {
     public:
-        /// Graphics handles drawing sprites, updating animators. etc...
         /// \param renderer: A reference to the Game's Renderer.
         /// \param textureCache: A reference to the Game's TextureCache.
         Graphics(Renderer& renderer, AssetCache<Texture>& textureCache);
