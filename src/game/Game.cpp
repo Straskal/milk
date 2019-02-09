@@ -76,6 +76,14 @@ void milk::Game::init(std::string configFilepath)
     if (!window_->init(title, width, height, vwidth, vheight, fullscreen))
         return;
 
+    renderer_ = &adapter::RendererAdapter::getInstance();
+
+    if (!renderer_->init(window_->sdlWindow(), vwidth, vheight))
+    {
+        window_->free();
+        return;
+    }
+
     fileSystem_ = &adapter::FilesystemAdapter::getInstance();
 
     textureCache_ = &adapter::TextureCacheAdapter::getInstance();
@@ -308,6 +316,7 @@ void milk::Game::shutDown()
     textureCache_->free();
     actorTemplateCache_->free();
 
+    renderer_->free();
     window_->free();
 }
 

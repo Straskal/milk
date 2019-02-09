@@ -54,14 +54,6 @@ bool milk::adapter::WindowAdapter::init(const std::string& title,
         return false;
     }
 
-    auto& rendererAdapter = RendererAdapter::getInstance();
-
-    if (!rendererAdapter.init(sdlWindow_, resolutionWidth, resolutionHeight))
-    {
-        SDL_DestroyWindow(sdlWindow_);
-        return false;
-    }
-
     return true;
 }
 
@@ -120,6 +112,4 @@ SDL_Window* milk::adapter::WindowAdapter::sdlWindow() const
 void milk::adapter::WindowAdapter::free()
 {
     SDL_DestroyWindow(sdlWindow_);
-
-    RendererAdapter::getInstance().free();
 }

@@ -26,6 +26,7 @@ namespace milk
     class Graphics;
     class Logic;
     class Physics;
+    class Renderer;
     class Scene;
     class Texture;
     class Window;
@@ -34,6 +35,7 @@ namespace milk
     {
         class ActorTemplateCacheAdapter;
         class FilesystemAdapter;
+        class RendererAdapter;
         class SceneLoaderAdapter;
         class TextureCacheAdapter;
         class WindowAdapter;
@@ -91,6 +93,7 @@ namespace milk
         std::unique_ptr<adapter::SceneLoaderAdapter> sceneLoader_;
 
         adapter::WindowAdapter* window_;
+        adapter::RendererAdapter* renderer_;
         adapter::FilesystemAdapter* fileSystem_;
         adapter::TextureCacheAdapter* textureCache_;
         adapter::ActorTemplateCacheAdapter* actorTemplateCache_;
