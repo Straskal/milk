@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 
-#include "externals/sol.hpp"
+#include "sol/sol.hpp"
 
 namespace milk
 {

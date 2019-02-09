@@ -1,7 +1,7 @@
 #ifndef MILK_ACTORJSONPARSER_H
 #define MILK_ACTORJSONPARSER_H
 
-#include "externals/json.hpp"
+#include "json/json.hpp"
 
 namespace milk
 {

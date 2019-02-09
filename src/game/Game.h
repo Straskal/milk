@@ -10,8 +10,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "externals/sol.hpp"
-#include "externals/json.hpp"
+#include "sol/sol.hpp"
+#include "json/json.hpp"
 
 namespace milk
 {

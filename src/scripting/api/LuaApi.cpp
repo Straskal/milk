@@ -1,6 +1,6 @@
 #include "LuaApi.h"
 
-#include "externals/sol.hpp"
+#include "sol/sol.hpp"
 
 #include "LuaActor.h"
 #include "LuaCollision.h"

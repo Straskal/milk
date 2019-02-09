@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "externals/json.hpp"
+#include "json/json.hpp"
 
 namespace milk
 {

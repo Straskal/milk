@@ -9,7 +9,7 @@
 
 #include <string>
 
-#include "externals/sol.hpp"
+#include "sol/sol.hpp"
 
 #include "scene/ActorComponent.h"
 

@@ -2,6 +2,10 @@ project(milklib)
 
 set(MILK_SRC_FILES
 
+        # third party libs
+        ../libs/json/json.hpp
+        ../libs/sol/sol.hpp
+
         # asset cache
         assetcache/AssetCache.h
         assetcache/adapter/ActorTemplateCacheAdapter.cpp
@@ -12,10 +16,6 @@ set(MILK_SRC_FILES
         # debug tools
         debugtools/DebugTools.cpp
         debugtools/DebugTools.h
-
-        # externals
-        externals/json.hpp
-        externals/sol.hpp
 
         # filesystem
         filesystem/Filesystem.h
@@ -127,6 +127,7 @@ target_include_directories(milklib
             ${SDL2_IMAGE_INCLUDE_DIRS}
             ${LUA53_INCLUDE_DIR}
             ${milklib_SOURCE_DIR}
+            ../libs
         )
 
 # link libs
