@@ -205,6 +205,9 @@ void milk::Game::update()
         actorTemplateCache_->freeUnreferencedAssets();
     }
 
+    if (scene_ == nullptr)
+        return;
+
     // Lets handle all of the actors that were spawned last frame!
     while (auto spawned = scene_->pollSpawned())
     {
@@ -246,11 +249,14 @@ void milk::Game::render()
 {
     window_->renderer().clear(Color::black());
 
-    graphics_->render(*scene_);
+    if (scene_ != nullptr)
+    {
+        graphics_->render(*scene_);
 
 #ifdef _DEBUG
-    debugTools_->render(*scene_);
+        debugTools_->render(*scene_);
 #endif
+    }
 
     window_->renderer().present();
 }
@@ -294,7 +300,8 @@ void milk::Game::loadScene(const std::string& name)
 
 void milk::Game::shutDown()
 {
-    scene_->end();
+    if (scene_ != nullptr)
+        scene_->end();
 
     logic_->flush();
     physics_->flush();
