@@ -72,7 +72,7 @@ void milk::Game::init(std::string configFilepath)
     std::string assetRootDir = config["resourceRootDir"];
     std::string entryScene = config["entryScene"];
 
-    window_ = std::make_unique<adapter::WindowAdapter>();
+    window_ = &adapter::WindowAdapter::getInstance();
 
     if (!window_->init(title, width, height, vwidth, vheight, fullscreen))
         return;
@@ -104,7 +104,7 @@ void milk::Game::init(std::string configFilepath)
     graphics_ = std::make_unique<Graphics>(window().renderer(), textureCache());
 
     luaState_["Game"] = this;
-    luaState_["Window"] = dynamic_cast<Window*>(window_.get());
+    luaState_["Window"] = &window();
 
     loadScene(entryScene);
 

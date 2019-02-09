@@ -18,7 +18,11 @@ namespace milk
         class WindowAdapter : public Window
         {
         public:
-            WindowAdapter();
+            static WindowAdapter& getInstance()
+            {
+                static WindowAdapter instance;
+                return instance;
+            }
 
             ~WindowAdapter();
 
@@ -46,6 +50,8 @@ namespace milk
             void free();
 
         private:
+            WindowAdapter();
+
             std::string title_;
 
             unsigned int width_;

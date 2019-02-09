@@ -94,17 +94,18 @@ namespace milk
         std::string sceneToLoad_;
         std::unique_ptr<Scene> scene_;
 
-        std::unique_ptr<Logic> logic_;
-        std::unique_ptr<Physics> physics_;
-        std::unique_ptr<Graphics> graphics_;
+        adapter::WindowAdapter* window_;
 
-        std::unique_ptr<adapter::WindowAdapter> window_;
         std::unique_ptr<adapter::FilesystemAdapter> fileSystem_;
         std::unique_ptr<adapter::SceneLoaderAdapter> sceneLoader_;
         std::unique_ptr<adapter::TextureCacheAdapter> textureCache_;
         std::unique_ptr<adapter::ActorTemplateCacheAdapter> actorTemplateCache_;
 
         sol::state luaState_;
+
+        std::unique_ptr<Logic> logic_;
+        std::unique_ptr<Physics> physics_;
+        std::unique_ptr<Graphics> graphics_;
 
 #ifdef _DEBUG
         std::unique_ptr<DebugTools> debugTools_;
