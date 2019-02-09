@@ -41,8 +41,6 @@ namespace milk
 
             void toggleFullscreen() override;
 
-            Renderer& renderer() const override;
-
             SDL_Window* sdlWindow() const;
 
             void free();

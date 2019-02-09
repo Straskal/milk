@@ -22,9 +22,6 @@ namespace milk
 
         /// Toggles fullscreen mode.
         virtual void toggleFullscreen() = 0;
-
-        /// \returns the Window's Renderer.
-        virtual Renderer& renderer() const = 0;
     };
 }
 

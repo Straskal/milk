@@ -105,10 +105,10 @@ void milk::Game::init(std::string configFilepath)
 
     logic_ = std::make_unique<Logic>(luaState());
     physics_ = std::make_unique<Physics>();
-    graphics_ = std::make_unique<Graphics>(window().renderer(), textureCache());
+    graphics_ = std::make_unique<Graphics>(*renderer_, *textureCache_);
 
 #ifdef _DEBUG
-    debugTools_ = std::make_unique<DebugTools>(window().renderer());
+    debugTools_ = std::make_unique<DebugTools>(*renderer_);
 #endif
 
     luaState_["Game"] = this;
@@ -255,7 +255,7 @@ void milk::Game::update()
 
 void milk::Game::render()
 {
-    window_->renderer().clear(Color::black());
+    renderer_->clear(Color::black());
 
     if (scene_ != nullptr)
     {
@@ -266,7 +266,7 @@ void milk::Game::render()
 #endif
     }
 
-    window_->renderer().present();
+    renderer_->present();
 }
 
 milk::Window& milk::Game::window() const

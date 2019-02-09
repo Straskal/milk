@@ -97,11 +97,6 @@ void milk::adapter::WindowAdapter::toggleFullscreen()
     }
 }
 
-milk::Renderer& milk::adapter::WindowAdapter::renderer() const
-{
-    return RendererAdapter::getInstance();
-}
-
 SDL_Window* milk::adapter::WindowAdapter::sdlWindow() const
 {
     SDL_assert(sdlWindow_ != nullptr);
