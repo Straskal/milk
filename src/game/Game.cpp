@@ -90,6 +90,7 @@ void milk::Game::init(std::string configFilepath)
 
     if (!textureCache_->init())
     {
+        renderer_->free();
         window_->free();
         return;
     }
