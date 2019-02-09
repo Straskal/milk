@@ -28,18 +28,84 @@
 #include "window/adapter/WindowAdapter.h"
 #include "window/adapter/RendererAdapter.h"
 
-milk::Game::Game() = default;
-
-milk::Game::Game(const std::string& configFile)
-        : configFile_(configFile)
+milk::Game::Game()
 {
+    initialized_ = false;
+    isRunning_ = false;
 }
 
 milk::Game::~Game() = default;
 
+void milk::Game::init(std::string configFilepath)
+{
+    if (initialized_)
+        return;
+
+    configFile_ = std::move(configFilepath);
+
+    if (configFile_.empty())
+    {
+        std::cout << "Cannot find config file" << std::endl;
+        return;
+    }
+
+    luaState_.open_libraries(sol::lib::base, sol::lib::math, sol::lib::package);
+
+    sol::load_result loadResult = luaState_.load_file(configFile_);
+
+    if (!loadResult.valid())
+    {
+        std::cout << "could not load config file!" << std::endl;
+        return;
+    }
+
+    sol::table config = loadResult();
+
+    std::string title = config["title"];
+    unsigned int width = config["width"];
+    unsigned int height = config["height"];
+    unsigned int vwidth = config["vwidth"];
+    unsigned int vheight = config["vheight"];
+    bool fullscreen = config["fullscreen"];
+    std::string assetRootDir = config["resourceRootDir"];
+    std::string entryScene = config["entryScene"];
+
+    window_ = std::make_unique<adapter::WindowAdapter>();
+
+    if (!window_->init(title, width, height, vwidth, vheight, fullscreen))
+        return;
+
+    textureCache_ = std::make_unique<adapter::TextureCacheAdapter>(*window_->rendererAdapter().sdlRenderer(), assetRootDir);
+
+    if (!textureCache_->init())
+    {
+        window_->free();
+        return;
+    }
+
+    fileSystem_ = std::make_unique<adapter::FilesystemAdapter>(assetRootDir);
+
+#ifdef _DEBUG
+    debugTools_ = std::make_unique<DebugTools>(window_->renderer());
+#endif
+
+    actorTemplateCache_ = std::make_unique<adapter::ActorTemplateCacheAdapter>(assetRootDir, *fileSystem_);
+
+    Keyboard::initialize();
+
+    LuaApi::init(luaState_);
+
+    luaState_["Game"] = this;
+    luaState_["Window"] = dynamic_cast<Window*>(window_.get());
+
+    changeState(std::make_unique<GameState_SceneTransition>(*this, entryScene));
+
+    initialized_ = true;
+}
+
 int milk::Game::run()
 {
-    if (!initFromConfig())
+    if (!initialized_)
         return MILK_FAIL;
 
     isRunning_ = true;
@@ -186,68 +252,6 @@ milk::DebugTools& milk::Game::debugTools() const
 void milk::Game::loadScene(const std::string& name)
 {
     stateStack_.top()->loadScene(name);
-}
-
-bool milk::Game::initFromConfig()
-{
-    if (configFile_.empty())
-    {
-        std::cout << "Cannot find config file" << std::endl;
-        return MILK_FAIL;
-    }
-
-    luaState_.open_libraries(sol::lib::base, sol::lib::math, sol::lib::package);
-
-    sol::load_result loadResult = luaState_.load_file(configFile_);
-
-    if (!loadResult.valid())
-    {
-        std::cout << "could not load config file!" << std::endl;
-        return false;
-    }
-
-    sol::table config = loadResult();
-
-    std::string title = config["title"];
-    unsigned int width = config["width"];
-    unsigned int height = config["height"];
-    unsigned int vwidth = config["vwidth"];
-    unsigned int vheight = config["vheight"];
-    bool fullscreen = config["fullscreen"];
-    std::string assetRootDir = config["resourceRootDir"];
-    std::string entryScene = config["entryScene"];
-
-    window_ = std::make_unique<adapter::WindowAdapter>();
-
-    if (!window_->init(title, width, height, vwidth, vheight, fullscreen))
-        return false;
-
-    textureCache_ = std::make_unique<adapter::TextureCacheAdapter>(*window_->rendererAdapter().sdlRenderer(), assetRootDir);
-
-    if (!textureCache_->init())
-    {
-        window_->free();
-        return false;
-    }
-
-    fileSystem_ = std::make_unique<adapter::FilesystemAdapter>(assetRootDir);
-
-#ifdef _DEBUG
-    debugTools_ = std::make_unique<DebugTools>(window_->renderer());
-#endif
-
-    actorTemplateCache_ = std::make_unique<adapter::ActorTemplateCacheAdapter>(assetRootDir, *fileSystem_);
-
-    Keyboard::initialize();
-
-    LuaApi::init(luaState_);
-
-    luaState_["Game"] = this;
-    luaState_["Window"] = dynamic_cast<Window*>(window_.get());
-
-    changeState(std::make_unique<GameState_SceneTransition>(*this, entryScene));
-
-    return true;
 }
 
 void milk::Game::shutDown()

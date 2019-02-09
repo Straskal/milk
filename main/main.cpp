@@ -2,7 +2,9 @@
 
 int main(int argc, char* argv[])
 {
-	milk::Game game("res/config.lua");
+	auto& game = milk::Game::getInstance();
+
+	game.init("res/config.lua");
 
 	return game.run();
 }

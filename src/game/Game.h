@@ -35,16 +35,22 @@ namespace milk
         class WindowAdapter;
     }
 
+    /// The Game is in charge of startup, shutdown, state and scene management.
     class Game
     {
     public:
-        Game();
-
-        /// The Game is in charge of startup, shutdown, state and scene management.
-        /// \param configFile: Path to the config file
-        explicit Game(const std::string& configFile);
+        /// \returns the single instance of the Game.
+        static Game& getInstance()
+        {
+            static Game instance;
+            return instance;
+        }
 
         ~Game();
+
+        /// Initializes the Game and its subsystems.
+        /// \param configFilepath: The path to the Game's configuration file.
+        void init(std::string configFilepath);
 
         /// Initializes and runs the game
         /// Returns MILK_SUCCESS on successful run
@@ -90,6 +96,9 @@ namespace milk
         void quit();
 
     private:
+        /// \param configFile: Path to the config file
+        Game();
+
         std::stack<std::unique_ptr<GameState>> stateStack_;
 
         std::string configFile_;
@@ -105,9 +114,9 @@ namespace milk
         std::unique_ptr<DebugTools> debugTools_;
 #endif
 
+        bool initialized_;
         bool isRunning_;
 
-        bool initFromConfig();
         void handleEvents();
         void update();
         void render();
