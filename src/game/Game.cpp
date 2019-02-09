@@ -35,7 +35,7 @@
 milk::Game::Game()
 {
     initialized_ = false;
-    isRunning_ = false;
+    running_ = false;
 }
 
 milk::Game::~Game() = default;
@@ -69,7 +69,6 @@ void milk::Game::init(std::string configFilepath)
     unsigned int vwidth = config["vwidth"];
     unsigned int vheight = config["vheight"];
     bool fullscreen = config["fullscreen"];
-    std::string assetRootDir = config["resourceRootDir"];
     std::string entryScene = config["entryScene"];
 
     window_ = &adapter::WindowAdapter::getInstance();
@@ -77,7 +76,9 @@ void milk::Game::init(std::string configFilepath)
     if (!window_->init(title, width, height, vwidth, vheight, fullscreen))
         return;
 
-    textureCache_ = std::make_unique<adapter::TextureCacheAdapter>(*window_->rendererAdapter().sdlRenderer(), assetRootDir);
+    fileSystem_ = &adapter::FilesystemAdapter::getInstance();
+
+    textureCache_ = &adapter::TextureCacheAdapter::getInstance();
 
     if (!textureCache_->init())
     {
@@ -85,12 +86,9 @@ void milk::Game::init(std::string configFilepath)
         return;
     }
 
-    fileSystem_ = &adapter::FilesystemAdapter::getInstance();
-    fileSystem_->init(assetRootDir);
+    actorTemplateCache_ = &adapter::ActorTemplateCacheAdapter::getInstance();
 
     sceneLoader_ = std::make_unique<adapter::SceneLoaderAdapter>(*this);
-
-    actorTemplateCache_ = std::make_unique<adapter::ActorTemplateCacheAdapter>(assetRootDir, *fileSystem_);
 
     Keyboard::initialize();
 
@@ -117,7 +115,7 @@ int milk::Game::run()
     if (!initialized_)
         return MILK_FAIL;
 
-    isRunning_ = true;
+    running_ = true;
 
     const int MILLISECONDS_PER_FRAME = 1000 / 60; // = 16
 
@@ -125,7 +123,7 @@ int milk::Game::run()
 
     try
     {
-        while (isRunning_)
+        while (running_)
         {
             frameCapTimer.start();
 
@@ -287,13 +285,6 @@ sol::state& milk::Game::luaState()
     return luaState_;
 }
 
-#ifdef _DEBUG
-milk::DebugTools& milk::Game::debugTools() const
-{
-    return *debugTools_;
-}
-#endif
-
 void milk::Game::loadScene(const std::string& name)
 {
     sceneToLoad_ = name;
@@ -322,5 +313,5 @@ void milk::Game::shutDown()
 
 void milk::Game::quit()
 {
-    isRunning_ = false;
+    running_ = false;
 }

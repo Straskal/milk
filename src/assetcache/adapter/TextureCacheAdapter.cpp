@@ -7,11 +7,7 @@
 
 #include "graphics/Texture.h"
 
-milk::adapter::TextureCacheAdapter::TextureCacheAdapter(SDL_Renderer& sdlRenderer, const std::string& rootDir)
-        : AssetCache(rootDir),
-          sdlRenderer_(sdlRenderer)
-{
-}
+#include "window/adapter/RendererAdapter.h"
 
 bool milk::adapter::TextureCacheAdapter::init()
 {
@@ -33,7 +29,7 @@ std::shared_ptr<milk::Texture> milk::adapter::TextureCacheAdapter::load(const st
     if (found != textureCache_.end())
         return found->second;
 
-    auto sdlSurface = IMG_Load(getPath(textureName).c_str());
+    auto sdlSurface = IMG_Load(textureName.c_str());
 
     if (sdlSurface == nullptr)
     {
@@ -41,7 +37,9 @@ std::shared_ptr<milk::Texture> milk::adapter::TextureCacheAdapter::load(const st
         return nullptr;
     }
 
-    auto sdlTexture = SDL_CreateTextureFromSurface(&sdlRenderer_, sdlSurface);
+    auto sdlRenderer = RendererAdapter::getInstance().sdlRenderer();
+
+    auto sdlTexture = SDL_CreateTextureFromSurface(sdlRenderer, sdlSurface);
 
     SDL_FreeSurface(sdlSurface);
 
@@ -59,19 +57,20 @@ std::shared_ptr<milk::Texture> milk::adapter::TextureCacheAdapter::load(const st
 
 void milk::adapter::TextureCacheAdapter::freeUnreferencedAssets()
 {
-    auto textureItr = textureCache_.begin();
-
-    while (textureItr != textureCache_.end())
+    auto it = textureCache_.cbegin();
+    while (it != textureCache_.cend())
     {
-        if (textureItr->second.use_count() == 0)
-            textureCache_.erase(textureItr->first);
-
-        textureItr++;
+        auto curr = it++;
+        if (textureCache_.find(curr->first) != textureCache_.cend())
+        {
+            textureCache_.erase(curr);
+        }
     }
 }
 
 void milk::adapter::TextureCacheAdapter::free()
 {
     textureCache_.clear();
+
     IMG_Quit();
 }

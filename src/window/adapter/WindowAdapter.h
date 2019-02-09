@@ -43,8 +43,6 @@ namespace milk
 
             Renderer& renderer() const override;
 
-            RendererAdapter& rendererAdapter() const;
-
             SDL_Window* sdlWindow() const;
 
             void free();
@@ -63,8 +61,6 @@ namespace milk
             bool fullscreen_;
 
             SDL_Window* sdlWindow_;
-
-            std::unique_ptr<RendererAdapter> rendererAdapter_;
         };
     }
 }

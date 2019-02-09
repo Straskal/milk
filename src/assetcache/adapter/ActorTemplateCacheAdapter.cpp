@@ -1,12 +1,6 @@
 #include "ActorTemplateCacheAdapter.h"
 
-#include "filesystem/Filesystem.h"
-
-milk::adapter::ActorTemplateCacheAdapter::ActorTemplateCacheAdapter(const std::string& rootDir, Filesystem& filesystem)
-        : AssetCache(rootDir),
-          filesystem_(filesystem)
-{
-}
+#include "filesystem/adapter/FilesystemAdapter.h"
 
 std::shared_ptr<json> milk::adapter::ActorTemplateCacheAdapter::load(const std::string& actorTemplateName)
 {
@@ -17,10 +11,7 @@ std::shared_ptr<json> milk::adapter::ActorTemplateCacheAdapter::load(const std::
 
     using json = nlohmann::json;
 
-    auto templateNameWithEx = actorTemplateName + ".json";
-
-    // TODO: File system already prepends rootDir_, but we still have it. Revisit.
-    auto templateContents = filesystem_.contents(templateNameWithEx);
+    auto templateContents = FilesystemAdapter::getInstance().contents(actorTemplateName);
     auto templateJson = json::parse(templateContents);
 
     templateCache_.insert(std::make_pair(actorTemplateName, std::make_shared<json>(templateJson)));

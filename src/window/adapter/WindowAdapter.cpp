@@ -11,8 +11,7 @@ milk::adapter::WindowAdapter::WindowAdapter()
           width_(0),
           height_(0),
           fullscreen_(false),
-          sdlWindow_(nullptr),
-          rendererAdapter_(nullptr)
+          sdlWindow_(nullptr)
 {
 }
 
@@ -55,9 +54,9 @@ bool milk::adapter::WindowAdapter::init(const std::string& title,
         return false;
     }
 
-    rendererAdapter_ = std::make_unique<RendererAdapter>();
+    auto& rendererAdapter = RendererAdapter::getInstance();
 
-    if (!rendererAdapter_->init(sdlWindow_, resolutionWidth, resolutionHeight))
+    if (!rendererAdapter.init(sdlWindow_, resolutionWidth, resolutionHeight))
     {
         SDL_DestroyWindow(sdlWindow_);
         return false;
@@ -108,22 +107,19 @@ void milk::adapter::WindowAdapter::toggleFullscreen()
 
 milk::Renderer& milk::adapter::WindowAdapter::renderer() const
 {
-    return *rendererAdapter_;
-}
-
-milk::adapter::RendererAdapter& milk::adapter::WindowAdapter::rendererAdapter() const
-{
-    return *rendererAdapter_;
+    return RendererAdapter::getInstance();
 }
 
 SDL_Window* milk::adapter::WindowAdapter::sdlWindow() const
 {
     SDL_assert(sdlWindow_ != nullptr);
+
     return sdlWindow_;
 }
 
 void milk::adapter::WindowAdapter::free()
 {
     SDL_DestroyWindow(sdlWindow_);
-    rendererAdapter_->free();
+
+    RendererAdapter::getInstance().free();
 }

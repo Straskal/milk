@@ -19,7 +19,11 @@ namespace milk
         class ActorTemplateCacheAdapter : public AssetCache<json>
         {
         public:
-            explicit ActorTemplateCacheAdapter(const std::string& rootDir, Filesystem& filesystem);
+            static ActorTemplateCacheAdapter& getInstance()
+            {
+                static ActorTemplateCacheAdapter instance;
+                return instance;
+            }
 
             std::shared_ptr<json> load(const std::string& actorTemplateName) override;
 
@@ -28,7 +32,8 @@ namespace milk
             void free();
 
         private:
-            Filesystem& filesystem_;
+            ActorTemplateCacheAdapter() = default;
+
             std::unordered_map<std::string, std::shared_ptr<json>> templateCache_;
         };
     }

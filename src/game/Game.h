@@ -76,11 +76,6 @@ namespace milk
         /// \returns the games lua state.
         sol::state& luaState();
 
-#ifdef _DEBUG
-        /// \returns the Game's debug tools if in debug mode.
-        DebugTools& debugTools() const;
-#endif
-
         /// Attempts to load the requested Scene.
         /// \param name
         void loadScene(const std::string& name);
@@ -93,13 +88,12 @@ namespace milk
 
         std::string sceneToLoad_;
         std::unique_ptr<Scene> scene_;
+        std::unique_ptr<adapter::SceneLoaderAdapter> sceneLoader_;
 
         adapter::WindowAdapter* window_;
         adapter::FilesystemAdapter* fileSystem_;
-
-        std::unique_ptr<adapter::SceneLoaderAdapter> sceneLoader_;
-        std::unique_ptr<adapter::TextureCacheAdapter> textureCache_;
-        std::unique_ptr<adapter::ActorTemplateCacheAdapter> actorTemplateCache_;
+        adapter::TextureCacheAdapter* textureCache_;
+        adapter::ActorTemplateCacheAdapter* actorTemplateCache_;
 
         sol::state luaState_;
 
@@ -112,7 +106,7 @@ namespace milk
 #endif
 
         bool initialized_;
-        bool isRunning_;
+        bool running_;
 
         void handleEvents();
         void update();

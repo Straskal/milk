@@ -16,14 +16,10 @@ namespace milk
                 return instance;
             }
 
-            void init(std::string rootDirectory);
-
             std::string contents(const std::string& filename) override;
 
         private:
-            FilesystemAdapter();
-
-            std::string rootDir_;
+            FilesystemAdapter() = default;
         };
     }
 }

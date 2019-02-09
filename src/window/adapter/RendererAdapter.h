@@ -14,7 +14,11 @@ namespace milk
         class RendererAdapter : public Renderer
         {
         public:
-            RendererAdapter();
+            static RendererAdapter& getInstance()
+            {
+                static RendererAdapter instance;
+                return instance;
+            }
 
             bool init(SDL_Window* sdlWindow,
                       unsigned int resolutionWidth,
@@ -40,6 +44,8 @@ namespace milk
             SDL_Renderer* sdlRenderer() const;
 
         private:
+            RendererAdapter();
+
             Resolution resolution_;
 
             SDL_Renderer* sdlRenderer_;

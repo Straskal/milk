@@ -2,11 +2,11 @@
     "version": 1,
     "name": "scene",
     "tilemap": {
-        "texture": "testtilemap.png",
+        "texture": "res/testtilemap.png",
         "width": 640,
         "height": 640,
         "tileSize": 64,
-        "tileSet": "testtileset.json",
+        "tileSet": "res/testtileset.json",
         "layers": [
             [
                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -29,7 +29,7 @@
                 "x": 100,
                 "y": 300
             },
-            "template": "player"
+            "template": "res/player.json"
         }
     ]
 }

@@ -5,8 +5,7 @@ local config = {
     vwidth = 640,
     vheight = 360,
     fullscreen = false,
-    resourceRootDir = "res",
-    entryScene = "scene.json"
+    entryScene = "res/scene.json"
 }
 
 return config

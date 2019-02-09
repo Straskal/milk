@@ -3,22 +3,10 @@
 #include "SDL_rwops.h"
 #include "SDL_types.h"
 
-milk::adapter::FilesystemAdapter::FilesystemAdapter()
-{
-    rootDir_ = "";
-}
-
-void milk::adapter::FilesystemAdapter::init(std::string rootDirectory)
-{
-    rootDir_ = std::move(rootDirectory);
-}
-
 std::string milk::adapter::FilesystemAdapter::contents(const std::string& filename)
 {
-    std::string path = rootDir_ + "/" + filename;
-
     SDL_RWops* rwops;
-    rwops = SDL_RWFromFile(path.c_str(), "r");
+    rwops = SDL_RWFromFile(filename.c_str(), "r");
 
     if (rwops == nullptr)
         return nullptr;
