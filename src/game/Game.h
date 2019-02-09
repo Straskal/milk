@@ -89,7 +89,6 @@ namespace milk
         void quit();
 
     private:
-        /// \param configFile: Path to the config file
         Game();
 
         std::string sceneToLoad_;
