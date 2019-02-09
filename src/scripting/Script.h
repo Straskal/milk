@@ -17,12 +17,12 @@ namespace milk
 {
     class Collision;
 
+    /// A Script allows an Actor to be controlled via Lua scripts.
     class Script : public ActorComponent
     {
     public:
         static const ComponentType type;
 
-        /// A Script allows an Actor to be controlled via Lua scripts.
         /// \param actor: The Actor that the Script is attached to
         /// \param scriptName: The name of the Lua script to attach to the Actor
         explicit Script(Actor& actor, const std::string& scriptName);

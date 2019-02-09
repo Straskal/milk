@@ -11,10 +11,10 @@ namespace milk
     class Collision;
     class Script;
 
+    /// Logic handles all Game specific logic through Lua scripts.
     class Logic
     {
     public:
-        /// Logic handles all Game specific logic through Lua scripts.
         /// \param luaState: A reference to the Game's Lua State.
         explicit Logic(sol::state& luaState);
 

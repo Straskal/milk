@@ -7,10 +7,10 @@ namespace milk
 {
     class Actor;
 
+    /// The Scene's Camera. The Camera only has a position because its size always matches the games virtual resolution.
     class Camera
     {
     public:
-        /// The Scene's Camera. The Camera only has a position because its size always matches the games virtual resolution.
         Camera();
 
         /// Set the cameras position.

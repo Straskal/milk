@@ -16,10 +16,10 @@ namespace milk
         MAX_COMPONENTS = 1 << 31
     };
 
+    /// An ActorComponent is the building block of an Actor's behavior.
     class ActorComponent
     {
     public:
-        /// An ActorComponent is the building block of an Actor's behavior.
         /// \param actor: The Actor that owns this ActorComponent
         explicit ActorComponent(Actor& actor);
 

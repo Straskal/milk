@@ -15,9 +15,9 @@ namespace milk
         RIGHT
     };
 
+    /// A Collision in the Physics world
     struct Collision
     {
-        /// A Collision in the Physics world
         /// \param actor: The Actor colliding with another actor
         /// \param other: The other Actor
         /// \param direction: The direction in which the two actors collided with eachother, from the perspective of the main actor

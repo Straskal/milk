@@ -5,6 +5,8 @@ struct SDL_Texture;
 
 namespace milk
 {
+    /// TODO: Not sure how I'd abstract this away. After, it would ONLY be width and height.
+    /// A Texture! Owns a pointer to the underlying SDL texture.
     class Texture
     {
     public:
@@ -12,13 +14,13 @@ namespace milk
 
         ~Texture();
 
-        // Get the raw SDL_Texture.
+        /// \returns et the raw SDL_Texture.
         SDL_Texture* get() const;
 
-        // Get texture width.
+        /// \returns the Texture's width.
         int width() const;
 
-        // Get texture height.
+        /// \returns the Texture's height.
         int height() const;
 
     private:

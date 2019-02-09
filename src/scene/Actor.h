@@ -12,12 +12,12 @@ namespace milk
     class ActorComponent;
     class Scene;
 
+    /// An actor is an object that exists within a scene.
+    /// An actor can range from a rock on the ground to a dragon boss monster.
+    /// Attach components to an actor in order to define it and give it behavior.
     class Actor
     {
     public:
-        /// An actor is an object that exists within a scene.
-        /// An actor can range from a rock on the ground to a dragon boss monster.
-        /// Attach components to an actor in order to define it and give it behavior.
         /// \param scene: The Scene that the Actor exists within
         /// \param id: The Actor's unique identifier
         /// \param name: The Actor's name

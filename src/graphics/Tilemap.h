@@ -12,6 +12,7 @@ namespace milk
 {
     class Texture;
 
+    /// A tile type.
     struct TileType
     {
         TileType(int x, int y, int size, bool coll, const std::string& n)
@@ -29,6 +30,7 @@ namespace milk
         // i.e. triggerable, opacity, animations.
     };
 
+    /// An instance of a TileType.
     struct TileInstance
     {
         TileInstance(TileType& tile, int x, int y)
@@ -44,7 +46,7 @@ namespace milk
         TileType& type;
     };
 
-
+    /// A layer of tiles in a Tilemap.
     struct TileLayer
     {
         ~TileLayer()
@@ -64,6 +66,7 @@ namespace milk
         }
     };
 
+    /// A Tilemap! Has Layers.. like Ogres.
     struct Tilemap
     {
         Tilemap()

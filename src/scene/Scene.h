@@ -17,11 +17,11 @@ namespace milk
     class ActorLoader;
     class Tilemap;
 
+    /// A Scene represents the current state that the game is in.
+    /// Some examples: Main menu, dungeon level, cinematic, turn based combat sequence, etc...
     class Scene
     {
     public:
-        /// A Scene represents the current state that the game is in.
-        /// Some examples: Main menu, dungeon level, cinematic, turn based combat sequence, etc...
         /// \param id: The Scene's unique indentifier
         /// \param name: The Scene's name
         /// \param actorLoader: The scene uses the ActorLoader when spawning Actors from templates

@@ -14,7 +14,7 @@ namespace milk
 {
     class Texture;
 
-    // All objects that are drawn to the screen do so via the Sprite component.
+    /// All objects that are drawn to the screen do so via the Sprite component.
     class Sprite : public ActorComponent
     {
     public:
@@ -22,39 +22,37 @@ namespace milk
 
         explicit Sprite(Actor& actor, const std::string& textureName);
 
-        ~Sprite() override = default;
-
-        // Load the sprite's texture.
+        /// Load the sprite's texture.
         void load(AssetCache<Texture>& textureLoader);
 
-        // Get the sprites texture.
+        /// \returns the Sprite's Texture.
         std::shared_ptr<Texture> texture() const;
 
-        // Center the sprite's origin.
+        /// Center the sprite's origin.
         void center();
 
-        // Set the sprite's source rectangle.
+        /// Set the sprite's source rectangle.
         void sourceRect(int x, int y, int width, int height);
 
-        // Get the sprite's source rectangle.
+        /// \returns the Sprite's source rectangle.
         Rectangle sourceRect() const;
 
-        // Get the sprite's destination rectangle.
+        /// \returns the Sprite's destination rectangle.
         Rectangle destinationRect() const;
 
-        // Flip the sprite horizontally.
+        /// Flip the sprite horizontally.
         void flipX();
 
-        // Returns true if the sprite is flipped horizontally.
+        /// Returns true if the sprite is flipped horizontally.
         bool flippedX();
 
-        // Flip the sprite vertically.
+        /// Flip the sprite vertically.
         void flipY();
 
-        // Returns true if the sprite is flipped vertically.
+        /// Returns true if the sprite is flipped vertically.
         bool flippedY();
 
-        // Returns the renderer flip states.
+        /// Returns the renderer flip states.
         int rendererFlip() const;
 
     private:
@@ -65,6 +63,7 @@ namespace milk
 
         Alignment alignment_;
 
+        // TODO: Make this go AWAY. This is SDL specific. Milk should define it's own flip bits, bro.
         Uint8 flip_;
     };
 }
