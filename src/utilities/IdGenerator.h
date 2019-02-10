@@ -11,14 +11,14 @@ namespace milk
         IdGenerator();
 
         // Get unique id.
-        unsigned int popId();
+        int popId();
 
         // Push id back onto stack for re use.
-        void pushId(unsigned int id);
+        void pushId(int id);
 
     private:
-        std::vector<unsigned int> availableIds_;
-        unsigned int count_;
+        std::vector<int> availableIds_;
+        int count_;
     };
 }
 

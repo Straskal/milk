@@ -22,10 +22,9 @@ namespace milk
     class Scene
     {
     public:
-        /// \param id: The Scene's unique indentifier
         /// \param name: The Scene's name
         /// \param actorLoader: The scene uses the ActorLoader when spawning Actors from templates
-        Scene(int id, const std::string& name, ActorLoader& actorLoader);
+        Scene(const std::string& name, ActorLoader& actorLoader);
 
         ~Scene();
 
@@ -77,15 +76,13 @@ namespace milk
     private:
         ActorLoader& actorLoader_;
 
-        int id_;
         std::string name_;
+        bool ended_;
 
         IdGenerator idGenerator_;
         Camera camera_;
 
         std::unique_ptr<Tilemap> tilemap_;
-
-        bool ended_;
 
         std::unordered_map<int, std::unique_ptr<Actor>> actorsById_;
         std::vector<std::unique_ptr<Actor>> actorsToSpawn_;

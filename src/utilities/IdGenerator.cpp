@@ -5,18 +5,18 @@ milk::IdGenerator::IdGenerator()
 {
 }
 
-unsigned int milk::IdGenerator::popId()
+int milk::IdGenerator::popId()
 {
     if (availableIds_.empty())
         return count_++;
 
-    unsigned int id = availableIds_.back();
+    int id = availableIds_.back();
     availableIds_.pop_back();
 
     return id;
 }
 
-void milk::IdGenerator::pushId(unsigned int id)
+void milk::IdGenerator::pushId(int id)
 {
     for (auto& it : availableIds_)
     {

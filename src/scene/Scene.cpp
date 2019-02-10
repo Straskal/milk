@@ -10,10 +10,9 @@
 
 #include "window/Window.h"
 
-milk::Scene::Scene(int id, const std::string& name, ActorLoader& actorLoader)
-        : actorLoader_(actorLoader),
-          id_(id),
-          name_(name),
+milk::Scene::Scene(const std::string& name, ActorLoader& actorLoader)
+        : name_(name),
+          actorLoader_(actorLoader),
           tilemap_(nullptr),
           ended_(false)
 {
@@ -91,7 +90,7 @@ void milk::Scene::tilemap(std::unique_ptr<milk::Tilemap> tilemap)
 
 milk::Rectangle milk::Scene::bounds() const
 {
-    return {0, 0, tilemap_->width, tilemap_->height};
+    return Rectangle{0, 0, tilemap_->width, tilemap_->height};
 }
 
 void milk::Scene::end()
@@ -126,7 +125,10 @@ milk::Actor* milk::Scene::pollDestroyed()
     }
 
     if (lastPolledId > -1)
+    {
         actorsById_.erase(lastPolledId);
+        idGenerator_.pushId(lastPolledId);
+    }
 
     int destroyedId = actorsToDestroy_.back();
 
