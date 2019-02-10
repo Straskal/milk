@@ -1,5 +1,6 @@
 #include "Scene.h"
 
+#include <algorithm>
 #include <memory>
 
 #include "Actor.h"
@@ -47,7 +48,10 @@ milk::Actor* milk::Scene::spawnActor(const std::string& actorName, Vector2 posit
 
 bool milk::Scene::destroyActor(int id)
 {
-    if (actorsById_.find(id) == actorsById_.end())
+    if (actorsById_.find(id) == actorsById_.end()
+        && std::find_if(actorsToSpawn_.begin(),
+                        actorsToSpawn_.end(),
+                        [&](const std::unique_ptr<Actor>& actor) -> bool { return actor->id() == id; }) == actorsToSpawn_.end())
         return false;
 
     actorsToDestroy_.emplace_back(id);
