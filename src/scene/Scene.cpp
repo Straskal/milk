@@ -107,15 +107,15 @@ milk::Actor* milk::Scene::pollSpawned()
     if (actorsToSpawn_.empty())
         return nullptr;
 
-    auto& pSpawned = actorsToSpawn_.back();
+    auto& spawned = actorsToSpawn_.back();
 
-    auto pSpawnedRaw = pSpawned.get();
+    auto pSpawned = spawned.get();
 
-    actorsById_.insert(std::make_pair(pSpawned->id(), std::move(pSpawned)));
+    actorsById_.insert(std::make_pair(spawned->id(), std::move(spawned)));
 
     actorsToSpawn_.pop_back();
 
-    return pSpawnedRaw;
+    return pSpawned;
 }
 
 milk::Actor* milk::Scene::pollDestroyed()
