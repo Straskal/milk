@@ -12,6 +12,11 @@ namespace milk
             {
                 scene.camera().position(position.x, position.y);
             }
+
+            Actor* spawn(Scene& scene, const std::string& name, const Vector2& position, const std::string& actorTemplateName)
+            {
+                return scene.spawnActor(name, position, actorTemplateName);
+            }
         }
     }
 }

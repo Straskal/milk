@@ -29,6 +29,7 @@ void milk::LuaApi::init(sol::state& luaState)
                       "R", SDLK_r,
                       "S", SDLK_s,
                       "W", SDLK_w,
+                      "Space", SDLK_SPACE,
                       "Tilde", SDLK_BACKQUOTE);
 
     // Actor
@@ -66,11 +67,12 @@ void milk::LuaApi::init(sol::state& luaState)
     // Scene
     /////////////////////////////////////////////////////////////////
     luaState.new_usertype<Scene>("Scene",
-                                 "set_cam_pos", &lua::scene::setCameraPosition);
+                                 "set_cam_pos", &lua::scene::setCameraPosition,
+                                 "spawn", &lua::scene::spawn);
 
     // Vector2D
     /////////////////////////////////////////////////////////////////
-    luaState.new_usertype<Vector2>("Vector2D",
+    luaState.new_usertype<Vector2>("Vector2",
                                     sol::constructors<Vector2(), Vector2(int, int)>(),
                                     "x", &Vector2::x,
                                     "y", &Vector2::y,

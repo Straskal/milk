@@ -16,7 +16,12 @@ function player:update()
 		Game:load_scene('res/scene.json')
 	end
 
-	local inputvec = Vector2D.new(0, 0)
+	if Input.get_key_pressed(Keys.Space) then
+		local pos = self.actor.position
+		self.scene:spawn('anothersteve', Vector2.new(pos.x + 70, pos.y + 70), 'res/player.json')
+	end
+
+	local inputvec = Vector2.new(0, 0)
 
 	if Input.get_key(Keys.W) then
 		inputvec.y = -1
@@ -41,7 +46,7 @@ function player:update()
 		end
 	end
 
-	if (inputvec == Vector2D.new(0, 0)) then
+	if (inputvec == Vector2.new(0, 0)) then
 		self.actor:set_animation('idle')
 	else
 		self.actor:set_animation('run')
@@ -62,7 +67,7 @@ function player:destroyed()
 end
 
 function player:late_update()
-	local clamped_cam_pos = Vector2D.new()
+	local clamped_cam_pos = Vector2.new()
 	clamped_cam_pos.x = Mathf.clamp(self.actor.position.x, 320, 320)
 	clamped_cam_pos.y = Mathf.clamp(self.actor.position.y, 180, 360)
 

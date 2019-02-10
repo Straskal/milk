@@ -1,6 +1,8 @@
 #ifndef LUASCENE_H
 #define LUASCENE_H
 
+#include <string>
+
 namespace milk
 {
     class Actor;
@@ -12,6 +14,8 @@ namespace milk
         namespace scene
         {
             void setCameraPosition(Scene& scene, Vector2& position);
+
+            Actor* spawn(Scene& scene, const std::string& name, const Vector2& position, const std::string& actorTemplateName);
         }
     }
 }
