@@ -14,13 +14,13 @@ void milk::Velocity::value(float x, float y)
     value_.y = y;
 }
 
-void milk::Velocity::value(Vector2d velocity)
+void milk::Velocity::value(Vector2 velocity)
 {
     value_.x = velocity.x;
     value_.y = velocity.y;
 }
 
-milk::Vector2d milk::Velocity::value() const
+milk::Vector2 milk::Velocity::value() const
 {
     return value_;
 }

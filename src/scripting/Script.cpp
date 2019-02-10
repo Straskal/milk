@@ -8,7 +8,7 @@
 const milk::ComponentType milk::Script::type = SCRIPT;
 
 milk::Script::Script(Actor& actor, const std::string& scriptName)
-        : ActorComponent::ActorComponent(actor),
+        : ActorComponent(actor),
           scriptName_(scriptName)
 {
 }

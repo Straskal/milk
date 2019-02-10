@@ -21,7 +21,7 @@ milk::Scene::Scene(int id, const std::string& name, ActorLoader& actorLoader)
 
 milk::Scene::~Scene() = default;
 
-milk::Actor* milk::Scene::spawnActor(const std::string& actorName, milk::Vector2d position)
+milk::Actor* milk::Scene::spawnActor(const std::string& actorName, milk::Vector2 position)
 {
     int id = idGenerator_.popId();
 
@@ -37,7 +37,7 @@ milk::Actor* milk::Scene::spawnActor(const std::string& actorName, milk::Vector2
     return pActor;
 }
 
-milk::Actor* milk::Scene::spawnActor(const std::string& actorName, Vector2d position, const std::string& templateName)
+milk::Actor* milk::Scene::spawnActor(const std::string& actorName, Vector2 position, const std::string& templateName)
 {
     auto pActor = spawnActor(actorName, position);
 

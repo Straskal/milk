@@ -36,7 +36,7 @@ void milk::BoxCollider::center()
 
 void milk::BoxCollider::updateBBox()
 {
-    Vector2d actorPosition = actor_.position();
+    Vector2 actorPosition = actor_.position();
 
     // Update the old bounding box before invalidating the current one.
     oldRect_ = rect_;

@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "math/Vector2d.h"
+#include "math/Vector2.h"
 
 namespace milk
 {
@@ -15,7 +15,7 @@ namespace milk
         {
             std::string name(Actor& actor);
 
-            Vector2d position(Actor& actor);
+            Vector2 position(Actor& actor);
 
             void move(Actor& actor, float x, float y);
 

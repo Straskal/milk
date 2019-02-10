@@ -2,7 +2,7 @@
 
 #include "graphics/Texture.h"
 
-#include "math/Vector2d.h"
+#include "math/Vector2.h"
 
 #include "scene/Actor.h"
 
@@ -57,7 +57,7 @@ milk::Rectangle milk::Sprite::sourceRect() const
 
 milk::Rectangle milk::Sprite::destinationRect() const
 {
-    Vector2d actorPosition = actor_.position();
+    Vector2 actorPosition = actor_.position();
 
     Rectangle destinationRect;
     destinationRect.width = sourceRect_.width;

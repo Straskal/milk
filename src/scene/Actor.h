@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "math/Vector2d.h"
+#include "math/Vector2.h"
 
 namespace milk
 {
@@ -22,7 +22,7 @@ namespace milk
         /// \param id: The Actor's unique identifier
         /// \param name: The Actor's name
         /// \param position: The Actor's position
-        Actor(Scene& scene, int id, const std::string& name, const Vector2d& position);
+        Actor(Scene& scene, int id, const std::string& name, const Vector2& position);
 
         ~Actor();
 
@@ -36,7 +36,7 @@ namespace milk
         std::string name() const;
 
         // \returns the Actor's position.
-        Vector2d position() const;
+        Vector2 position() const;
 
         /// Sets the Actor's position.
         /// \param x: Actor's x coordinate
@@ -81,7 +81,7 @@ namespace milk
 
         int id_;
         std::string name_;
-        Vector2d position_;
+        Vector2 position_;
         uint32_t componentBitmask_;
 
         std::unordered_map<int, std::unique_ptr<ActorComponent>> componentsByType_;

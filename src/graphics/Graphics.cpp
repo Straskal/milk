@@ -26,7 +26,7 @@ void milk::Graphics::render(milk::Scene& scene)
 
     // camera has to handle all of this stuff.
     // if we want the camera to clamp from a script, this already has to be calculated, or the clamp will be overridden
-    Vector2d camOffset = {camera.position().x - screenSize.width * 0.5f, camera.position().y - screenSize.height * 0.5f};
+    Vector2 camOffset = {camera.position().x - screenSize.width * 0.5f, camera.position().y - screenSize.height * 0.5f};
 
     auto tilemap = scene.tilemap();
 

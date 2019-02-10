@@ -1,7 +1,7 @@
 #ifndef MILK_CAMERA_H
 #define MILK_CAMERA_H
 
-#include "math/Vector2d.h"
+#include "math/Vector2.h"
 
 namespace milk
 {
@@ -20,10 +20,10 @@ namespace milk
 
         /// Get the Camera's position.
         /// \return: Cameras position.
-        Vector2d position() const;
+        Vector2 position() const;
 
     private:
-        Vector2d position_;
+        Vector2 position_;
     };
 }
 

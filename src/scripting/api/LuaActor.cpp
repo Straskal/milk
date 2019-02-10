@@ -16,7 +16,7 @@ namespace milk
                 return actor.name();
             }
 
-            Vector2d position(Actor& actor)
+            Vector2 position(Actor& actor)
             {
                 return actor.position();
             }

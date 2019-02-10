@@ -11,7 +11,7 @@ void milk::Camera::position(float x, float y)
     position_.y = y;
 }
 
-milk::Vector2d milk::Camera::position() const
+milk::Vector2 milk::Camera::position() const
 {
     return position_;
 }

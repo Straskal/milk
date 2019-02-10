@@ -2,7 +2,7 @@
 
 #include "ActorComponent.h"
 
-milk::Actor::Actor(Scene& scene, int id, const std::string& name, const Vector2d& position)
+milk::Actor::Actor(Scene& scene, int id, const std::string& name, const Vector2& position)
         : scene_(scene),
           id_(id),
           name_(name),
@@ -28,7 +28,7 @@ std::string milk::Actor::name() const
     return name_;
 }
 
-milk::Vector2d milk::Actor::position() const
+milk::Vector2 milk::Actor::position() const
 {
     return position_;
 }

@@ -19,13 +19,13 @@ void milk::Physics::update()
 {
     for (auto& velItr : velocityByActorId_)
     {
-        Vector2d velocity = velItr.second->value();
+        Vector2 velocity = velItr.second->value();
 
-        if (velocity == Vector2d(0, 0))
+        if (velocity == Vector2(0, 0))
             continue;
 
         Actor& actor = velItr.second->actor();
-        Vector2d oldActorPosition = actor.position();
+        Vector2 oldActorPosition = actor.position();
 
         auto newPos = actor.position() + velocity;
         actor.position(newPos.x, newPos.y);

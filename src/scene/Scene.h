@@ -33,14 +33,14 @@ namespace milk
         /// \param actorName: The Actor's name
         /// \param position: The Actor's position
         /// \returns newly spawned Actor
-        Actor* spawnActor(const std::string& actorName, Vector2d position);
+        Actor* spawnActor(const std::string& actorName, Vector2 position);
 
         /// Spawns an Actor with the given name, position, and template.
         /// \param actorName: The Actor's name
         /// \param position: The Actor's position
         /// \param templateName: The Actor's component template
         /// \returns newly spawned Actor
-        Actor* spawnActor(const std::string& actorName, Vector2d position, const std::string& templateName);
+        Actor* spawnActor(const std::string& actorName, Vector2 position, const std::string& templateName);
 
         /// Attempts to destroy an Actor with the given id.
         /// \param id: The id of the Actor to destroy

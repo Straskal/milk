@@ -4,7 +4,7 @@
 #include "scene/ActorComponent.h"
 
 #include "math/Rectangle.h"
-#include "math/Vector2d.h"
+#include "math/Vector2.h"
 
 #include "utilities/Alignment.h"
 
@@ -66,7 +66,7 @@ namespace milk
         Rectangle rect_;
         Rectangle oldRect_;
 
-        Vector2d offset_;
+        Vector2 offset_;
 
         SpatialPartitionGrid* grid_;
 

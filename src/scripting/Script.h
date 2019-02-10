@@ -49,6 +49,7 @@ namespace milk
 
     private:
         std::string scriptName_;
+
         sol::table luaScript_;
     };
 }

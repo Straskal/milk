@@ -57,7 +57,7 @@ set(MILK_SRC_FILES
         # math
         math/Mathf.h
         math/Rectangle.h
-        math/Vector2d.h
+        math/Vector2.h
 
         # physics
         physics/BoxCollider.cpp
@@ -111,7 +111,7 @@ set(MILK_SRC_FILES
         window/adapter/RendererAdapter.cpp
         window/adapter/RendererAdapter.h
         window/adapter/WindowAdapter.cpp
-        window/adapter/WindowAdapter.h)
+        window/adapter/WindowAdapter.h math/Matrix3.h)
 
 add_library(milklib ${MILK_SRC_FILES})
 

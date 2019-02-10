@@ -3,7 +3,7 @@
 
 #include "scene/ActorComponent.h"
 
-#include "math/Vector2d.h"
+#include "math/Vector2.h"
 
 namespace milk
 {
@@ -20,13 +20,13 @@ namespace milk
         void value(float x, float y);
 
         /// Sets the velocity.
-        void value(Vector2d velocity);
+        void value(Vector2 velocity);
 
         /// \returns the velocity.
-        Vector2d value() const;
+        Vector2 value() const;
 
     private:
-        Vector2d value_;
+        Vector2 value_;
     };
 }
 
