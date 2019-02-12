@@ -1,29 +1,36 @@
 #ifndef MILK_CAMERA_H
 #define MILK_CAMERA_H
 
+#include "math/Matrix3.h"
 #include "math/Vector2.h"
 
 namespace milk
 {
     class Actor;
 
-    /// The Scene's Camera. The Camera only has a position because its size always matches the games virtual resolution.
+    /// A Camera! The Camera only has a position because its size always matches the games resolution.
     class Camera
     {
     public:
         Camera();
 
-        /// Set the cameras position.
+        /// Set the Cameras position.
         /// \param x: x coordinate
         /// \param y: y coordinate
         void position(float x, float y);
 
-        /// Get the Camera's position.
-        /// \return: Cameras position.
+        /// \returns the Cameras position.
         Vector2 position() const;
 
+        /// \returns the Cameras matrix transformation
+        Matrix3 transformation();
+
     private:
+        bool dirty_;
+
         Vector2 position_;
+
+        Matrix3 transformation_;
     };
 }
 

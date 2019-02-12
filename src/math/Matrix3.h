@@ -1,8 +1,6 @@
 #ifndef MILK_MATRIX3_H
 #define MILK_MATRIX3_H
 
-#include "Vector2.h"
-
 namespace milk
 {
     struct Matrix3
@@ -39,16 +37,26 @@ namespace milk
                            0.0f, 1.0f, 0.0f,
                            0.0f, 0.0f, 1.0f};
         }
+
+        static Matrix3 createTranslation(float x, float y)
+        {
+            auto translation = Matrix3::identity();
+
+            translation.m13 = x;
+            translation.m23 = y;
+
+            return translation;
+        }
     };
 
-    bool operator==(const Matrix3& m1, const Matrix3& m2)
+    inline bool operator==(const Matrix3& m1, const Matrix3& m2)
     {
         return m1.m11 == m2.m11 && m1.m12 == m2.m12 && m1.m13 == m2.m13
             && m1.m21 == m2.m21 && m1.m22 == m2.m22 && m1.m23 == m2.m23
             && m1.m31 == m2.m31 && m1.m32 == m2.m32 && m1.m33 == m2.m33;
     }
 
-    Matrix3 operator*(const Matrix3& m1, const Matrix3& m2)
+    inline Matrix3 operator*(const Matrix3& m1, const Matrix3& m2)
     {
         Matrix3 matrix;
 

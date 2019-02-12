@@ -18,7 +18,7 @@ namespace milk
         class WindowAdapter : public Window
         {
         public:
-            static WindowAdapter& getInstance()
+            static WindowAdapter& instance()
             {
                 static WindowAdapter instance;
                 return instance;

@@ -10,7 +10,7 @@ namespace milk
         class FilesystemAdapter : public Filesystem
         {
         public:
-            static FilesystemAdapter& getInstance()
+            static FilesystemAdapter& instance()
             {
                 static FilesystemAdapter instance;
                 return instance;

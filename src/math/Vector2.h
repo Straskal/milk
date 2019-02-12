@@ -3,6 +3,8 @@
 
 #include <cmath>
 
+#include "Matrix3.h"
+
 namespace milk
 {
     struct Vector2
@@ -74,6 +76,12 @@ namespace milk
         Vector2 normalize()
         {
             return *this / magnitude();
+        }
+
+        static Vector2 transform(const Vector2& v, const Matrix3& m)
+        {
+            return Vector2{(v.x * m.m11) + (v.y * m.m12) + m.m13,
+                           (v.x * m.m21) + (v.y * m.m22) + m.m23};
         }
     };
 }

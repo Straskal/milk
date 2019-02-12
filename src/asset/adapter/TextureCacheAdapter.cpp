@@ -37,7 +37,7 @@ std::shared_ptr<milk::Texture> milk::adapter::TextureCacheAdapter::load(const st
         return nullptr;
     }
 
-    auto sdlRenderer = RendererAdapter::getInstance().sdlRenderer();
+    auto sdlRenderer = RendererAdapter::instance().sdlRenderer();
 
     auto sdlTexture = SDL_CreateTextureFromSurface(sdlRenderer, sdlSurface);
 

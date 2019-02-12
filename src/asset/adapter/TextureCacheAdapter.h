@@ -17,7 +17,7 @@ namespace milk
         class TextureCacheAdapter : public AssetCache<Texture>
         {
         public:
-            static TextureCacheAdapter& getInstance()
+            static TextureCacheAdapter& instance()
             {
                 static TextureCacheAdapter instance;
                 return instance;

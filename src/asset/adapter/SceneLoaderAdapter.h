@@ -12,7 +12,7 @@ namespace milk
         class SceneLoaderAdapter : public SceneLoader
         {
         public:
-            static SceneLoaderAdapter& getInstance()
+            static SceneLoaderAdapter& instance()
             {
                 static SceneLoaderAdapter instance;
                 return instance;

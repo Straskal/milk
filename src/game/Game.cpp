@@ -72,12 +72,12 @@ void milk::Game::init(std::string configFilepath)
     bool fullscreen = config["fullscreen"];
     std::string entryScene = config["entryScene"];
 
-    window_ = &adapter::WindowAdapter::getInstance();
+    window_ = &adapter::WindowAdapter::instance();
 
     if (!window_->init(title, width, height, vwidth, vheight, fullscreen))
         return;
 
-    renderer_ = &adapter::RendererAdapter::getInstance();
+    renderer_ = &adapter::RendererAdapter::instance();
 
     if (!renderer_->init(window_->sdlWindow(), vwidth, vheight))
     {
@@ -85,7 +85,7 @@ void milk::Game::init(std::string configFilepath)
         return;
     }
 
-    textureCache_ = &adapter::TextureCacheAdapter::getInstance();
+    textureCache_ = &adapter::TextureCacheAdapter::instance();
 
     if (!textureCache_->init())
     {
@@ -94,10 +94,10 @@ void milk::Game::init(std::string configFilepath)
         return;
     }
 
-    fileSystem_ = &adapter::FilesystemAdapter::getInstance();
-    sceneLoader_ = &adapter::SceneLoaderAdapter::getInstance();
-    actorLoader_ = &adapter::ActorLoaderAdapter::getInstance();
-    actorTemplateCache_ = &adapter::ActorTemplateCacheAdapter::getInstance();
+    fileSystem_ = &adapter::FilesystemAdapter::instance();
+    sceneLoader_ = &adapter::SceneLoaderAdapter::instance();
+    actorLoader_ = &adapter::ActorLoaderAdapter::instance();
+    actorTemplateCache_ = &adapter::ActorTemplateCacheAdapter::instance();
 
     Keyboard::initialize();
 

@@ -19,7 +19,7 @@ namespace milk
         class ActorTemplateCacheAdapter : public AssetCache<json>
         {
         public:
-            static ActorTemplateCacheAdapter& getInstance()
+            static ActorTemplateCacheAdapter& instance()
             {
                 static ActorTemplateCacheAdapter instance;
                 return instance;

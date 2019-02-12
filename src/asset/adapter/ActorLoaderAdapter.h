@@ -12,7 +12,7 @@ namespace milk
         class ActorLoaderAdapter : public ActorLoader
         {
         public:
-            static ActorLoaderAdapter& getInstance()
+            static ActorLoaderAdapter& instance()
             {
                 static ActorLoaderAdapter instance;
                 return instance;

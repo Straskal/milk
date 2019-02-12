@@ -11,7 +11,7 @@ std::shared_ptr<json> milk::adapter::ActorTemplateCacheAdapter::load(const std::
 
     using json = nlohmann::json;
 
-    auto templateContents = FilesystemAdapter::getInstance().contents(actorTemplateName);
+    auto templateContents = FilesystemAdapter::instance().contents(actorTemplateName);
     auto templateJson = json::parse(templateContents);
 
     templateCache_.insert(std::make_pair(actorTemplateName, std::make_shared<json>(templateJson)));

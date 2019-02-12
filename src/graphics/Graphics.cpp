@@ -24,9 +24,7 @@ void milk::Graphics::render(milk::Scene& scene)
 
     auto screenSize = renderer_.resolution();
 
-    // camera has to handle all of this stuff.
-    // if we want the camera to clamp from a script, this already has to be calculated, or the clamp will be overridden
-    Vector2 camOffset = {camera.position().x - screenSize.width * 0.5f, camera.position().y - screenSize.height * 0.5f};
+    Matrix3 camTransform = camera.transformation();
 
     auto tilemap = scene.tilemap();
 
@@ -37,8 +35,12 @@ void milk::Graphics::render(milk::Scene& scene)
             for (auto& tile : layer->tiles)
             {
                 Rectangle destinationRect;
-                destinationRect.x = tile->x - (int)camOffset.x;
-                destinationRect.y = tile->y - (int)camOffset.y;
+
+                Vector2 destVec = Vector2{(float)tile->x, (float)tile->y};
+                destVec = Vector2::transform(destVec, camTransform);
+
+                destinationRect.x = (int)destVec.x;
+                destinationRect.y = (int)destVec.y;
                 destinationRect.width = tile->type.sourceRect.width;
                 destinationRect.height = tile->type.sourceRect.height;
 
@@ -57,8 +59,12 @@ void milk::Graphics::render(milk::Scene& scene)
         auto texture = it.second->texture();
         auto sourceRect = it.second->sourceRect();
         auto destinationRect = it.second->destinationRect();
-        destinationRect.x -= (int)camOffset.x;
-        destinationRect.y -= (int)camOffset.y;
+
+        Vector2 destVec = Vector2{(float)destinationRect.x, (float)destinationRect.y};
+        destVec = Vector2::transform(destVec, camTransform);
+
+        destinationRect.x = (int)destVec.x;
+        destinationRect.y = (int)destVec.y;
 
         renderer_.draw(*texture, sourceRect, destinationRect, it.second->rendererFlip());
     }

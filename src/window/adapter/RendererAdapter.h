@@ -14,7 +14,7 @@ namespace milk
         class RendererAdapter : public Renderer
         {
         public:
-            static RendererAdapter& getInstance()
+            static RendererAdapter& instance()
             {
                 static RendererAdapter instance;
                 return instance;
