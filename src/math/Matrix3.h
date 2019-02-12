@@ -31,24 +31,12 @@ namespace milk
             this->m33 = m33;
         }
 
-        static Matrix3 identity()
-        {
-            return Matrix3{1.0f, 0.0f, 0.0f,
-                           0.0f, 1.0f, 0.0f,
-                           0.0f, 0.0f, 1.0f};
-        }
+        static Matrix3 identity();
 
-        static Matrix3 createTranslation(float x, float y)
-        {
-            auto translation = Matrix3::identity();
-
-            translation.m13 = x;
-            translation.m23 = y;
-
-            return translation;
-        }
+        static Matrix3 createTranslation(float x, float y);
     };
 
+    // Global operators
     inline bool operator==(const Matrix3& m1, const Matrix3& m2)
     {
         return m1.m11 == m2.m11 && m1.m12 == m2.m12 && m1.m13 == m2.m13
@@ -73,6 +61,23 @@ namespace milk
         matrix.m33 = (m1.m31 * m2.m13) + (m1.m32 * m2.m23) + (m1.m33 * m2.m33);
 
         return matrix;
+    }
+
+    inline Matrix3 Matrix3::identity()
+    {
+        return Matrix3{1.0f, 0.0f, 0.0f,
+                       0.0f, 1.0f, 0.0f,
+                       0.0f, 0.0f, 1.0f};
+    }
+
+    inline Matrix3 Matrix3::createTranslation(float x, float y)
+    {
+        auto translation = Matrix3::identity();
+
+        translation.m13 = x;
+        translation.m23 = y;
+
+        return translation;
     }
 }
 

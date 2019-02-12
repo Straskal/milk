@@ -73,13 +73,13 @@ void milk::LuaApi::init(sol::state& luaState)
     // Vector2D
     /////////////////////////////////////////////////////////////////
     luaState.new_usertype<Vector2>("Vector2",
-                                    sol::constructors<Vector2(), Vector2(int, int)>(),
-                                    "x", &Vector2::x,
-                                    "y", &Vector2::y,
-                                    "magnitude", &Vector2::magnitude,
-                                    "normalize", &Vector2::normalize,
-                                    sol::meta_function::equal_to, &Vector2::operator==,
-                                    sol::meta_function::multiplication, &Vector2::operator*);
+                                   sol::constructors<Vector2(), Vector2(int, int)>(),
+                                   "x", &Vector2::x,
+                                   "y", &Vector2::y,
+                                   "magnitude", &Vector2::magnitude,
+                                   "normalize", &Vector2::normalize,
+                                   sol::meta_function::addition, sol::resolve<Vector2(const Vector2&, const Vector2&)>(milk::operator+),
+                                   sol::meta_function::multiplication, sol::resolve<Vector2(const Vector2&, float)>(milk::operator*));
 
     // Window
     /////////////////////////////////////////////////////////////////

@@ -24,66 +24,81 @@ namespace milk
             y = b;
         }
 
-        Vector2& operator*=(float scalar)
-        {
-            x *= scalar;
-            y *= scalar;
+        Vector2& operator*=(float scalar);
 
-            return (*this);
-        }
+        Vector2& operator/=(float scalar);
 
-        Vector2& operator/=(float scalar)
-        {
-            x /= scalar;
-            y /= scalar;
+        Vector2& operator+=(Vector2 v);
 
-            return (*this);
-        }
+        float magnitude();
 
-        Vector2& operator+=(Vector2 v)
-        {
-            x += v.x;
-            y += v.y;
+        Vector2 normalize();
 
-            return (*this);
-        }
-
-        bool operator==(const Vector2& v2)
-        {
-            return x == v2.x && y == v2.y;
-        }
-
-        Vector2 operator+(const Vector2& v2)
-        {
-            return {x + v2.x, y + v2.y};
-        }
-
-        Vector2 operator*(float s)
-        {
-            return {x * s, y * s};
-        }
-
-        Vector2 operator/(float s)
-        {
-            return {x / s, y / s};
-        }
-
-        float magnitude()
-        {
-            return std::sqrt(x * x + y * y);
-        }
-
-        Vector2 normalize()
-        {
-            return *this / magnitude();
-        }
-
-        static Vector2 transform(const Vector2& v, const Matrix3& m)
-        {
-            return Vector2{(v.x * m.m11) + (v.y * m.m12) + m.m13,
-                           (v.x * m.m21) + (v.y * m.m22) + m.m23};
-        }
+        static Vector2 transform(const Vector2& v, const Matrix3& m);
     };
+
+    // Global operator overloads
+    inline bool operator==(const Vector2& v1, const Vector2& v2)
+    {
+        return v1.x == v2.x && v1.y == v2.y;
+    }
+
+    inline Vector2 operator+(const Vector2& v1, const Vector2& v2)
+    {
+        return Vector2{v1.x + v2.x, v1.y + v2.y};
+    }
+
+    inline Vector2 operator*(const Vector2& v, float s)
+    {
+        return Vector2{v.x * s, v.y * s};
+    }
+
+    inline Vector2 operator/(const Vector2& v, float s)
+    {
+        return Vector2{v.x / s, v.y / s};
+    }
+
+    // Member operator overloads
+    inline Vector2& Vector2::operator*=(float scalar)
+    {
+        x *= scalar;
+        y *= scalar;
+
+        return (*this);
+    }
+
+    inline Vector2& Vector2::operator/=(float scalar)
+    {
+        x /= scalar;
+        y /= scalar;
+
+        return (*this);
+    }
+
+    inline Vector2& Vector2::operator+=(Vector2 v)
+    {
+        x += v.x;
+        y += v.y;
+
+        return (*this);
+    }
+
+    // Member methods
+    inline float Vector2::magnitude()
+    {
+        return std::sqrt(x * x + y * y);
+    }
+
+    inline Vector2 Vector2::normalize()
+    {
+        return *this / magnitude();
+    }
+
+    inline Vector2 Vector2::transform(const Vector2& v, const Matrix3& m)
+    {
+        return Vector2{(v.x * m.m11) + (v.y * m.m12) + m.m13,
+                       (v.x * m.m21) + (v.y * m.m22) + m.m23};
+    }
 }
 
 #endif
