@@ -20,20 +20,15 @@ namespace milk
                 return instance;
             }
 
-            bool init(SDL_Window* sdlWindow,
-                      unsigned int resolutionWidth,
-                      unsigned int resolutionHeight);
+            bool init(SDL_Window* sdlWindow, unsigned int resolutionWidth, unsigned int resolutionHeight);
 
             void clear(const Color& color) override;
 
-            void drawRectangle(Rectangle& destinationRectangle, const Color& color) override;
+            void drawRectangle(const Rectangle& destinationRectangle, const Color& color) override;
 
-            void drawRectangleOutline(Rectangle& destinationRectangle, const Color& color) override;
+            void drawRectangleOutline(const Rectangle& destinationRectangle, const Color& color) override;
 
-            void draw(Texture& texture,
-                      Rectangle& sourceRectangle,
-                      Rectangle& destinationRectangle,
-                      int flipFlags) override;
+            void draw(const Texture& texture, const Rectangle& sourceRectangle, const Rectangle& destinationRectangle, int flipFlags) override;
 
             void present() override;
 

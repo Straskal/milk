@@ -1,7 +1,6 @@
 #ifndef MILK_WINDOW_ADAPTER_H
 #define MILK_WINDOW_ADAPTER_H
 
-#include <memory>
 #include <string>
 
 #include "window/Window.h"
@@ -24,14 +23,7 @@ namespace milk
                 return instance;
             }
 
-            ~WindowAdapter();
-
-            bool init(const std::string& title,
-                      unsigned int width,
-                      unsigned int height,
-                      unsigned int resolutionWidth,
-                      unsigned int resolutionHeight,
-                      bool fullscreen);
+            bool init(const std::string& title, unsigned int width, unsigned int height, bool fullscreen);
 
             unsigned int width() const override;
 
@@ -52,9 +44,6 @@ namespace milk
 
             unsigned int width_;
             unsigned int height_;
-
-            unsigned int nativeWidth_;
-            unsigned int nativeHeight_;
 
             bool fullscreen_;
 

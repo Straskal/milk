@@ -74,7 +74,7 @@ void milk::Game::init(std::string configFilepath)
 
     window_ = &adapter::WindowAdapter::instance();
 
-    if (!window_->init(title, width, height, vwidth, vheight, fullscreen))
+    if (!window_->init(title, width, height, fullscreen))
         return;
 
     renderer_ = &adapter::RendererAdapter::instance();

@@ -15,44 +15,28 @@ milk::adapter::WindowAdapter::WindowAdapter()
 {
 }
 
-milk::adapter::WindowAdapter::~WindowAdapter() = default;
-
-bool milk::adapter::WindowAdapter::init(const std::string& title,
-                                        unsigned int width,
-                                        unsigned int height,
-                                        unsigned int resolutionWidth,
-                                        unsigned int resolutionHeight,
-                                        bool fullscreen)
+bool milk::adapter::WindowAdapter::init(const std::string& title, unsigned int width, unsigned int height, bool fullscreen)
 {
     title_ = title;
     width_ = width;
     height_ = height;
-    fullscreen_ = fullscreen;
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
     {
-        std::cout << "Error initializing SDL: " << SDL_GetError() << std::endl;
+        std::cout << "Error initializing SDL_Video & SDL_Timer: " << SDL_GetError() << std::endl;
         return false;
     }
 
-    SDL_DisplayMode currentDisplayMode;
-    SDL_GetCurrentDisplayMode(0, &currentDisplayMode);
-
-    int windowXPosition = (currentDisplayMode.w / 2) - (width_ / 2);
-    int windowYPosition = (currentDisplayMode.h / 2) - (height_ / 2);
-
-    int flags = SDL_WINDOW_SHOWN;
-
-    if (fullscreen_)
-        flags |= SDL_WINDOW_FULLSCREEN;
-
-    sdlWindow_ = SDL_CreateWindow(title_.c_str(), windowXPosition, windowYPosition, width_, height_, (Uint32)flags);
+    sdlWindow_ = SDL_CreateWindow(title_.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width_, height_, SDL_WINDOW_SHOWN);
 
     if (sdlWindow_ == nullptr)
     {
-        std::cout << "Error creating window: " << SDL_GetError() << std::endl;
+        std::cout << "Error creating SDL_Window: " << SDL_GetError() << std::endl;
         return false;
     }
+
+    if (fullscreen)
+        toggleFullscreen();
 
     return true;
 }
@@ -78,9 +62,9 @@ void milk::adapter::WindowAdapter::toggleFullscreen()
 
     if (!fullscreen_)
     {
-        const int WINDOWED = 0;
-        SDL_SetWindowFullscreen(sdlWindow_, WINDOWED);
+        SDL_SetWindowFullscreen(sdlWindow_, 0);
         SDL_SetWindowSize(sdlWindow_, width_, height_);
+        SDL_SetWindowPosition(sdlWindow_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     }
     else
     {
@@ -89,10 +73,7 @@ void milk::adapter::WindowAdapter::toggleFullscreen()
         SDL_Rect displayBounds;
         SDL_GetDisplayBounds(displayIndex, &displayBounds);
 
-        nativeWidth_ = (unsigned int)(displayBounds.w);
-        nativeHeight_ = (unsigned int)displayBounds.h;
-
-        SDL_SetWindowSize(sdlWindow_, nativeWidth_, nativeHeight_);
+        SDL_SetWindowSize(sdlWindow_, displayBounds.w, displayBounds.h);
         SDL_SetWindowFullscreen(sdlWindow_, SDL_WINDOW_FULLSCREEN);
     }
 }
@@ -100,11 +81,11 @@ void milk::adapter::WindowAdapter::toggleFullscreen()
 SDL_Window* milk::adapter::WindowAdapter::sdlWindow() const
 {
     SDL_assert(sdlWindow_ != nullptr);
-
     return sdlWindow_;
 }
 
 void milk::adapter::WindowAdapter::free()
 {
     SDL_DestroyWindow(sdlWindow_);
+    SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
 }

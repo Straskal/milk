@@ -21,25 +21,22 @@ namespace milk
         /// Clear the Renderer.
         virtual void clear(const Color& color) = 0;
 
-        /// Draw a Rectangle
+        /// Draw a Rectangle.
         /// \param destinationRectangle: Rectangle's shape
         /// \param color: Rectangle's color
-        virtual void drawRectangle(Rectangle& destinationRectangle, const Color& color) = 0;
+        virtual void drawRectangle(const Rectangle& destinationRectangle, const Color& color) = 0;
 
         /// Draw a Rectangle's outline.
         /// \param destinationRectangle: Rectangle's shape
         /// \param color: Rectangle's color
-        virtual void drawRectangleOutline(Rectangle& destinationRectangle, const Color& color) = 0;
+        virtual void drawRectangleOutline(const Rectangle& destinationRectangle, const Color& color) = 0;
 
-        /// Draw the texture.
+        /// Draw a texture.
         /// \param texture: The Texture to draw
         /// \param sourceRectangle: The source Rectangle of the Texture
         /// \param destinationRectangle: The destination to draw the texture
         /// \param flipFlags: The Texture's flip flags
-        virtual void draw(Texture& texture,
-                          Rectangle& sourceRectangle,
-                          Rectangle& destinationRectangle,
-                          int flipFlags) = 0;
+        virtual void draw(const Texture& texture, const Rectangle& sourceRectangle, const Rectangle& destinationRectangle, int flipFlags) = 0;
 
         /// Draw the contents of the Renderer to the Window.
         virtual void present() = 0;

@@ -1,13 +1,11 @@
 #ifndef MILK_WINDOW_H
 #define MILK_WINDOW_H
 
-#include <string>
-
 namespace milk
 {
     class Renderer;
 
-    /// The Game's Window.
+    /// The Games Window.
     class Window
     {
     public:

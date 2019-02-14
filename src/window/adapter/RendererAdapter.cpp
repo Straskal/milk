@@ -16,9 +16,7 @@ milk::adapter::RendererAdapter::RendererAdapter()
     resolution_.height = 0;
 }
 
-bool milk::adapter::RendererAdapter::init(SDL_Window* sdlWindow,
-                                          unsigned int resolutionWidth,
-                                          unsigned int resolutionHeight)
+bool milk::adapter::RendererAdapter::init(SDL_Window* sdlWindow, unsigned int resolutionWidth, unsigned int resolutionHeight)
 {
     resolution_.width = resolutionWidth;
     resolution_.height = resolutionHeight;
@@ -27,13 +25,12 @@ bool milk::adapter::RendererAdapter::init(SDL_Window* sdlWindow,
 
     if (sdlRenderer_ == nullptr)
     {
-        std::cout << "Error creating renderer: " << SDL_GetError() << std::endl;
+        std::cout << "Error creating SDL_Renderer: " << SDL_GetError() << std::endl;
         return false;
     }
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
     SDL_RenderSetLogicalSize(sdlRenderer_, resolutionWidth, resolutionHeight);
-    SDL_SetRenderDrawColor(sdlRenderer_, 0x00, 0x00, 0x00, 0xFF);
     SDL_SetRenderDrawBlendMode(sdlRenderer_, SDL_BLENDMODE_BLEND);
 
     return true;
@@ -45,7 +42,7 @@ void milk::adapter::RendererAdapter::clear(const Color& color)
     SDL_RenderClear(sdlRenderer_);
 }
 
-void milk::adapter::RendererAdapter::drawRectangle(milk::Rectangle& destinationRectangle, const milk::Color& color)
+void milk::adapter::RendererAdapter::drawRectangle(const milk::Rectangle& destinationRectangle, const milk::Color& color)
 {
     SDL_Rect dst = {destinationRectangle.x, destinationRectangle.y, destinationRectangle.width, destinationRectangle.height};
 
@@ -53,7 +50,7 @@ void milk::adapter::RendererAdapter::drawRectangle(milk::Rectangle& destinationR
     SDL_RenderFillRect(sdlRenderer_, &dst);
 }
 
-void milk::adapter::RendererAdapter::drawRectangleOutline(milk::Rectangle& destinationRectangle, const milk::Color& color)
+void milk::adapter::RendererAdapter::drawRectangleOutline(const milk::Rectangle& destinationRectangle, const milk::Color& color)
 {
     SDL_Rect dst = {destinationRectangle.x, destinationRectangle.y, destinationRectangle.width, destinationRectangle.height};
 
@@ -61,9 +58,9 @@ void milk::adapter::RendererAdapter::drawRectangleOutline(milk::Rectangle& desti
     SDL_RenderDrawRect(sdlRenderer_, &dst);
 }
 
-void milk::adapter::RendererAdapter::draw(milk::Texture& texture,
-                                          milk::Rectangle& sourceRectangle,
-                                          milk::Rectangle& destinationRectangle,
+void milk::adapter::RendererAdapter::draw(const milk::Texture& texture,
+                                          const milk::Rectangle& sourceRectangle,
+                                          const milk::Rectangle& destinationRectangle,
                                           int flipFlags)
 {
     SDL_Rect src = {sourceRectangle.x, sourceRectangle.y, sourceRectangle.width, sourceRectangle.height};
