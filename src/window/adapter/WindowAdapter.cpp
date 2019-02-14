@@ -62,7 +62,7 @@ void milk::adapter::WindowAdapter::toggleFullscreen()
 
     if (!fullscreen_)
     {
-        SDL_SetWindowFullscreen(sdlWindow_, 0);
+        SDL_SetWindowFullscreen(sdlWindow_, MILK_SDL_WINDOW_NO_FLAG);
         SDL_SetWindowSize(sdlWindow_, width_, height_);
         SDL_SetWindowPosition(sdlWindow_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     }

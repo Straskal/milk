@@ -1,6 +1,9 @@
 #ifndef MILK_WINDOW_ADAPTER_H
 #define MILK_WINDOW_ADAPTER_H
 
+// We define this bad boy here because SDL does not have this and we don't want magic numbers chilling up in this mafk.
+#define MILK_SDL_WINDOW_NO_FLAG 0
+
 #include <string>
 
 #include "window/Window.h"
