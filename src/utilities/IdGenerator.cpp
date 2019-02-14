@@ -1,14 +1,14 @@
 #include "IdGenerator.h"
 
 milk::IdGenerator::IdGenerator()
-        : count_(0)
+        : next_(0)
 {
 }
 
 int milk::IdGenerator::popId()
 {
     if (availableIds_.empty())
-        return count_++;
+        return next_++;
 
     int id = availableIds_.back();
     availableIds_.pop_back();
