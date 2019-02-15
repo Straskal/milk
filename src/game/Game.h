@@ -47,7 +47,7 @@ namespace milk
     {
     public:
         /// \returns the single instance of the Game.
-        static Game& getInstance()
+        static Game& instance()
         {
             static Game instance;
             return instance;

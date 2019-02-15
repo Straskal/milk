@@ -56,6 +56,7 @@ set(MILK_SRC_FILES
 
         # math
         math/Mathf.h
+        math/Matrix3.h
         math/Rectangle.h
         math/Vector2.h
 
@@ -81,22 +82,28 @@ set(MILK_SRC_FILES
         scene/Scene.h
 
         # scripting
-        scripting/api/LuaApi.cpp
-        scripting/api/LuaApi.h
-        scripting/api/LuaActor.cpp
-        scripting/api/LuaActor.h
-        scripting/api/LuaCollision.cpp
-        scripting/api/LuaCollision.h
-        scripting/api/LuaGame.cpp
-        scripting/api/LuaGame.h
-        scripting/api/LuaScene.cpp
-        scripting/api/LuaScene.h
-        scripting/api/LuaWindow.cpp
-        scripting/api/LuaWindow.h
+        scripting/LuaApi.cpp
+        scripting/LuaApi.h
         scripting/Logic.cpp
         scripting/Logic.h
         scripting/Script.cpp
         scripting/Script.h
+        scripting/bindings/LuaActor.cpp
+        scripting/bindings/LuaActor.h
+        scripting/bindings/LuaCollision.cpp
+        scripting/bindings/LuaCollision.h
+        scripting/bindings/LuaGame.cpp
+        scripting/bindings/LuaGame.h
+        scripting/bindings/LuaKeyboard.cpp
+        scripting/bindings/LuaKeyboard.h
+        scripting/bindings/LuaMathf.cpp
+        scripting/bindings/LuaMathf.h
+        scripting/bindings/LuaScene.cpp
+        scripting/bindings/LuaScene.h
+        scripting/bindings/LuaVector2.cpp
+        scripting/bindings/LuaVector2.h
+        scripting/bindings/LuaWindow.cpp
+        scripting/bindings/LuaWindow.h
 
         # utilities
         utilities/Alignment.h
@@ -111,7 +118,7 @@ set(MILK_SRC_FILES
         window/adapter/RendererAdapter.cpp
         window/adapter/RendererAdapter.h
         window/adapter/WindowAdapter.cpp
-        window/adapter/WindowAdapter.h math/Matrix3.h)
+        window/adapter/WindowAdapter.h)
 
 add_library(milklib ${MILK_SRC_FILES})
 

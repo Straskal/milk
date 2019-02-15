@@ -8,15 +8,15 @@ function player:begin()
 end
 
 function player:update()
-	if Input.get_key_pressed(Keys.F) then
+	if Keyboard.get_key_pressed(Keys.F) then
 		Window:toggle_fullscreen()
 	end
 
-	if Input.get_key_pressed(Keys.R) then
+	if Keyboard.get_key_pressed(Keys.R) then
 		Game:load_scene('res/scene.json')
 	end
 
-	if Input.get_key_pressed(Keys.Space) then
+	if Keyboard.get_key_pressed(Keys.Space) then
 		if (not self.other_steve) then
 			local pos = self.actor.position
 			self.other_steve = self.scene:spawn('anothersteve', Vector2.new(pos.x + 70, pos.y + 70), 'res/playerWithoutStuff.json')
@@ -29,13 +29,13 @@ function player:update()
 
 	local inputvec = Vector2.new(0, 0)
 
-	if Input.get_key(Keys.W) then
+	if Keyboard.get_key(Keys.W) then
 		inputvec.y = -1
 	end
-	if Input.get_key(Keys.S) then
+	if Keyboard.get_key(Keys.S) then
 		inputvec.y = 1
 	end
-	if Input.get_key(Keys.A) then
+	if Keyboard.get_key(Keys.A) then
 		inputvec.x = -1
 
 		if (not self.flipped_x) then
@@ -43,7 +43,7 @@ function player:update()
 			self.actor:flip_x()
 		end
 	end
-	if Input.get_key(Keys.D) then
+	if Keyboard.get_key(Keys.D) then
 		inputvec.x = 1
 
 		if (self.flipped_x) then

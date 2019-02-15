@@ -16,7 +16,7 @@ void milk::adapter::ActorLoaderAdapter::load(Actor& actor, const std::string& te
 {
     using json = nlohmann::json;
 
-    auto& game = Game::getInstance();
+    auto& game = Game::instance();
 
     json& actorJson = *(game.actorTemplateCache().load(templateName));
 

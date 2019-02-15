@@ -12,7 +12,7 @@ milk::adapter::SceneLoaderAdapter::~SceneLoaderAdapter() = default;
 
 std::unique_ptr<milk::Scene> milk::adapter::SceneLoaderAdapter::load(const std::string& file) const
 {
-    auto& game = Game::getInstance();
+    auto& game = Game::instance();
 
     std::string sceneJsonString = game.filesystem().contents(file);
 

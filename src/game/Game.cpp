@@ -24,7 +24,7 @@
 #include "physics/Physics.h"
 
 #include "scripting/Logic.h"
-#include "scripting/api/LuaApi.h"
+#include "scripting/LuaApi.h"
 
 #include "scene/Scene.h"
 
@@ -52,7 +52,7 @@ void milk::Game::init(std::string configFilepath)
         return;
     }
 
-    luaState_.open_libraries(sol::lib::base, sol::lib::math, sol::lib::package);
+    luaState_.open_libraries(sol::lib::base, sol::lib::math);
 
     sol::load_result loadResult = luaState_.load_file(configFilepath);
 
@@ -101,8 +101,6 @@ void milk::Game::init(std::string configFilepath)
 
     Keyboard::initialize();
 
-    LuaApi::init(luaState_);
-
     logic_ = std::make_unique<Logic>(luaState());
     physics_ = std::make_unique<Physics>();
     graphics_ = std::make_unique<Graphics>(*renderer_, *textureCache_);
@@ -111,8 +109,7 @@ void milk::Game::init(std::string configFilepath)
     debugTools_ = std::make_unique<DebugTools>(*renderer_);
 #endif
 
-    luaState_["Game"] = this;
-    luaState_["Window"] = &window();
+    LuaApi::init(luaState_);
 
     loadScene(entryScene);
 
@@ -141,6 +138,7 @@ int milk::Game::run()
             render();
 
             int frameTicks = frameCapTimer.milliseconds();
+
             if (frameTicks < MILLISECONDS_PER_FRAME)
                 SDL_Delay((Uint32)(MILLISECONDS_PER_FRAME - frameTicks));
         }
