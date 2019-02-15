@@ -68,7 +68,8 @@ void milk::LuaApi::init(sol::state& luaState)
     /////////////////////////////////////////////////////////////////
     luaState.new_usertype<Scene>("Scene",
                                  "set_cam_pos", &lua::scene::setCameraPosition,
-                                 "spawn", &lua::scene::spawn);
+                                 "spawn", &lua::scene::spawn,
+                                 "destroy", &lua::scene::destroy);
 
     // Vector2D
     /////////////////////////////////////////////////////////////////

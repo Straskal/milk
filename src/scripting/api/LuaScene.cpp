@@ -1,5 +1,6 @@
 #include "LuaScene.h"
 
+#include "scene/Actor.h"
 #include "scene/Scene.h"
 
 namespace milk
@@ -16,6 +17,11 @@ namespace milk
             Actor* spawn(Scene& scene, const std::string& name, const Vector2& position, const std::string& actorTemplateName)
             {
                 return scene.spawnActor(name, position, actorTemplateName);
+            }
+
+            bool destroy(Scene& scene, Actor& actor)
+            {
+                return scene.destroyActor(actor.id());
             }
         }
     }

@@ -60,13 +60,7 @@ void milk::adapter::WindowAdapter::toggleFullscreen()
 {
     fullscreen_ = !fullscreen_;
 
-    if (!fullscreen_)
-    {
-        SDL_SetWindowFullscreen(sdlWindow_, MILK_SDL_WINDOW_NO_FLAG);
-        SDL_SetWindowSize(sdlWindow_, width_, height_);
-        SDL_SetWindowPosition(sdlWindow_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    }
-    else
+    if (fullscreen_)
     {
         int displayIndex = SDL_GetWindowDisplayIndex(sdlWindow_);
 
@@ -75,6 +69,12 @@ void milk::adapter::WindowAdapter::toggleFullscreen()
 
         SDL_SetWindowSize(sdlWindow_, displayBounds.w, displayBounds.h);
         SDL_SetWindowFullscreen(sdlWindow_, SDL_WINDOW_FULLSCREEN);
+    }
+    else
+    {
+        SDL_SetWindowFullscreen(sdlWindow_, MILK_SDL_WINDOW_NO_FLAG);
+        SDL_SetWindowSize(sdlWindow_, width_, height_);
+        SDL_SetWindowPosition(sdlWindow_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     }
 }
 
@@ -87,5 +87,5 @@ SDL_Window* milk::adapter::WindowAdapter::sdlWindow() const
 void milk::adapter::WindowAdapter::free()
 {
     SDL_DestroyWindow(sdlWindow_);
-    SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
+    SDL_Quit();
 }

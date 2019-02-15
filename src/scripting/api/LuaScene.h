@@ -16,6 +16,8 @@ namespace milk
             void setCameraPosition(Scene& scene, Vector2& position);
 
             Actor* spawn(Scene& scene, const std::string& name, const Vector2& position, const std::string& actorTemplateName);
+
+            bool destroy(Scene& scene, Actor& actor);
         }
     }
 }

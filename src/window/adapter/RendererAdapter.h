@@ -34,9 +34,9 @@ namespace milk
 
             Resolution resolution() const override;
 
-            void free();
-
             SDL_Renderer* sdlRenderer() const;
+
+            void free();
 
         private:
             RendererAdapter();

@@ -17,8 +17,14 @@ function player:update()
 	end
 
 	if Input.get_key_pressed(Keys.Space) then
-		local pos = self.actor.position
-		self.scene:spawn('anothersteve', Vector2.new(pos.x + 70, pos.y + 70), 'res/player.json')
+		if (not self.other_steve) then
+			local pos = self.actor.position
+			self.other_steve = self.scene:spawn('anothersteve', Vector2.new(pos.x + 70, pos.y + 70), 'res/playerWithoutStuff.json')
+			return;
+		end
+
+		self.scene:destroy(self.other_steve)
+		self.other_steve = nil
 	end
 
 	local inputvec = Vector2.new(0, 0)

@@ -1,0 +1,52 @@
+{
+    "version": 1,
+    "components": [
+        {
+            "type": "sprite",
+            "textureName": "res/player.png",
+            "sourceRect": {
+                "x": 0,
+                "y": 0,
+                "width": 64,
+                "height": 64
+            }
+        },
+        {
+            "type": "velocity",
+            "value": {
+              "x": 0,
+              "y": 0
+            }
+        },
+        {
+            "type": "script",
+            "name": "res/playerWithoutStuff.lua"
+        },
+        {
+            "type": "collider",
+            "size": {
+                "width": 64,
+                "height": 64
+            },
+            "offset": {
+                "x": 0,
+                "y": 16
+            }
+        },
+        {
+          "type": "animator",
+          "spriteSheetRows": 4,
+          "spriteSheetColumns": 8,
+          "animations": [
+            {
+              "name": "idle",
+              "frames": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
+            },
+            {
+              "name": "run",
+              "frames": [ 13, 14, 15, 16, 17, 18, 19, 20 ]
+            }
+          ]
+        }
+    ]
+}

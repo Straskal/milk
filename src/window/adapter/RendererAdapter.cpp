@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "SDL_assert.h"
 #include "SDL_hints.h"
 #include "SDL_render.h"
 
@@ -79,12 +80,13 @@ milk::Resolution milk::adapter::RendererAdapter::resolution() const
     return resolution_;
 }
 
+SDL_Renderer* milk::adapter::RendererAdapter::sdlRenderer() const
+{
+    SDL_assert(sdlRenderer_ != nullptr);
+    return sdlRenderer_;
+}
+
 void milk::adapter::RendererAdapter::free()
 {
     SDL_DestroyRenderer(sdlRenderer_);
-}
-
-SDL_Renderer* milk::adapter::RendererAdapter::sdlRenderer() const
-{
-    return sdlRenderer_;
 }

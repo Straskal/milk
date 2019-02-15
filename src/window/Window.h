@@ -3,8 +3,6 @@
 
 namespace milk
 {
-    class Renderer;
-
     /// The Games Window.
     class Window
     {
