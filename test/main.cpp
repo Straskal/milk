@@ -3,6 +3,7 @@
 #include "tests/math/Matrix3Tests.h"
 #include "tests/math/RectangleTests.h"
 
+#include "tests/scene/ActorTests.h"
 #include "tests/scene/SceneTests.h"
 
 int main(int argc, char **argv)
