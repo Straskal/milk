@@ -9,52 +9,69 @@ using ::testing::_;
 
 #include "scene/Scene.h"
 
-class SceneTests : public ::testing::Test {};
-
-TEST_F(SceneTests, Constructs)
+TEST(SceneTests, Constructs)
 {
     MockActorLoader actorLoader;
 
     ASSERT_NO_THROW(milk::Scene("scene", actorLoader));
 }
 
-TEST_F(SceneTests, SpawnActor_ReturnsSpawnedActor)
+TEST(SceneTests, SpawnActor_ReturnsSpawnedActor)
 {
     MockActorLoader actorLoader;
+
+    milk::Scene scene{"scene", actorLoader};
+
+    auto actor = scene.spawnActor("steve", milk::Vector2{});
+
+    ASSERT_NE(nullptr, actor);
+}
+
+TEST(SceneTests, SpawnActor_AssignsProperValuesToNewlySpawnedActor)
+{
+    MockActorLoader actorLoader;
+
     milk::Scene scene{"scene", actorLoader};
 
     auto actor = scene.spawnActor("steve", milk::Vector2{1, 1});
 
-    ASSERT_NE(nullptr, actor);
     ASSERT_EQ("steve", actor->name());
     ASSERT_TRUE(milk::Vector2(1, 1) == actor->position());
-
-    auto polledSpawn = scene.pollSpawned();
-
-    ASSERT_EQ(actor, polledSpawn);
 }
 
-TEST_F(SceneTests, SpawnActorFromTemplate_ReturnsSpawnedActor)
+TEST(SceneTests, SpawnActorFromTemplate_ReturnsSpawnedActor)
 {
     MockActorLoader actorLoader;
 
-    EXPECT_CALL(actorLoader, load(_, "balls.json"))
+    EXPECT_CALL(actorLoader, load(_, "hi.json"))
         .Times(1);
 
     milk::Scene scene{"scene", actorLoader};
 
-    auto actor = scene.spawnActor("steve", milk::Vector2{1, 1}, "balls.json");
+    auto actor = scene.spawnActor("steve", milk::Vector2{1, 1}, "hi.json");
 
     ASSERT_NE(nullptr, actor);
-    ASSERT_EQ("steve", actor->name());
-    ASSERT_TRUE(milk::Vector2(1, 1) == actor->position());
-
-    auto polledSpawn = scene.pollSpawned();
-
-    ASSERT_EQ(actor, polledSpawn);
 }
 
-TEST_F(SceneTests, DestroyActor_GivenSceneDoesNotContainActor_ReturnsFalse)
+TEST(SceneTests, PollSpawned_ReturnsSpawnedActors)
+{
+    MockActorLoader actorLoader;
+
+    milk::Scene scene{"scene", actorLoader};
+
+    auto actor1 = scene.spawnActor("steve1", milk::Vector2{1, 1});
+    auto actor2 = scene.spawnActor("steve2", milk::Vector2{1, 1});
+
+    auto polledSpawn1 = scene.pollSpawned();
+    auto polledSpawn2 = scene.pollSpawned();
+    auto polledSpawn3 = scene.pollSpawned();
+
+    ASSERT_EQ(actor2, polledSpawn1);
+    ASSERT_EQ(actor1, polledSpawn2);
+    ASSERT_EQ(nullptr, polledSpawn3);
+}
+
+TEST(SceneTests, DestroyActor_GivenSceneDoesNotContainActor_ReturnsFalse)
 {
     MockActorLoader actorLoader;
 
@@ -65,7 +82,7 @@ TEST_F(SceneTests, DestroyActor_GivenSceneDoesNotContainActor_ReturnsFalse)
     ASSERT_FALSE(destroyed);
 }
 
-TEST_F(SceneTests, DestroyActor_GivenSceneContainsActor_ReturnsTrue)
+TEST(SceneTests, DestroyActor_GivenSceneContainsActor_ReturnsTrue)
 {
     MockActorLoader actorLoader;
 
@@ -78,24 +95,27 @@ TEST_F(SceneTests, DestroyActor_GivenSceneContainsActor_ReturnsTrue)
     ASSERT_TRUE(destroyed);
 }
 
-TEST_F(SceneTests, DestroyActor_GivenSceneContainsActor_ActuallyDestroysActor)
+TEST(SceneTests, PollDestroyed_ReturnsDestroyedActors)
 {
     MockActorLoader actorLoader;
 
     milk::Scene scene{"scene", actorLoader};
 
-    auto actor = scene.spawnActor("steve", milk::Vector2{1, 1});
+    auto actor1 = scene.spawnActor("steve", milk::Vector2{1, 1});
+    auto actor2 = scene.spawnActor("steve", milk::Vector2{1, 1});
 
-    bool destroyed = scene.destroyActor(actor->id());
-
-    ASSERT_TRUE(destroyed);
+    scene.destroyActor(actor1->id());
+    scene.destroyActor(actor2->id());
 
     // Clear out spawned and internally add them to actorsById_ list.
     scene.pollSpawned();
+    scene.pollSpawned();
 
-    auto destroyedActor = scene.pollDestroyed();
+    auto destroyedActor1 = scene.pollDestroyed();
+    auto destroyedActor2 = scene.pollDestroyed();
 
-    ASSERT_EQ(actor, destroyedActor);
+    ASSERT_EQ(actor2, destroyedActor1);
+    ASSERT_EQ(actor1, destroyedActor2);
 }
 
 #endif
