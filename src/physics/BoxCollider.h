@@ -19,7 +19,6 @@ namespace milk
     public:
         static const ComponentType type;
 
-
         /// Updates the bounding box. If the Actor's position has changed, this method must be called in order to update the bounding box.
         void updateBBox();
 

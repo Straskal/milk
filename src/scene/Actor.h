@@ -48,9 +48,10 @@ namespace milk
         /// \param args The ActorComponent's constructor parameters
         /// \returns newly added ActorComponent if successfull, nullptr if not
         template<class TComponent, typename... Args>
-        TComponent* addComponent(Args&& ... args)
+        TComponent* addComponent(Args&&... args)
         {
             static_assert(std::is_base_of<ActorComponent, TComponent>::value, "TComponent must derive from ActorComponent.");
+            static_assert(!std::is_member_pointer<decltype(&TComponent::type)>::value, "TComponent must define static member 'type' of type 'ComponentType'");
 
             auto type = TComponent::type;
 
@@ -69,6 +70,7 @@ namespace milk
         TComponent* getComponent() const
         {
             static_assert(std::is_base_of<ActorComponent, TComponent>::value, "TComponent must derive from ActorComponent.");
+            static_assert(!std::is_member_pointer<decltype(&TComponent::type)>::value, "TComponent must define static member 'type' of type 'ComponentType'");
 
             auto type = TComponent::type;
 
