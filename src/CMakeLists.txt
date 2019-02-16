@@ -37,10 +37,14 @@ set(MILK_SRC_FILES
         # input
         input/Keyboard.cpp
         input/Keyboard.h
+        input/binding/LuaKeyboard.cpp
+        input/binding/LuaKeyboard.h
 
         # game
         game/Game.h
         game/Game.cpp
+        game/binding/LuaGame.cpp
+        game/binding/LuaGame.h
 
         # graphics
         graphics/Animator.cpp
@@ -59,6 +63,10 @@ set(MILK_SRC_FILES
         math/Matrix3.h
         math/Rectangle.h
         math/Vector2.h
+        math/binding/LuaMathf.cpp
+        math/binding/LuaMathf.h
+        math/binding/LuaVector2.cpp
+        math/binding/LuaVector2.h
 
         # physics
         physics/BoxCollider.cpp
@@ -70,6 +78,8 @@ set(MILK_SRC_FILES
         physics/SpatialPartitionGrid.h
         physics/Velocity.cpp
         physics/Velocity.h
+        physics/binding/LuaCollision.cpp
+        physics/binding/LuaCollision.h
 
         #scene
         scene/Actor.cpp
@@ -80,6 +90,10 @@ set(MILK_SRC_FILES
         scene/Camera.h
         scene/Scene.cpp
         scene/Scene.h
+        scene/binding/LuaActor.cpp
+        scene/binding/LuaActor.h
+        scene/binding/LuaScene.cpp
+        scene/binding/LuaScene.h
 
         # scripting
         scripting/LuaApi.cpp
@@ -88,22 +102,6 @@ set(MILK_SRC_FILES
         scripting/Logic.h
         scripting/Script.cpp
         scripting/Script.h
-        scripting/bindings/LuaActor.cpp
-        scripting/bindings/LuaActor.h
-        scripting/bindings/LuaCollision.cpp
-        scripting/bindings/LuaCollision.h
-        scripting/bindings/LuaGame.cpp
-        scripting/bindings/LuaGame.h
-        scripting/bindings/LuaKeyboard.cpp
-        scripting/bindings/LuaKeyboard.h
-        scripting/bindings/LuaMathf.cpp
-        scripting/bindings/LuaMathf.h
-        scripting/bindings/LuaScene.cpp
-        scripting/bindings/LuaScene.h
-        scripting/bindings/LuaVector2.cpp
-        scripting/bindings/LuaVector2.h
-        scripting/bindings/LuaWindow.cpp
-        scripting/bindings/LuaWindow.h
 
         # utilities
         utilities/Alignment.h
@@ -118,7 +116,9 @@ set(MILK_SRC_FILES
         window/adapter/RendererAdapter.cpp
         window/adapter/RendererAdapter.h
         window/adapter/WindowAdapter.cpp
-        window/adapter/WindowAdapter.h)
+        window/adapter/WindowAdapter.h
+        window/binding/LuaWindow.cpp
+        window/binding/LuaWindow.h)
 
 add_library(milklib ${MILK_SRC_FILES})
 

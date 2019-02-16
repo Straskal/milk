@@ -50,6 +50,8 @@ namespace milk
         template<class TComponent, typename... Args>
         TComponent* addComponent(Args&& ... args)
         {
+            static_assert(std::is_base_of<ActorComponent, TComponent>::value, "TComponent must derive from ActorComponent.");
+
             auto type = TComponent::type;
 
             if ((componentBitmask_ & type) == type)
@@ -66,6 +68,8 @@ namespace milk
         template<class TComponent>
         TComponent* getComponent() const
         {
+            static_assert(std::is_base_of<ActorComponent, TComponent>::value, "TComponent must derive from ActorComponent.");
+
             auto type = TComponent::type;
 
             if ((componentBitmask_ & type) != type)
@@ -82,6 +86,7 @@ namespace milk
         int id_;
         std::string name_;
         Vector2 position_;
+
         uint32_t componentBitmask_;
 
         std::unordered_map<int, std::unique_ptr<ActorComponent>> componentsByType_;

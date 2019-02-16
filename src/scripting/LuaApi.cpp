@@ -1,13 +1,13 @@
 #include "LuaApi.h"
 
-#include "scripting/bindings/LuaActor.h"
-#include "scripting/bindings/LuaCollision.h"
-#include "scripting/bindings/LuaKeyboard.h"
-#include "scripting/bindings/LuaGame.h"
-#include "scripting/bindings/LuaMathf.h"
-#include "scripting/bindings/LuaScene.h"
-#include "scripting/bindings/LuaVector2.h"
-#include "scripting/bindings/LuaWindow.h"
+#include "game/binding/LuaGame.h"
+#include "input/binding/LuaKeyboard.h"
+#include "math/binding/LuaMathf.h"
+#include "math/binding/LuaVector2.h"
+#include "physics/binding/LuaCollision.h"
+#include "scene/binding/LuaActor.h"
+#include "scene/binding/LuaScene.h"
+#include "window/binding/LuaWindow.h"
 
 void milk::LuaApi::init(sol::state& luaState)
 {
