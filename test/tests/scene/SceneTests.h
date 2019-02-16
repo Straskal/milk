@@ -71,6 +71,26 @@ TEST(SceneTests, PollSpawned_ReturnsSpawnedActors)
     ASSERT_EQ(nullptr, polledSpawn3);
 }
 
+TEST(SceneTests, PollSpawned_GivenSceneMarkedAsEnded_ReturnsNoNewSpawns)
+{
+    MockActorLoader actorLoader;
+
+    milk::Scene scene{"scene", actorLoader};
+
+    scene.end();
+
+    scene.spawnActor("steve1", milk::Vector2{1, 1});
+    scene.spawnActor("steve2", milk::Vector2{1, 1});
+
+    auto polledSpawn1 = scene.pollSpawned();
+    auto polledSpawn2 = scene.pollSpawned();
+    auto polledSpawn3 = scene.pollSpawned();
+
+    ASSERT_EQ(nullptr, polledSpawn1);
+    ASSERT_EQ(nullptr, polledSpawn2);
+    ASSERT_EQ(nullptr, polledSpawn3);
+}
+
 TEST(SceneTests, DestroyActor_GivenSceneDoesNotContainActor_ReturnsFalse)
 {
     MockActorLoader actorLoader;
