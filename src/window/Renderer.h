@@ -3,10 +3,10 @@
 
 namespace milk
 {
-    class Rectangle;
     class Texture;
 
     struct Color;
+	struct Rectangle;
 
     /// Renderer resolution
     struct Resolution

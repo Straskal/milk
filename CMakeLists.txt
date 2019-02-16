@@ -21,14 +21,14 @@ if (WIN32)
         # provide paths for minGW/minGW-w64 development libs
         # set(SDL2_PATH ...)
         # set(SDL2_IMAGE_PATH ...)
-        # FindLua53 responds to LUA_DIR env variable
+        # set(ENV{LUA_DIR} ...)
 
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
         # provide paths for visual c++ development libs
-        # set(SDL2_PATH ...)
-        # set(SDL2_IMAGE_PATH ...)
-        # FindLua53 responds to LUA_DIR env variable
+        set(SDL2_PATH C:/ExternalLibs/sdl2/SDL2-2.0.9)
+        set(SDL2_IMAGE_PATH C:/ExternalLibs/SDL2_image-2.0.4)
+        set(ENV{LUA_DIR} C:/ExternalLibs/lua53)
 
     endif()
 endif()

@@ -19,6 +19,8 @@ milk::adapter::SceneJsonDeserializerV1::SceneJsonDeserializerV1(milk::Game& game
 {
 }
 
+milk::adapter::SceneJsonDeserializerV1::~SceneJsonDeserializerV1() = default;
+
 std::unique_ptr<milk::Scene> milk::adapter::SceneJsonDeserializerV1::deserialize(nlohmann::json& sceneJson) const
 {
     using json = nlohmann::json;

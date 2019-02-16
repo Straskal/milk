@@ -1,7 +1,7 @@
 local config = {
     title = "butt dragons",
-    width = 1920,
-    height = 1080,
+    width = 640,
+    height = 360,
     vwidth = 640,
     vheight = 360,
     fullscreen = false,

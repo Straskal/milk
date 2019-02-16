@@ -14,6 +14,8 @@ namespace milk
         public:
             explicit SceneJsonDeserializerV1(Game& game);
 
+			~SceneJsonDeserializerV1();
+
             std::unique_ptr<Scene> deserialize(nlohmann::json& sceneJson) const override;
 
         private:

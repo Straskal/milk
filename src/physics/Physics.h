@@ -9,9 +9,10 @@ namespace milk
 {
     class Actor;
     class BoxCollider;
-    class Collision;
     class SpatialPartitionGrid;
     class Velocity;
+
+	struct Collision;
 
     /// The Physics system handles moving Actor's with velocity, and detecting collisions between Actor's with BoxColliders.
     class Physics

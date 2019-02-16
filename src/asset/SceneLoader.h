@@ -1,6 +1,8 @@
 #ifndef MILK_SCENELOADER_H
 #define MILK_SCENELOADER_H
 
+#include <string>
+
 namespace milk
 {
     class Scene;

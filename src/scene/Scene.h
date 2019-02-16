@@ -15,7 +15,8 @@ namespace milk
 {
     class Actor;
     class ActorLoader;
-    class Tilemap;
+
+    struct Tilemap;
 
     /// A Scene represents the current state that the game is in.
     /// Some examples: Main menu, dungeon level, cinematic, turn based combat sequence, etc...

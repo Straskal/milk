@@ -21,6 +21,7 @@
 
 #include "input/Keyboard.h"
 
+#include "physics/Collision.h"
 #include "physics/Physics.h"
 
 #include "scripting/Logic.h"

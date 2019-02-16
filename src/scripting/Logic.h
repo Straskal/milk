@@ -8,8 +8,9 @@
 namespace milk
 {
     class Actor;
-    class Collision;
     class Script;
+
+	struct Collision;
 
     /// Logic handles all Game specific logic through Lua scripts.
     class Logic

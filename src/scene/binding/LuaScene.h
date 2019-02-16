@@ -12,7 +12,8 @@ namespace milk
 {
     class Actor;
     class Scene;
-    class Vector2;
+
+    struct Vector2;
 
     namespace lua
     {

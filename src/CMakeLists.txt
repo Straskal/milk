@@ -125,12 +125,23 @@ add_library(milklib ${MILK_SRC_FILES})
 # include lib headers
 target_include_directories(milklib
         PUBLIC
-            ${SDL_INCLUDE_DIR}
+            ${SDL2_INCLUDE_DIR}
             ${SDL2_IMAGE_INCLUDE_DIRS}
             ${LUA53_INCLUDE_DIR}
             ${milklib_SOURCE_DIR}
             ../libs
         )
+
+# visual studio needs both the .dll and .lib
+target_link_directories(milklib
+	PUBLIC
+        ${SDL2_INCLUDE_DIR}
+        ${SDL2_IMAGE_INCLUDE_DIRS}
+        ${LUA53_INCLUDE_DIR}
+        ${milklib_SOURCE_DIR}
+        # not sure if we have to include ../libs here.
+        ../libs
+)
 
 # link libs
 target_link_libraries(milklib
