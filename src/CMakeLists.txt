@@ -132,16 +132,20 @@ target_include_directories(milklib
             ../libs
         )
 
-# visual studio needs both the .dll and .lib
-target_link_directories(milklib
-	PUBLIC
-        ${SDL2_INCLUDE_DIR}
-        ${SDL2_IMAGE_INCLUDE_DIRS}
-        ${LUA53_INCLUDE_DIR}
-        ${milklib_SOURCE_DIR}
-        # not sure if we have to include ../libs here.
-        ../libs
-)
+# windows binaries needs both the .dll and .lib to compile
+if (WIN32)
+
+	target_link_directories(milklib
+		PUBLIC
+			${SDL2_INCLUDE_DIR}
+			${SDL2_IMAGE_INCLUDE_DIRS}
+			${LUA53_INCLUDE_DIR}
+			${milklib_SOURCE_DIR}
+			# not sure if we have to include ../libs here.
+			../libs
+	)
+
+endif()
 
 # link libs
 target_link_libraries(milklib
