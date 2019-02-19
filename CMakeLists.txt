@@ -362,7 +362,7 @@ add_executable(milktests test/main.cpp ${TESTS} ${MOCKS})
 
 target_include_directories(milktests
     PRIVATE
-        ${milktests_SOURCE_DIR}
+        test
 )
 
 # link test exe with libs
