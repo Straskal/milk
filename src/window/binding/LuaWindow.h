@@ -3,29 +3,29 @@
 
 namespace sol
 {
-    class state;
+	class state;
 }
 
 namespace milk
 {
-    class Window;
+	class Window;
 
-    namespace lua
-    {
-        class LuaWindow
-        {
-        public:
-            static void bind(sol::state& luaState);
+	namespace lua
+	{
+		class LuaWindow
+		{
+		public:
+			static void bind(sol::state& luaState);
 
-            static int width(Window& window);
+			static int width(Window& window);
 
-            static int height(Window& window);
+			static int height(Window& window);
 
-            static bool fullscreen(Window& window);
+			static bool fullscreen(Window& window);
 
-            static void toggleFullscreen(Window& window);
-        };
-    }
+			static void toggleFullscreen(Window& window);
+		};
+	}
 }
 
 #endif

@@ -8,44 +8,44 @@ struct SDL_Window;
 
 namespace milk
 {
-    namespace adapter
-    {
-        /// SDL implementation of Renderer.
-        class RendererAdapter : public Renderer
-        {
-        public:
-            static RendererAdapter& instance()
-            {
-                static RendererAdapter instance;
-                return instance;
-            }
+	namespace adapter
+	{
+		/// SDL implementation of Renderer.
+		class RendererAdapter : public Renderer
+		{
+		public:
+			static RendererAdapter& instance()
+			{
+				static RendererAdapter instance;
+				return instance;
+			}
 
-            bool init(SDL_Window* sdlWindow, unsigned int resolutionWidth, unsigned int resolutionHeight);
+			bool init(SDL_Window* sdlWindow, unsigned int resolutionWidth, unsigned int resolutionHeight);
 
-            void clear(const Color& color) override;
+			void clear(const Color& color) override;
 
-            void drawRectangle(const Rectangle& destinationRectangle, const Color& color) override;
+			void drawRectangle(const Rectangle& destinationRectangle, const Color& color) override;
 
-            void drawRectangleOutline(const Rectangle& destinationRectangle, const Color& color) override;
+			void drawRectangleOutline(const Rectangle& destinationRectangle, const Color& color) override;
 
-            void draw(const Texture& texture, const Rectangle& sourceRectangle, const Rectangle& destinationRectangle, int flipFlags) override;
+			void draw(const Texture& texture, const Rectangle& sourceRectangle, const Rectangle& destinationRectangle, int flipFlags) override;
 
-            void present() override;
+			void present() override;
 
-            Resolution resolution() const override;
+			Resolution resolution() const override;
 
-            SDL_Renderer* sdlRenderer() const;
+			SDL_Renderer* sdlRenderer() const;
 
-            void free();
+			void free();
 
-        private:
-            RendererAdapter();
+		private:
+			RendererAdapter();
 
-            Resolution resolution_;
+			Resolution resolution_;
 
-            SDL_Renderer* sdlRenderer_;
-        };
-    }
+			SDL_Renderer* sdlRenderer_;
+		};
+	}
 }
 
 #endif

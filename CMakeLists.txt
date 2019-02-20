@@ -15,28 +15,24 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 # On windows, we have to point cmake to our third party dependencies.
 #---------------------------------------------------------------------------
 if(WIN32)
-
     if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-
         # provide paths for minGW/minGW-w64 development libs
         # set(SDL2_PATH ...)
         # set(SDL2_IMAGE_PATH ...)
         # set(ENV{LUA_DIR} ...)
-
     elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-
         # provide paths for visual c++ development libs
-		# these are just the paths that I use. Feel free to change them in your environment.
+        # these are just the paths that I use. Feel free to change them in your environment.
         set(SDL2_PATH C:/ExternalLibs/sdl2/SDL2-2.0.9)
         set(SDL2_IMAGE_PATH C:/ExternalLibs/SDL2_image-2.0.4)
         set(ENV{LUA_DIR} C:/ExternalLibs/lua53)
-
     endif()
 endif()
 
 #---------------------------------------------------------------------------
-# run find scripts
+# find dependencies
 #---------------------------------------------------------------------------
+
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(Lua53 REQUIRED)
@@ -45,9 +41,11 @@ find_package(Lua53 REQUIRED)
 # milk lib
 #---------------------------------------------------------------------------
 
+# enable testing for milk lib
 include(CTest)	
 enable_testing()
 
+# external libs
 set(MILK_SRC_LIBS
     libs/json/json.hpp
     libs/sol/sol.hpp
@@ -55,6 +53,7 @@ set(MILK_SRC_LIBS
 
 source_group("libs" FILES ${MILK_SRC_LIBS})
 
+# asset
 set(MILK_SRC_ASSET
     src/asset/AssetCache.h
     src/asset/ActorLoader.h
@@ -62,7 +61,7 @@ set(MILK_SRC_ASSET
 )
 
 set(MILK_SRC_ASSET_ADAPTER
-	src/asset/adapter/ActorLoaderAdapter.cpp
+    src/asset/adapter/ActorLoaderAdapter.cpp
     src/asset/adapter/ActorLoaderAdapter.h
     src/asset/adapter/ActorJsonDeserializer.h
     src/asset/adapter/ActorTemplateCacheAdapter.cpp
@@ -81,6 +80,7 @@ set(MILK_SRC_ASSET_ADAPTER
 source_group("asset" FILES ${MILK_SRC_ASSET})
 source_group("asset\\adapter" FILES ${MILK_SRC_ASSET_ADAPTER})
 
+# debug tools
 set(MILK_SRC_DEBUG_TOOLS
     src/debugtools/DebugTools.cpp
     src/debugtools/DebugTools.h
@@ -88,12 +88,12 @@ set(MILK_SRC_DEBUG_TOOLS
 
 source_group("debugtools" FILES ${MILK_SRC_DEBUG_TOOLS})
 
+# file system
 set(MILK_SRC_FILESYSTEM
     src/filesystem/Filesystem.h
 )
 
 set(MILK_SRC_FILESYSTEM_ADAPTER
-    src/filesystem/Filesystem.h
     src/filesystem/adapter/FilesystemAdapter.cpp
     src/filesystem/adapter/FilesystemAdapter.h
 )
@@ -101,6 +101,7 @@ set(MILK_SRC_FILESYSTEM_ADAPTER
 source_group("filesystem" FILES ${MILK_SRC_FILESYSTEM})
 source_group("filesystem\\adapter" FILES ${MILK_SRC_FILESYSTEM_ADAPTER})
 
+# input
 set(MILK_SRC_INPUT
     src/input/Keyboard.cpp
     src/input/Keyboard.h
@@ -114,6 +115,7 @@ set(MILK_SRC_INPUT_BINDING
 source_group("input" FILES ${MILK_SRC_INPUT})
 source_group("input\\binding" FILES ${MILK_SRC_INPUT_BINDING})
 
+# game
 set(MILK_SRC_GAME
     src/game/Game.h
     src/game/Game.cpp
@@ -127,6 +129,7 @@ set(MILK_SRC_GAME_BINDING
 source_group("game" FILES ${MILK_SRC_GAME})
 source_group("game\\binding" FILES ${MILK_SRC_GAME_BINDING})
 
+# graphics
 set(MILK_SRC_GRAPHICS
     src/graphics/Animator.cpp
     src/graphics/Animator.h
@@ -142,6 +145,7 @@ set(MILK_SRC_GRAPHICS
 
 source_group("graphics" FILES ${MILK_SRC_GRAPHICS})
 
+# math
 set(MILK_SRC_MATH
     src/math/Mathf.h
     src/math/Matrix3.h
@@ -159,6 +163,7 @@ set(MILK_SRC_MATH_BINDING
 source_group("math" FILES ${MILK_SRC_MATH})
 source_group("math\\binding" FILES ${MILK_SRC_MATH_BINDING})
 
+# physics
 set(MILK_SRC_PHYSICS
     src/physics/BoxCollider.cpp
     src/physics/BoxCollider.h
@@ -179,6 +184,7 @@ set(MILK_SRC_PHYSICS_BINDING
 source_group("physics" FILES ${MILK_SRC_PHYSICS})
 source_group("physics\\binding" FILES ${MILK_SRC_PHYSICS_BINDING})
 
+# scene
 set(MILK_SRC_SCENE
     src/scene/Actor.cpp
     src/scene/Actor.h
@@ -200,6 +206,7 @@ set(MILK_SRC_SCENE_BINDING
 source_group("scene" FILES ${MILK_SRC_SCENE})
 source_group("scene\\binding" FILES ${MILK_SRC_SCENE_BINDING})
 
+# scripting
 set(MILK_SRC_SCRIPTING
     src/scripting/LuaApi.cpp
     src/scripting/LuaApi.h
@@ -211,6 +218,7 @@ set(MILK_SRC_SCRIPTING
 
 source_group("scripting" FILES ${MILK_SRC_SCRIPTING})
 
+# utilities
 set(MILK_SRC_UTILITIES
     src/utilities/Alignment.h
     src/utilities/IdGenerator.cpp
@@ -221,6 +229,7 @@ set(MILK_SRC_UTILITIES
 
 source_group("utilities" FILES ${MILK_SRC_UTILITIES})
 
+# window
 set(MILK_SRC_WINDOW
     src/window/Renderer.h
     src/window/Window.h
@@ -245,26 +254,26 @@ source_group("window\\binding" FILES ${MILK_SRC_WINDOW_BINDING})
 set(MILK_SRC_FILES
     ${MILK_SRC_LIBS}
     ${MILK_SRC_ASSET}
-	${MILK_SRC_ASSET_ADAPTER}
+    ${MILK_SRC_ASSET_ADAPTER}
     ${MILK_SRC_DEBUG_TOOLS}
     ${MILK_SRC_FILESYSTEM}
-	${MILK_SRC_FILESYSTEM_ADAPTER}
+    ${MILK_SRC_FILESYSTEM_ADAPTER}
     ${MILK_SRC_INPUT}
-	${MILK_SRC_INPUT_BINDING}
+    ${MILK_SRC_INPUT_BINDING}
     ${MILK_SRC_GAME}
-	${MILK_SRC_GAME_BINDING}
+    ${MILK_SRC_GAME_BINDING}
     ${MILK_SRC_GRAPHICS}
     ${MILK_SRC_MATH}
-	${MILK_SRC_MATH_BINDING}
+    ${MILK_SRC_MATH_BINDING}
     ${MILK_SRC_PHYSICS}
-	${MILK_SRC_PHYSICS_BINDING}
+    ${MILK_SRC_PHYSICS_BINDING}
     ${MILK_SRC_SCENE}
-	${MILK_SRC_SCENE_BINDING}
+    ${MILK_SRC_SCENE_BINDING}
     ${MILK_SRC_SCRIPTING}
     ${MILK_SRC_UTILITIES}
     ${MILK_SRC_WINDOW}
-	${MILK_SRC_WINDOW_ADAPTER}
-	${MILK_SRC_WINDOW_BINDING}
+    ${MILK_SRC_WINDOW_ADAPTER}
+    ${MILK_SRC_WINDOW_BINDING}
 )
 
 add_library(milklib ${MILK_SRC_FILES})
@@ -279,16 +288,14 @@ target_include_directories(milklib
 )
 
 if (WIN32)
-
-	target_link_directories(milklib
-		PUBLIC
-			${SDL2_INCLUDE_DIR}
-			${SDL2_IMAGE_INCLUDE_DIRS}
-			${LUA53_INCLUDE_DIR}
-			src
-			libs
-	)
-
+    target_link_directories(milklib
+        PUBLIC
+            ${SDL2_INCLUDE_DIR}
+            ${SDL2_IMAGE_INCLUDE_DIRS}
+            ${LUA53_INCLUDE_DIR}
+            src
+            libs
+    )
 endif()
 
 target_link_libraries(milklib
@@ -302,7 +309,7 @@ target_link_libraries(milklib
 # milk exe
 #---------------------------------------------------------------------------
 
-add_executable(milk main/main.cpp)
+add_executable(milk src/main.cpp)
 
 target_link_libraries(milk milklib)
 
@@ -346,10 +353,10 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 # create test exe
 set (TESTS
-	test/tests/math/Matrix3Tests.h
-	test/tests/math/RectangleTests.h
-	test/tests/scene/ActorTests.h
-	test/tests/scene/SceneTests.h
+    test/tests/math/Matrix3Tests.h
+    test/tests/math/RectangleTests.h
+    test/tests/scene/ActorTests.h
+    test/tests/scene/SceneTests.h
 )
 
 set(MOCKS
@@ -381,7 +388,5 @@ add_test(NAME milktests COMMAND milktests)
 #---------------------------------------------------------------------------
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-
-	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT milk)
-
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT milk)
 endif()
