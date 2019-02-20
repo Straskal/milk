@@ -3,20 +3,20 @@
 
 #include <memory>
 
-#include "json/json.hpp"
+#include "asset/json/json.hpp"
 
 namespace milk
 {
-    class Scene;
+	class Scene;
 
-    namespace adapter
-    {
-        class SceneJsonDeserializer
-        {
-        public:
-            virtual std::unique_ptr<Scene> deserialize(nlohmann::json& sceneJson) const = 0;
-        };
-    }
+	namespace adapter
+	{
+		class SceneJsonDeserializer
+		{
+		public:
+			virtual std::unique_ptr<Scene> deserialize(nlohmann::json& sceneJson) const = 0;
+		};
+	}
 }
 
 #endif

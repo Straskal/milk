@@ -33,8 +33,8 @@ endif()
 # find dependencies
 #---------------------------------------------------------------------------
 
-find_package(SDL2 REQUIRED)
-find_package(SDL2_image REQUIRED)
+find_package(SDL2 2.0.9 REQUIRED)
+find_package(SDL2_image 2.0.4 REQUIRED)
 find_package(Lua53 REQUIRED)
 
 #---------------------------------------------------------------------------
@@ -44,14 +44,6 @@ find_package(Lua53 REQUIRED)
 # enable testing for milk lib
 include(CTest)	
 enable_testing()
-
-# external libs
-set(MILK_SRC_LIBS
-    libs/json/json.hpp
-    libs/sol/sol.hpp
-)
-
-source_group("libs" FILES ${MILK_SRC_LIBS})
 
 # asset
 set(MILK_SRC_ASSET
@@ -77,8 +69,13 @@ set(MILK_SRC_ASSET_ADAPTER
     src/asset/adapter/deserializers-v1/SceneJsonDeserializerV1.h
 )
 
+set(MILK_SRC_ASSET_JSON
+    src/asset/json/json.hpp   
+)
+
 source_group("asset" FILES ${MILK_SRC_ASSET})
 source_group("asset\\adapter" FILES ${MILK_SRC_ASSET_ADAPTER})
+source_group("asset\\json" FILES ${MILK_SRC_ASSET_JSON})
 
 # debug tools
 set(MILK_SRC_DEBUG_TOOLS
@@ -216,7 +213,12 @@ set(MILK_SRC_SCRIPTING
     src/scripting/Script.h
 )
 
+set(MILK_SRC_SCRIPTING_SOL
+    src/scripting/sol/sol.hpp
+)
+
 source_group("scripting" FILES ${MILK_SRC_SCRIPTING})
+source_group("scripting\\sol" FILES ${MILK_SRC_SCRIPTING_SOL})
 
 # utilities
 set(MILK_SRC_UTILITIES
@@ -255,6 +257,7 @@ set(MILK_SRC_FILES
     ${MILK_SRC_LIBS}
     ${MILK_SRC_ASSET}
     ${MILK_SRC_ASSET_ADAPTER}
+    ${MILK_SRC_ASSET_JSON}
     ${MILK_SRC_DEBUG_TOOLS}
     ${MILK_SRC_FILESYSTEM}
     ${MILK_SRC_FILESYSTEM_ADAPTER}
@@ -270,6 +273,7 @@ set(MILK_SRC_FILES
     ${MILK_SRC_SCENE}
     ${MILK_SRC_SCENE_BINDING}
     ${MILK_SRC_SCRIPTING}
+    ${MILK_SRC_SCRIPTING_SOL}
     ${MILK_SRC_UTILITIES}
     ${MILK_SRC_WINDOW}
     ${MILK_SRC_WINDOW_ADAPTER}
@@ -323,8 +327,8 @@ file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${milk_BINARY_DIR})
 configure_file(test/GTestDownload.txt googletest-download/CMakeLists.txt)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download
 )
 
 if(result)
@@ -332,8 +336,8 @@ if(result)
 endif()
 
 execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download
 )
 
 if(result)
@@ -389,4 +393,16 @@ add_test(NAME milktests COMMAND milktests)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT milk)
+endif()
+
+#---------------------------------------------------------------------------
+# post build step to copy dlls to executable output file
+# currently only set up for visual c++ x86 dlls on windows
+#---------------------------------------------------------------------------
+
+if (WIN32)
+    add_custom_command(TARGET milk POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${PROJECT_SOURCE_DIR}/libs"
+            $<TARGET_FILE_DIR:milk>)
 endif()

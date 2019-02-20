@@ -1,6 +1,6 @@
 #include "LuaWindow.h"
 
-#include "sol/sol.hpp"
+#include "scripting/sol/sol.hpp"
 
 #include "game/Game.h"
 

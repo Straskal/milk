@@ -6,37 +6,37 @@
 
 #include "asset/AssetCache.h"
 
-#include "json/json.hpp"
+#include "asset/json/json.hpp"
 
 using json = nlohmann::json;
 
 namespace milk
 {
-    class Filesystem;
+	class Filesystem;
 
-    namespace adapter
-    {
-        class ActorTemplateCacheAdapter : public AssetCache<json>
-        {
-        public:
-            static ActorTemplateCacheAdapter& instance()
-            {
-                static ActorTemplateCacheAdapter instance;
-                return instance;
-            }
+	namespace adapter
+	{
+		class ActorTemplateCacheAdapter : public AssetCache<json>
+		{
+		public:
+			static ActorTemplateCacheAdapter& instance()
+			{
+				static ActorTemplateCacheAdapter instance;
+				return instance;
+			}
 
-            std::shared_ptr<json> load(const std::string& actorTemplateName) override;
+			std::shared_ptr<json> load(const std::string& actorTemplateName) override;
 
-            void freeUnreferencedAssets() override;
+			void freeUnreferencedAssets() override;
 
-            void free();
+			void free();
 
-        private:
-            ActorTemplateCacheAdapter() = default;
+		private:
+			ActorTemplateCacheAdapter() = default;
 
-            std::unordered_map<std::string, std::shared_ptr<json>> templateCache_;
-        };
-    }
+			std::unordered_map<std::string, std::shared_ptr<json>> templateCache_;
+		};
+	}
 }
 
 #endif
