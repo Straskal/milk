@@ -1,3 +1,8 @@
+# You must download dependencies. If on Windows, then you have to manually set paths to dependencies. See line 20
+# SDL2 2.0.9: https://www.libsdl.org/download-2.0.php
+# SDL2_image 2.0.4: https://www.libsdl.org/projects/SDL_image/
+# Lua 5.3: https://www.lua.org/download.html which leads to https://sourceforge.net/projects/luabinaries/files/5.3.5/
+
 cmake_minimum_required(VERSION 3.6.1)
 
 project(milk)
