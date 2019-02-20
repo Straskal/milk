@@ -1,6 +1,6 @@
 # You must download dependencies. If on Windows, then you have to manually set paths to dependencies. See line 20
-# SDL2 2.0.9: https://www.libsdl.org/download-2.0.php
-# SDL2_image 2.0.4: https://www.libsdl.org/projects/SDL_image/
+# SDL2: https://www.libsdl.org/download-2.0.php
+# SDL2_image: https://www.libsdl.org/projects/SDL_image/
 # Lua 5.3: https://www.lua.org/download.html which leads to https://sourceforge.net/projects/luabinaries/files/5.3.5/
 
 cmake_minimum_required(VERSION 3.6.1)
@@ -38,8 +38,8 @@ endif()
 # find dependencies
 #---------------------------------------------------------------------------
 
-find_package(SDL2 2.0.9 REQUIRED)
-find_package(SDL2_image 2.0.4 REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
 find_package(Lua53 REQUIRED)
 
 #---------------------------------------------------------------------------
@@ -403,6 +403,10 @@ endif()
 #---------------------------------------------------------------------------
 # post build step to copy dlls to executable output file
 # currently only set up for visual c++ x86 dlls on windows
+
+# assumes SDL2 2.0.9
+# assumes SDL2_image 2.0.4
+# assumes Lua 5.3.5
 #---------------------------------------------------------------------------
 
 if (WIN32)
