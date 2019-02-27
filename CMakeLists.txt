@@ -143,7 +143,6 @@ set(MILK_SRC_GRAPHICS
     src/graphics/Sprite.h
     src/graphics/Texture.cpp
     src/graphics/Texture.h
-    src/graphics/Tilemap.h
 )
 
 source_group("graphics" FILES ${MILK_SRC_GRAPHICS})

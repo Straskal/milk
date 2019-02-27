@@ -38,7 +38,7 @@ namespace milk
 		/// \param flipFlags: The Texture's flip flags
 		virtual void draw(const Texture& texture, const Rectangle& sourceRectangle, const Rectangle& destinationRectangle, int flipFlags) = 0;
 
-		/// Draw the contents of the Renderer to the Window.
+		/// Present the contents of the Renderer to the Window.
 		virtual void present() = 0;
 
 		/// \returns the Renderer's resolution.

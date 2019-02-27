@@ -5,7 +5,6 @@
 #include "Animator.h"
 #include "Sprite.h"
 #include "Texture.h"
-#include "Tilemap.h"
 
 #include "scene/Actor.h"
 #include "scene/Scene.h"
@@ -25,29 +24,6 @@ void milk::Graphics::render(milk::Scene& scene)
     auto screenSize = renderer_.resolution();
 
     Matrix3 camTransform = camera.transformation();
-
-    auto tilemap = scene.tilemap();
-
-    if (tilemap != nullptr)
-    {
-        for (auto& layer : tilemap->layers)
-        {
-            for (auto& tile : layer->tiles)
-            {
-                Rectangle destinationRect;
-
-                Vector2 destVec = Vector2{(float)tile->x, (float)tile->y};
-                destVec = Vector2::transform(destVec, camTransform);
-
-                destinationRect.x = (int)destVec.x;
-                destinationRect.y = (int)destVec.y;
-                destinationRect.width = tile->type.sourceRect.width;
-                destinationRect.height = tile->type.sourceRect.height;
-
-                renderer_.draw(*(tilemap->texture), tile->type.sourceRect, destinationRect, 0);
-            }
-        }
-    }
 
     for (auto it : spritesByActorId_)
     {

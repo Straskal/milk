@@ -16,8 +16,6 @@ namespace milk
     class Actor;
     class ActorLoader;
 
-    struct Tilemap;
-
     /// A Scene represents the current state that the game is in.
     /// Some examples: Main menu, dungeon level, cinematic, turn based combat sequence, etc...
     class Scene
@@ -55,21 +53,11 @@ namespace milk
         /// \returns The Scene's Camera
         Camera& camera();
 
-        /// \returns the Scene's Tilemap, or nullptr if the Scene doesn't have a tilemap.
-        Tilemap* tilemap();
-
-        /// Sets the Scene's Tilemap.
-        /// \param tilemap
-        void tilemap(std::unique_ptr<Tilemap> tilemap);
-
         /// \returns the next spawned Actor in the "to spawn" queue.
         Actor* pollSpawned();
 
         /// \returns the next spawned Actor in the "to destroy" queue.
         Actor* pollDestroyed();
-
-        /// \returns The Scene's boundaries
-        Rectangle bounds() const;
 
         /// Mark the scene as ended. After a Scene has ended, no new spawns are processed.
         void end();
@@ -82,8 +70,6 @@ namespace milk
 
         IdGenerator idGenerator_;
         Camera camera_;
-
-        std::unique_ptr<Tilemap> tilemap_;
 
         std::unordered_map<int, std::unique_ptr<Actor>> actorsById_;
         std::vector<std::unique_ptr<Actor>> actorsToSpawn_;
