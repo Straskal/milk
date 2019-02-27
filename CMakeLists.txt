@@ -83,6 +83,13 @@ source_group("asset" FILES ${MILK_SRC_ASSET})
 source_group("asset\\adapter" FILES ${MILK_SRC_ASSET_ADAPTER})
 source_group("asset\\json" FILES ${MILK_SRC_ASSET_JSON})
 
+# common
+set(MILK_SRC_COMMON
+	src/common/atomic.h
+)
+
+source_group("common" FILES ${MILK_SRC_COMMON})
+
 # debug tools
 set(MILK_SRC_DEBUG_TOOLS
     src/debugtools/DebugTools.cpp
@@ -263,6 +270,7 @@ set(MILK_SRC_FILES
     ${MILK_SRC_ASSET}
     ${MILK_SRC_ASSET_ADAPTER}
     ${MILK_SRC_ASSET_JSON}
+	${MILK_SRC_COMMON}	
     ${MILK_SRC_DEBUG_TOOLS}
     ${MILK_SRC_FILESYSTEM}
     ${MILK_SRC_FILESYSTEM_ADAPTER}
