@@ -7,9 +7,9 @@
 
 #include "Camera.h"
 
-#include "math/Rectangle.h"
+#include "common/IdGenerator.h"
 
-#include "utilities/IdGenerator.h"
+#include "math/Rectangle.h"
 
 namespace milk
 {

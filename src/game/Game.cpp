@@ -29,7 +29,7 @@
 
 #include "scene/Scene.h"
 
-#include "utilities/Timer.h"
+#include "timer/Timer.h"
 
 #include "window/adapter/WindowAdapter.h"
 #include "window/adapter/RendererAdapter.h"

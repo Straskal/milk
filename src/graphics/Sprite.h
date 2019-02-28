@@ -6,9 +6,9 @@
 #include "SDL.h"
 
 #include "asset/AssetCache.h"
+#include "common/Alignment.h"
 #include "math/Rectangle.h"
 #include "scene/ActorComponent.h"
-#include "utilities/Alignment.h"
 
 namespace milk
 {

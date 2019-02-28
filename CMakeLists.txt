@@ -85,6 +85,9 @@ source_group("asset\\json" FILES ${MILK_SRC_ASSET_JSON})
 
 # common
 set(MILK_SRC_COMMON
+    src/common/Alignment.h
+    src/common/IdGenerator.cpp
+    src/common/IdGenerator.h
 	src/common/int.h
 )
 
@@ -232,16 +235,13 @@ set(MILK_SRC_SCRIPTING_SOL
 source_group("scripting" FILES ${MILK_SRC_SCRIPTING})
 source_group("scripting\\sol" FILES ${MILK_SRC_SCRIPTING_SOL})
 
-# utilities
-set(MILK_SRC_UTILITIES
-    src/utilities/Alignment.h
-    src/utilities/IdGenerator.cpp
-    src/utilities/IdGenerator.h
-    src/utilities/Timer.cpp
-    src/utilities/Timer.h
+# timer
+set(MILK_SRC_TIMER
+    src/timer/Timer.cpp
+    src/timer/Timer.h
 )
 
-source_group("utilities" FILES ${MILK_SRC_UTILITIES})
+source_group("timer" FILES ${MILK_SRC_TIMER})
 
 # window
 set(MILK_SRC_WINDOW
@@ -287,7 +287,7 @@ set(MILK_SRC_FILES
     ${MILK_SRC_SCENE_BINDING}
     ${MILK_SRC_SCRIPTING}
     ${MILK_SRC_SCRIPTING_SOL}
-    ${MILK_SRC_UTILITIES}
+    ${MILK_SRC_TIMER}
     ${MILK_SRC_WINDOW}
     ${MILK_SRC_WINDOW_ADAPTER}
     ${MILK_SRC_WINDOW_BINDING}

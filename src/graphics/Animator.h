@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "scene/ActorComponent.h"
-#include "utilities/Timer.h"
+#include "timer/Timer.h"
 
 namespace milk
 {

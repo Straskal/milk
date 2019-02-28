@@ -3,10 +3,10 @@
 
 #include "scene/ActorComponent.h"
 
+#include "common/Alignment.h"
+
 #include "math/Rectangle.h"
 #include "math/Vector2.h"
-
-#include "utilities/Alignment.h"
 
 namespace milk
 {
