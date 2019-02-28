@@ -1,5 +1,5 @@
-#ifndef MILK_ATOMIC_H
-#define MILK_ATOMIC_H
+#ifndef MILK_INT_H
+#define MILK_INT_H
 
 #include <cstdint>
 
@@ -12,8 +12,6 @@ namespace milk
 	typedef uint_fast8_t U8;
 	typedef uint_fast16_t U16;
 	typedef uint_fast32_t U32;
-
-	typedef float F32;
 }
 
 #endif

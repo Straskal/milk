@@ -1,7 +1,7 @@
 #ifndef MILK_WINDOW_ADAPTER_H
 #define MILK_WINDOW_ADAPTER_H
 
-// We define this bad boy here because SDL does not, and we don't want magic numbers chilling up in this boi.
+// We define this bad boi here because SDL does not, and we don't want magic numbers chilling up in this boi.
 #define MILK_SDL_WINDOW_NO_FLAG 0
 
 #include <string>
@@ -47,6 +47,8 @@ namespace milk
 			unsigned int height_;
 
 			bool fullscreen_;
+
+			bool initialized_;
 
 			SDL_Window* sdlWindow_;
 		};

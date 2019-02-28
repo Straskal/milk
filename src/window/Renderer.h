@@ -1,6 +1,8 @@
 #ifndef MILK_RENDERER_H
 #define MILK_RENDERER_H
 
+#include "common/int.h"
+
 namespace milk
 {
 	class Texture;
@@ -36,7 +38,7 @@ namespace milk
 		/// \param sourceRectangle: The source Rectangle of the Texture
 		/// \param destinationRectangle: The destination to draw the texture
 		/// \param flipFlags: The Texture's flip flags
-		virtual void draw(const Texture& texture, const Rectangle& sourceRectangle, const Rectangle& destinationRectangle, int flipFlags) = 0;
+		virtual void draw(const Texture& texture, const Rectangle& sourceRectangle, const Rectangle& destinationRectangle, U8 flipFlags) = 0;
 
 		/// Present the contents of the Renderer to the Window.
 		virtual void present() = 0;

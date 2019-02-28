@@ -85,7 +85,7 @@ source_group("asset\\json" FILES ${MILK_SRC_ASSET_JSON})
 
 # common
 set(MILK_SRC_COMMON
-	src/common/atomic.h
+	src/common/int.h
 )
 
 source_group("common" FILES ${MILK_SRC_COMMON})

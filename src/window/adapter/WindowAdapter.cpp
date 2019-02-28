@@ -7,16 +7,19 @@
 #include "RendererAdapter.h"
 
 milk::adapter::WindowAdapter::WindowAdapter()
-	: title_(""),
-	width_(0),
-	height_(0),
-	fullscreen_(false),
-	sdlWindow_(nullptr)
 {
+	width_ = 0;
+	height_ = 0;
+	fullscreen_ = false;
+	initialized_ = false;
+	sdlWindow_ = nullptr;
 }
 
 bool milk::adapter::WindowAdapter::init(const std::string& title, unsigned int width, unsigned int height, bool fullscreen)
 {
+	if (initialized_)
+		return true;
+
 	title_ = title;
 	width_ = width;
 	height_ = height;
@@ -37,6 +40,8 @@ bool milk::adapter::WindowAdapter::init(const std::string& title, unsigned int w
 
 	if (fullscreen)
 		toggleFullscreen();
+
+	initialized_ = true;
 
 	return true;
 }

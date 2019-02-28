@@ -28,7 +28,7 @@ namespace milk
 
 			void drawRectangleOutline(const Rectangle& destinationRectangle, const Color& color) override;
 
-			void draw(const Texture& texture, const Rectangle& sourceRectangle, const Rectangle& destinationRectangle, int flipFlags) override;
+			void draw(const Texture& texture, const Rectangle& sourceRectangle, const Rectangle& destinationRectangle, U8 flipFlags) override;
 
 			void present() override;
 
@@ -40,6 +40,8 @@ namespace milk
 
 		private:
 			RendererAdapter();
+
+			bool initialized_;
 
 			Resolution resolution_;
 
