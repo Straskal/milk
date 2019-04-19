@@ -228,7 +228,7 @@ void milk::Game::update()
         logic_->onActorSpawned(*spawned);
     }
 
-    // Now lets all of the actors that were destroyed last frame!
+    // Now lets handle all of the actors that were destroyed last frame!
     while (auto destroyed = scene_->pollDestroyed())
     {
         physics_->onActorDestroyed(*destroyed);
