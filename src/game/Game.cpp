@@ -4,33 +4,13 @@
 
 #include "SDL.h"
 
-#include "asset/adapter/ActorLoaderAdapter.h"
-#include "asset/adapter/ActorTemplateCacheAdapter.h"
-#include "asset/adapter/SceneLoaderAdapter.h"
 #include "asset/adapter/TextureCacheAdapter.h"
-
-#ifdef _DEBUG
-#include "debugtools/DebugTools.h"
-#endif
-
 #include "filesystem/Filesystem.h"
 #include "filesystem/adapter/FilesystemAdapter.h"
-
 #include "graphics/Color.h"
-#include "graphics/Graphics.h"
-
 #include "input/Keyboard.h"
-
-#include "physics/Collision.h"
-#include "physics/Physics.h"
-
-#include "scripting/Logic.h"
 #include "scripting/LuaApi.h"
-
-#include "scene/Scene.h"
-
 #include "timer/Timer.h"
-
 #include "window/adapter/WindowAdapter.h"
 #include "window/adapter/RendererAdapter.h"
 
@@ -96,19 +76,8 @@ void milk::Game::init(std::string configFilepath)
     }
 
     fileSystem_ = &adapter::FilesystemAdapter::instance();
-    sceneLoader_ = &adapter::SceneLoaderAdapter::instance();
-    actorLoader_ = &adapter::ActorLoaderAdapter::instance();
-    actorTemplateCache_ = &adapter::ActorTemplateCacheAdapter::instance();
 
     Keyboard::initialize();
-
-    logic_ = std::make_unique<Logic>(luaState());
-    physics_ = std::make_unique<Physics>();
-    graphics_ = std::make_unique<Graphics>(*renderer_, *textureCache_);
-
-#ifdef _DEBUG
-    debugTools_ = std::make_unique<DebugTools>(*renderer_);
-#endif
 
     LuaApi::init(luaState_);
 
@@ -172,11 +141,6 @@ void milk::Game::handleEvents()
             case SDL_KEYUP:
                 if (sdlEvent.key.keysym.sym == SDLK_ESCAPE)
                     quit();
-#ifdef _DEBUG
-                if (sdlEvent.key.keysym.sym == SDLK_BACKQUOTE)
-                    debugTools_->show = !debugTools_->show;
-                break;
-#endif
             default:
                 break;
         }
@@ -189,82 +153,12 @@ void milk::Game::handleEvents()
 
 void milk::Game::update()
 {
-    if (!sceneToLoad_.empty())
-    {
-        if (scene_ != nullptr)
-        {
-            scene_->end();
-
-            logic_->flush();
-            physics_->flush();
-            graphics_->flush();
-
-#ifdef _DEBUG
-            debugTools_->flush();
-#endif
-        }
-
-        scene_ = sceneLoader_->load(sceneToLoad_);
-
-        sceneToLoad_.erase();
-
-        textureCache_->freeUnreferencedAssets();
-        actorTemplateCache_->freeUnreferencedAssets();
-    }
-
-    if (scene_ == nullptr)
-        return;
-
-    // Lets handle all of the actors that were spawned last frame!
-    while (auto spawned = scene_->pollSpawned())
-    {
-        physics_->onActorSpawned(*spawned);
-        graphics_->onActorSpawned(*spawned);
-
-#ifdef _DEBUG
-        debugTools_->onActorSpawned(*spawned);
-#endif
-
-        logic_->onActorSpawned(*spawned);
-    }
-
-    // Now lets handle all of the actors that were destroyed last frame!
-    while (auto destroyed = scene_->pollDestroyed())
-    {
-        physics_->onActorDestroyed(*destroyed);
-        graphics_->onActorDestroyed(*destroyed);
-
-#ifdef _DEBUG
-        debugTools_->onActorDestroyed(*destroyed);
-#endif
-
-        logic_->onActorDestroyed(*destroyed);
-    }
-
-    // NOW lets handle all of the collisions last frame!
-    while (auto collisionEvent = physics_->pollCollisions())
-    {
-        logic_->onActorCollision(*collisionEvent);
-    }
-
-    logic_->update();
-    physics_->update();
-    logic_->lateUpdate();
+    
 }
 
 void milk::Game::render()
 {
     renderer_->clear(Color::black());
-
-    if (scene_ != nullptr)
-    {
-        graphics_->render(*scene_);
-
-#ifdef _DEBUG
-        debugTools_->render(*scene_);
-#endif
-    }
-
     renderer_->present();
 }
 
@@ -283,11 +177,6 @@ milk::AssetCache<milk::Texture>& milk::Game::textureCache() const
     return *textureCache_;
 }
 
-milk::AssetCache<nlohmann::json>& milk::Game::actorTemplateCache() const
-{
-    return *actorTemplateCache_;
-}
-
 sol::state& milk::Game::luaState()
 {
     return luaState_;
@@ -300,22 +189,7 @@ void milk::Game::loadScene(const std::string& name)
 
 void milk::Game::shutDown()
 {
-    if (scene_ != nullptr)
-        scene_->end();
-
-    logic_->flush();
-    physics_->flush();
-    graphics_->flush();
-
-#ifdef _DEBUG
-    debugTools_->flush();
-#endif
-
-    scene_.reset();
-
     textureCache_->free();
-    actorTemplateCache_->free();
-
     renderer_->free();
     window_->free();
 }

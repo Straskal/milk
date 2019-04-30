@@ -54,52 +54,22 @@ enable_testing()
 # asset
 set(MILK_SRC_ASSET
     src/asset/AssetCache.h
-    src/asset/ActorLoader.h
-    src/asset/SceneLoader.h    
 )
 
 set(MILK_SRC_ASSET_ADAPTER
-    src/asset/adapter/ActorLoaderAdapter.cpp
-    src/asset/adapter/ActorLoaderAdapter.h
-    src/asset/adapter/ActorJsonDeserializer.h
-    src/asset/adapter/ActorTemplateCacheAdapter.cpp
-    src/asset/adapter/ActorTemplateCacheAdapter.h
-    src/asset/adapter/SceneLoaderAdapter.cpp
-    src/asset/adapter/SceneLoaderAdapter.h
-    src/asset/adapter/SceneJsonDeserializer.h
     src/asset/adapter/TextureCacheAdapter.cpp
     src/asset/adapter/TextureCacheAdapter.h
-    src/asset/adapter/deserializers-v1/ActorJsonDeserializerV1.cpp
-    src/asset/adapter/deserializers-v1/ActorJsonDeserializerV1.h
-    src/asset/adapter/deserializers-v1/SceneJsonDeserializerV1.cpp
-    src/asset/adapter/deserializers-v1/SceneJsonDeserializerV1.h
-)
-
-set(MILK_SRC_ASSET_JSON
-    src/asset/json/json.hpp   
 )
 
 source_group("asset" FILES ${MILK_SRC_ASSET})
 source_group("asset\\adapter" FILES ${MILK_SRC_ASSET_ADAPTER})
-source_group("asset\\json" FILES ${MILK_SRC_ASSET_JSON})
 
 # common
 set(MILK_SRC_COMMON
-    src/common/Alignment.h
-    src/common/IdGenerator.cpp
-    src/common/IdGenerator.h
 	src/common/int.h
 )
 
 source_group("common" FILES ${MILK_SRC_COMMON})
-
-# debug tools
-set(MILK_SRC_DEBUG_TOOLS
-    src/debugtools/DebugTools.cpp
-    src/debugtools/DebugTools.h
-)
-
-source_group("debugtools" FILES ${MILK_SRC_DEBUG_TOOLS})
 
 # file system
 set(MILK_SRC_FILESYSTEM
@@ -144,13 +114,7 @@ source_group("game\\binding" FILES ${MILK_SRC_GAME_BINDING})
 
 # graphics
 set(MILK_SRC_GRAPHICS
-    src/graphics/Animator.cpp
-    src/graphics/Animator.h
     src/graphics/Color.h
-    src/graphics/Graphics.cpp
-    src/graphics/Graphics.h
-    src/graphics/Sprite.cpp
-    src/graphics/Sprite.h
     src/graphics/Texture.cpp
     src/graphics/Texture.h
 )
@@ -175,57 +139,18 @@ set(MILK_SRC_MATH_BINDING
 source_group("math" FILES ${MILK_SRC_MATH})
 source_group("math\\binding" FILES ${MILK_SRC_MATH_BINDING})
 
-# physics
-set(MILK_SRC_PHYSICS
-    src/physics/BoxCollider.cpp
-    src/physics/BoxCollider.h
-    src/physics/Collision.h
-    src/physics/Physics.cpp
-    src/physics/Physics.h
-    src/physics/SpatialPartitionGrid.cpp
-    src/physics/SpatialPartitionGrid.h
-    src/physics/Velocity.cpp
-    src/physics/Velocity.h
-)
-
-set(MILK_SRC_PHYSICS_BINDING
-    src/physics/binding/LuaCollision.cpp
-    src/physics/binding/LuaCollision.h
-)
-
-source_group("physics" FILES ${MILK_SRC_PHYSICS})
-source_group("physics\\binding" FILES ${MILK_SRC_PHYSICS_BINDING})
-
 # scene
 set(MILK_SRC_SCENE
-    src/scene/Actor.cpp
-    src/scene/Actor.h
-    src/scene/ActorComponent.cpp
-    src/scene/ActorComponent.h
     src/scene/Camera.cpp
     src/scene/Camera.h
-    src/scene/Scene.cpp
-    src/scene/Scene.h
-)
-
-set(MILK_SRC_SCENE_BINDING
-    src/scene/binding/LuaActor.cpp
-    src/scene/binding/LuaActor.h
-    src/scene/binding/LuaScene.cpp
-    src/scene/binding/LuaScene.h
 )
 
 source_group("scene" FILES ${MILK_SRC_SCENE})
-source_group("scene\\binding" FILES ${MILK_SRC_SCENE_BINDING})
 
 # scripting
 set(MILK_SRC_SCRIPTING
     src/scripting/LuaApi.cpp
     src/scripting/LuaApi.h
-    src/scripting/Logic.cpp
-    src/scripting/Logic.h
-    src/scripting/Script.cpp
-    src/scripting/Script.h
 )
 
 set(MILK_SRC_SCRIPTING_SOL
@@ -372,14 +297,10 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 set (TESTS
     test/tests/math/Matrix3Tests.h
     test/tests/math/RectangleTests.h
-    test/tests/scene/ActorTests.h
-    test/tests/scene/SceneTests.h
 )
 
 set(MOCKS
-    test/mocks/asset/MockActorLoader.h
     test/mocks/asset/MockTextureCache.h
-    test/mocks/scene/MockActorComponent.h 
 )
 
 add_executable(milktests test/main.cpp ${TESTS} ${MOCKS})
