@@ -13,6 +13,7 @@
 #include "timer/Timer.h"
 #include "window/adapter/WindowAdapter.h"
 #include "window/adapter/RendererAdapter.h"
+#include "scene/Actors.h"
 
 milk::Game::Game()
 {

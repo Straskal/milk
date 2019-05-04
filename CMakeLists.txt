@@ -141,6 +141,8 @@ source_group("math\\binding" FILES ${MILK_SRC_MATH_BINDING})
 
 # scene
 set(MILK_SRC_SCENE
+	src/scene/Actors.cpp
+	src/scene/Actors.h
     src/scene/Camera.cpp
     src/scene/Camera.h
 )
@@ -297,6 +299,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 set (TESTS
     test/tests/math/Matrix3Tests.h
     test/tests/math/RectangleTests.h
+	test/tests/scene/ActorsTests.h
 )
 
 set(MOCKS
