@@ -66,7 +66,12 @@ source_group("asset\\adapter" FILES ${MILK_SRC_ASSET_ADAPTER})
 
 # common
 set(MILK_SRC_COMMON
+	src/common/Array.h
+	src/common/HashMap.h
 	src/common/int.h
+	src/common/Ids.h
+	src/common/FastMap.h
+	src/common/String.h
 )
 
 source_group("common" FILES ${MILK_SRC_COMMON})
@@ -145,6 +150,8 @@ set(MILK_SRC_SCENE
 	src/scene/Actors.h
     src/scene/Camera.cpp
     src/scene/Camera.h
+	src/scene/Transforms.cpp
+    src/scene/Transforms.h
 )
 
 source_group("scene" FILES ${MILK_SRC_SCENE})

@@ -1,76 +1,105 @@
 #ifndef MILK_ACTORS_TESTS
 #define MILK_ACTORS_TESTS
 
-#include "scene/Actors.h"
-
 #include "gtest/gtest.h"
+#include "scene/Actors.h"
 
 namespace milk
 {
 	class ActorsTests : public ::testing::Test
 	{
-	};
-
-	TEST_F(ActorsTests, Create_CreateMany)
+	}
+	;
+	TEST_F(ActorsTests, Creation)
 	{
-		std::vector<std::string> names(Actors::MAX_ACTORS);
-		std::vector<U32> ids(Actors::MAX_ACTORS);
-
 		Actors actors;
-		actors.Create(names, ids);
-		
-		for (int i = 0; i < Actors::MAX_ACTORS; ++i)
-		{
-			ASSERT_EQ(i, ids[i]);
-		}
+		Actor actor = actors.create("stev");
+		Actor actor1 = actors.create("tev");
+		Actor actor2 = actors.create("ev");
+
+		EXPECT_EQ(0, actor.id);
+		EXPECT_EQ(1, actor1.id);
+		EXPECT_EQ(2, actor2.id);
+
+		EXPECT_TRUE(actors.alive(actor));
+		EXPECT_TRUE(actors.alive(actor1));
+		EXPECT_TRUE(actors.alive(actor2));
+
+		EXPECT_EQ("stev", actors.getName(actor));
+		EXPECT_EQ("tev", actors.getName(actor1));
+		EXPECT_EQ("ev", actors.getName(actor2));
+
+		EXPECT_EQ(Vector2::zero(), actors.getPosition(actor));
+		EXPECT_EQ(Vector2::zero(), actors.getPosition(actor1));
+		EXPECT_EQ(Vector2::zero(), actors.getPosition(actor2));
 	}
 
-	TEST_F(ActorsTests, Alive_WhenAlive_ReturnsTrue)
+	TEST_F(ActorsTests, Destruction)
 	{
-		std::vector<std::string> names(Actors::MAX_ACTORS);
-		std::vector<U32> ids(Actors::MAX_ACTORS);
-
 		Actors actors;
-		actors.Create(names, ids);
+		Actor actor = actors.create("stev");
+		Actor actor1 = actors.create("tev");
+		Actor actor2 = actors.create("ev");
 
-		ASSERT_TRUE(actors.Alive(ids));
+		EXPECT_TRUE(actors.alive(actor));
+		EXPECT_TRUE(actors.alive(actor1));
+		EXPECT_TRUE(actors.alive(actor2));
+
+		actors.destroy(actor);
+		actors.destroy(actor1);
+		actors.destroy(actor2);
+
+		EXPECT_FALSE(actors.alive(actor));
+		EXPECT_FALSE(actors.alive(actor1));
+		EXPECT_FALSE(actors.alive(actor2));
 	}
 
-	TEST_F(ActorsTests, Alive_WhenDead_ReturnsFalse)
+	TEST_F(ActorsTests, Tags)
 	{
-		std::vector<std::string> names(Actors::MAX_ACTORS);
-		std::vector<U32> ids(Actors::MAX_ACTORS);
-
 		Actors actors;
-		actors.Create(names, ids);
-		actors.Destroy(ids);
+		Actor actor = actors.create("stev");
+		Actor actor1 = actors.create("tev");
+		Actor actor2 = actors.create("ev");
 
-		ASSERT_FALSE(actors.Alive(ids));
+		U32 playerTag = 0 << 0;
+		U32 enemyTag = 0 << 1;
+		U32 damagableTag = 0 << 2;
+
+		actors.tag(actor, playerTag);
+		actors.tag(actor1, enemyTag);
+		actors.tag(actor2, damagableTag);
+
+		EXPECT_TRUE(actors.isTagged(actor, playerTag));
+		EXPECT_TRUE(actors.isTagged(actor1, enemyTag));
+		EXPECT_TRUE(actors.isTagged(actor2, damagableTag));
+
+		actors.untag(actor, playerTag);
+		actors.untag(actor1, enemyTag);
+		actors.untag(actor2, damagableTag);
+
+		EXPECT_FALSE(actors.isTagged(actor, playerTag));
+		EXPECT_FALSE(actors.isTagged(actor1, enemyTag));
+		EXPECT_FALSE(actors.isTagged(actor2, damagableTag));
 	}
 
-	class ActorUtilsTests : public ::testing::Test
-	{
-	};
-
-	TEST_F(ActorUtilsTests, Create)
+	TEST_F(ActorsTests, Position)
 	{
 		Actors actors;
-		U32 id0 = ActorUtils::Create(actors, "steve");
-		U32 id1 = ActorUtils::Create(actors, "steve");
-		U32 id2 = ActorUtils::Create(actors, "steve");
+		Actor actor = actors.create("stev");
+		Actor actor1 = actors.create("tev");
+		Actor actor2 = actors.create("ev");
 
-		ASSERT_EQ(0, id0);
-		ASSERT_EQ(1, id1);
-		ASSERT_EQ(2, id2);
-	}
+		EXPECT_EQ(Vector2::zero(), actors.getPosition(actor));
+		EXPECT_EQ(Vector2::zero(), actors.getPosition(actor1));
+		EXPECT_EQ(Vector2::zero(), actors.getPosition(actor2));
 
-	TEST_F(ActorUtilsTests, Destroy)
-	{
-		Actors actors;
-		U32 id0 = ActorUtils::Create(actors, "steve");
-		ActorUtils::Destroy(actors, id0);
+		actors.setPosition(actor, Vector2{ 5.f, 6.f });
+		actors.setPosition(actor1, Vector2{ 4.f, 9.f });
+		actors.setPosition(actor2, Vector2{ 10.f, 1.f });
 
-		ASSERT_FALSE(ActorUtils::Alive(actors, id0));
+		EXPECT_EQ(Vector2(5.f, 6.f ), actors.getPosition(actor));
+		EXPECT_EQ(Vector2(4.f, 9.f), actors.getPosition(actor1));
+		EXPECT_EQ(Vector2(10.f, 1.f), actors.getPosition(actor2));
 	}
 }
 

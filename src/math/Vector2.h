@@ -25,16 +25,14 @@ namespace milk
         }
 
         Vector2& operator*=(float scalar);
-
         Vector2& operator/=(float scalar);
-
         Vector2& operator+=(Vector2 v);
 
         float magnitude();
-
         Vector2 normalize();
 
         static Vector2 transform(const Vector2& v, const Matrix3& m);
+		static const Vector2 zero();
     };
 
     // Global operator overloads
@@ -94,11 +92,17 @@ namespace milk
         return *this / magnitude();
     }
 
+	// Static methods
     inline Vector2 Vector2::transform(const Vector2& v, const Matrix3& m)
     {
         return Vector2{(v.x * m.m11) + (v.y * m.m12) + m.m13,
                        (v.x * m.m21) + (v.y * m.m22) + m.m23};
     }
+	
+	inline const Vector2 Vector2::zero()
+	{
+		return Vector2{0.f, 0.f};
+	}
 }
 
 #endif

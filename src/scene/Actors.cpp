@@ -1,75 +1,75 @@
 #include "Actors.h"
 
-#include <assert.h>
+#include <assert.h>s
 
 namespace milk
 {
-	void Actors::Create(std::vector<std::string>& names, std::vector<U32>& ids)
+	Actor Actors::create(const String& name)
 	{
-		assert(names.size() == ids.size());
-		for (int i = 0; i < names.size(); ++i)
-		{
-			U32 index;
-			if (freeIndeces_.size() > MAX_FREE_INDECES)
-			{
-				index = freeIndeces_.front();
-				freeIndeces_.pop();
-			}
-			else
-			{
-				index = nextIndex_++;
-				assert(nextIndex_ <= MAX_ACTORS);
-			}
-			ids[i] = index | (generations_[index] << GENERATION_BITS);
-			names_[i] = names[i];
-		}
+		U32 id = ids_.create();
+		names_.push(id, name);
+		positions_.insert(std::make_pair(id, Vector2::zero()));
+		return Actor{ id };
 	}
 
-	void Actors::Destroy(std::vector<U32>& ids)
+	void Actors::destroy(Actor actor)
 	{
-		for (int i = 0; i < ids.size(); ++i)
-		{
-			U16 index = ids[i] & ~GENERATION_BITS;
-			names_[index] = "";
-			++generations_[index];
-			freeIndeces_.push(index);
-		}
+		ids_.remove(actor.id);
+		names_.remove(actor.id);
+		positions_.erase(actor.id);
 	}
 
-	bool Actors::Alive(std::vector<U32>& ids)
+	bool Actors::alive(Actor actor) const
 	{
-		for (int i = 0; i < ids.size(); ++i)
-		{
-			U16 index = ids[i] & ~GENERATION_BITS;
-			U16 generation = ids[i] >> INDEX_BITS & ~(1 << GENERATION_BITS);
-			if (generations_[index] != generation)
-			{
-				return false;
-			}
-		}
-		return true;
+		return ids_.valid(actor.id);
 	}
 
-	namespace ActorUtils
+	bool Actors::isTagged(Actor actor, U32 tag)
 	{
-		U32 Create(Actors& actors, const std::string& name)
+		Array<U32>& taggedActors = taggedGroups_.lookup(tag);
+		for (int i = 0; i < taggedActors.size(); ++i) 
 		{
-			std::vector<std::string> names{ name };
-			std::vector<U32> ids(1);
-			actors.Create(names, ids);
-			return ids[0];
+			if (taggedActors[i] == actor.id)
+				return true;
 		}
+		return false;
+	}
 
-		void Destroy(Actors& actors, U32 id)
-		{
-			std::vector<U32> ids{ id };
-			actors.Destroy(ids);
-		}
+	void Actors::tag(Actor actor, U32 tag)
+	{
+		taggedGroups_.lookup(tag).push_back(actor.id);
+	}
 
-		bool Alive(Actors& actors, U32 id)
-		{
-			std::vector<U32> ids{ id };
-			return actors.Alive(ids);
-		}
+	void Actors::untag(Actor actor, U32 tag)
+	{
+		Array<U32>& tagged = taggedGroups_.lookup(tag);
+		tagged.erase(std::find(tagged.begin(), tagged.end(), actor.id));
+	}
+
+	void Actors::getByTag(Array<Actor>& tagged, U32 tag) const
+	{
+	}
+
+	String Actors::getName(Actor actor)
+	{
+		return names_.lookup(actor.id);
+	}
+
+	void Actors::setName(Actor actor, const String& name)
+	{
+	}
+
+	void Actors::getByName(const String& name) const
+	{
+	}
+
+	Vector2 Actors::getPosition(Actor actor)
+	{
+		return positions_.at(actor.id);
+	}
+
+	void Actors::setPosition(Actor actor, const Vector2& position)
+	{
+		positions_.at(actor.id) = position;
 	}
 }
