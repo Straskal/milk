@@ -38,7 +38,7 @@ namespace milk
 
 		T& operator[] (U32 idx) 
 		{
-			assert(idx < size_);
+			assert(idx < array_.size());
 			return array_[idx];
 		}
 

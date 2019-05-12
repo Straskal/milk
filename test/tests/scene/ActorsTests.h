@@ -8,8 +8,8 @@ namespace milk
 {
 	class ActorsTests : public ::testing::Test
 	{
-	}
-	;
+	};
+
 	TEST_F(ActorsTests, Creation)
 	{
 		Actors actors;
