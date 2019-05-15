@@ -5,6 +5,7 @@
 #include "tests/math/Matrix3Tests.h"
 #include "tests/math/RectangleTests.h"
 #include "tests/scene/ActorsTests.h"
+#include "tests/data/ArrayTests.h"
 
 int main(int argc, char **argv)
 {

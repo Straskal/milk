@@ -52,6 +52,11 @@ include(CTest)
 enable_testing()
 
 # common
+set(MILK_SRC_DATA
+	src/data/Array.h
+)
+
+# data
 set(MILK_SRC_COMMON
 	src/common/Array.h
 	src/common/HashMap.h
@@ -61,21 +66,11 @@ set(MILK_SRC_COMMON
 	src/common/String.h
 )
 
-source_group("common" FILES ${MILK_SRC_COMMON})
-
 # input
 set(MILK_SRC_INPUT
     src/input/Keyboard.cpp
     src/input/Keyboard.h
 )
-
-set(MILK_SRC_INPUT_BINDING
-    src/input/binding/LuaKeyboard.cpp
-    src/input/binding/LuaKeyboard.h
-)
-
-source_group("input" FILES ${MILK_SRC_INPUT})
-source_group("input\\binding" FILES ${MILK_SRC_INPUT_BINDING})
 
 # graphics
 set(MILK_SRC_GRAPHICS
@@ -84,25 +79,18 @@ set(MILK_SRC_GRAPHICS
     src/graphics/Texture.h
 )
 
-source_group("graphics" FILES ${MILK_SRC_GRAPHICS})
-
 # math
 set(MILK_SRC_MATH
-    src/math/Mathf.h
     src/math/Matrix3.h
     src/math/Rectangle.h
     src/math/Vector2.h
 )
-
-source_group("math" FILES ${MILK_SRC_MATH})
 
 # scene
 set(MILK_SRC_SCENE
 	src/scene/Actors.cpp
 	src/scene/Actors.h
 )
-
-source_group("scene" FILES ${MILK_SRC_SCENE})
 
 # window
 set(MILK_SRC_WINDOW
@@ -117,10 +105,8 @@ set(MILK_SRC_WINDOW_ADAPTER
     src/window/adapter/WindowAdapter.h
 )
 
-source_group("window" FILES ${MILK_SRC_WINDOW})
-source_group("window\\adapter" FILES ${MILK_SRC_WINDOW_ADAPTER})
-
 set(MILK_SRC_FILES
+	${MILK_SRC_DATA}	
 	${MILK_SRC_COMMON}	
     ${MILK_SRC_INPUT}
     ${MILK_SRC_GRAPHICS}
@@ -207,6 +193,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 # create test exe
 set (TESTS
+	test/tests/data/ArrayTests.h
 	test/tests/common/FastMapTests.h
 	test/tests/common/IdsTests.h
     test/tests/math/Matrix3Tests.h
