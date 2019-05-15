@@ -36,13 +36,19 @@ namespace milk
 			return array_[idx];
 		}
 
+		bool contains(U32 id) 
+		{
+			auto& found = idxMap_.find(id);
+			return found != idxMap_.end();
+		}
+
 		T& operator[] (U32 idx) 
 		{
 			assert(idx < array_.size());
 			return array_[idx];
 		}
 
-		U32 size() 
+		int size() 
 		{
 			return array_.size();
 		}

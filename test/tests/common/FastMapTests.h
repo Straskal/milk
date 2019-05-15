@@ -33,6 +33,18 @@ namespace milk
 		EXPECT_EQ("twentyseven", fm.lookup(27));
 	}
 
+	TEST_F(FastMapTests, TryLookup)
+	{
+		FastMap<String> fm{};
+		fm.push(10, "ten");
+
+		String ten;
+		EXPECT_TRUE(fm.contains(10));
+
+		String nothing;
+		EXPECT_FALSE(fm.contains(0));
+	}
+
 	TEST_F(FastMapTests, Remove)
 	{
 		FastMap<String> fm{};

@@ -12,7 +12,7 @@ namespace milk
 {
 	struct Actor 
 	{
-		U32 id = 0;
+		U32 id = Ids<>::INVALID;
 	};
 
 	class Actors
@@ -27,20 +27,30 @@ namespace milk
 		bool isTagged(Actor actor, U32 tag);
 		void tag(Actor actor, U32 tag);
 		void untag(Actor actor, U32 tag);
-		void getByTag(Array<Actor>& tagged, U32 tag) const;
+		void getByTag(Array<Actor>& tagged, U32 tag);
 
 		String getName(Actor actor);
 		void setName(Actor actor, const String& name);
-		void getByName(const String& name) const;
+		Actor getByName(const String& name);
 
 		Vector2 getPosition(Actor actor);
 		void setPosition(Actor actor, const Vector2& position);
 
 	private:
+		struct Tag
+		{
+			U32 actorId = 0;
+			U32 mask = 0;
+		};
+		struct Name
+		{
+			U32 actorId = 0;
+			String name = "";
+		};
+
 		Ids<> ids_{};
-		FastMap<Array<U32>> taggedGroups_{};
-		FastMap<String> names_{};
-		HashMap<U32, U32> tags_{};
+		FastMap<Name> names_{};
+		FastMap<Tag> tagMasks_{};
 		HashMap<U32, Vector2> positions_{};
 	};
 }

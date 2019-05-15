@@ -7,7 +7,7 @@ namespace milk
 	Actor Actors::create(const String& name)
 	{
 		U32 id = ids_.create();
-		names_.push(id, name);
+		names_.push(id, Name{ id, name });
 		positions_.insert(std::make_pair(id, Vector2::zero()));
 		return Actor{ id };
 	}
@@ -26,41 +26,61 @@ namespace milk
 
 	bool Actors::isTagged(Actor actor, U32 tag)
 	{
-		Array<U32>& taggedActors = taggedGroups_.lookup(tag);
-		for (int i = 0; i < taggedActors.size(); ++i) 
-		{
-			if (taggedActors[i] == actor.id)
-				return true;
-		}
-		return false;
+		return tagMasks_.contains(actor.id) && (tagMasks_.lookup(actor.id).mask & tag) == tag;
 	}
 
 	void Actors::tag(Actor actor, U32 tag)
 	{
-		taggedGroups_.lookup(tag).push_back(actor.id);
+		if (tagMasks_.contains(actor.id))
+		{
+			tagMasks_.lookup(actor.id).mask |= tag;
+			return;
+		}
+		Tag newTag;
+		newTag.actorId = actor.id;
+		newTag.mask = tag;
+		tagMasks_.push(actor.id, newTag);
 	}
 
 	void Actors::untag(Actor actor, U32 tag)
 	{
-		Array<U32>& tagged = taggedGroups_.lookup(tag);
-		tagged.erase(std::find(tagged.begin(), tagged.end(), actor.id));
+		if (tagMasks_.contains(actor.id))
+		{
+			tagMasks_.lookup(actor.id).mask &= ~tag;
+		}
 	}
 
-	void Actors::getByTag(Array<Actor>& tagged, U32 tag) const
+	void Actors::getByTag(Array<Actor>& tagged, U32 tag)
 	{
+		for (int i = 0; i < tagMasks_.size(); ++i)
+		{
+			if ((tagMasks_[i].mask & tag) == tag)
+			{
+				tagged.push_back(Actor{ tagMasks_[i].actorId });
+			}
+		}
 	}
 
 	String Actors::getName(Actor actor)
 	{
-		return names_.lookup(actor.id);
+		return names_.lookup(actor.id).name;
 	}
 
-	void Actors::setName(Actor actor, const String& name)
+	void Actors::setName(Actor actor, const String & name)
 	{
+		names_.lookup(actor.id).name = name;
 	}
 
-	void Actors::getByName(const String& name) const
+	Actor Actors::getByName(const String & name)
 	{
+		for (int i = 0; i < names_.size(); ++i)
+		{
+			if (names_[i].name == name)
+			{
+				return Actor{ names_[i].actorId };
+			}
+		}
+		return Actor{ Ids<>::INVALID };
 	}
 
 	Vector2 Actors::getPosition(Actor actor)
@@ -68,7 +88,7 @@ namespace milk
 		return positions_.at(actor.id);
 	}
 
-	void Actors::setPosition(Actor actor, const Vector2& position)
+	void Actors::setPosition(Actor actor, const Vector2 & position)
 	{
 		positions_.at(actor.id) = position;
 	}

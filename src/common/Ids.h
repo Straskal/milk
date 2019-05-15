@@ -14,6 +14,8 @@ namespace milk
 	class Ids
 	{
 	public:
+		const static U32 INVALID = 0;
+
 		U32 create()
 		{
 			U32 index;
@@ -26,6 +28,11 @@ namespace milk
 			{
 				index = nextIndex_++;
 				assert(nextIndex_ <= SIZE);
+			}
+			U32 id = index | (generations_[index] << GEN_BITS);
+			if (id == INVALID)
+			{
+				++generations_[index];
 			}
 			return index | (generations_[index] << GEN_BITS);
 		}

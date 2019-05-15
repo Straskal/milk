@@ -14,7 +14,6 @@
 #include "window/adapter/WindowAdapter.h"
 #include "window/adapter/RendererAdapter.h"
 #include "scene/Actors.h"
-#include "scene/Transforms.h"
 
 milk::Game::Game()
 {
