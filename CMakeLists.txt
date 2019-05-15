@@ -51,19 +51,6 @@ find_package(Lua53 REQUIRED)
 include(CTest)	
 enable_testing()
 
-# asset
-set(MILK_SRC_ASSET
-    src/asset/AssetCache.h
-)
-
-set(MILK_SRC_ASSET_ADAPTER
-    src/asset/adapter/TextureCacheAdapter.cpp
-    src/asset/adapter/TextureCacheAdapter.h
-)
-
-source_group("asset" FILES ${MILK_SRC_ASSET})
-source_group("asset\\adapter" FILES ${MILK_SRC_ASSET_ADAPTER})
-
 # common
 set(MILK_SRC_COMMON
 	src/common/Array.h
@@ -75,19 +62,6 @@ set(MILK_SRC_COMMON
 )
 
 source_group("common" FILES ${MILK_SRC_COMMON})
-
-# file system
-set(MILK_SRC_FILESYSTEM
-    src/filesystem/Filesystem.h
-)
-
-set(MILK_SRC_FILESYSTEM_ADAPTER
-    src/filesystem/adapter/FilesystemAdapter.cpp
-    src/filesystem/adapter/FilesystemAdapter.h
-)
-
-source_group("filesystem" FILES ${MILK_SRC_FILESYSTEM})
-source_group("filesystem\\adapter" FILES ${MILK_SRC_FILESYSTEM_ADAPTER})
 
 # input
 set(MILK_SRC_INPUT
@@ -102,20 +76,6 @@ set(MILK_SRC_INPUT_BINDING
 
 source_group("input" FILES ${MILK_SRC_INPUT})
 source_group("input\\binding" FILES ${MILK_SRC_INPUT_BINDING})
-
-# game
-set(MILK_SRC_GAME
-    src/game/Game.h
-    src/game/Game.cpp
-)
-
-set(MILK_SRC_GAME_BINDING
-    src/game/binding/LuaGame.cpp
-    src/game/binding/LuaGame.h
-)
-
-source_group("game" FILES ${MILK_SRC_GAME})
-source_group("game\\binding" FILES ${MILK_SRC_GAME_BINDING})
 
 # graphics
 set(MILK_SRC_GRAPHICS
@@ -134,46 +94,15 @@ set(MILK_SRC_MATH
     src/math/Vector2.h
 )
 
-set(MILK_SRC_MATH_BINDING
-    src/math/binding/LuaMathf.cpp
-    src/math/binding/LuaMathf.h
-    src/math/binding/LuaVector2.cpp
-    src/math/binding/LuaVector2.h
-)
-
 source_group("math" FILES ${MILK_SRC_MATH})
-source_group("math\\binding" FILES ${MILK_SRC_MATH_BINDING})
 
 # scene
 set(MILK_SRC_SCENE
 	src/scene/Actors.cpp
 	src/scene/Actors.h
-    src/scene/Camera.cpp
-    src/scene/Camera.h
 )
 
 source_group("scene" FILES ${MILK_SRC_SCENE})
-
-# scripting
-set(MILK_SRC_SCRIPTING
-    src/scripting/LuaApi.cpp
-    src/scripting/LuaApi.h
-)
-
-set(MILK_SRC_SCRIPTING_SOL
-    src/scripting/sol/sol.hpp
-)
-
-source_group("scripting" FILES ${MILK_SRC_SCRIPTING})
-source_group("scripting\\sol" FILES ${MILK_SRC_SCRIPTING_SOL})
-
-# timer
-set(MILK_SRC_TIMER
-    src/timer/Timer.cpp
-    src/timer/Timer.h
-)
-
-source_group("timer" FILES ${MILK_SRC_TIMER})
 
 # window
 set(MILK_SRC_WINDOW
@@ -188,41 +117,17 @@ set(MILK_SRC_WINDOW_ADAPTER
     src/window/adapter/WindowAdapter.h
 )
 
-set(MILK_SRC_WINDOW_BINDING
-    src/window/binding/LuaWindow.cpp
-    src/window/binding/LuaWindow.h
-)
-
 source_group("window" FILES ${MILK_SRC_WINDOW})
 source_group("window\\adapter" FILES ${MILK_SRC_WINDOW_ADAPTER})
-source_group("window\\binding" FILES ${MILK_SRC_WINDOW_BINDING})
 
 set(MILK_SRC_FILES
-    ${MILK_SRC_LIBS}
-    ${MILK_SRC_ASSET}
-    ${MILK_SRC_ASSET_ADAPTER}
-    ${MILK_SRC_ASSET_JSON}
 	${MILK_SRC_COMMON}	
-    ${MILK_SRC_DEBUG_TOOLS}
-    ${MILK_SRC_FILESYSTEM}
-    ${MILK_SRC_FILESYSTEM_ADAPTER}
     ${MILK_SRC_INPUT}
-    ${MILK_SRC_INPUT_BINDING}
-    ${MILK_SRC_GAME}
-    ${MILK_SRC_GAME_BINDING}
     ${MILK_SRC_GRAPHICS}
     ${MILK_SRC_MATH}
-    ${MILK_SRC_MATH_BINDING}
-    ${MILK_SRC_PHYSICS}
-    ${MILK_SRC_PHYSICS_BINDING}
     ${MILK_SRC_SCENE}
-    ${MILK_SRC_SCENE_BINDING}
-    ${MILK_SRC_SCRIPTING}
-    ${MILK_SRC_SCRIPTING_SOL}
-    ${MILK_SRC_TIMER}
     ${MILK_SRC_WINDOW}
     ${MILK_SRC_WINDOW_ADAPTER}
-    ${MILK_SRC_WINDOW_BINDING}
 )
 
 add_library(milklib ${MILK_SRC_FILES})
@@ -310,7 +215,6 @@ set (TESTS
 )
 
 set(MOCKS
-    test/mocks/asset/MockTextureCache.h
 )
 
 add_executable(milktests test/main.cpp ${TESTS} ${MOCKS})
