@@ -1,13 +1,12 @@
 #include "gtest/gtest.h"
 
+#include "tests/common/FastMapTests.h"
+#include "tests/common/IdsTests.h"
 #include "tests/math/Matrix3Tests.h"
 #include "tests/math/RectangleTests.h"
+#include "tests/scene/ActorsTests.h"
 
-#include "tests/scene/ActorTests.h"
-#include "tests/scene/SceneTests.h"
-
-int main(int argc, char **argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+int main(int argc, char** argv) {
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

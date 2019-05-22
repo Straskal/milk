@@ -1,50 +1,57 @@
 #ifndef MILK_RECTANGLE_H
 #define MILK_RECTANGLE_H
 
-namespace milk
-{
-    struct Rectangle
-    {
-        Rectangle(int x = 0, int y = 0, int width = 0, int height = 0)
-            : x(x), y(y), width(width), height(height) {}
+namespace milk {
+	struct Rectangle {
+		int x;
+		int y;
+		int width;
+		int height;
 
-        int x, y, width, height;
+		Rectangle(int x = 0, int y = 0, int width = 0, int height = 0)
+			: x(x)
+			, y(y)
+			, width(width)
+			, height(height) {
+		}
 
-        int top()
-        {
-            return y;
-        }
+		int top();
+		int bottom();
+		int left();
+		int right();
+		bool overlaps(Rectangle other);
+		bool empty();
+	};
 
-        int bottom()
-        {
-            return y + height;
-        }
+	inline int Rectangle::top() {
+		return y;
+	}
 
-        int left()
-        {
-            return x;
-        }
+	inline int Rectangle::bottom() {
+		return y + height;
+	}
 
-        int right()
-        {
-            return x + width;
-        }
+	inline int Rectangle::left() {
+		return x;
+	}
 
-        // Returns true if rectangle overlaps other rectangle.
-        bool overlaps(Rectangle other)
-        {
-            return other.left() < right()
-                   && left() < other.right()
-                   && other.top() < bottom()
-                   && top() < other.bottom();
-        }
+	inline int Rectangle::right() {
+		return x + width;
+	}
 
-        // Returns true if rectangle is empty.
-        bool empty()
-        {
-            return x == 0 && y == 0 && width == 0 && height == 0;
-        }
-    };
+	inline bool Rectangle::overlaps(Rectangle other) {
+		return other.left() < right()
+			&& left() < other.right()
+			&& other.top() < bottom()
+			&& top() < other.bottom();
+	}
+
+	inline bool Rectangle::empty() {
+		return x == 0 
+			&& y == 0 
+			&& width == 0 
+			&& height == 0;
+	}
 }
 
 #endif
