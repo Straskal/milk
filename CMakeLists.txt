@@ -188,11 +188,11 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 # create test exe
 set (TESTS
-	test/tests/common/FastMapTests.h
-	test/tests/common/IdsTests.h
-    test/tests/math/Matrix3Tests.h
-    test/tests/math/RectangleTests.h
-	test/tests/scene/ActorsTests.h
+	test/data/FastMapTests.h
+	test/data/IdsTests.h
+    test/math/Matrix3Tests.h
+    test/math/RectangleTests.h
+	test/scene/ActorsTests.h
 )
 
 set(MOCKS

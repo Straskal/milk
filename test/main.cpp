@@ -1,10 +1,10 @@
 #include "gtest/gtest.h"
 
-#include "tests/common/FastMapTests.h"
-#include "tests/common/IdsTests.h"
-#include "tests/math/Matrix3Tests.h"
-#include "tests/math/RectangleTests.h"
-#include "tests/scene/ActorsTests.h"
+#include "data/FastMapTests.h"
+#include "data/IdsTests.h"
+#include "math/Matrix3Tests.h"
+#include "math/RectangleTests.h"
+#include "scene/ActorsTests.h"
 
 int main(int argc, char** argv) {
 	::testing::InitGoogleTest(&argc, argv);
