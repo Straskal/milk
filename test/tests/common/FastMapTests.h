@@ -2,8 +2,8 @@
 #define MILK_FASTMAPTESTS_H
 
 #include "gtest/gtest.h"
-#include "common/FastMap.h"
-#include "common/String.h"
+#include "data/FastMap.h"
+#include "data/String.h"
 
 namespace milk 
 {

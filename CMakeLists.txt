@@ -7,8 +7,8 @@ cmake_minimum_required(VERSION 3.6.1)
 
 project(milk)
 
-# we're a c++14 family.
-set(CMAKE_CXX_STANDARD 14)
+# we're a c++11 family.
+set(CMAKE_CXX_STANDARD 11)
 
 # set debug symbol = _DEBUG
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
@@ -54,16 +54,12 @@ enable_testing()
 # common
 set(MILK_SRC_DATA
 	src/data/Array.h
-)
-
-# data
-set(MILK_SRC_COMMON
-	src/common/Array.h
-	src/common/HashMap.h
-	src/common/int.h
-	src/common/Ids.h
-	src/common/FastMap.h
-	src/common/String.h
+	src/data/HashMap.h
+	src/data/int.h
+	src/data/Ids.cpp
+	src/data/Ids.h
+	src/data/FastMap.h
+	src/data/String.h
 )
 
 # input
@@ -107,7 +103,6 @@ set(MILK_SRC_WINDOW_ADAPTER
 
 set(MILK_SRC_FILES
 	${MILK_SRC_DATA}	
-	${MILK_SRC_COMMON}	
     ${MILK_SRC_INPUT}
     ${MILK_SRC_GRAPHICS}
     ${MILK_SRC_MATH}
@@ -193,7 +188,6 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 # create test exe
 set (TESTS
-	test/tests/data/ArrayTests.h
 	test/tests/common/FastMapTests.h
 	test/tests/common/IdsTests.h
     test/tests/math/Matrix3Tests.h

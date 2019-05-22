@@ -3,8 +3,7 @@
 
 #include <cstdint>
 
-namespace milk 
-{
+namespace milk {
 	typedef int_fast8_t I8;
 	typedef int_fast16_t I16;
 	typedef int_fast32_t I32;

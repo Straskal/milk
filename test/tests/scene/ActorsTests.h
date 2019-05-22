@@ -17,9 +17,9 @@ namespace milk
 		Actor actor1 = actors.create("tev");
 		Actor actor2 = actors.create("ev");
 
-		EXPECT_NE(Ids<>::INVALID, actor.id);
-		EXPECT_NE(Ids<>::INVALID, actor1.id);
-		EXPECT_NE(Ids<>::INVALID, actor2.id);
+		EXPECT_NE(Ids::INVALID, actor.id);
+		EXPECT_NE(Ids::INVALID, actor1.id);
+		EXPECT_NE(Ids::INVALID, actor2.id);
 
 		EXPECT_NE(actor.id, actor1.id);
 		EXPECT_NE(actor.id, actor2.id);
@@ -73,17 +73,17 @@ namespace milk
 		actors.tag(actor1, enemyTag);
 		actors.tag(actor2, damagableTag);
 
-		EXPECT_TRUE(actors.isTagged(actor, playerTag));
-		EXPECT_TRUE(actors.isTagged(actor1, enemyTag));
-		EXPECT_TRUE(actors.isTagged(actor2, damagableTag));
+		EXPECT_TRUE(actors.tagged(actor, playerTag));
+		EXPECT_TRUE(actors.tagged(actor1, enemyTag));
+		EXPECT_TRUE(actors.tagged(actor2, damagableTag));
 
 		actors.untag(actor, playerTag);
 		actors.untag(actor1, enemyTag);
 		actors.untag(actor2, damagableTag);
 
-		EXPECT_FALSE(actors.isTagged(actor, playerTag));
-		EXPECT_FALSE(actors.isTagged(actor1, enemyTag));
-		EXPECT_FALSE(actors.isTagged(actor2, damagableTag));
+		EXPECT_FALSE(actors.tagged(actor, playerTag));
+		EXPECT_FALSE(actors.tagged(actor1, enemyTag));
+		EXPECT_FALSE(actors.tagged(actor2, damagableTag));
 	}
 
 	TEST_F(ActorsTests, GetByTag)
@@ -171,7 +171,7 @@ namespace milk
 		EXPECT_EQ(actor.id, actors.getByName("stev").id);
 		EXPECT_EQ(actor1.id, actors.getByName("tev").id);
 		EXPECT_EQ(actor2.id, actors.getByName("ev").id);
-		EXPECT_EQ(Ids<>::INVALID, actors.getByName("jam").id);
+		EXPECT_EQ(Ids::INVALID, actors.getByName("jam").id);
 	}
 }
 

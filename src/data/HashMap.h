@@ -3,8 +3,7 @@
 
 #include <unordered_map>
 
-namespace milk
-{
+namespace milk {
 	template<class T, class U>
 	using HashMap = std::unordered_map<T, U>;
 }

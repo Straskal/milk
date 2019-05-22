@@ -3,8 +3,7 @@
 
 #include <string>
 
-namespace milk
-{
+namespace milk {
 	using String = std::string;
 }
 
