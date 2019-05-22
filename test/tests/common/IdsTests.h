@@ -5,9 +5,7 @@
 #include "data/Ids.h"
 
 namespace milk {
-	class IdsTests : public ::testing::Test {};
-
-	TEST_F(IdsTests, Creation) {
+	TEST(IdsTests, Creation) {
 		Ids ids{};
 		U32 id0 = ids.create();
 		U32 id1 = ids.create();
@@ -22,7 +20,7 @@ namespace milk {
 		EXPECT_NE(Ids::INVALID, id2);
 	}
 
-	TEST_F(IdsTests, Removal) {
+	TEST(IdsTests, Removal) {
 		Ids ids{};
 		U32 id0 = ids.create();
 		U32 id1 = ids.create();

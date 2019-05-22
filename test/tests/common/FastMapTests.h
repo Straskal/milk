@@ -5,14 +5,8 @@
 #include "data/FastMap.h"
 #include "data/String.h"
 
-namespace milk 
-{
-	class FastMapTests : public ::testing::Test
-	{
-	};
-
-	TEST_F(FastMapTests, Push)
-	{
+namespace milk {
+	TEST(FastMapTests, Push) {
 		FastMap<String> fm{};
 		fm.push(10, "ten");
 		fm.push(6, "six");
@@ -21,8 +15,7 @@ namespace milk
 		EXPECT_EQ(3, fm.size());
 	}
 
-	TEST_F(FastMapTests, Lookup) 
-	{
+	TEST(FastMapTests, Lookup) {
 		FastMap<String> fm{};
 		fm.push(10, "ten");
 		fm.push(6, "six");
@@ -33,8 +26,7 @@ namespace milk
 		EXPECT_EQ("twentyseven", fm.lookup(27));
 	}
 
-	TEST_F(FastMapTests, TryLookup)
-	{
+	TEST(FastMapTests, TryLookup) {
 		FastMap<String> fm{};
 		fm.push(10, "ten");
 
@@ -45,8 +37,7 @@ namespace milk
 		EXPECT_FALSE(fm.contains(0));
 	}
 
-	TEST_F(FastMapTests, Remove)
-	{
+	TEST(FastMapTests, Remove) {
 		FastMap<String> fm{};
 		fm.push(10, "ten");
 		fm.push(6, "six");
@@ -59,8 +50,7 @@ namespace milk
 		EXPECT_EQ(0, fm.size());
 	}
 
-	TEST_F(FastMapTests, Index)
-	{
+	TEST(FastMapTests, Index) {
 		FastMap<String> fm{};
 		fm.push(0, "ten");
 		fm.push(3, "six");

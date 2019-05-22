@@ -4,14 +4,8 @@
 #include "gtest/gtest.h"
 #include "scene/Actors.h"
 
-namespace milk
-{
-	class ActorsTests : public ::testing::Test
-	{
-	};
-
-	TEST_F(ActorsTests, Creation)
-	{
+namespace milk {
+	TEST(ActorsTests, Creation) {
 		Actors actors{};
 		Actor actor = actors.create("stev");
 		Actor actor1 = actors.create("tev");
@@ -38,8 +32,7 @@ namespace milk
 		EXPECT_EQ(Vector2::zero(), actors.getPosition(actor2));
 	}
 
-	TEST_F(ActorsTests, Destruction)
-	{
+	TEST(ActorsTests, Destruction) {
 		Actors actors{};
 		Actor actor = actors.create("stev");
 		Actor actor1 = actors.create("tev");
@@ -58,8 +51,7 @@ namespace milk
 		EXPECT_FALSE(actors.alive(actor2));
 	}
 
-	TEST_F(ActorsTests, Tags)
-	{
+	TEST(ActorsTests, Tags) {
 		Actors actors{};
 		Actor actor = actors.create("stev");
 		Actor actor1 = actors.create("tev");
@@ -86,8 +78,7 @@ namespace milk
 		EXPECT_FALSE(actors.tagged(actor2, damagableTag));
 	}
 
-	TEST_F(ActorsTests, GetByTag)
-	{
+	TEST(ActorsTests, GetByTag) {
 		Actors actors{};
 		Actor actor = actors.create("stev");
 		Actor actor1 = actors.create("tev");
@@ -125,8 +116,7 @@ namespace milk
 		EXPECT_EQ(enemies[1].id, actor2.id);
 	}
 
-	TEST_F(ActorsTests, Position)
-	{
+	TEST(ActorsTests, Position) {
 		Actors actors{};
 		Actor actor = actors.create("stev");
 		Actor actor1 = actors.create("tev");
@@ -140,13 +130,12 @@ namespace milk
 		actors.setPosition(actor1, Vector2{ 4.f, 9.f });
 		actors.setPosition(actor2, Vector2{ 10.f, 1.f });
 
-		EXPECT_EQ(Vector2(5.f, 6.f ), actors.getPosition(actor));
+		EXPECT_EQ(Vector2(5.f, 6.f), actors.getPosition(actor));
 		EXPECT_EQ(Vector2(4.f, 9.f), actors.getPosition(actor1));
 		EXPECT_EQ(Vector2(10.f, 1.f), actors.getPosition(actor2));
 	}
 
-	TEST_F(ActorsTests, Name)
-	{
+	TEST(ActorsTests, Name) {
 		Actors actors{};
 		Actor actor = actors.create("stev");
 		Actor actor1 = actors.create("tev");
@@ -161,13 +150,12 @@ namespace milk
 		EXPECT_EQ("day man", actors.getName(actor2));
 	}
 
-	TEST_F(ActorsTests, GetByName)
-	{
+	TEST(ActorsTests, GetByName) {
 		Actors actors{};
 		Actor actor = actors.create("stev");
 		Actor actor1 = actors.create("tev");
 		Actor actor2 = actors.create("ev");
-		
+
 		EXPECT_EQ(actor.id, actors.getByName("stev").id);
 		EXPECT_EQ(actor1.id, actors.getByName("tev").id);
 		EXPECT_EQ(actor2.id, actors.getByName("ev").id);
