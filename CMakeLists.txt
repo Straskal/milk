@@ -7,8 +7,8 @@ cmake_minimum_required(VERSION 3.6.1)
 
 project(milk)
 
-# we're a c++11 family.
-set(CMAKE_CXX_STANDARD 11)
+# we're a c++14 family.
+set(CMAKE_CXX_STANDARD 14)
 
 # set debug symbol = _DEBUG
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
