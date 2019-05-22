@@ -11,7 +11,7 @@
 namespace milk {
 	class Ids {
 	public:
-		const static U32 INVALID{ 0 };
+		const static U32 INVALID = 0;
 
 		const U8 IDX_BITS;
 		const U8 GEN_BITS;
