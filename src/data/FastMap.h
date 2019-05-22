@@ -31,7 +31,7 @@ namespace milk {
 		}
 
 		bool contains(U32 id) {
-			auto& found = idxMap_.find(id);
+			auto found = idxMap_.find(id);
 			return found != idxMap_.end();
 		}
 
