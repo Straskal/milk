@@ -1,30 +1,33 @@
 #ifndef MILK_COLOR_H
 #define MILK_COLOR_H
 
-#include <cstdint>
+#include "data/int.h"
 
 namespace milk {
 	struct Color {
-		uint8_t red;
-		uint8_t blue;
-		uint8_t green;
-		uint8_t alpha;
+		U8 red;
+		U8 blue;
+		U8 green;
+		U8 alpha;
 
-		explicit Color(uint8_t red = 0x00, uint8_t blue = 0x00, uint8_t green = 0x00, uint8_t alpha = 0xFF)
-			: red(red),
-			blue(blue),
-			green(green),
-			alpha(alpha) {
+		explicit Color(U8 red = 0x00, U8 blue = 0x00, U8 green = 0x00, U8 alpha = 0x00)
+			: red(red)
+			, blue(blue)
+			, green(green)
+			, alpha(alpha) {
 		}
 
-		static Color clear() {
-			return Color{ 0x00, 0x00, 0x00, 0x00 };
-		}
-
-		static Color black() {
-			return Color{ 0x00, 0x00, 0x00, 0xFF };
-		}
+		static Color clear();
+		static Color black();
 	};
+
+	inline Color Color::clear() {
+		return Color{ 0x00, 0x00, 0x00, 0x00 };
+	}
+
+	inline Color Color::black() {
+		return Color{ 0x00, 0x00, 0x00, 0xFF };
+	}
 }
 
 #endif

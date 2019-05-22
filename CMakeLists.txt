@@ -54,7 +54,7 @@ enable_testing()
 # common
 set(MILK_SRC_DATA
 	src/data/Array.h
-	src/data/HashMap.h
+	src/data/HashTable.h
 	src/data/int.h
 	src/data/Ids.cpp
 	src/data/Ids.h

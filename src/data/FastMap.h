@@ -4,7 +4,7 @@
 #include <assert.h>
 
 #include "Array.h"
-#include "HashMap.h"
+#include "HashTable.h"
 #include "int.h"
 
 namespace milk {
@@ -46,7 +46,7 @@ namespace milk {
 
 	private:
 		Array<T> array_{};
-		HashMap<U32, U32> idxMap_{};
+		HashTable<U32, U32> idxMap_{};
 	};
 }
 

@@ -5,7 +5,7 @@
 
 namespace milk {
 	template<class T, class U>
-	using HashMap = std::unordered_map<T, U>;
+	using HashTable = std::unordered_map<T, U>;
 }
 
 #endif

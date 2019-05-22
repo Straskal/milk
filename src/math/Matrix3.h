@@ -30,11 +30,9 @@ namespace milk {
 		}
 
 		static Matrix3 identity();
-
 		static Matrix3 createTranslation(float x, float y);
 	};
 
-	// Global operators
 	inline bool operator==(const Matrix3& m1, const Matrix3& m2) {
 		return m1.m11 == m2.m11 && m1.m12 == m2.m12 && m1.m13 == m2.m13
 			&& m1.m21 == m2.m21 && m1.m22 == m2.m22 && m1.m23 == m2.m23
@@ -43,19 +41,15 @@ namespace milk {
 
 	inline Matrix3 operator*(const Matrix3& m1, const Matrix3& m2) {
 		Matrix3 matrix;
-
 		matrix.m11 = (m1.m11 * m2.m11) + (m1.m12 * m2.m21) + (m1.m13 * m2.m31);
 		matrix.m12 = (m1.m11 * m2.m12) + (m1.m12 * m2.m22) + (m1.m13 * m2.m32);
 		matrix.m13 = (m1.m11 * m2.m13) + (m1.m12 * m2.m23) + (m1.m13 * m2.m33);
-
 		matrix.m21 = (m1.m21 * m2.m11) + (m1.m22 * m2.m21) + (m1.m23 * m2.m31);
 		matrix.m22 = (m1.m21 * m2.m12) + (m1.m22 * m2.m22) + (m1.m23 * m2.m32);
 		matrix.m23 = (m1.m21 * m2.m13) + (m1.m22 * m2.m23) + (m1.m23 * m2.m33);
-
 		matrix.m31 = (m1.m31 * m2.m11) + (m1.m32 * m2.m21) + (m1.m33 * m2.m31);
 		matrix.m32 = (m1.m31 * m2.m12) + (m1.m32 * m2.m22) + (m1.m33 * m2.m32);
 		matrix.m33 = (m1.m31 * m2.m13) + (m1.m32 * m2.m23) + (m1.m33 * m2.m33);
-
 		return matrix;
 	}
 
@@ -67,10 +61,8 @@ namespace milk {
 
 	inline Matrix3 Matrix3::createTranslation(float x, float y) {
 		auto translation = Matrix3::identity();
-
 		translation.m13 = x;
 		translation.m23 = y;
-
 		return translation;
 	}
 }

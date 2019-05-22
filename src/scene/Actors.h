@@ -3,7 +3,7 @@
 
 #include "data/Ids.h"
 #include "data/int.h"
-#include "data/HashMap.h"
+#include "data/HashTable.h"
 #include "data/FastMap.h"
 #include "data/String.h"
 #include "math/Vector2.h"
@@ -35,18 +35,18 @@ namespace milk {
 
 	private:
 		struct Tag {
-			U32 actorId = 0;
-			U32 mask = 0;
+			U32 actorId{ 0 };
+			U32 mask{ 0 };
 		};
 		struct Name {
-			U32 actorId = 0;
-			String name = "";
+			U32 actorId{ 0 };
+			String name{};
 		};
 
 		Ids ids_{};
 		FastMap<Name> names_{};
 		FastMap<Tag> tagMasks_{};
-		HashMap<U32, Vector2> positions_{};
+		HashTable<U32, Vector2> positions_{};
 	};
 }
 
