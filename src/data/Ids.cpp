@@ -1,5 +1,7 @@
 #include "Ids.h"
 
+const milk::U32 milk::Ids::INVALID = 0;
+
 milk::Ids::Ids()
 	: IDX_BITS{ 16 }
 	, GEN_BITS{ 16 }
