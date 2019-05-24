@@ -17,9 +17,9 @@ void milk::actor::destroy(ActorData& actorData, U32 actor) {
 		return;
 	}
 	id::remove(actorData.ids, actor);
-	U32 nameidx = actorData.namemap.at(actor);
-	U32 lastidx = actorData.names.size() - 1;
 	if (actorData.names.size() > 1) {
+		U32 nameidx = actorData.namemap.at(actor);
+		U32 lastidx = actorData.names.size() - 1;
 		actorData.names[nameidx] = actorData.names[lastidx];
 		actorData.namemap.at(lastidx) = nameidx;
 	}
