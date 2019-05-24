@@ -11,8 +11,6 @@ namespace milk {
 	}
 }
 
-const milk::U32 milk::id::INVALID = 0;
-
 milk::U32 milk::id::create(IdData& ids) {
 	U32 index;
 	if (ids.freeIndeces.size() > MAX_FREE) {
