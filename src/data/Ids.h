@@ -14,7 +14,7 @@ namespace milk {
 	};
 
 	namespace id {
-		const static U32 INVALID;
+		static const U32 INVALID;
 
 		U32 create(IdData& ids);
 		void remove(IdData& ids, U32 id);
