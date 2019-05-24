@@ -1,76 +1,54 @@
 #include "Actors.h"
 
-#include <assert.h>
+#include <algorithm>
 
-namespace milk {
-	Actor Actors::create(const String& name) {
-		U32 id = ids_.create();
-		names_.push(id, Name{ id, name });
-		positions_.insert(std::make_pair(id, Vector2::zero()));
-		return Actor{ id };
+milk::U32 milk::actor::create(ActorData& actorData, const std::string& name) {
+	U32 id = id::create(actorData.ids);
+	NameData nameData;
+	nameData.actorid = id;
+	nameData.name = name;
+	actorData.names.push_back(nameData);
+	actorData.namemap.insert(std::make_pair(id, actorData.names.size() - 1));
+	return id;
+}
+
+void milk::actor::destroy(ActorData& actorData, U32 actor) {
+	if (!id::valid(actorData.ids, actor)) {
+		return;
 	}
-
-	void Actors::destroy(Actor actor) {
-		ids_.remove(actor.id);
-		names_.remove(actor.id);
-		positions_.erase(actor.id);
+	id::remove(actorData.ids, actor);
+	U32 nameidx = actorData.namemap.at(actor);
+	U32 lastidx = actorData.names.size() - 1;
+	if (actorData.names.size() > 1) {
+		actorData.names[nameidx] = actorData.names[lastidx];
+		actorData.namemap.at(lastidx) = nameidx;
 	}
+	actorData.names.pop_back();
+	actorData.namemap.erase(actor);
+	actorData.destroyed.push_back(actor);
+}
 
-	bool Actors::alive(Actor actor) const {
-		return ids_.valid(actor.id);
+std::string milk::actor::getName(ActorData& actorData, U32 actor) {
+	if (!id::valid(actorData.ids, actor)) {
+		return "";
 	}
+	U32 nameidx = actorData.namemap.at(actor);
+	return actorData.names[nameidx].name;
+}
 
-	bool Actors::tagged(Actor actor, U32 tag) {
-		return tagMasks_.contains(actor.id) && (tagMasks_.lookup(actor.id).mask & tag) == tag;
+void milk::actor::setName(ActorData& actorData, U32 actor, const std::string& name) {
+	if (!id::valid(actorData.ids, actor)) {
+		return;
 	}
+	U32 nameidx = actorData.namemap.at(actor);
+	actorData.names[nameidx].name = name;
+}
 
-	void Actors::tag(Actor actor, U32 tag) {
-		if (tagMasks_.contains(actor.id)) {
-			tagMasks_.lookup(actor.id).mask |= tag;
-			return;
+milk::U32 milk::actor::getByName(ActorData& actorData, const std::string& name) {
+	for (int i = 0; i < actorData.names.size(); ++i) {
+		if (actorData.names[i].name == name) {
+			return actorData.names[i].actorid;
 		}
-		Tag newTag;
-		newTag.actorId = actor.id;
-		newTag.mask = tag;
-		tagMasks_.push(actor.id, newTag);
 	}
-
-	void Actors::untag(Actor actor, U32 tag) {
-		if (tagMasks_.contains(actor.id)) {
-			tagMasks_.lookup(actor.id).mask &= ~tag;
-		}
-	}
-
-	void Actors::getByTag(Array<Actor>& tagged, U32 tag) {
-		for (int i = 0; i < tagMasks_.size(); ++i) {
-			if ((tagMasks_[i].mask & tag) == tag) {
-				tagged.push_back(Actor{ tagMasks_[i].actorId });
-			}
-		}
-	}
-
-	String Actors::getName(Actor actor) {
-		return names_.lookup(actor.id).name;
-	}
-
-	void Actors::setName(Actor actor, const String& name) {
-		names_.lookup(actor.id).name = name;
-	}
-
-	Actor Actors::getByName(const String& name) {
-		for (int i = 0; i < names_.size(); ++i) {
-			if (names_[i].name == name) {
-				return Actor{ names_[i].actorId };
-			}
-		}
-		return Actor{ Ids::INVALID };
-	}
-
-	Vector2 Actors::getPosition(Actor actor) {
-		return positions_.at(actor.id);
-	}
-
-	void Actors::setPosition(Actor actor, const Vector2& position) {
-		positions_.at(actor.id) = position;
-	}
+	return id::INVALID;
 }

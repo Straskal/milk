@@ -53,13 +53,9 @@ enable_testing()
 
 # common
 set(MILK_SRC_DATA
-	src/data/Array.h
-	src/data/HashTable.h
 	src/data/int.h
 	src/data/Ids.cpp
 	src/data/Ids.h
-	src/data/FastMap.h
-	src/data/String.h
 )
 
 # input
@@ -102,13 +98,13 @@ set(MILK_SRC_WINDOW_ADAPTER
 )
 
 set(MILK_SRC_FILES
-	${MILK_SRC_DATA}	
+	${MILK_SRC_DATA}
     ${MILK_SRC_INPUT}
     ${MILK_SRC_GRAPHICS}
     ${MILK_SRC_MATH}
     ${MILK_SRC_SCENE}
     ${MILK_SRC_WINDOW}
-    ${MILK_SRC_WINDOW_ADAPTER}
+	${MILK_SRC_WINDOW_ADAPTER}
 )
 
 add_library(milklib ${MILK_SRC_FILES})
@@ -188,7 +184,6 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 # create test exe
 set (TESTS
-	test/data/FastMapTests.h
 	test/data/IdsTests.h
     test/math/Matrix3Tests.h
     test/math/RectangleTests.h
