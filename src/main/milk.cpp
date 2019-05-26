@@ -7,7 +7,7 @@
 
 bool milk::state::init(milk::MilkState& milkState) {
 	milkState.lua->init();
-	MilkStartupConfig config = milkState.lua->getConfiguration("res/config.lua");
+	MilkStartupConfig config = luaExtensions::getConfiguration(*milkState.lua, "res/config.lua");
 
 	if (!milkState.window->init(config.winTitle, config.winWidth, config.winHeight, config.winFullscreen)) {
 		milkState.window->free();

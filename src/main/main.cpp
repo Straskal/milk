@@ -1,13 +1,15 @@
+#include <iostream>
+
 #include "SDL_main.h"
 #include "SDL.h"
 
 #include "milk.h"
 #include "lua/LuaEnvironment.h"
 #include "scene/Actors.h"
-#include "window/Renderer.h"
-#include "window/Window.h"
 #include "window/adapter/RendererAdapter.h"
 #include "window/adapter/WindowAdapter.h"
+
+#define MILK_SUCCESS 0;
 
 int main(int argc, char* argv[]) {
 	milk::MilkState milkState;
@@ -15,32 +17,38 @@ int main(int argc, char* argv[]) {
 	milkState.window = new milk::adapter::WindowAdapter();
 	milkState.renderer = new milk::adapter::RendererAdapter();
 
-	milk::state::init(milkState);
+	if (!milk::state::init(milkState))
+		goto quit;
 
-	while (true) {
-		int frameStartTime = SDL_GetTicks();
+	try {
+		while (true) {
+			int frameStartTime = SDL_GetTicks();
 
-		SDL_Event event;
-		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT) {
-				goto exit;
+			SDL_Event event;
+			while (SDL_PollEvent(&event)) {
+				if (event.type == SDL_QUIT) {
+					goto quit;
+				}
 			}
+
+			milk::state::tick(milkState);
+			milk::state::postTick(milkState);
+			milk::state::render(milkState);
+
+			Uint32 frameTime = SDL_GetTicks() - frameStartTime;
+			if (frameTime < milk::state::MILLISECONDS_PER_FRAME)
+				SDL_Delay((Uint32)(milk::state::MILLISECONDS_PER_FRAME - frameTime));
 		}
-
-		milk::state::tick(milkState);
-		milk::state::postTick(milkState);
-		milk::state::render(milkState);
-
-		Uint32 frameTime = SDL_GetTicks() - frameStartTime;
-		if (frameTime < milk::state::MILLISECONDS_PER_FRAME)
-			SDL_Delay((Uint32)(milk::state::MILLISECONDS_PER_FRAME - frameTime));
+	}
+	catch (std::exception e) {
+		std::cout << "Fatal error encountered: " << e.what() << std::endl;
+		goto quit;
 	}
 
-exit:
+quit:
 	milk::state::quit(milkState);
-
-	delete milkState.renderer;
-	delete milkState.window;
-
-	return 0;
+	delete milkState.lua; milkState.lua = nullptr;
+	delete milkState.renderer; milkState.renderer = nullptr;
+	delete milkState.window; milkState.window = nullptr;
+	return MILK_SUCCESS;
 }

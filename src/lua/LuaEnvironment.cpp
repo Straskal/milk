@@ -1,4 +1,8 @@
 #include "LuaEnvironment.h"
+#include "LuaEnvironment.h"
+#include "LuaEnvironment.h"
+#include "LuaEnvironment.h"
+#include "LuaEnvironment.h"
 
 extern "C" {
 #include "lua.h"
@@ -11,29 +15,41 @@ void milk::LuaEnvironment::init() {
 	luaL_openlibs(luaState_);
 }
 
-milk::MilkStartupConfig milk::LuaEnvironment::getConfiguration(const std::string& configFile) const {
-	MilkStartupConfig config;
+void milk::LuaEnvironment::doFile(const std::string& file) {
+	luaL_dofile(luaState_, file.c_str());
+}
 
-	luaL_dofile(luaState_, configFile.c_str());
-	lua_getfield(luaState_, -1, "title");
-	config.winTitle = std::string{ (const char*)lua_tostring(luaState_, -1) };
+std::string milk::LuaEnvironment::getStringField(const std::string& key) {
+	lua_getfield(luaState_, -1, key.c_str());
+	std::string result = std::string{ (const char*)lua_tostring(luaState_, -1) };
 	lua_pop(luaState_, 1);
-	lua_getfield(luaState_, -1, "width");
-	config.winWidth = (int)lua_tointeger(luaState_, -1);
+	return result;
+}
+
+int milk::LuaEnvironment::getIntegerField(const std::string& key) {
+	lua_getfield(luaState_, -1, key.c_str());
+	int result = (int)lua_tointeger(luaState_, -1);
 	lua_pop(luaState_, 1);
-	lua_getfield(luaState_, -1, "height");
-	config.winHeight = (int)lua_tointeger(luaState_, -1);
+	return result;
+}
+
+bool milk::LuaEnvironment::getBooleanField(const std::string& key) {
+	lua_getfield(luaState_, -1, key.c_str());
+	bool result = (bool)lua_toboolean(luaState_, -1);
 	lua_pop(luaState_, 1);
-	lua_getfield(luaState_, -1, "vwidth");
-	config.resWidth = (int)lua_tointeger(luaState_, -1);
-	lua_pop(luaState_, 1);
-	lua_getfield(luaState_, -1, "vheight");
-	config.resHeight = (int)lua_tointeger(luaState_, -1);
-	lua_pop(luaState_, 1);
-	lua_getfield(luaState_, -1, "fullscreen");
-	config.winFullscreen = (bool)lua_toboolean(luaState_, -1);
-	lua_pop(luaState_, 1);
-	lua_pop(luaState_, 1);
+	return result;
+}
+
+milk::MilkStartupConfig milk::luaExtensions::getConfiguration(LuaEnvironment& env, const std::string& configFile) {
+	env.doFile(configFile);
+
+	MilkStartupConfig config;
+	config.winTitle = env.getStringField("title");
+	config.winWidth = env.getIntegerField("width");
+	config.winHeight = env.getIntegerField("height");
+	config.resWidth = env.getIntegerField("vwidth");
+	config.resHeight = env.getIntegerField("vheight");
+	config.winFullscreen = env.getBooleanField("fullscreen");
 
 	return config;
 }
