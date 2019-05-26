@@ -36,8 +36,9 @@ int main(int argc, char* argv[]) {
 			milk::state::render(milkState);
 
 			Uint32 frameTime = SDL_GetTicks() - frameStartTime;
-			if (frameTime < milk::state::MILLISECONDS_PER_FRAME)
+			if (frameTime < milk::state::MILLISECONDS_PER_FRAME) {
 				SDL_Delay((Uint32)(milk::state::MILLISECONDS_PER_FRAME - frameTime));
+			}				
 		}
 	}
 	catch (std::exception e) {
