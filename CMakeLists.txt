@@ -54,8 +54,6 @@ enable_testing()
 # common
 set(MILK_SRC_DATA
 	src/data/int.h
-	src/data/Ids.cpp
-	src/data/Ids.h
 )
 
 # input
@@ -69,6 +67,18 @@ set(MILK_SRC_GRAPHICS
     src/graphics/Color.h
     src/graphics/Texture.cpp
     src/graphics/Texture.h
+)
+
+# lua
+set(MILK_SRC_LUA
+	src/lua/LuaEnvironment.cpp
+    src/lua/LuaEnvironment.h
+)
+
+# math
+set(MILK_SRC_MAIN
+	src/main/milk.cpp
+    src/main/milk.h
 )
 
 # math
@@ -101,6 +111,8 @@ set(MILK_SRC_FILES
 	${MILK_SRC_DATA}
     ${MILK_SRC_INPUT}
     ${MILK_SRC_GRAPHICS}
+	${MILK_SRC_LUA}
+	${MILK_SRC_MAIN}
     ${MILK_SRC_MATH}
     ${MILK_SRC_SCENE}
     ${MILK_SRC_WINDOW}
@@ -140,7 +152,7 @@ target_link_libraries(milklib
 # milk exe
 #---------------------------------------------------------------------------
 
-add_executable(milk src/main.cpp)
+add_executable(milk src/main/main.cpp)
 
 target_link_libraries(milk milklib)
 

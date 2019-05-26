@@ -6,7 +6,7 @@
 //
 //namespace milk {
 //	TEST(IdsTests, Creation) {
-//		Ids ids{};
+//		Ids actors{};
 //		U32 id0 = ids.create();
 //		U32 id1 = ids.create();
 //		U32 id2 = ids.create();

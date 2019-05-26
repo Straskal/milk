@@ -10,27 +10,22 @@ namespace milk {
 	namespace adapter {
 		class RendererAdapter : public Renderer {
 		public:
-			static RendererAdapter& instance() {
-				static RendererAdapter instance;
-				return instance;
-			}
+			RendererAdapter();
 
-			bool init(SDL_Window* sdlWindow, unsigned int resolutionWidth, unsigned int resolutionHeight);
+			bool init(void* windowHandle, unsigned int resolutionWidth, unsigned int resolutionHeight) override;
 			void clear(const Color& color) override;
 			void drawRectangle(const Rectangle& destinationRectangle, const Color& color) override;
 			void drawRectangleOutline(const Rectangle& destinationRectangle, const Color& color) override;
 			void draw(const Texture& texture, const Rectangle& sourceRectangle, const Rectangle& destinationRectangle, U8 flipFlags) override;
 			void present() override;
 			Resolution resolution() const override;
-			SDL_Renderer* sdlRenderer() const;
-			void free();
+			void free() override;
 
 		private:
-			RendererAdapter();
 
 			bool initialized_;
 			Resolution resolution_;
-			SDL_Renderer* sdlRenderer_;
+			SDL_Renderer* handle_;
 		};
 	}
 }

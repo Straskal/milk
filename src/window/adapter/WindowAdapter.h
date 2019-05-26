@@ -16,29 +16,20 @@ namespace milk
 	{
 		class WindowAdapter : public Window {
 		public:
-			static WindowAdapter& instance()
-			{
-				static WindowAdapter instance;
-				return instance;
-			}
+			WindowAdapter();
 
-			bool init(const std::string& title, unsigned int width, unsigned int height, bool fullscreen);
+			bool init(const std::string& title, unsigned int width, unsigned int height, bool fullscreen) override;
 			unsigned int width() const override;
 			unsigned int height() const override;
 			bool fullscreen() const override;
 			void toggleFullscreen() override;
-			SDL_Window* sdlWindow() const;
-			void free();
+			void* handle() const override;
+			void free() override;
 
 		private:
-			WindowAdapter();
-
-			std::string title_;
-			unsigned int width_;
-			unsigned int height_;
-			bool fullscreen_;
-			bool initialized_;
-			SDL_Window* sdlWindow_;
+			SDL_Window* handle_;
+			int width_;
+			int height_;
 		};
 	}
 }
