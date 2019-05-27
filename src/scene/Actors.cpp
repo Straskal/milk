@@ -69,7 +69,7 @@ namespace milk {
 			std::unordered_map<U32, int>& nameidmap,
 			std::unordered_map<int, U32>& nameidxmap
 		) {
-			U32 lastidx = names.size() - 1;
+			size_t lastidx = names.size() - 1;
 			if (names.size() > 1) {
 				// Swap the deleted element with last, then remove last element.
 				U32 nameidx = nameidmap.at(id);
@@ -88,7 +88,7 @@ namespace milk {
 			std::unordered_map<U32, int>& nameidmap,
 			const std::string& name
 		) {
-			U32 nameidx = nameidmap.at(id);
+			int nameidx = nameidmap.at(id);
 			names[nameidx] = name;
 		}
 
@@ -97,7 +97,7 @@ namespace milk {
 			std::vector<std::string>& names,
 			std::unordered_map<U32, int>& nameidmap
 		) {
-			U32 nameidx = nameidmap.at(id);
+			int nameidx = nameidmap.at(id);
 			return names[nameidx];
 		}
 
