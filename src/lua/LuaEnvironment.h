@@ -24,12 +24,16 @@ namespace milk {
 		int getScript(U32 id, const std::string& scriptName);
 
 		void tick();
+		void postTick();
+		void render();
 
 	private:
 		lua_State* luaState_;
-		std::unordered_map<U32, std::unordered_map<std::string, int>> scriptidmap_;
-		std::vector<int> newscripts_;
-		std::vector<int> tickcallbacks_;
+		std::unordered_map<U32, std::unordered_map<std::string, int>> scriptIdMap_;
+		std::vector<int> newScripts_;
+		std::vector<int> tickCallbacks_;
+		std::vector<int> postTickCallbacks_;
+		std::vector<int> renderCallbacks_;
 	};
 
 	namespace lua {
