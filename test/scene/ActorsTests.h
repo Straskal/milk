@@ -80,6 +80,25 @@ namespace milk {
 		EXPECT_EQ("burt macklin", actors.getActorName(actor1));
 		EXPECT_EQ("day man", actors.getActorName(actor2));
 	}
+
+	TEST(ActorsTests, Tags) {
+		Actors actors;
+
+		U32 actor0 = actors.createActor("hail satan", Vector2{ 0.f, 12.f });
+		U32 actor1 = actors.createActor("stev", Vector2{ 15.5f, 98.f });
+		U32 actor2 = actors.createActor("danny devito", Vector2{ 0.f, -1.f });
+
+		U32 playerTag = 1 << 0;
+		U32 enemyTag = 1 << 1;
+		U32 interactabletag = 1 << 2;
+
+		actors.setActorTags(actor0, playerTag);
+		actors.setActorTags(actor1, enemyTag | interactabletag);
+
+		EXPECT_EQ(playerTag, actors.getActorTags(actor0));
+		EXPECT_EQ(enemyTag | interactabletag, actors.getActorTags(actor1));
+		EXPECT_EQ(0, actors.getActorTags(actor2));
+	}
 }
 
 #endif

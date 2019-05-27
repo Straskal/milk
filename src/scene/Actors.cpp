@@ -125,7 +125,7 @@ namespace milk {
 
 		void insertOrUpdateTag(
 			U32 id,
-			std::unordered_map<U32, U32> tags,
+			std::unordered_map<U32, U32>& tags,
 			U32 mask
 		) {
 			std::unordered_map<U32, U32>::iterator tag = tags.find(id);
@@ -139,7 +139,7 @@ namespace milk {
 
 		U32 queryTagsById(
 			U32 id,
-			std::unordered_map<U32, U32> tags
+			std::unordered_map<U32, U32>& tags
 		) {
 			std::unordered_map<U32, U32>::iterator tag = tags.find(id);
 			return tag == tags.end() ? 0 : tag->second;
