@@ -8,7 +8,7 @@ namespace milk {
 	TEST(ActorsTests, Creation) {
 		Actors actors;
 
-		U32 actor0 = actors.createActor("hail satan", Vector2{0.f, 12.f});
+		U32 actor0 = actors.createActor("hail satan", Vector2{ 0.f, 12.f });
 		U32 actor1 = actors.createActor("stev", Vector2{ 15.5f, 98.f });
 		U32 actor2 = actors.createActor("danny devito", Vector2{ 0.f, -1.f });
 
@@ -47,6 +47,22 @@ namespace milk {
 		EXPECT_FALSE(actors.isActorAlive(actor0));
 		EXPECT_FALSE(actors.isActorAlive(actor1));
 		EXPECT_FALSE(actors.isActorAlive(actor2));
+	}
+
+	TEST(ActorsTests, Position) {
+		Actors actors;
+
+		U32 actor0 = actors.createActor("hail satan", Vector2{ 0.f, 12.f });
+		U32 actor1 = actors.createActor("stev", Vector2{ 15.5f, 98.f });
+		U32 actor2 = actors.createActor("danny devito", Vector2{ 0.f, -1.f });
+
+		actors.setActorPosition(actor0, Vector2::zero());
+		actors.setActorPosition(actor1, Vector2{ 1.f, 1.f });
+		actors.setActorPosition(actor2, Vector2{ -10.f, 20.f });
+
+		EXPECT_EQ(Vector2::zero(), actors.getActorPosition(actor0));
+		EXPECT_EQ(Vector2(1.f, 1.f), actors.getActorPosition(actor1));
+		EXPECT_EQ(Vector2(-10.f, 20.f), actors.getActorPosition(actor2));
 	}
 
 	TEST(ActorsTests, Name) {
