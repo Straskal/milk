@@ -41,8 +41,7 @@ namespace milk {
 
 		bool validId(
 			U32 id,
-			std::vector<U16>& generations,
-			std::queue<U16>& freeIndeces
+			std::vector<U16>& generations
 		) {
 			U16 index = id & ~(1 << Actors::GEN_BITS);
 			assert(index < generations.size());
@@ -148,42 +147,59 @@ namespace milk {
 	}
 }
 
-milk::U32 milk::Actors::createActor(const std::string& name) {
+milk::U32 milk::Actors::createActor(const std::string& name, Vector2 position) {
 	U32 id = makeId(generations_, freeIndeces_);
 	insertName(id, names_, nameidmap_, nameidxmap_, name);
-	insertPosition(id, positions_, Vector2::zero());
+	insertPosition(id, positions_, position);
 	return id;
 }
 
 void milk::Actors::destroyActor(U32 id) {
+	if (!validId(id, generations_)) {
+		// TODO: Trying to access destroyed actor. Log warning.
+	}
 	deleteId(id, generations_, freeIndeces_, destroyed_);
 	deleteName(id, names_, nameidmap_, nameidxmap_);
 }
 
-bool milk::Actors::isActorAlive(U32 id) {
-	return validId(id, generations_, freeIndeces_);
-}
-
 std::string milk::Actors::getActorName(U32 id) {
+	if (!validId(id, generations_)) {
+		// TODO: Trying to access destroyed actor. Log warning.
+	}
 	return queryNamesById(id, names_, nameidmap_);
 }
 
 void milk::Actors::setActorName(U32 id, const std::string& name) {
+	if (!validId(id, generations_)) {
+		// TODO: Trying to access destroyed actor. Log warning.
+	}
 	updateName(id, names_, nameidmap_, name);
 }
 
 milk::Vector2 milk::Actors::getActorPosition(U32 id) {
+	if (!validId(id, generations_)) {
+		// TODO: Trying to access destroyed actor. Log warning.
+	}
 	return queryPositionsById(id, positions_);
 }
 
 void milk::Actors::setActorPosition(U32 id, Vector2 position) {
+	if (!validId(id, generations_)) {
+		// TODO: Trying to access destroyed actor. Log warning.
+	}
 	updatePosition(id, positions_, position);
 }
 
 milk::U32 milk::Actors::getActorTags(U32 id) {
+	if (!validId(id, generations_)) {
+		// TODO: Trying to access destroyed actor. Log warning.
+	}
 	return queryTagsById(id, tags_);
 }
 
 void milk::Actors::setActorTags(U32 id, U32 mask) {
+	if (!validId(id, generations_)) {
+		// TODO: Trying to access destroyed actor. Log warning.
+	}
 	insertOrUpdateTag(id, tags_, mask);
 }

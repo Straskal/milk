@@ -18,9 +18,8 @@ namespace milk {
 		static const U32 GEN_BITS;
 		static const U32 INVALID;
 
-		U32 createActor(const std::string& name);
+		U32 createActor(const std::string& name, Vector2 position);
 		void destroyActor(U32 id);
-		bool isActorAlive(U32 id);
 		std::string getActorName(U32 id);
 		void setActorName(U32 id, const std::string& name);
 		Vector2 getActorPosition(U32 id);
