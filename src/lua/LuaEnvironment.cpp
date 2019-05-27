@@ -1,6 +1,4 @@
 #include "LuaEnvironment.h"
-#include "LuaEnvironment.h"
-#include "LuaEnvironment.h"
 
 extern "C" {
 #include "lua.h"
