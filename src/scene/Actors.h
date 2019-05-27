@@ -26,7 +26,7 @@ namespace milk {
 		Vector2 getActorPosition(U32 id);
 		void setActorPosition(U32 id, Vector2 position);
 		U32 getActorTags(U32 id);
-		void setActorTags(U32 id, U32 tags);
+		void setActorTags(U32 id, U32 mask);
 
 	private:
 		std::queue<U16> freeIndeces_;
@@ -37,7 +37,6 @@ namespace milk {
 		std::unordered_map<int, U32> nameidxmap_;
 		std::unordered_map<U32, Vector2> positions_;
 		std::unordered_map<U32, U32> tags_;
-		std::unordered_map<U32, std::vector<U32>> tagmap_;
 	};
 }
 

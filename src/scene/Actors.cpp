@@ -2,90 +2,190 @@
 
 #include <assert.h>
 
+namespace milk {
+	namespace {
+		U32 makeId(
+			std::vector<U16>& generations, 
+			std::queue<U16>& freeIndeces
+		) {
+			U16 index;
+			if (freeIndeces.size() > Actors::MAX_FREE) {
+				index = freeIndeces.front();
+				freeIndeces.pop();
+			}
+			else {
+				generations.push_back(0);
+				index = generations.size() - 1;
+				assert(index <= Actors::MAX);
+			}
+			U32 id = index | (generations[index] << Actors::GEN_BITS);
+			if (id == Actors::INVALID) {
+				++generations[index];
+				id = index | (generations[index] << Actors::GEN_BITS);
+			}
+			return id;
+		}
+
+		void deleteId(
+			U32 id,
+			std::vector<U16>& generations,
+			std::queue<U16>& freeIndeces,
+			std::vector<U32> destroyed
+		) {		
+			U16 index = id & ~(1 << Actors::GEN_BITS);
+			assert(index < generations.size());
+			++generations[index];
+			freeIndeces.push(index);
+			destroyed.push_back(id);
+		}
+
+		bool validId(
+			U32 id,
+			std::vector<U16>& generations,
+			std::queue<U16>& freeIndeces
+		) {
+			U16 index = id & ~(1 << Actors::GEN_BITS);
+			assert(index < generations.size());
+			U16 generation = id >> Actors::IDX_BITS & ~(1 << Actors::GEN_BITS);
+			return generations[index] == generation;
+		}
+
+		void insertName(
+			U32 id, 
+			std::vector<std::string>& names,
+			std::unordered_map<U32, int>& nameidmap,
+			std::unordered_map<int, U32>& nameidxmap,
+			const std::string& name
+		) {
+			names.push_back(name);
+			int nameidx = names.size() - 1;
+			nameidmap.insert(std::make_pair(id, nameidx));
+			nameidxmap.insert(std::make_pair(nameidx, id));
+		}
+
+		void deleteName(
+			U32 id,
+			std::vector<std::string>& names,
+			std::unordered_map<U32, int>& nameidmap,
+			std::unordered_map<int, U32>& nameidxmap
+		) {
+			U32 lastidx = names.size() - 1;
+
+			if (names.size() > 1) {
+				// Swap the deleted element with last, then remove last element.
+				U32 nameidx = nameidmap.at(id);
+				names[nameidx] = names[lastidx];
+				nameidmap.at(lastidx) = nameidx;
+				nameidxmap.at(nameidx) = nameidxmap.at(lastidx);
+			}
+
+			names.pop_back();
+			nameidmap.erase(id);
+			nameidxmap.erase(lastidx);
+		}
+
+		void updateName(
+			U32 id, 
+			std::vector<std::string>& names,
+			std::unordered_map<U32, int>& nameidmap,
+			const std::string& name
+		) {
+			U32 nameidx = nameidmap.at(id);
+			names[nameidx] = name;
+		}
+
+		std::string queryNamesById(
+			U32 id,
+			std::vector<std::string>& names,
+			std::unordered_map<U32, int>& nameidmap
+		) {
+			U32 nameidx = nameidmap.at(id);
+			return names[nameidx];
+		}
+
+		void insertPosition(
+			U32 id,
+			std::unordered_map<U32, Vector2>& positions,
+			Vector2 position
+		) {
+			positions.insert(std::make_pair(id, position));
+		}
+
+		void updatePosition(
+			U32 id,
+			std::unordered_map<U32, Vector2>& positions,
+			Vector2 position
+		) {
+			positions.at(id) = position;
+		}
+
+		Vector2 queryPositionsById(
+			U32 id,
+			std::unordered_map<U32, Vector2>& positions
+		) {
+			return positions.at(id);
+		}
+
+		void insertOrUpdateTag(
+			U32 id,
+			std::unordered_map<U32, U32> tags,
+			U32 mask
+		) {
+			std::unordered_map<U32, U32>::iterator tag = tags.find(id);
+			if (tag != tags.end()) {
+				tag->second = mask;
+			}
+			else {
+				tags.insert(std::make_pair(id, mask));
+			}
+		}
+
+		U32 queryTagsById(
+			U32 id,
+			std::unordered_map<U32, U32> tags
+		) {
+			std::unordered_map<U32, U32>::iterator tag = tags.find(id);
+			return tag == tags.end() ? 0 : tag->second;
+		}
+	}
+}
+
 milk::U32 milk::Actors::createActor(const std::string& name) {
-	U32 index;
-	if (freeIndeces_.size() > MAX_FREE) {
-		index = freeIndeces_.front();
-		freeIndeces_.pop();
-	}
-	else {
-		generations_.push_back(0);
-		index = generations_.size() - 1;
-		assert(index <= MAX);
-	}
-	U32 id = index | (generations_[index] << GEN_BITS);
-	if (id == INVALID) {
-		++generations_[index];
-		id = index | (generations_[index] << GEN_BITS);
-	}
-
-	names_.push_back(name);
-	int nameidx = names_.size() - 1;
-	nameidmap_.insert(std::make_pair(id, nameidx));
-	nameidxmap_.insert(std::make_pair(nameidx, id));
-
-	positions_.insert(std::make_pair(id, Vector2::zero()));
+	U32 id = makeId(generations_, freeIndeces_);
+	insertName(id, names_, nameidmap_, nameidxmap_, name);
+	insertPosition(id, positions_, Vector2::zero());
 	return id;
 }
 
 void milk::Actors::destroyActor(U32 id) {
-	U16 index = id & ~(1 << GEN_BITS);
-	assert(index < generations_.size());
-	++generations_[index];
-	freeIndeces_.push(index);
-
-	U32 lastidx = names_.size() - 1;
-
-	if (names_.size() > 1) {
-		// Swap the deleted element with last, then remove last element.
-		U32 nameidx = nameidmap_.at(id);
-		names_[nameidx] = names_[lastidx];
-		nameidmap_.at(lastidx) = nameidx;
-		nameidxmap_.at(nameidx) = nameidxmap_.at(lastidx);
-	}
-
-	names_.pop_back();
-	nameidmap_.erase(id);
-	nameidxmap_.erase(lastidx);
-	destroyed_.push_back(id);
+	deleteId(id, generations_, freeIndeces_, destroyed_);
+	deleteName(id, names_, nameidmap_, nameidxmap_);
 }
 
 bool milk::Actors::isActorAlive(U32 id) {
-	U16 index = id & ~(1 << GEN_BITS);
-	assert(index < generations_.size());
-	U16 generation = id >> IDX_BITS & ~(1 << GEN_BITS);
-	return generations_[index] == generation;
+	return validId(id, generations_, freeIndeces_);
 }
 
 std::string milk::Actors::getActorName(U32 id) {
-	U32 nameidx = nameidmap_.at(id);
-	return names_[nameidx];
+	return queryNamesById(id, names_, nameidmap_);
 }
 
 void milk::Actors::setActorName(U32 id, const std::string& name) {
-	U32 nameidx = nameidmap_.at(id);
-	names_[nameidx] = name;
+	updateName(id, names_, nameidmap_, name);
 }
 
 milk::Vector2 milk::Actors::getActorPosition(U32 id) {
-	return positions_.at(id);
+	return queryPositionsById(id, positions_);
 }
 
 void milk::Actors::setActorPosition(U32 id, Vector2 position) {
-	positions_.at(id) = position;
+	updatePosition(id, positions_, position);
 }
 
 milk::U32 milk::Actors::getActorTags(U32 id) {
-	std::unordered_map<U32, U32>::iterator tag = tags_.find(id);
-	return tag == tags_.end() ? 0 : tag->second;
+	return queryTagsById(id, tags_);
 }
 
-void milk::Actors::setActorTags(U32 id, U32 tags) {
-	std::unordered_map<U32, U32>::iterator tag = tags_.find(id);
-	if (tag != tags_.end()) {
-		tag->second = tags;
-	}
-	else {
-		tags_.insert(std::make_pair(id, tags));
-	}
+void milk::Actors::setActorTags(U32 id, U32 mask) {
+	insertOrUpdateTag(id, tags_, mask);
 }

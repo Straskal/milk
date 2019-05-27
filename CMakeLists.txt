@@ -196,7 +196,6 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 # create test exe
 set (TESTS
-	test/data/IdsTests.h
     test/math/Matrix3Tests.h
     test/math/RectangleTests.h
 	test/scene/ActorsTests.h

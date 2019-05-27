@@ -12,6 +12,7 @@ void milk::LuaEnvironment::init() {
 }
 
 milk::MilkStartupConfig milk::LuaEnvironment::getConfiguration(const std::string& configFile) {
+	// Push config table onto stack
 	luaL_dofile(luaState_, configFile.c_str());
 
 	MilkStartupConfig config;
@@ -21,6 +22,9 @@ milk::MilkStartupConfig milk::LuaEnvironment::getConfiguration(const std::string
 	config.resWidth = lua::getIntegerField(luaState_, "vwidth");
 	config.resHeight = lua::getIntegerField(luaState_, "vheight");
 	config.winFullscreen = lua::getBooleanField(luaState_, "fullscreen");
+
+	// Pop config table off of stack
+	lua_pop(luaState_, 1);
 
 	return config;
 }
