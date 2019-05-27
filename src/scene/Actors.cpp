@@ -100,6 +100,19 @@ namespace milk {
 			return names[nameidx];
 		}
 
+		U32 queryIdsByName(
+			const std::string& name,
+			std::vector<std::string>& names,
+			std::unordered_map<int, U32>& nameidxmap
+		) {
+			for (int i = 0; i < names.size(); ++i) {
+				if (name == names[i]) {
+					return nameidxmap.at(i);
+				}
+			}
+			return Actors::INVALID;
+		}
+
 		void insertPosition(
 			U32 id,
 			std::unordered_map<U32, Vector2>& positions,
@@ -184,6 +197,10 @@ void milk::Actors::setActorName(U32 id, const std::string& name) {
 		// TODO: Trying to access destroyed actor. Log warning.
 	}
 	updateName(id, names_, nameidmap_, name);
+}
+
+milk::U32 milk::Actors::getActorByName(const std::string& name) {
+	return queryIdsByName(name, names_, nameidxmap_);
 }
 
 milk::Vector2 milk::Actors::getActorPosition(U32 id) {

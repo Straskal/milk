@@ -79,6 +79,14 @@ namespace milk {
 		EXPECT_EQ("bobody", actors.getActorName(actor0));
 		EXPECT_EQ("burt macklin", actors.getActorName(actor1));
 		EXPECT_EQ("day man", actors.getActorName(actor2));
+
+		U32 foundActor0 = actors.getActorByName("bobody");
+		U32 foundActor1 = actors.getActorByName("burt macklin");
+		U32 foundActor2 = actors.getActorByName("day man");
+
+		EXPECT_EQ(actor0, foundActor0);
+		EXPECT_EQ(actor1, foundActor1);
+		EXPECT_EQ(actor2, foundActor2);
 	}
 
 	TEST(ActorsTests, Tags) {

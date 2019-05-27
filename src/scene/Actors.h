@@ -23,6 +23,7 @@ namespace milk {
 		bool isActorAlive(U32 id);
 		std::string getActorName(U32 id);
 		void setActorName(U32 id, const std::string& name);
+		U32 getActorByName(const std::string& name);
 		Vector2 getActorPosition(U32 id);
 		void setActorPosition(U32 id, Vector2 position);
 		U32 getActorTags(U32 id);
