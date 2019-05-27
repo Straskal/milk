@@ -1,6 +1,7 @@
 #ifndef MILK_LUA_ENVIRONMENT_H
 #define MILK_LUA_ENVIRONMENT_H
 
+#include <queue>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -14,10 +15,21 @@ namespace milk {
 	class LuaEnvironment {
 	public:
 		void init();
+		void free();
+
 		MilkStartupConfig getConfiguration(const std::string& configFile);
+
+		void addScript(U32 id, const std::string& scriptName);
+		void removeScript(U32 id, const std::string& scriptName);
+		int getScript(U32 id, const std::string& scriptName);
+
+		void tick();
 
 	private:
 		lua_State* luaState_;
+		std::unordered_map<U32, std::unordered_map<std::string, int>> scriptidmap_;
+		std::vector<int> newscripts_;
+		std::vector<int> tickcallbacks_;
 	};
 
 	namespace lua {

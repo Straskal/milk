@@ -21,6 +21,8 @@ int main(int argc, char* argv[]) {
 		goto quit;
 
 	try {
+		milkState.lua->addScript(20, "res/player.lua");
+
 		while (true) {
 			int frameStartTime = SDL_GetTicks();
 

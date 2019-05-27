@@ -1,4 +1,9 @@
 #include "LuaEnvironment.h"
+#include "LuaEnvironment.h"
+#include "LuaEnvironment.h"
+#include "LuaEnvironment.h"
+#include "LuaEnvironment.h"
+#include "LuaEnvironment.h"
 
 extern "C" {
 #include "lua.h"
@@ -6,9 +11,71 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+namespace milk {
+	namespace {
+		void insertScript(
+			U32 id,
+			lua_State* L,
+			std::unordered_map<U32, std::unordered_map<std::string, int>>& scriptidmap,
+			std::vector<int>& newScripts,
+			const std::string& name
+		) {
+			luaL_dofile(L, name.c_str());
+
+			lua_getfield(L, -1, "awake");
+			if (!lua_isnil(L, -1) && lua_isfunction(L, -1)) {
+				lua_pcall(L, 0, 0, NULL);
+			}
+
+			int ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+			std::unordered_map<U32, std::unordered_map<std::string, int>>::iterator found = scriptidmap.find(id);
+			if (found != scriptidmap.end()) {
+				found->second.insert(std::make_pair(name, ref));
+			}
+			else {
+				scriptidmap.insert(std::make_pair(id, std::unordered_map<std::string, int> {
+					std::make_pair(name, ref)
+				}));
+			}
+			newScripts.push_back(ref);
+		}
+
+		void insertTickCallbacks(
+			lua_State* L,
+			std::vector<int>& newscripts,
+			std::vector<int>& tickcallbacks
+		) {
+			for (int i = 0; i < newscripts.size(); ++i) {
+				lua_rawgeti(L, LUA_REGISTRYINDEX, newscripts[i]);
+				lua_getfield(L, -1, "tick");
+				if (!lua_isnil(L, -1) && lua_isfunction(L, -1)) {
+					tickcallbacks.push_back(luaL_ref(L, LUA_REGISTRYINDEX));
+				}
+			}
+		}
+
+		void invokeTickCallbacks(
+			lua_State* L,
+			std::vector<int>& tickcallbacks
+		) {
+			for (int i = 0; i < tickcallbacks.size(); ++i) {
+				lua_rawgeti(L, LUA_REGISTRYINDEX, tickcallbacks[i]);
+				if (!lua_isnil(L, -1) && lua_isfunction(L, -1)) {
+					lua_pcall(L, 0, 0, NULL);
+				}
+			}
+		}
+	}
+}
+
 void milk::LuaEnvironment::init() {
 	luaState_ = luaL_newstate();
 	luaL_openlibs(luaState_);
+}
+
+void milk::LuaEnvironment::free() {
+	lua_close(luaState_);
 }
 
 milk::MilkStartupConfig milk::LuaEnvironment::getConfiguration(const std::string& configFile) {
@@ -27,6 +94,24 @@ milk::MilkStartupConfig milk::LuaEnvironment::getConfiguration(const std::string
 	lua_pop(luaState_, 1);
 
 	return config;
+}
+
+void milk::LuaEnvironment::addScript(U32 id, const std::string& scriptName) {
+	insertScript(id, luaState_, scriptidmap_, newscripts_, scriptName);	
+}
+
+void milk::LuaEnvironment::removeScript(U32 id, const std::string& scriptName) {
+}
+
+int milk::LuaEnvironment::getScript(U32 id, const std::string& scriptName) {
+	return 0;
+}
+
+void milk::LuaEnvironment::tick() {
+	insertTickCallbacks(luaState_, newscripts_, tickcallbacks_);
+	newscripts_.clear();
+
+	invokeTickCallbacks(luaState_, tickcallbacks_);
 }
 
 std::string milk::lua::getStringField(lua_State* L, const std::string& key) {

@@ -24,7 +24,7 @@ bool milk::state::init(milk::MilkState& milkState) {
 }
 
 void milk::state::tick(milk::MilkState& milkState) {
-
+	milkState.lua->tick();
 }
 
 void milk::state::postTick(milk::MilkState& milkState) {
@@ -39,4 +39,5 @@ void milk::state::render(milk::MilkState& milkState) {
 void milk::state::quit(milk::MilkState& milkState) {
 	milkState.renderer->free();
 	milkState.window->free();
+	milkState.lua->free();
 }
