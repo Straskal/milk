@@ -28,12 +28,17 @@ void milk::state::tick(milk::MilkState& milkState) {
 }
 
 void milk::state::postTick(milk::MilkState& milkState) {
-
+	milkState.lua->postTick();
 }
 
 void milk::state::render(milk::MilkState& milkState) {
 	milkState.renderer->clear(Color::black());
+	milkState.lua->render();
 	milkState.renderer->present();
+}
+
+void milk::state::postRender(milk::MilkState& milkState) {
+	milkState.lua->postRender();
 }
 
 void milk::state::quit(milk::MilkState& milkState) {

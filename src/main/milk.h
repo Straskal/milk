@@ -32,6 +32,7 @@ namespace milk {
 		bool init(MilkState& milkState);
 		void tick(MilkState& milkState);
 		void postTick(MilkState& milkState);
+		void postRender(MilkState& milkState);
 		void render(MilkState& milkState);
 		void quit(MilkState& milkState);
 	}

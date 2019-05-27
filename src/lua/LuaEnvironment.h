@@ -21,10 +21,10 @@ namespace milk {
 
 		void addScript(U32 id, const std::string& scriptName);
 
-		void beginFrame();
 		void tick();
 		void postTick();
 		void render();
+		void postRender();
 
 	private:
 		lua_State* luaState_;
@@ -34,12 +34,6 @@ namespace milk {
 		std::vector<int> postTickCallbacks_;
 		std::vector<int> renderCallbacks_;
 	};
-
-	namespace lua {
-		std::string getStringField(lua_State* L, const std::string& key);
-		int getIntegerField(lua_State* L, const std::string& key);
-		bool getBooleanField(lua_State* L, const std::string& key);
-	}
 }
 
 #endif

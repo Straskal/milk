@@ -73,6 +73,7 @@ set(MILK_SRC_GRAPHICS
 set(MILK_SRC_LUA
 	src/lua/LuaEnvironment.cpp
     src/lua/LuaEnvironment.h
+	src/lua/LuaExtensions.h
 )
 
 # math

@@ -1,13 +1,11 @@
 #include "LuaEnvironment.h"
-#include "LuaEnvironment.h"
+#include "LuaExtensions.h"
 
 extern "C" {
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
 }
-
-#include <iostream>
 
 namespace milk {
 	namespace {
@@ -95,13 +93,6 @@ void milk::LuaEnvironment::addScript(U32 id, const std::string& scriptName) {
 	insertScript(id, luaState_, scriptIdMap_, newScripts_, scriptName);	
 }
 
-void milk::LuaEnvironment::beginFrame() {
-	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "tick");
-	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "postTick");
-	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "render");
-	newScripts_.clear();
-}
-
 void milk::LuaEnvironment::tick() {
 	invokeCallbacks(luaState_, tickCallbacks_);
 }
@@ -114,23 +105,9 @@ void milk::LuaEnvironment::render() {
 	invokeCallbacks(luaState_, renderCallbacks_);
 }
 
-std::string milk::lua::getStringField(lua_State* L, const std::string& key) {
-	lua_getfield(L, -1, key.c_str());
-	std::string result = std::string{ (const char*)lua_tostring(L, -1) };
-	lua_pop(L, 1);
-	return result;
-}
-
-int milk::lua::getIntegerField(lua_State* L, const std::string& key) {
-	lua_getfield(L, -1, key.c_str());
-	int result = (int)lua_tointeger(L, -1);
-	lua_pop(L, 1);
-	return result;
-}
-
-bool milk::lua::getBooleanField(lua_State* L, const std::string& key) {
-	lua_getfield(L, -1, key.c_str());
-	bool result = (bool)lua_toboolean(L, -1);
-	lua_pop(L, 1);
-	return result;
+void milk::LuaEnvironment::postRender() {
+	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "tick");
+	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "postTick");
+	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "render");
+	newScripts_.clear();
 }
