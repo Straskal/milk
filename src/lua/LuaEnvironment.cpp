@@ -1,4 +1,5 @@
 #include "LuaEnvironment.h"
+#include "LuaEnvironment.h"
 
 extern "C" {
 #include "lua.h"
@@ -76,7 +77,6 @@ void milk::LuaEnvironment::free() {
 }
 
 milk::MilkStartupConfig milk::LuaEnvironment::getConfiguration(const std::string& configFile) {
-	// Push config table onto stack
 	luaL_dofile(luaState_, configFile.c_str());
 
 	MilkStartupConfig config;
@@ -87,9 +87,7 @@ milk::MilkStartupConfig milk::LuaEnvironment::getConfiguration(const std::string
 	config.resHeight = lua::getIntegerField(luaState_, "vheight");
 	config.winFullscreen = lua::getBooleanField(luaState_, "fullscreen");
 
-	// Pop config table off of stack
 	lua_pop(luaState_, 1);
-
 	return config;
 }
 
@@ -97,20 +95,14 @@ void milk::LuaEnvironment::addScript(U32 id, const std::string& scriptName) {
 	insertScript(id, luaState_, scriptIdMap_, newScripts_, scriptName);	
 }
 
-void milk::LuaEnvironment::removeScript(U32 id, const std::string& scriptName) {
-}
-
-int milk::LuaEnvironment::getScript(U32 id, const std::string& scriptName) {
-	return 0;
-}
-
-void milk::LuaEnvironment::tick() {
+void milk::LuaEnvironment::beginFrame() {
 	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "tick");
 	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "postTick");
 	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "render");
-
 	newScripts_.clear();
+}
 
+void milk::LuaEnvironment::tick() {
 	invokeCallbacks(luaState_, tickCallbacks_);
 }
 

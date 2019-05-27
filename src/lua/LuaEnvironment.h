@@ -20,9 +20,8 @@ namespace milk {
 		MilkStartupConfig getConfiguration(const std::string& configFile);
 
 		void addScript(U32 id, const std::string& scriptName);
-		void removeScript(U32 id, const std::string& scriptName);
-		int getScript(U32 id, const std::string& scriptName);
 
+		void beginFrame();
 		void tick();
 		void postTick();
 		void render();
