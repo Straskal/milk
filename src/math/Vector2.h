@@ -20,9 +20,11 @@ namespace milk {
 			, y(y) {
 		}
 
+		bool operator==(const Vector2& v);
 		Vector2& operator*=(float scalar);
 		Vector2& operator/=(float scalar);
-		Vector2& operator+=(Vector2 v);
+		Vector2 operator/(float scalar);
+		Vector2& operator+=(const Vector2& v);
 
 		float magnitude();
 		Vector2 normalize();
@@ -39,17 +41,27 @@ namespace milk {
 		return Vector2{ v1.x + v2.x, v1.y + v2.y };
 	}
 
-	inline Vector2 operator*(const Vector2& v, float s) {
+	inline Vector2 operator*(float s, const Vector2& v) {
 		return Vector2{ v.x * s, v.y * s };
 	}
 
-	inline Vector2 operator/(const Vector2& v, float s) {
+	inline Vector2 operator/(float s, const Vector2& v) {
 		return Vector2{ v.x / s, v.y / s };
+	}
+
+	inline bool Vector2::operator==(const Vector2& v) {
+		return x == v.x && y == v.y;
 	}
 
 	inline Vector2& Vector2::operator*=(float scalar) {
 		x *= scalar;
 		y *= scalar;
+		return (*this);
+	}
+
+	inline Vector2 Vector2::operator/(float scalar) {
+		x /= scalar;
+		y /= scalar;
 		return (*this);
 	}
 
@@ -59,7 +71,7 @@ namespace milk {
 		return (*this);
 	}
 
-	inline Vector2& Vector2::operator+=(Vector2 v) {
+	inline Vector2& Vector2::operator+=(const Vector2& v) {
 		x += v.x;
 		y += v.y;
 		return (*this);

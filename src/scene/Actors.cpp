@@ -5,7 +5,7 @@
 namespace milk {
 	namespace {
 		U32 makeId(
-			std::vector<U16>& generations, 
+			std::vector<U16>& generations,
 			std::queue<U16>& freeIndeces
 		) {
 			U16 index;
@@ -31,7 +31,7 @@ namespace milk {
 			std::vector<U16>& generations,
 			std::queue<U16>& freeIndeces,
 			std::vector<U32> destroyed
-		) {		
+		) {
 			U16 index = id & ~(1 << Actors::GEN_BITS);
 			assert(index < generations.size());
 			++generations[index];
@@ -50,7 +50,7 @@ namespace milk {
 		}
 
 		void insertName(
-			U32 id, 
+			U32 id,
 			std::vector<std::string>& names,
 			std::unordered_map<U32, int>& nameidmap,
 			std::unordered_map<int, U32>& nameidxmap,
@@ -82,7 +82,7 @@ namespace milk {
 		}
 
 		void updateName(
-			U32 id, 
+			U32 id,
 			std::vector<std::string>& names,
 			std::unordered_map<U32, int>& nameidmap,
 			const std::string& name
@@ -147,6 +147,12 @@ namespace milk {
 	}
 }
 
+const int milk::Actors::MAX = 20000;
+const int milk::Actors::MAX_FREE = 1024;
+const milk::U32 milk::Actors::IDX_BITS = 16;
+const milk::U32 milk::Actors::GEN_BITS = 16;
+const milk::U32 milk::Actors::INVALID = 0;
+
 milk::U32 milk::Actors::createActor(const std::string& name, Vector2 position) {
 	U32 id = makeId(generations_, freeIndeces_);
 	insertName(id, names_, nameidmap_, nameidxmap_, name);
@@ -160,6 +166,10 @@ void milk::Actors::destroyActor(U32 id) {
 	}
 	deleteId(id, generations_, freeIndeces_, destroyed_);
 	deleteName(id, names_, nameidmap_, nameidxmap_);
+}
+
+bool milk::Actors::isActorAlive(U32 id) {
+	return validId(id, generations_);
 }
 
 std::string milk::Actors::getActorName(U32 id) {

@@ -5,80 +5,65 @@
 #include "scene/Actors.h"
 
 namespace milk {
-	/*TEST(ActorsTests, Creation) {
-		ActorData actorData;
+	TEST(ActorsTests, Creation) {
+		Actors actors;
 
-		U32 actor0 = actor::create(actorData, "hail satan");
-		U32 actor1 = actor::create(actorData, "stev");
-		U32 actor2 = actor::create(actorData, "dumbo");
+		U32 actor0 = actors.createActor("hail satan", Vector2{0.f, 12.f});
+		U32 actor1 = actors.createActor("stev", Vector2{ 15.5f, 98.f });
+		U32 actor2 = actors.createActor("danny devito", Vector2{ 0.f, -1.f });
 
-		EXPECT_NE(id::INVALID, actor0);
-		EXPECT_NE(id::INVALID, actor1);
-		EXPECT_NE(id::INVALID, actor2);
+		EXPECT_NE(Actors::INVALID, actor0);
+		EXPECT_NE(Actors::INVALID, actor1);
+		EXPECT_NE(Actors::INVALID, actor2);
 
 		EXPECT_NE(actor0, actor1);
 		EXPECT_NE(actor0, actor2);
 		EXPECT_NE(actor1, actor2);
 
-		EXPECT_EQ("hail satan", actor::getName(actorData, actor0));
-		EXPECT_EQ("stev", actor::getName(actorData, actor1));
-		EXPECT_EQ("dumbo", actor::getName(actorData, actor2));
+		EXPECT_EQ("hail satan", actors.getActorName(actor0));
+		EXPECT_EQ("stev", actors.getActorName(actor1));
+		EXPECT_EQ("danny devito", actors.getActorName(actor2));
 
-		EXPECT_TRUE(id::valid(actorData.actors, actor0));
-		EXPECT_TRUE(id::valid(actorData.actors, actor1));
-		EXPECT_TRUE(id::valid(actorData.actors, actor2));
+		EXPECT_EQ(Vector2(0.f, 12.f), actors.getActorPosition(actor0));
+		EXPECT_EQ(Vector2(15.5f, 98.f), actors.getActorPosition(actor1));
+		EXPECT_EQ(Vector2(0.f, -1.f), actors.getActorPosition(actor2));
 	}
 
 	TEST(ActorsTests, Destruction) {
-		ActorData actorData;
+		Actors actors;
 
-		U32 actor0 = actor::create(actorData, "hail satan");
-		U32 actor1 = actor::create(actorData, "stev");
-		U32 actor2 = actor::create(actorData, "dumbo");
+		U32 actor0 = actors.createActor("hail satan", Vector2{ 0.f, 12.f });
+		U32 actor1 = actors.createActor("stev", Vector2{ 15.5f, 98.f });
+		U32 actor2 = actors.createActor("danny devito", Vector2{ 0.f, -1.f });
 
-		EXPECT_TRUE(id::valid(actorData.actors, actor0));
-		EXPECT_TRUE(id::valid(actorData.actors, actor1));
-		EXPECT_TRUE(id::valid(actorData.actors, actor2));
+		EXPECT_TRUE(actors.isActorAlive(actor0));
+		EXPECT_TRUE(actors.isActorAlive(actor1));
+		EXPECT_TRUE(actors.isActorAlive(actor2));
 
-		actor::destroy(actorData, actor0);
-		actor::destroy(actorData, actor1);
-		actor::destroy(actorData, actor2);
+		actors.destroyActor(actor0);
+		actors.destroyActor(actor1);
+		actors.destroyActor(actor2);
 
-		EXPECT_FALSE(id::valid(actorData.actors, actor0));
-		EXPECT_FALSE(id::valid(actorData.actors, actor1));
-		EXPECT_FALSE(id::valid(actorData.actors, actor2));
-
-		EXPECT_EQ(3, actorData.destroyed.size());
+		EXPECT_FALSE(actors.isActorAlive(actor0));
+		EXPECT_FALSE(actors.isActorAlive(actor1));
+		EXPECT_FALSE(actors.isActorAlive(actor2));
 	}
 
 	TEST(ActorsTests, Name) {
-		ActorData actorData;
+		Actors actors;
 
-		U32 actor0 = actor::create(actorData, "hail satan");
-		U32 actor1 = actor::create(actorData, "stev");
-		U32 actor2 = actor::create(actorData, "dumbo");
+		U32 actor0 = actors.createActor("hail satan", Vector2{ 0.f, 12.f });
+		U32 actor1 = actors.createActor("stev", Vector2{ 15.5f, 98.f });
+		U32 actor2 = actors.createActor("danny devito", Vector2{ 0.f, -1.f });
 
-		actor::setName(actorData, actor0, "bobody");
-		actor::setName(actorData, actor1, "burt macklin");
-		actor::setName(actorData, actor2, "day man");
+		actors.setActorName(actor0, "bobody");
+		actors.setActorName(actor1, "burt macklin");
+		actors.setActorName(actor2, "day man");
 
-		EXPECT_EQ("bobody", actor::getName(actorData, actor0));
-		EXPECT_EQ("burt macklin", actor::getName(actorData, actor1));
-		EXPECT_EQ("day man", actor::getName(actorData, actor2));
+		EXPECT_EQ("bobody", actors.getActorName(actor0));
+		EXPECT_EQ("burt macklin", actors.getActorName(actor1));
+		EXPECT_EQ("day man", actors.getActorName(actor2));
 	}
-
-	TEST(ActorsTests, GetByName) {
-		ActorData actorData;
-
-		U32 actor0 = actor::create(actorData, "hail satan");
-		U32 actor1 = actor::create(actorData, "stev");
-		U32 actor2 = actor::create(actorData, "dumbo");
-
-		EXPECT_EQ(actor0, actor::getByName(actorData, "hail satan"));
-		EXPECT_EQ(actor1, actor::getByName(actorData, "stev"));
-		EXPECT_EQ(actor2, actor::getByName(actorData, "dumbo"));
-		EXPECT_EQ(id::INVALID, actor::getByName(actorData, "jam"));
-	}*/
 }
 
 #endif
