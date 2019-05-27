@@ -11,41 +11,37 @@ void milk::LuaEnvironment::init() {
 	luaL_openlibs(luaState_);
 }
 
-void milk::LuaEnvironment::doFile(const std::string& file) {
-	luaL_dofile(luaState_, file.c_str());
-}
-
-std::string milk::LuaEnvironment::getStringField(const std::string& key) {
-	lua_getfield(luaState_, -1, key.c_str());
-	std::string result = std::string{ (const char*)lua_tostring(luaState_, -1) };
-	lua_pop(luaState_, 1);
-	return result;
-}
-
-int milk::LuaEnvironment::getIntegerField(const std::string& key) {
-	lua_getfield(luaState_, -1, key.c_str());
-	int result = (int)lua_tointeger(luaState_, -1);
-	lua_pop(luaState_, 1);
-	return result;
-}
-
-bool milk::LuaEnvironment::getBooleanField(const std::string& key) {
-	lua_getfield(luaState_, -1, key.c_str());
-	bool result = (bool)lua_toboolean(luaState_, -1);
-	lua_pop(luaState_, 1);
-	return result;
-}
-
-milk::MilkStartupConfig milk::luaExtensions::getConfiguration(LuaEnvironment& env, const std::string& configFile) {
-	env.doFile(configFile);
+milk::MilkStartupConfig milk::LuaEnvironment::getConfiguration(const std::string& configFile) {
+	luaL_dofile(luaState_, configFile.c_str());
 
 	MilkStartupConfig config;
-	config.winTitle = env.getStringField("title");
-	config.winWidth = env.getIntegerField("width");
-	config.winHeight = env.getIntegerField("height");
-	config.resWidth = env.getIntegerField("vwidth");
-	config.resHeight = env.getIntegerField("vheight");
-	config.winFullscreen = env.getBooleanField("fullscreen");
+	config.winTitle = lua::getStringField(luaState_, "title");
+	config.winWidth = lua::getIntegerField(luaState_, "width");
+	config.winHeight = lua::getIntegerField(luaState_, "height");
+	config.resWidth = lua::getIntegerField(luaState_, "vwidth");
+	config.resHeight = lua::getIntegerField(luaState_, "vheight");
+	config.winFullscreen = lua::getBooleanField(luaState_, "fullscreen");
 
 	return config;
+}
+
+std::string milk::lua::getStringField(lua_State* L, const std::string& key) {
+	lua_getfield(L, -1, key.c_str());
+	std::string result = std::string{ (const char*)lua_tostring(L, -1) };
+	lua_pop(L, 1);
+	return result;
+}
+
+int milk::lua::getIntegerField(lua_State* L, const std::string& key) {
+	lua_getfield(L, -1, key.c_str());
+	int result = (int)lua_tointeger(L, -1);
+	lua_pop(L, 1);
+	return result;
+}
+
+bool milk::lua::getBooleanField(lua_State* L, const std::string& key) {
+	lua_getfield(L, -1, key.c_str());
+	bool result = (bool)lua_toboolean(L, -1);
+	lua_pop(L, 1);
+	return result;
 }
