@@ -4,34 +4,36 @@
 #include "SDL.h"
 
 #include "milk.h"
-#include "lua/LuaEnvironment.h"
+#include "lua/adapter/LuaEnvironmentAdapter.h"
 #include "scene/Actors.h"
 #include "window/adapter/RendererAdapter.h"
 #include "window/adapter/WindowAdapter.h"
 
 #define MILK_SUCCESS 0;
+#define MILK_FAIL 1;
 
 int main(int argc, char* argv[]) {
 	milk::MilkState milkState;
-	milkState.lua = new milk::LuaEnvironment();
+	milkState.luaenv = new milk::adapter::LuaEnvironmentAdapter();
 	milkState.window = new milk::adapter::WindowAdapter();
 	milkState.renderer = new milk::adapter::RendererAdapter();
 
-	if (!milk::state::init(milkState))
-		goto quit;
+	if (!milk::state::init(milkState)) {
+		goto exit_fail;
+	}
 
 	try {
-		for (int i = 0; i < 300; i++) {
-			milkState.lua->addScript(i, "res/player.lua");
+		for (int i = 0; i < 500; i++) {
+			milkState.luaenv->addScript(i, "res/player.lua");
 		}
 
-		while (true) {
+		while (milkState.running) {
 			int frameStartTime = SDL_GetTicks();
 
 			SDL_Event event;
 			while (SDL_PollEvent(&event)) {
 				if (event.type == SDL_QUIT) {
-					goto quit;
+					milkState.running = false;
 				}
 			}
 
@@ -48,12 +50,21 @@ int main(int argc, char* argv[]) {
 	}
 	catch (std::exception e) {
 		std::cout << "Fatal error encountered: " << e.what() << std::endl;
-		goto quit;
+		goto exit_fail;
 	}
 
-quit:
+	goto exit_success;
+
+exit_success:
 	milk::state::quit(milkState);
-	delete milkState.lua; milkState.lua = nullptr;
+	delete milkState.luaenv; milkState.luaenv = nullptr;
+	delete milkState.renderer; milkState.renderer = nullptr;
+	delete milkState.window; milkState.window = nullptr;
+	return MILK_SUCCESS;
+
+exit_fail:
+	milk::state::quit(milkState);
+	delete milkState.luaenv; milkState.luaenv = nullptr;
 	delete milkState.renderer; milkState.renderer = nullptr;
 	delete milkState.window; milkState.window = nullptr;
 	return MILK_SUCCESS;

@@ -71,9 +71,15 @@ set(MILK_SRC_GRAPHICS
 
 # lua
 set(MILK_SRC_LUA
-	src/lua/LuaEnvironment.cpp
     src/lua/LuaEnvironment.h
-	src/lua/LuaExtensions.h
+)
+
+set(MILK_SRC_LUA_ADAPTER
+	src/lua/adapter/LuaApi.cpp
+	src/lua/adapter/LuaApi.h
+	src/lua/adapter/LuaEnvironmentAdapter.cpp
+	src/lua/adapter/LuaEnvironmentAdapter.h
+	src/lua/adapter/LuaExtensions.h
 )
 
 # math
@@ -113,6 +119,7 @@ set(MILK_SRC_FILES
     ${MILK_SRC_INPUT}
     ${MILK_SRC_GRAPHICS}
 	${MILK_SRC_LUA}
+	${MILK_SRC_LUA_ADAPTER}
 	${MILK_SRC_MAIN}
     ${MILK_SRC_MATH}
     ${MILK_SRC_SCENE}

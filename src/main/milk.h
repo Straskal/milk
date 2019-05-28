@@ -19,7 +19,7 @@ namespace milk {
 	};
 
 	struct MilkState {
-		LuaEnvironment* lua;
+		LuaEnvironment* luaenv;
 		Window* window;
 		Renderer* renderer;
 		Actors* actors;

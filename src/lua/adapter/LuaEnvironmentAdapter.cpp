@@ -1,4 +1,5 @@
-#include "LuaEnvironment.h"
+#include "LuaEnvironmentAdapter.h"
+#include "LuaApi.h"
 #include "LuaExtensions.h"
 
 extern "C" {
@@ -19,10 +20,9 @@ namespace milk {
 			luaL_dofile(L, name.c_str());
 
 			lua_getfield(L, -1, "awake");
-			if (!lua_isnil(L, -1) && lua_isfunction(L, -1)) {
+			if (lua_isfunction(L, -1)) {
 				lua_pcall(L, 0, 0, NULL);
 			}
-
 			int ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
 			std::unordered_map<U32, std::unordered_map<std::string, int>>::iterator found = scriptidmap.find(id);
@@ -39,15 +39,30 @@ namespace milk {
 
 		void insertCallbacks(
 			lua_State* L,
-			std::vector<int>& newscripts,
+			std::vector<int>& scripts,
 			std::vector<int>& callbacks,
 			const std::string& callbackname
 		) {
-			for (int i = 0; i < newscripts.size(); ++i) {
-				lua_rawgeti(L, LUA_REGISTRYINDEX, newscripts[i]);
+			for (int i = 0; i < scripts.size(); ++i) {
+				lua_rawgeti(L, LUA_REGISTRYINDEX, scripts[i]);
 				lua_getfield(L, -1, callbackname.c_str());
-				if (!lua_isnil(L, -1) && lua_isfunction(L, -1)) {
+				if (lua_isfunction(L, -1)) {
 					callbacks.push_back(luaL_ref(L, LUA_REGISTRYINDEX));
+				}
+				lua_pop(L, -1);
+			}
+		}
+
+		void invokeCallbacks(
+			lua_State* L,
+			std::vector<int>& scripts,
+			const std::string& callbackname
+		) {
+			for (int i = 0; i < scripts.size(); ++i) {
+				lua_rawgeti(L, LUA_REGISTRYINDEX, scripts[i]);
+				lua_getfield(L, -1, callbackname.c_str());
+				if (lua_isfunction(L, -1)) {
+					lua_pcall(L, 0, 0, NULL);
 				}
 				lua_pop(L, -1);
 			}
@@ -59,53 +74,56 @@ namespace milk {
 		) {
 			for (int i = 0; i < callbacks.size(); ++i) {
 				lua_rawgeti(L, LUA_REGISTRYINDEX, callbacks[i]);
-				lua_call(L, 0, 0);
+				lua_pcall(L, 0, 0, NULL);
 			}
 		}
 	}
 }
 
-void milk::LuaEnvironment::init() {
+void milk::adapter::LuaEnvironmentAdapter::init(MilkState* milkState) {
 	luaState_ = luaL_newstate();
 	luaL_openlibs(luaState_);
+
+	LuaApi::init(luaState_, milkState);
 }
 
-void milk::LuaEnvironment::free() {
+void milk::adapter::LuaEnvironmentAdapter::free() {
 	lua_close(luaState_);
 }
 
-milk::MilkStartupConfig milk::LuaEnvironment::getConfiguration(const std::string& configFile) {
+milk::MilkStartupConfig milk::adapter::LuaEnvironmentAdapter::getConfiguration(const std::string& configFile) {
 	luaL_dofile(luaState_, configFile.c_str());
 
 	MilkStartupConfig config;
-	config.winTitle = lua::getStringField(luaState_, "title");
-	config.winWidth = lua::getIntegerField(luaState_, "width");
-	config.winHeight = lua::getIntegerField(luaState_, "height");
-	config.resWidth = lua::getIntegerField(luaState_, "vwidth");
-	config.resHeight = lua::getIntegerField(luaState_, "vheight");
-	config.winFullscreen = lua::getBooleanField(luaState_, "fullscreen");
+	config.winTitle = luaenv::getStringField(luaState_, "title");
+	config.winWidth = luaenv::getIntegerField(luaState_, "width");
+	config.winHeight = luaenv::getIntegerField(luaState_, "height");
+	config.resWidth = luaenv::getIntegerField(luaState_, "vwidth");
+	config.resHeight = luaenv::getIntegerField(luaState_, "vheight");
+	config.winFullscreen = luaenv::getBooleanField(luaState_, "fullscreen");
 
 	lua_pop(luaState_, 1);
 	return config;
 }
 
-void milk::LuaEnvironment::addScript(U32 id, const std::string& scriptName) {
+void milk::adapter::LuaEnvironmentAdapter::addScript(U32 id, const std::string& scriptName) {
 	insertScript(id, luaState_, scriptIdMap_, newScripts_, scriptName);	
 }
 
-void milk::LuaEnvironment::tick() {
+void milk::adapter::LuaEnvironmentAdapter::tick() {
 	invokeCallbacks(luaState_, tickCallbacks_);
 }
 
-void milk::LuaEnvironment::postTick() {
+void milk::adapter::LuaEnvironmentAdapter::postTick() {
 	invokeCallbacks(luaState_, postTickCallbacks_);
 }
 
-void milk::LuaEnvironment::render() {
+void milk::adapter::LuaEnvironmentAdapter::render() {
 	invokeCallbacks(luaState_, renderCallbacks_);
 }
 
-void milk::LuaEnvironment::postRender() {
+void milk::adapter::LuaEnvironmentAdapter::postRender() {
+	invokeCallbacks(luaState_, newScripts_, "start");
 	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "tick");
 	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "postTick");
 	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "render");

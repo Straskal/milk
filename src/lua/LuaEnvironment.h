@@ -1,11 +1,6 @@
 #ifndef MILK_LUA_ENVIRONMENT_H
 #define MILK_LUA_ENVIRONMENT_H
 
-#include <queue>
-#include <string>
-#include <unordered_map>
-#include <vector>
-
 #include "data/int.h"
 #include "main/milk.h"
 
@@ -14,25 +9,19 @@ struct lua_State;
 namespace milk {
 	class LuaEnvironment {
 	public:
-		void init();
-		void free();
+		virtual ~LuaEnvironment() = default;
 
-		MilkStartupConfig getConfiguration(const std::string& configFile);
+		virtual void init(MilkState* milkState) = 0;
+		virtual void free() = 0;
 
-		void addScript(U32 id, const std::string& scriptName);
+		virtual MilkStartupConfig getConfiguration(const std::string& configFile) = 0;
 
-		void tick();
-		void postTick();
-		void render();
-		void postRender();
+		virtual void addScript(U32 id, const std::string& scriptName) = 0;
 
-	private:
-		lua_State* luaState_;
-		std::unordered_map<U32, std::unordered_map<std::string, int>> scriptIdMap_;
-		std::vector<int> newScripts_;
-		std::vector<int> tickCallbacks_;
-		std::vector<int> postTickCallbacks_;
-		std::vector<int> renderCallbacks_;
+		virtual void tick() = 0;
+		virtual void postTick() = 0;
+		virtual void render() = 0;
+		virtual void postRender() = 0;
 	};
 }
 
