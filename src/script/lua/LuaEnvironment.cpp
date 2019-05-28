@@ -1,4 +1,4 @@
-#include "LuaEnvironmentAdapter.h"
+#include "LuaEnvironment.h"
 #include "LuaApi.h"
 #include "LuaExtensions.h"
 
@@ -80,18 +80,18 @@ namespace milk {
 	}
 }
 
-void milk::adapter::LuaEnvironmentAdapter::init(MilkState* milkState) {
+void milk::lua::LuaEnvironment::init(MilkState* milkState) {
 	luaState_ = luaL_newstate();
 	luaL_openlibs(luaState_);
 
 	LuaApi::init(luaState_, milkState);
 }
 
-void milk::adapter::LuaEnvironmentAdapter::free() {
+void milk::lua::LuaEnvironment::free() {
 	lua_close(luaState_);
 }
 
-milk::MilkStartupConfig milk::adapter::LuaEnvironmentAdapter::getConfiguration(const std::string& configFile) {
+milk::MilkStartupConfig milk::lua::LuaEnvironment::getConfiguration(const std::string& configFile) {
 	luaL_dofile(luaState_, configFile.c_str());
 
 	MilkStartupConfig config;
@@ -106,23 +106,23 @@ milk::MilkStartupConfig milk::adapter::LuaEnvironmentAdapter::getConfiguration(c
 	return config;
 }
 
-void milk::adapter::LuaEnvironmentAdapter::addScript(U32 id, const std::string& scriptName) {
+void milk::lua::LuaEnvironment::addScript(U32 id, const std::string& scriptName) {
 	insertScript(id, luaState_, scriptIdMap_, newScripts_, scriptName);	
 }
 
-void milk::adapter::LuaEnvironmentAdapter::tick() {
+void milk::lua::LuaEnvironment::tick() {
 	invokeCallbacks(luaState_, tickCallbacks_);
 }
 
-void milk::adapter::LuaEnvironmentAdapter::postTick() {
+void milk::lua::LuaEnvironment::postTick() {
 	invokeCallbacks(luaState_, postTickCallbacks_);
 }
 
-void milk::adapter::LuaEnvironmentAdapter::render() {
+void milk::lua::LuaEnvironment::render() {
 	invokeCallbacks(luaState_, renderCallbacks_);
 }
 
-void milk::adapter::LuaEnvironmentAdapter::postRender() {
+void milk::lua::LuaEnvironment::postRender() {
 	invokeCallbacks(luaState_, newScripts_, "start");
 	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "tick");
 	insertCallbacks(luaState_, newScripts_, tickCallbacks_, "postTick");

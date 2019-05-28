@@ -1,5 +1,5 @@
-#ifndef MILK_RENDERER_ADAPTER_H
-#define MILK_RENDERER_ADAPTER_H
+#ifndef MILK_RENDERER_SDL_H
+#define MILK_RENDERER_SDL_H
 
 #include "window/Renderer.h"
 
@@ -7,10 +7,10 @@ struct SDL_Renderer;
 struct SDL_Window;
 
 namespace milk {
-	namespace adapter {
-		class RendererAdapter : public Renderer {
+	namespace sdl {
+		class Renderer : public milk::Renderer {
 		public:
-			RendererAdapter();
+			Renderer();
 
 			bool init(void* windowHandle, unsigned int resolutionWidth, unsigned int resolutionHeight) override;
 			void clear(const Color& color) override;

@@ -1,5 +1,5 @@
-#ifndef MILK_LUA_ENVIRONMENT_H
-#define MILK_LUA_ENVIRONMENT_H
+#ifndef MILK_SCRIPT_ENVIRONMENT_H
+#define MILK_SCRIPT_ENVIRONMENT_H
 
 #include "data/int.h"
 #include "main/milk.h"
@@ -7,9 +7,9 @@
 struct lua_State;
 
 namespace milk {
-	class LuaEnvironment {
+	class ScriptEnvironment {
 	public:
-		virtual ~LuaEnvironment() = default;
+		virtual ~ScriptEnvironment() = default;
 
 		virtual void init(MilkState* milkState) = 0;
 		virtual void free() = 0;

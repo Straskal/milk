@@ -69,17 +69,17 @@ set(MILK_SRC_GRAPHICS
     src/graphics/Texture.h
 )
 
-# lua
-set(MILK_SRC_LUA
-    src/lua/LuaEnvironment.h
+# script
+set(MILK_SRC_SCRIPT
+    src/script/ScriptEnvironment.h
 )
 
-set(MILK_SRC_LUA_ADAPTER
-	src/lua/adapter/LuaApi.cpp
-	src/lua/adapter/LuaApi.h
-	src/lua/adapter/LuaEnvironmentAdapter.cpp
-	src/lua/adapter/LuaEnvironmentAdapter.h
-	src/lua/adapter/LuaExtensions.h
+set(MILK_SRC_SCRIPT_LUA
+	src/script/lua/LuaApi.cpp
+	src/script/lua/LuaApi.h
+	src/script/lua/LuaEnvironment.cpp
+	src/script/lua/LuaEnvironment.h
+	src/script/lua/LuaExtensions.h
 )
 
 # math
@@ -107,24 +107,24 @@ set(MILK_SRC_WINDOW
     src/window/Window.h
 )
 
-set(MILK_SRC_WINDOW_ADAPTER
-    src/window/adapter/RendererAdapter.cpp
-    src/window/adapter/RendererAdapter.h
-    src/window/adapter/WindowAdapter.cpp
-    src/window/adapter/WindowAdapter.h
+set(MILK_SRC_WINDOW_SDL
+    src/window/sdl/Renderer.cpp
+    src/window/sdl/Renderer.h
+    src/window/sdl/Window.cpp
+    src/window/sdl/Window.h
 )
 
 set(MILK_SRC_FILES
 	${MILK_SRC_DATA}
     ${MILK_SRC_INPUT}
     ${MILK_SRC_GRAPHICS}
-	${MILK_SRC_LUA}
-	${MILK_SRC_LUA_ADAPTER}
+	${MILK_SRC_SCRIPT}
+	${MILK_SRC_SCRIPT_LUA}
 	${MILK_SRC_MAIN}
     ${MILK_SRC_MATH}
     ${MILK_SRC_SCENE}
     ${MILK_SRC_WINDOW}
-	${MILK_SRC_WINDOW_ADAPTER}
+	${MILK_SRC_WINDOW_SDL}
 )
 
 add_library(milklib ${MILK_SRC_FILES})

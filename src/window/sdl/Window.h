@@ -1,5 +1,5 @@
-#ifndef MILK_WINDOW_ADAPTER_H
-#define MILK_WINDOW_ADAPTER_H
+#ifndef MILK_WINDOW_SDL_H
+#define MILK_WINDOW_SDL_H
 
 // We define this bad boi here because SDL does not, and we don't want magic numbers chilling up in this boi.
 #define MILK_SDL_WINDOW_NO_FLAG 0
@@ -12,11 +12,11 @@ struct SDL_Window;
 
 namespace milk
 {
-	namespace adapter
+	namespace sdl
 	{
-		class WindowAdapter : public Window {
+		class Window : public milk::Window{
 		public:
-			WindowAdapter();
+			Window();
 
 			bool init(const std::string& title, unsigned int width, unsigned int height, bool fullscreen) override;
 			unsigned int width() const override;

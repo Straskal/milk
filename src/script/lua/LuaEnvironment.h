@@ -1,5 +1,5 @@
-#ifndef MILK_LUA_ENVIRONMENT_ADAPTER_H
-#define MILK_LUA_ENVIRONMENT_ADAPTER_H
+#ifndef MILK_LUA_ENVIRONMENT_H
+#define MILK_LUA_ENVIRONMENT_H
 
 #include <queue>
 #include <string>
@@ -7,13 +7,13 @@
 #include <vector>
 
 #include "data/int.h"
-#include "lua/LuaEnvironment.h"
+#include "script/ScriptEnvironment.h"
 
 struct lua_State;
 
 namespace milk {
-	namespace adapter {
-		class LuaEnvironmentAdapter : public LuaEnvironment {
+	namespace lua {
+		class LuaEnvironment : public ScriptEnvironment {
 		public:
 			void init(MilkState* milkState) override;
 			void free() override;

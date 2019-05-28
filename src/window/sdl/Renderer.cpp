@@ -1,4 +1,4 @@
-#include "RendererAdapter.h"
+#include "Renderer.h"
 
 #include <iostream>
 
@@ -11,14 +11,14 @@
 
 #include "math/Rectangle.h"
 
-milk::adapter::RendererAdapter::RendererAdapter() {
+milk::sdl::Renderer::Renderer() {
 	initialized_ = false;
 	resolution_.width = 0;
 	resolution_.height = 0;
 	handle_ = nullptr;
 }
 
-bool milk::adapter::RendererAdapter::init(void* windowHandle, unsigned int resolutionWidth, unsigned int resolutionHeight) {
+bool milk::sdl::Renderer::init(void* windowHandle, unsigned int resolutionWidth, unsigned int resolutionHeight) {
 	if (initialized_) {
 		return true;
 	}
@@ -36,26 +36,26 @@ bool milk::adapter::RendererAdapter::init(void* windowHandle, unsigned int resol
 	return true;
 }
 
-void milk::adapter::RendererAdapter::clear(const Color& color) {
+void milk::sdl::Renderer::clear(const Color& color) {
 	SDL_SetRenderDrawColor(handle_, color.red, color.blue, color.green, color.alpha);
 	SDL_RenderClear(handle_);
 }
 
-void milk::adapter::RendererAdapter::drawRectangle(const milk::Rectangle& destinationRectangle, const milk::Color& color) {
+void milk::sdl::Renderer::drawRectangle(const milk::Rectangle& destinationRectangle, const milk::Color& color) {
 	SDL_Rect dst = { destinationRectangle.x, destinationRectangle.y, destinationRectangle.width, destinationRectangle.height };
 
 	SDL_SetRenderDrawColor(handle_, color.red, color.blue, color.green, color.alpha);
 	SDL_RenderFillRect(handle_, &dst);
 }
 
-void milk::adapter::RendererAdapter::drawRectangleOutline(const milk::Rectangle& destinationRectangle, const milk::Color& color) {
+void milk::sdl::Renderer::drawRectangleOutline(const milk::Rectangle& destinationRectangle, const milk::Color& color) {
 	SDL_Rect dst = { destinationRectangle.x, destinationRectangle.y, destinationRectangle.width, destinationRectangle.height };
 
 	SDL_SetRenderDrawColor(handle_, color.red, color.blue, color.green, color.alpha);
 	SDL_RenderDrawRect(handle_, &dst);
 }
 
-void milk::adapter::RendererAdapter::draw(
+void milk::sdl::Renderer::draw(
 	const milk::Texture& texture,
 	const milk::Rectangle& sourceRectangle,
 	const milk::Rectangle& destinationRectangle,
@@ -66,14 +66,14 @@ void milk::adapter::RendererAdapter::draw(
 	SDL_RenderCopyEx(handle_, texture.get(), &src, &dst, 0, nullptr, (SDL_RendererFlip)flipFlags);
 }
 
-void milk::adapter::RendererAdapter::present() {
+void milk::sdl::Renderer::present() {
 	SDL_RenderPresent(handle_);
 }
 
-milk::Resolution milk::adapter::RendererAdapter::resolution() const {
+milk::Resolution milk::sdl::Renderer::resolution() const {
 	return resolution_;
 }
 
-void milk::adapter::RendererAdapter::free() {
+void milk::sdl::Renderer::free() {
 	SDL_DestroyRenderer(handle_);
 }

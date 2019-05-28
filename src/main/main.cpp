@@ -4,19 +4,19 @@
 #include "SDL.h"
 
 #include "milk.h"
-#include "lua/adapter/LuaEnvironmentAdapter.h"
+#include "script/lua/LuaEnvironment.h"
 #include "scene/Actors.h"
-#include "window/adapter/RendererAdapter.h"
-#include "window/adapter/WindowAdapter.h"
+#include "window/sdl/Renderer.h"
+#include "window/sdl/Window.h"
 
 #define MILK_SUCCESS 0;
 #define MILK_FAIL 1;
 
 int main(int argc, char* argv[]) {
 	milk::MilkState milkState;
-	milkState.luaenv = new milk::adapter::LuaEnvironmentAdapter();
-	milkState.window = new milk::adapter::WindowAdapter();
-	milkState.renderer = new milk::adapter::RendererAdapter();
+	milkState.scriptenv = new milk::lua::LuaEnvironment();
+	milkState.window = new milk::sdl::Window();
+	milkState.renderer = new milk::sdl::Renderer();
 
 	if (!milk::state::init(milkState)) {
 		goto exit_fail;
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
 
 	try {
 		for (int i = 0; i < 500; i++) {
-			milkState.luaenv->addScript(i, "res/player.lua");
+			milkState.scriptenv->addScript(i, "res/player.lua");
 		}
 
 		while (milkState.running) {
@@ -57,14 +57,14 @@ int main(int argc, char* argv[]) {
 
 exit_success:
 	milk::state::quit(milkState);
-	delete milkState.luaenv; milkState.luaenv = nullptr;
+	delete milkState.scriptenv; milkState.scriptenv = nullptr;
 	delete milkState.renderer; milkState.renderer = nullptr;
 	delete milkState.window; milkState.window = nullptr;
 	return MILK_SUCCESS;
 
 exit_fail:
 	milk::state::quit(milkState);
-	delete milkState.luaenv; milkState.luaenv = nullptr;
+	delete milkState.scriptenv; milkState.scriptenv = nullptr;
 	delete milkState.renderer; milkState.renderer = nullptr;
 	delete milkState.window; milkState.window = nullptr;
 	return MILK_SUCCESS;
