@@ -21,6 +21,7 @@ bool milk::state::init(milk::MilkState& milkState) {
 	}
 
 	milkState.running = true;
+	return true;
 }
 
 void milk::state::tick(milk::MilkState& milkState) {
