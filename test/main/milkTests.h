@@ -138,6 +138,27 @@ namespace milk {
 		milk::state::postRender(m);
 		delete env;
 	}
+
+	TEST(MilkTests, Quit) {
+		MilkState m;
+		MockScriptEnvironment* env = new MockScriptEnvironment();
+		MockWindow* win = new MockWindow();
+		MockRenderer* ren = new MockRenderer();
+
+		Sequence seq;
+		EXPECT_CALL(*ren, free());
+		EXPECT_CALL(*win, free());
+		EXPECT_CALL(*env, free());
+
+		m.scriptenv = env;
+		m.window = win;
+		m.renderer = ren;
+
+		milk::state::quit(m);
+		delete ren;
+		delete win;
+		delete env;
+	}
 }
 
 #endif
