@@ -18,9 +18,7 @@ namespace milk
 		public:
 			Window();
 
-			bool init(const std::string& title, unsigned int width, unsigned int height, bool fullscreen) override;
-			unsigned int width() const override;
-			unsigned int height() const override;
+			bool init(const std::string& title, int width, int height, bool fullscreen) override;
 			bool fullscreen() const override;
 			void toggleFullscreen() override;
 			void* handle() const override;

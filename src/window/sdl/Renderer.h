@@ -12,10 +12,9 @@ namespace milk {
 		public:
 			Renderer();
 
-			bool init(void* windowHandle, unsigned int resolutionWidth, unsigned int resolutionHeight) override;
+			bool init(void* windowHandle, int resolutionWidth, int resolutionHeight) override;
 			void clear(const Color& color) override;
 			void drawRectangle(const Rectangle& destinationRectangle, const Color& color) override;
-			void drawRectangleOutline(const Rectangle& destinationRectangle, const Color& color) override;
 			void draw(const Texture& texture, const Rectangle& sourceRectangle, const Rectangle& destinationRectangle, U8 flipFlags) override;
 			void present() override;
 			Resolution resolution() const override;

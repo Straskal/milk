@@ -1,6 +1,8 @@
 #ifndef MILK_SCRIPT_ENVIRONMENT_H
 #define MILK_SCRIPT_ENVIRONMENT_H
 
+#include <string>
+
 #include "data/int.h"
 #include "main/milk.h"
 

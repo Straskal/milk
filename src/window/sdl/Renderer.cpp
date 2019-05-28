@@ -18,7 +18,7 @@ milk::sdl::Renderer::Renderer() {
 	handle_ = nullptr;
 }
 
-bool milk::sdl::Renderer::init(void* windowHandle, unsigned int resolutionWidth, unsigned int resolutionHeight) {
+bool milk::sdl::Renderer::init(void* windowHandle, int resolutionWidth, int resolutionHeight) {
 	if (initialized_) {
 		return true;
 	}
@@ -46,13 +46,6 @@ void milk::sdl::Renderer::drawRectangle(const milk::Rectangle& destinationRectan
 
 	SDL_SetRenderDrawColor(handle_, color.red, color.blue, color.green, color.alpha);
 	SDL_RenderFillRect(handle_, &dst);
-}
-
-void milk::sdl::Renderer::drawRectangleOutline(const milk::Rectangle& destinationRectangle, const milk::Color& color) {
-	SDL_Rect dst = { destinationRectangle.x, destinationRectangle.y, destinationRectangle.width, destinationRectangle.height };
-
-	SDL_SetRenderDrawColor(handle_, color.red, color.blue, color.green, color.alpha);
-	SDL_RenderDrawRect(handle_, &dst);
 }
 
 void milk::sdl::Renderer::draw(

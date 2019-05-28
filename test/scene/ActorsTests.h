@@ -1,5 +1,5 @@
-#ifndef MILK_ACTORS_TESTS
-#define MILK_ACTORS_TESTS
+#ifndef MILK_ACTORS_TESTS_H
+#define MILK_ACTORS_TESTS_H
 
 #include "gtest/gtest.h"
 #include "scene/Actors.h"
