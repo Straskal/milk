@@ -16,6 +16,8 @@ namespace milk
 
 	class Renderer {
 	public:
+		virtual ~Renderer() = default;
+
 		virtual bool init(void* windowHandle, int resolutionWidth, int resolutionHeight) = 0;
 		virtual void clear(const Color& color) = 0;
 		virtual void drawRectangle(const Rectangle& destinationRectangle, const Color& color) = 0;
