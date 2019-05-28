@@ -1,4 +1,4 @@
-#include "Actors.h"
+#include "SceneGraph.h"
 
 #include <assert.h>
 
@@ -9,19 +9,19 @@ namespace milk {
 			std::queue<U16>& freeIndeces
 		) {
 			U16 index;
-			if (freeIndeces.size() > Actors::MAX_FREE) {
+			if (freeIndeces.size() > SceneGraph::MAX_FREE) {
 				index = freeIndeces.front();
 				freeIndeces.pop();
 			}
 			else {
 				generations.push_back(0);
 				index = generations.size() - 1;
-				assert(index <= Actors::MAX);
+				assert(index <= SceneGraph::MAX);
 			}
-			U32 id = index | (generations[index] << Actors::GEN_BITS);
-			if (id == Actors::INVALID) {
+			U32 id = index | (generations[index] << SceneGraph::GEN_BITS);
+			if (id == SceneGraph::INVALID) {
 				++generations[index];
-				id = index | (generations[index] << Actors::GEN_BITS);
+				id = index | (generations[index] << SceneGraph::GEN_BITS);
 			}
 			return id;
 		}
@@ -32,7 +32,7 @@ namespace milk {
 			std::queue<U16>& freeIndeces,
 			std::vector<U32> destroyed
 		) {
-			U16 index = id & ~(1 << Actors::GEN_BITS);
+			U16 index = id & ~(1 << SceneGraph::GEN_BITS);
 			assert(index < generations.size());
 			++generations[index];
 			freeIndeces.push(index);
@@ -43,9 +43,9 @@ namespace milk {
 			U32 id,
 			std::vector<U16>& generations
 		) {
-			U16 index = id & ~(1 << Actors::GEN_BITS);
+			U16 index = id & ~(1 << SceneGraph::GEN_BITS);
 			assert(index < generations.size());
-			U16 generation = id >> Actors::IDX_BITS & ~(1 << Actors::GEN_BITS);
+			U16 generation = id >> SceneGraph::IDX_BITS & ~(1 << SceneGraph::GEN_BITS);
 			return generations[index] == generation;
 		}
 
@@ -110,7 +110,7 @@ namespace milk {
 					return nameidxmap.at(i);
 				}
 			}
-			return Actors::INVALID;
+			return SceneGraph::INVALID;
 		}
 
 		void insertPosition(
@@ -160,20 +160,20 @@ namespace milk {
 	}
 }
 
-const int milk::Actors::MAX = 20000;
-const int milk::Actors::MAX_FREE = 1024;
-const milk::U32 milk::Actors::IDX_BITS = 16;
-const milk::U32 milk::Actors::GEN_BITS = 16;
-const milk::U32 milk::Actors::INVALID = 0;
+const int milk::SceneGraph::MAX = 20000;
+const int milk::SceneGraph::MAX_FREE = 1024;
+const milk::U32 milk::SceneGraph::IDX_BITS = 16;
+const milk::U32 milk::SceneGraph::GEN_BITS = 16;
+const milk::U32 milk::SceneGraph::INVALID = 0;
 
-milk::U32 milk::Actors::createActor(const std::string& name, Vector2 position) {
+milk::U32 milk::SceneGraph::add(const std::string& name, Vector2 position) {
 	U32 id = makeId(generations_, freeIndeces_);
 	insertName(id, names_, nameidmap_, nameidxmap_, name);
 	insertPosition(id, positions_, position);
 	return id;
 }
 
-void milk::Actors::destroyActor(U32 id) {
+void milk::SceneGraph::remove(U32 id) {
 	if (!validId(id, generations_)) {
 		// TODO: Trying to access destroyed actor. Log warning.
 	}
@@ -181,50 +181,50 @@ void milk::Actors::destroyActor(U32 id) {
 	deleteName(id, names_, nameidmap_, nameidxmap_);
 }
 
-bool milk::Actors::isActorAlive(U32 id) {
+bool milk::SceneGraph::alive(U32 id) {
 	return validId(id, generations_);
 }
 
-std::string milk::Actors::getActorName(U32 id) {
+std::string milk::SceneGraph::getName(U32 id) {
 	if (!validId(id, generations_)) {
 		// TODO: Trying to access destroyed actor. Log warning.
 	}
 	return queryNamesById(id, names_, nameidmap_);
 }
 
-void milk::Actors::setActorName(U32 id, const std::string& name) {
+void milk::SceneGraph::setName(U32 id, const std::string& name) {
 	if (!validId(id, generations_)) {
 		// TODO: Trying to access destroyed actor. Log warning.
 	}
 	updateName(id, names_, nameidmap_, name);
 }
 
-milk::U32 milk::Actors::getActorByName(const std::string& name) {
+milk::U32 milk::SceneGraph::getByName(const std::string& name) {
 	return queryIdsByName(name, names_, nameidxmap_);
 }
 
-milk::Vector2 milk::Actors::getActorPosition(U32 id) {
+milk::Vector2 milk::SceneGraph::getPosition(U32 id) {
 	if (!validId(id, generations_)) {
 		// TODO: Trying to access destroyed actor. Log warning.
 	}
 	return queryPositionsById(id, positions_);
 }
 
-void milk::Actors::setActorPosition(U32 id, Vector2 position) {
+void milk::SceneGraph::setPosition(U32 id, Vector2 position) {
 	if (!validId(id, generations_)) {
 		// TODO: Trying to access destroyed actor. Log warning.
 	}
 	updatePosition(id, positions_, position);
 }
 
-milk::U32 milk::Actors::getActorTags(U32 id) {
+milk::U32 milk::SceneGraph::getTags(U32 id) {
 	if (!validId(id, generations_)) {
 		// TODO: Trying to access destroyed actor. Log warning.
 	}
 	return queryTagsById(id, tags_);
 }
 
-void milk::Actors::setActorTags(U32 id, U32 mask) {
+void milk::SceneGraph::setTags(U32 id, U32 mask) {
 	if (!validId(id, generations_)) {
 		// TODO: Trying to access destroyed actor. Log warning.
 	}

@@ -10,7 +10,7 @@
 #include "math/Vector2.h"
 
 namespace milk {
-	class Actors {
+	class SceneGraph {
 	public:
 		static const int MAX;
 		static const int MAX_FREE;
@@ -18,16 +18,16 @@ namespace milk {
 		static const U32 GEN_BITS;
 		static const U32 INVALID;
 
-		U32 createActor(const std::string& name, Vector2 position);
-		void destroyActor(U32 id);
-		bool isActorAlive(U32 id);
-		std::string getActorName(U32 id);
-		void setActorName(U32 id, const std::string& name);
-		U32 getActorByName(const std::string& name);
-		Vector2 getActorPosition(U32 id);
-		void setActorPosition(U32 id, Vector2 position);
-		U32 getActorTags(U32 id);
-		void setActorTags(U32 id, U32 mask);
+		U32 add(const std::string& name, Vector2 position);
+		void remove(U32 id);
+		bool alive(U32 id);
+		std::string getName(U32 id);
+		void setName(U32 id, const std::string& name);
+		U32 getByName(const std::string& name);
+		Vector2 getPosition(U32 id);
+		void setPosition(U32 id, Vector2 position);
+		U32 getTags(U32 id);
+		void setTags(U32 id, U32 mask);
 
 	private:
 		std::queue<U16> freeIndeces_;

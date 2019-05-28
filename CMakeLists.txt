@@ -97,8 +97,8 @@ set(MILK_SRC_MATH
 
 # scene
 set(MILK_SRC_SCENE
-	src/scene/Actors.cpp
-	src/scene/Actors.h
+	src/scene/SceneGraph.cpp
+	src/scene/SceneGraph.h
 )
 
 # window
@@ -207,7 +207,7 @@ set (TESTS
 	test/main/milkTests.h
     test/math/Matrix3Tests.h
     test/math/RectangleTests.h
-	test/scene/ActorsTests.h
+	test/scene/SceneGraphTests.h
 	test/script/MockScriptEnvironment.h
 	test/window/MockRenderer.h
 	test/window/MockRenderer.h

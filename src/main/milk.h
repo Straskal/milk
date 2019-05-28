@@ -4,7 +4,7 @@
 #include <string>
 
 namespace milk {
-	class Actors;
+	class SceneGraph;
 	class ScriptEnvironment;
 	class Renderer;
 	class Window;	   	 
@@ -19,10 +19,10 @@ namespace milk {
 	};
 
 	struct MilkState {
-		ScriptEnvironment* scriptenv;
 		Window* window;
 		Renderer* renderer;
-		Actors* actors;
+		ScriptEnvironment* scriptenv;
+		SceneGraph* scene;
 		bool running;
 	};
 
