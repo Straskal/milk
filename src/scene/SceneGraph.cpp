@@ -71,10 +71,11 @@ namespace milk {
 			size_t lastidx = names.size() - 1;
 			if (names.size() > 1) {
 				// Swap the deleted element with last, then remove last element.
-				U32 nameidx = nameidmap.at(id);
+				int nameidx = nameidmap.at(id);
+				U32 lastid = nameidxmap.at(lastidx);
 				names[nameidx] = names[lastidx];
-				nameidmap.at(lastidx) = nameidx;
-				nameidxmap.at(nameidx) = nameidxmap.at(lastidx);
+				nameidmap.at(lastid) = nameidx;
+				nameidxmap.at(nameidx) = lastid;
 			}
 			names.pop_back();
 			nameidmap.erase(id);
