@@ -136,6 +136,13 @@ namespace milk {
 			positions.at(id) = position;
 		}
 
+		void deletePosition(
+			U32 id,
+			std::unordered_map<U32, Vector2>& positions
+		) {
+			positions.erase(id);
+		}
+
 		Vector2 queryPositionsById(
 			U32 id,
 			std::unordered_map<U32, Vector2>& positions
@@ -177,6 +184,7 @@ milk::U32 milk::SceneGraph::add(const std::string& name, Vector2 position) {
 void milk::SceneGraph::remove(U32 id) {
 	deleteId(id, generations_, freeIndeces_, destroyed_);
 	deleteName(id, names_, nameidmap_, nameidxmap_);
+	deletePosition(id, positions_);
 }
 
 bool milk::SceneGraph::alive(U32 id) {
