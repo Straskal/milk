@@ -3,6 +3,12 @@
 #include <assert.h>
 
 namespace milk {
+	const int milk::SceneGraph::MAX = 20000;
+	const int milk::SceneGraph::MAX_FREE = 1024;
+	const milk::U32 milk::SceneGraph::IDX_BITS = 16;
+	const milk::U32 milk::SceneGraph::GEN_BITS = 16;
+	const milk::U32 milk::SceneGraph::INVALID = 0;
+
 	namespace {
 		U32 makeId(
 			std::vector<U16>& generations,
@@ -161,12 +167,6 @@ namespace milk {
 	}
 }
 
-const int milk::SceneGraph::MAX = 20000;
-const int milk::SceneGraph::MAX_FREE = 1024;
-const milk::U32 milk::SceneGraph::IDX_BITS = 16;
-const milk::U32 milk::SceneGraph::GEN_BITS = 16;
-const milk::U32 milk::SceneGraph::INVALID = 0;
-
 milk::U32 milk::SceneGraph::add(const std::string& name, Vector2 position) {
 	U32 id = makeId(generations_, freeIndeces_);
 	insertName(id, names_, nameidmap_, nameidxmap_, name);
@@ -175,9 +175,6 @@ milk::U32 milk::SceneGraph::add(const std::string& name, Vector2 position) {
 }
 
 void milk::SceneGraph::remove(U32 id) {
-	if (!validId(id, generations_)) {
-		// TODO: Trying to access destroyed actor. Log warning.
-	}
 	deleteId(id, generations_, freeIndeces_, destroyed_);
 	deleteName(id, names_, nameidmap_, nameidxmap_);
 }
@@ -187,16 +184,10 @@ bool milk::SceneGraph::alive(U32 id) {
 }
 
 std::string milk::SceneGraph::getName(U32 id) {
-	if (!validId(id, generations_)) {
-		// TODO: Trying to access destroyed actor. Log warning.
-	}
 	return queryNamesById(id, names_, nameidmap_);
 }
 
 void milk::SceneGraph::setName(U32 id, const std::string& name) {
-	if (!validId(id, generations_)) {
-		// TODO: Trying to access destroyed actor. Log warning.
-	}
 	updateName(id, names_, nameidmap_, name);
 }
 
@@ -205,29 +196,17 @@ milk::U32 milk::SceneGraph::getByName(const std::string& name) {
 }
 
 milk::Vector2 milk::SceneGraph::getPosition(U32 id) {
-	if (!validId(id, generations_)) {
-		// TODO: Trying to access destroyed actor. Log warning.
-	}
 	return queryPositionsById(id, positions_);
 }
 
 void milk::SceneGraph::setPosition(U32 id, Vector2 position) {
-	if (!validId(id, generations_)) {
-		// TODO: Trying to access destroyed actor. Log warning.
-	}
 	updatePosition(id, positions_, position);
 }
 
 milk::U32 milk::SceneGraph::getTags(U32 id) {
-	if (!validId(id, generations_)) {
-		// TODO: Trying to access destroyed actor. Log warning.
-	}
 	return queryTagsById(id, tags_);
 }
 
 void milk::SceneGraph::setTags(U32 id, U32 mask) {
-	if (!validId(id, generations_)) {
-		// TODO: Trying to access destroyed actor. Log warning.
-	}
 	insertOrUpdateTag(id, tags_, mask);
 }
