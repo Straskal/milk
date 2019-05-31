@@ -10,13 +10,14 @@
 #include "math/Vector2.h"
 
 namespace milk {
-	class SceneGraph {
+	class RootNode {
 	public:
-		static const int MAX;
-		static const int MAX_FREE;
-		static const U32 IDX_BITS;
-		static const U32 GEN_BITS;
-		static const U32 INVALID;
+		static const U32 ID_INDEX_BITS;
+		static const U32 ID_GENERATION_BITS;
+		static const U32 ROOT_NODE_ID;
+		static const U32 INVALID_NODE_ID;
+		static const int MAX_NODES;
+		static const int MAX_FREE_INDECES;
 
 		U32 add(const std::string& name, Vector2 position);
 		void remove(U32 id);
@@ -32,7 +33,6 @@ namespace milk {
 	private:
 		std::queue<U16> freeIndeces_;
 		std::vector<U16> generations_;
-		std::vector<U32> destroyed_;
 		std::vector<std::string> names_;
 		std::unordered_map<U32, int> nameidmap_;
 		std::unordered_map<int, U32> nameidxmap_;

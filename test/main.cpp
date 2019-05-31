@@ -3,6 +3,7 @@
 #include "main/milkTests.h"
 #include "math/Matrix3Tests.h"
 #include "math/RectangleTests.h"
+#include "scene/IdTests.h"
 #include "scene/SceneGraphTests.h"
 
 int main(int argc, char** argv) {

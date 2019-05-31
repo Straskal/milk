@@ -2,19 +2,19 @@
 #define MILK_ACTORS_TESTS_H
 
 #include "gtest/gtest.h"
-#include "scene/SceneGraph.h"
+#include "scene/RootNode.h"
 
 namespace milk {
 	TEST(SceneGraphTests, Creation) {
-		SceneGraph scene;
+		RootNode scene;
 
 		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
 		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
 		U32 actor2 = scene.add("danny devito", Vector2{ 0.f, -1.f });
 
-		EXPECT_NE(SceneGraph::INVALID, actor0);
-		EXPECT_NE(SceneGraph::INVALID, actor1);
-		EXPECT_NE(SceneGraph::INVALID, actor2);
+		EXPECT_NE(RootNode::INVALID_NODE_ID, actor0);
+		EXPECT_NE(RootNode::INVALID_NODE_ID, actor1);
+		EXPECT_NE(RootNode::INVALID_NODE_ID, actor2);
 
 		EXPECT_NE(actor0, actor1);
 		EXPECT_NE(actor0, actor2);
@@ -30,7 +30,7 @@ namespace milk {
 	}
 
 	TEST(SceneGraphTests, Destruction) {
-		SceneGraph scene;
+		RootNode scene;
 
 		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
 		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
@@ -50,7 +50,7 @@ namespace milk {
 	}
 
 	TEST(SceneGraphTests, Position) {
-		SceneGraph scene;
+		RootNode scene;
 
 		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
 		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
@@ -66,7 +66,7 @@ namespace milk {
 	}
 
 	TEST(SceneGraphTests, Name) {
-		SceneGraph scene;
+		RootNode scene;
 
 		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
 		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
@@ -90,7 +90,7 @@ namespace milk {
 	}
 
 	TEST(SceneGraphTests, Tags) {
-		SceneGraph scene;
+		RootNode scene;
 
 		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
 		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });

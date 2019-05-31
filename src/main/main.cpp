@@ -4,7 +4,7 @@
 #include "SDL.h"
 
 #include "milk.h"
-#include "scene/SceneGraph.h"
+#include "node/RootNode.h"
 #include "script/lua/LuaEnvironment.h"
 #include "window/sdl/Renderer.h"
 #include "window/sdl/Window.h"
@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 	milkState.window = new milk::sdl::Window();
 	milkState.renderer = new milk::sdl::Renderer();
 	milkState.scriptenv = new milk::lua::LuaEnvironment();
-	milkState.scene = new milk::SceneGraph();
+	milkState.rootnode = new milk::RootNode();
 
 	if (!milk::state::init(milkState)) {
 		goto exit_fail;
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 
 exit_success:
 	milk::state::quit(milkState);
-	delete milkState.scene; milkState.scene = nullptr;
+	delete milkState.rootnode; milkState.rootnode = nullptr;
 	delete milkState.scriptenv; milkState.scriptenv = nullptr;
 	delete milkState.renderer; milkState.renderer = nullptr;
 	delete milkState.window; milkState.window = nullptr;
@@ -66,7 +66,7 @@ exit_success:
 
 exit_fail:
 	milk::state::quit(milkState);
-	delete milkState.scene; milkState.scene = nullptr;
+	delete milkState.rootnode; milkState.rootnode = nullptr;
 	delete milkState.scriptenv; milkState.scriptenv = nullptr;
 	delete milkState.renderer; milkState.renderer = nullptr;
 	delete milkState.window; milkState.window = nullptr;

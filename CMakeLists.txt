@@ -69,19 +69,6 @@ set(MILK_SRC_GRAPHICS
     src/graphics/Texture.h
 )
 
-# script
-set(MILK_SRC_SCRIPT
-    src/script/ScriptEnvironment.h
-)
-
-set(MILK_SRC_SCRIPT_LUA
-	src/script/lua/LuaApi.cpp
-	src/script/lua/LuaApi.h
-	src/script/lua/LuaEnvironment.cpp
-	src/script/lua/LuaEnvironment.h
-	src/script/lua/LuaExtensions.h
-)
-
 # math
 set(MILK_SRC_MAIN
 	src/main/milk.cpp
@@ -95,10 +82,25 @@ set(MILK_SRC_MATH
     src/math/Vector2.h
 )
 
-# scene
+# node
 set(MILK_SRC_SCENE
-	src/scene/SceneGraph.cpp
-	src/scene/SceneGraph.h
+	src/node/id.cpp
+	src/node/id.h
+	src/node/RootNode.cpp
+	src/node/RootNode.h
+)
+
+# script
+set(MILK_SRC_SCRIPT
+    src/script/ScriptEnvironment.h
+)
+
+set(MILK_SRC_SCRIPT_LUA
+	src/script/lua/LuaApi.cpp
+	src/script/lua/LuaApi.h
+	src/script/lua/LuaEnvironment.cpp
+	src/script/lua/LuaEnvironment.h
+	src/script/lua/LuaExtensions.h
 )
 
 # window
@@ -207,7 +209,8 @@ set (TESTS
 	test/main/milkTests.h
     test/math/Matrix3Tests.h
     test/math/RectangleTests.h
-	test/scene/SceneGraphTests.h
+	test/node/IdTests.h
+	test/node/RootNodeTests.h
 	test/script/MockScriptEnvironment.h
 	test/window/MockRenderer.h
 	test/window/MockRenderer.h
