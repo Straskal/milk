@@ -4,7 +4,7 @@
 #include "SDL.h"
 
 #include "milk.h"
-#include "node/RootNode.h"
+#include "node/NodeTree.h"
 #include "script/lua/LuaEnvironment.h"
 #include "window/sdl/Renderer.h"
 #include "window/sdl/Window.h"
@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 	milkState.window = new milk::sdl::Window();
 	milkState.renderer = new milk::sdl::Renderer();
 	milkState.scriptenv = new milk::lua::LuaEnvironment();
-	milkState.rootnode = new milk::RootNode();
+	milkState.rootnode = new milk::NodeTree();
 
 	if (!milk::state::init(milkState)) {
 		goto exit_fail;

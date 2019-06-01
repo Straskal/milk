@@ -83,11 +83,11 @@ set(MILK_SRC_MATH
 )
 
 # node
-set(MILK_SRC_SCENE
-	src/node/id.cpp
-	src/node/id.h
-	src/node/RootNode.cpp
-	src/node/RootNode.h
+set(MILK_SRC_NODE
+	src/node/node_id.cpp
+	src/node/node_id.h
+	src/node/NodeTree.cpp
+	src/node/NodeTree.h
 )
 
 # script
@@ -124,7 +124,7 @@ set(MILK_SRC_FILES
 	${MILK_SRC_SCRIPT_LUA}
 	${MILK_SRC_MAIN}
     ${MILK_SRC_MATH}
-    ${MILK_SRC_SCENE}
+    ${MILK_SRC_NODE}
     ${MILK_SRC_WINDOW}
 	${MILK_SRC_WINDOW_SDL}
 )
@@ -209,8 +209,8 @@ set (TESTS
 	test/main/milkTests.h
     test/math/Matrix3Tests.h
     test/math/RectangleTests.h
-	test/node/IdTests.h
-	test/node/RootNodeTests.h
+	test/node/NodeIdTests.h
+	test/node/NodeTreeTests.h
 	test/script/MockScriptEnvironment.h
 	test/window/MockRenderer.h
 	test/window/MockRenderer.h

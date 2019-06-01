@@ -31,7 +31,6 @@ namespace milk {
 		U32 make(
 			std::vector<U16>& generations,
 			std::queue<U16>& freeIndeces,
-			const U32 INVALID_ID,
 			const U32 GENERATION_BITS,
 			const int MAX_FREE_INDECES
 		);

@@ -4,7 +4,7 @@
 #include <string>
 
 namespace milk {
-	class RootNode;
+	class NodeTree;
 	class ScriptEnvironment;
 	class Renderer;
 	class Window;	   	 
@@ -22,7 +22,7 @@ namespace milk {
 		Window* window;
 		Renderer* renderer;
 		ScriptEnvironment* scriptenv;
-		RootNode* rootnode;
+		NodeTree* rootnode;
 		bool running;
 	};
 

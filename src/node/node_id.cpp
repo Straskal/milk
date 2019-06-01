@@ -1,9 +1,8 @@
-#include "id.h"
+#include "node_id.h"
 
 milk::U32 milk::node_id::make(
 	std::vector<U16>& generations,
 	std::queue<U16>& freeIndeces,
-	const milk::U32 INVALID_ID,
 	const milk::U32 GENERATION_BITS,
 	const int MAX_FREE_INDECES
 ) {
@@ -16,12 +15,7 @@ milk::U32 milk::node_id::make(
 		generations.push_back(0);
 		index = generations.size() - 1;
 	}
-	U32 id = index | (generations[index] << GENERATION_BITS);
-	if (id == INVALID_ID) {
-		++generations[index];
-		id = index | (generations[index] << GENERATION_BITS);
-	}
-	return id;
+	return index | (generations[index] << GENERATION_BITS);
 }
 
 void milk::node_id::recycle(
