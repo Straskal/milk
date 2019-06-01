@@ -1,5 +1,5 @@
-#ifndef MILK_ACTORS_H
-#define MILK_ACTORS_H
+#ifndef MILK_NODE_TREE_H
+#define MILK_NODE_TREE_H
 
 #include <string>
 #include <queue>
