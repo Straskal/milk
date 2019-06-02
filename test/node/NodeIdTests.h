@@ -7,8 +7,12 @@
 
 namespace milk {
 	TEST(IdTests, MakeId) {
-		std::vector<U16> generations;
-		std::queue<U16> freeIndeces;
+	}
+
+	TEST(IdTests, Recycle) {
+	}
+
+	TEST(IdTests, valid) {
 	}
 }
 

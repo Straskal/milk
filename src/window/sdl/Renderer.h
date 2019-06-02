@@ -21,10 +21,8 @@ namespace milk {
 			void free() override;
 
 		private:
-
-			bool initialized_;
-			Resolution resolution_;
-			SDL_Renderer* handle_;
+			Resolution m_resolution;
+			SDL_Renderer* m_handle;
 		};
 	}
 }

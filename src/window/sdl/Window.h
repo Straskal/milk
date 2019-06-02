@@ -25,9 +25,9 @@ namespace milk
 			void free() override;
 
 		private:
-			SDL_Window* handle_;
-			int width_;
-			int height_;
+			SDL_Window* m_handle;
+			int m_width;
+			int m_height;
 		};
 	}
 }

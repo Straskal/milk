@@ -14,9 +14,9 @@ namespace milk {
 		int height() const;
 
 	private:
-		SDL_Texture* sdlTexture_;
-		int width_;
-		int height_;
+		SDL_Texture* m_handle;
+		int m_width;
+		int m_height;
 	};
 }
 

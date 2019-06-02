@@ -13,8 +13,8 @@ namespace milk {
 		static void updateKeyboardState();
 
 	private:
-		static Uint8 previousState_[SDL_NUM_SCANCODES];
-		static Uint8 currentState_[SDL_NUM_SCANCODES];
+		static Uint8 m_previousState[SDL_NUM_SCANCODES];
+		static Uint8 m_currentState[SDL_NUM_SCANCODES];
 	};
 }
 
