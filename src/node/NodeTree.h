@@ -2,7 +2,6 @@
 #define MILK_NODE_TREE_H
 
 #include <string>
-#include <queue>
 #include <unordered_map>
 #include <vector>
 
