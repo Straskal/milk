@@ -27,27 +27,15 @@
 	An id will be duplicated only once it is recycled 67,108,864‬ times.
 */
 namespace milk {
+	struct NodeIdData {
+		std::queue<U16> freeIndeces;
+		std::vector<U16> generations;
+	};
+
 	namespace node_id {
-		U32 make(
-			std::vector<U16>& generations,
-			std::queue<U16>& freeIndeces,
-			const U32 GENERATION_BITS,
-			const int MAX_FREE_INDECES
-		);
-
-		void recycle(
-			std::vector<U16>& generations,
-			std::queue<U16>& freeIndeces,
-			const U32 GENERATION_BITS,
-			U32 id
-		);
-
-		bool valid(
-			std::vector<U16>& generations,
-			const U32 GENERATION_BITS,
-			const U32 INDEX_BITS,
-			U32 id
-		);
+		U32 make(NodeIdData& data, const U32 GENERATION_BITS, const int MAX_FREE_INDECES);
+		void recycle(NodeIdData& data, const U32 GENERATION_BITS, U32 id);
+		bool valid(const NodeIdData& data, const U32 GENERATION_BITS, const U32 INDEX_BITS, U32 id);
 	}
 }
 

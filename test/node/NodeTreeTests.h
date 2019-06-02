@@ -1,223 +1,127 @@
-//#ifndef MILK_ACTORS_TESTS_H
-//#define MILK_ACTORS_TESTS_H
-//
-//#include "gtest/gtest.h"
-//#include "scene/RootNode.h"
-//
-//namespace milk {
-//	TEST(SceneGraphTests, Creation) {
-//		RootNode scene;
-//
-//		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
-//		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
-//		U32 actor2 = scene.add("danny devito", Vector2{ 0.f, -1.f });
-//
-//		EXPECT_NE(RootNode::INVALID_NODE_ID, actor0);
-//		EXPECT_NE(RootNode::INVALID_NODE_ID, actor1);
-//		EXPECT_NE(RootNode::INVALID_NODE_ID, actor2);
-//
-//		EXPECT_NE(actor0, actor1);
-//		EXPECT_NE(actor0, actor2);
-//		EXPECT_NE(actor1, actor2);
-//
-//		EXPECT_EQ("hail satan", scene.getName(actor0));
-//		EXPECT_EQ("stev", scene.getName(actor1));
-//		EXPECT_EQ("danny devito", scene.getName(actor2));
-//
-//		EXPECT_EQ(Vector2(0.f, 12.f), scene.getPosition(actor0));
-//		EXPECT_EQ(Vector2(15.5f, 98.f), scene.getPosition(actor1));
-//		EXPECT_EQ(Vector2(0.f, -1.f), scene.getPosition(actor2));
-//	}
-//
-//	TEST(SceneGraphTests, Destruction) {
-//		RootNode scene;
-//
-//		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
-//		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
-//		U32 actor2 = scene.add("danny devito", Vector2{ 0.f, -1.f });
-//
-//		EXPECT_TRUE(scene.alive(actor0));
-//		EXPECT_TRUE(scene.alive(actor1));
-//		EXPECT_TRUE(scene.alive(actor2));
-//
-//		scene.remove(actor0);
-//		scene.remove(actor1);
-//		scene.remove(actor2);
-//
-//		EXPECT_FALSE(scene.alive(actor0));
-//		EXPECT_FALSE(scene.alive(actor1));
-//		EXPECT_FALSE(scene.alive(actor2));
-//	}
-//
-//	TEST(SceneGraphTests, Position) {
-//		RootNode scene;
-//
-//		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
-//		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
-//		U32 actor2 = scene.add("danny devito", Vector2{ 0.f, -1.f });
-//
-//		scene.setPosition(actor0, Vector2::zero());
-//		scene.setPosition(actor1, Vector2{ 1.f, 1.f });
-//		scene.setPosition(actor2, Vector2{ -10.f, 20.f });
-//
-//		EXPECT_EQ(Vector2::zero(), scene.getPosition(actor0));
-//		EXPECT_EQ(Vector2(1.f, 1.f), scene.getPosition(actor1));
-//		EXPECT_EQ(Vector2(-10.f, 20.f), scene.getPosition(actor2));
-//	}
-//
-//	TEST(SceneGraphTests, Name) {
-//		RootNode scene;
-//
-//		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
-//		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
-//		U32 actor2 = scene.add("danny devito", Vector2{ 0.f, -1.f });
-//
-//		scene.setName(actor0, "bobody");
-//		scene.setName(actor1, "burt macklin");
-//		scene.setName(actor2, "day man");
-//
-//		EXPECT_EQ("bobody", scene.getName(actor0));
-//		EXPECT_EQ("burt macklin", scene.getName(actor1));
-//		EXPECT_EQ("day man", scene.getName(actor2));
-//
-//		U32 foundActor0 = scene.getByName("bobody");
-//		U32 foundActor1 = scene.getByName("burt macklin");
-//		U32 foundActor2 = scene.getByName("day man");
-//
-//		EXPECT_EQ(actor0, foundActor0);
-//		EXPECT_EQ(actor1, foundActor1);
-//		EXPECT_EQ(actor2, foundActor2);
-//	}
-//
-//	TEST(SceneGraphTests, Tags) {
-//		RootNode scene;
-//
-//		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
-//		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
-//		U32 actor2 = scene.add("danny devito", Vector2{ 0.f, -1.f });
-//
-//		U32 playerTag = 1 << 0;
-//		U32 enemyTag = 1 << 1;
-//		U32 interactabletag = 1 << 2;
-//
-//		scene.setTags(actor0, playerTag);
-//		scene.setTags(actor1, enemyTag | interactabletag);
-//
-//		EXPECT_EQ(playerTag, scene.getTags(actor0));
-//		EXPECT_EQ(enemyTag | interactabletag, scene.getTags(actor1));
-//		EXPECT_EQ(0, scene.getTags(actor2));
-//	}
-//}
-//
-//#endif#ifndef MILK_ACTORS_TESTS_H
-//#define MILK_ACTORS_TESTS_H
-//
-//#include "gtest/gtest.h"
-//#include "scene/RootNode.h"
-//
-//namespace milk {
-//	TEST(SceneGraphTests, Creation) {
-//		RootNode scene;
-//
-//		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
-//		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
-//		U32 actor2 = scene.add("danny devito", Vector2{ 0.f, -1.f });
-//
-//		EXPECT_NE(RootNode::INVALID_NODE_ID, actor0);
-//		EXPECT_NE(RootNode::INVALID_NODE_ID, actor1);
-//		EXPECT_NE(RootNode::INVALID_NODE_ID, actor2);
-//
-//		EXPECT_NE(actor0, actor1);
-//		EXPECT_NE(actor0, actor2);
-//		EXPECT_NE(actor1, actor2);
-//
-//		EXPECT_EQ("hail satan", scene.getName(actor0));
-//		EXPECT_EQ("stev", scene.getName(actor1));
-//		EXPECT_EQ("danny devito", scene.getName(actor2));
-//
-//		EXPECT_EQ(Vector2(0.f, 12.f), scene.getPosition(actor0));
-//		EXPECT_EQ(Vector2(15.5f, 98.f), scene.getPosition(actor1));
-//		EXPECT_EQ(Vector2(0.f, -1.f), scene.getPosition(actor2));
-//	}
-//
-//	TEST(SceneGraphTests, Destruction) {
-//		RootNode scene;
-//
-//		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
-//		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
-//		U32 actor2 = scene.add("danny devito", Vector2{ 0.f, -1.f });
-//
-//		EXPECT_TRUE(scene.alive(actor0));
-//		EXPECT_TRUE(scene.alive(actor1));
-//		EXPECT_TRUE(scene.alive(actor2));
-//
-//		scene.remove(actor0);
-//		scene.remove(actor1);
-//		scene.remove(actor2);
-//
-//		EXPECT_FALSE(scene.alive(actor0));
-//		EXPECT_FALSE(scene.alive(actor1));
-//		EXPECT_FALSE(scene.alive(actor2));
-//	}
-//
-//	TEST(SceneGraphTests, Position) {
-//		RootNode scene;
-//
-//		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
-//		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
-//		U32 actor2 = scene.add("danny devito", Vector2{ 0.f, -1.f });
-//
-//		scene.setPosition(actor0, Vector2::zero());
-//		scene.setPosition(actor1, Vector2{ 1.f, 1.f });
-//		scene.setPosition(actor2, Vector2{ -10.f, 20.f });
-//
-//		EXPECT_EQ(Vector2::zero(), scene.getPosition(actor0));
-//		EXPECT_EQ(Vector2(1.f, 1.f), scene.getPosition(actor1));
-//		EXPECT_EQ(Vector2(-10.f, 20.f), scene.getPosition(actor2));
-//	}
-//
-//	TEST(SceneGraphTests, Name) {
-//		RootNode scene;
-//
-//		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
-//		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
-//		U32 actor2 = scene.add("danny devito", Vector2{ 0.f, -1.f });
-//
-//		scene.setName(actor0, "bobody");
-//		scene.setName(actor1, "burt macklin");
-//		scene.setName(actor2, "day man");
-//
-//		EXPECT_EQ("bobody", scene.getName(actor0));
-//		EXPECT_EQ("burt macklin", scene.getName(actor1));
-//		EXPECT_EQ("day man", scene.getName(actor2));
-//
-//		U32 foundActor0 = scene.getByName("bobody");
-//		U32 foundActor1 = scene.getByName("burt macklin");
-//		U32 foundActor2 = scene.getByName("day man");
-//
-//		EXPECT_EQ(actor0, foundActor0);
-//		EXPECT_EQ(actor1, foundActor1);
-//		EXPECT_EQ(actor2, foundActor2);
-//	}
-//
-//	TEST(SceneGraphTests, Tags) {
-//		RootNode scene;
-//
-//		U32 actor0 = scene.add("hail satan", Vector2{ 0.f, 12.f });
-//		U32 actor1 = scene.add("stev", Vector2{ 15.5f, 98.f });
-//		U32 actor2 = scene.add("danny devito", Vector2{ 0.f, -1.f });
-//
-//		U32 playerTag = 1 << 0;
-//		U32 enemyTag = 1 << 1;
-//		U32 interactabletag = 1 << 2;
-//
-//		scene.setTags(actor0, playerTag);
-//		scene.setTags(actor1, enemyTag | interactabletag);
-//
-//		EXPECT_EQ(playerTag, scene.getTags(actor0));
-//		EXPECT_EQ(enemyTag | interactabletag, scene.getTags(actor1));
-//		EXPECT_EQ(0, scene.getTags(actor2));
-//	}
-//}
-//
-//#endif
+#ifndef MILK_ACTORS_TESTS_H
+#define MILK_ACTORS_TESTS_H
+
+#include <algorithm>
+
+#include "gtest/gtest.h"
+#include "node/NodeTree.h"
+
+namespace milk {
+	TEST(NodeTreeTests, Constructor_InitializesRootNode) {
+		NodeTree nt;
+		U32 root = nt.root();
+
+		ASSERT_TRUE(nt.isAlive(root));
+		ASSERT_EQ("root", nt.getName(root));
+		ASSERT_EQ(Vector2::zero(), nt.getPosition(root));
+	}
+
+	TEST(NodeTreeTests, Constructor_InitializesGlobalNode) {
+		NodeTree nt;
+		U32 global = nt.global();
+
+		ASSERT_TRUE(nt.isAlive(global));
+		ASSERT_EQ("global", nt.getName(global));
+		ASSERT_EQ(Vector2::zero(), nt.getPosition(global));
+	}
+
+	TEST(NodeTreeTests, Add_AddsNode) {
+		NodeTree nt;
+		U32 root = nt.root();
+		U32 node = nt.add(root, "stv", Vector2(15.f, -100.f));
+
+		ASSERT_TRUE(nt.isAlive(node));
+		ASSERT_EQ(root, nt.getParent(node));
+		ASSERT_EQ("stv", nt.getName(node));
+		ASSERT_EQ(Vector2(15.f, -100.f), nt.getPosition(node));
+
+		std::vector<U32> rootChildren = nt.getChildren(root);
+		ASSERT_NE(rootChildren.end(), std::find(rootChildren.begin(), rootChildren.end(), node));
+	}
+
+	TEST(NodeTreeTests, Remove_RemovesNode) {
+		NodeTree nt;
+		U32 root = nt.root();
+		U32 node = nt.add(root, "stv", Vector2(15.f, -100.f));
+		nt.remove(node);
+
+		ASSERT_FALSE(nt.isAlive(node));
+
+		std::vector<U32> rootChildren = nt.getChildren(root);
+		ASSERT_EQ(rootChildren.end(), std::find(rootChildren.begin(), rootChildren.end(), node));
+	}
+
+	TEST(NodeTreeTests, GetParent_RootNode_ReturnsInvalid) {
+		NodeTree nt;
+		U32 root = nt.root();
+		U32 parent = nt.getParent(root);
+
+		ASSERT_EQ(0, parent);
+	}
+
+	TEST(NodeTreeTests, SetParent_CannotSetRootParent) {
+		NodeTree nt;
+		U32 root = nt.root();
+		nt.setParent(root, 7);
+
+		ASSERT_EQ(0, nt.getParent(root));
+	}
+
+	TEST(NodeTreeTests, SetParent_CannotSetGlobalParent) {
+		NodeTree nt;
+		U32 root = nt.root();
+		U32 global = nt.global();
+		nt.setParent(global, 7);
+
+		ASSERT_EQ(root, nt.getParent(global));
+	}
+
+	TEST(NodeTreeTests, SetParent_SetsParentAndParentsChild) {
+		NodeTree nt;
+		U32 root = nt.root();
+		U32 global = nt.global();
+		U32 node = nt.add(root, "stv", Vector2(15.f, -100.f));
+		nt.setParent(node, global);
+
+		std::vector<U32> rootChildren = nt.getChildren(root);
+		ASSERT_EQ(rootChildren.end(), std::find(rootChildren.begin(), rootChildren.end(), node));
+		ASSERT_EQ(global, nt.getParent(node));
+		std::vector<U32> globalChildren = nt.getChildren(global);
+		ASSERT_NE(globalChildren.end(), std::find(globalChildren.begin(), globalChildren.end(), node));
+	}
+
+	TEST(NodeTreeTests, SetName_CannotSetRootName) {
+		NodeTree nt;
+		U32 root = nt.root();
+		nt.setName(root, "butt");
+
+		ASSERT_EQ("root", nt.getName(root));
+	}
+
+	TEST(NodeTreeTests, SetName_CannotSetGlobalName) {
+		NodeTree nt;
+		U32 global = nt.global();
+		nt.setName(global, "butt");
+
+		ASSERT_EQ("global", nt.getName(global));
+	}
+
+	TEST(NodeTreeTests, SetName_SetsName) {
+		NodeTree nt;
+		U32 root = nt.root();
+		U32 node = nt.add(root, "stv", Vector2(15.f, -100.f));
+		nt.setName(node, "butt");
+
+		ASSERT_EQ("butt", nt.getName(node));
+	}
+
+	TEST(NodeTreeTests, SetPosition_SetsPosition) {
+		NodeTree nt;
+		U32 root = nt.root();
+		nt.setPosition(root, Vector2(100.f, 100.f));
+
+		ASSERT_EQ(Vector2(100.f, 100.f), nt.getPosition(root));
+	}
+}
+
+#endif

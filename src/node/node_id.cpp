@@ -1,41 +1,26 @@
 #include "node_id.h"
 
-milk::U32 milk::node_id::make(
-	std::vector<U16>& generations,
-	std::queue<U16>& freeIndeces,
-	const milk::U32 GENERATION_BITS,
-	const int MAX_FREE_INDECES
-) {
+milk::U32 milk::node_id::make(milk::NodeIdData& data, const milk::U32 GENERATION_BITS, const int MAX_FREE_INDECES) {
 	U16 index;
-	if (freeIndeces.size() > MAX_FREE_INDECES) {
-		index = freeIndeces.front();
-		freeIndeces.pop();
+	if (data.freeIndeces.size() > MAX_FREE_INDECES) {
+		index = data.freeIndeces.front();
+		data.freeIndeces.pop();
 	}
 	else {
-		generations.push_back(0);
-		index = generations.size() - 1;
+		data.generations.push_back(0);
+		index = data.generations.size() - 1;
 	}
-	return index | (generations[index] << GENERATION_BITS);
+	return index | (data.generations[index] << GENERATION_BITS);
 }
 
-void milk::node_id::recycle(
-	std::vector<milk::U16>& generations,
-	std::queue<milk::U16>& freeIndeces,
-	const milk::U32 GENERATION_BITS,
-	milk::U32 id
-) {
+void milk::node_id::recycle(milk::NodeIdData& data, const milk::U32 GENERATION_BITS, milk::U32 id) {
 	U16 index = id & ~(1 << GENERATION_BITS);
-	++generations[index];
-	freeIndeces.push(index);
+	++data.generations[index];
+	data.freeIndeces.push(index);
 }
 
-bool milk::node_id::valid(
-	std::vector<U16>& generations,
-	const U32 GENERATION_BITS,
-	const U32 INDEX_BITS,
-	milk::U32 id
-) {
+bool milk::node_id::valid(const milk::NodeIdData& data, const U32 GENERATION_BITS, const U32 INDEX_BITS, milk::U32 id) {
 	U16 index = id & ~(1 << GENERATION_BITS);
 	U16 generation = id >> INDEX_BITS & ~(1 << GENERATION_BITS);
-	return generations[index] == generation;
+	return data.generations[index] == generation;
 }
