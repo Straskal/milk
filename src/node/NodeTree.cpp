@@ -58,7 +58,7 @@ namespace milk {
 		m_positions.erase(node);
 	}
 
-	bool milk::NodeTree::isAlive(U32 node) {
+	bool milk::NodeTree::isAlive(U32 node) const {
 		return node != m_invalidNode && node_id::valid(m_ids, ID_GENERATION_BITS, ID_INDEX_BITS, node);
 	}
 
@@ -74,15 +74,15 @@ namespace milk {
 		m_children.at(parentNode).push_back(node);
 	}
 
-	milk::U32 milk::NodeTree::getParent(U32 node) {
+	milk::U32 milk::NodeTree::getParent(U32 node) const {
 		return node == m_rootNode ? m_invalidNode : m_parents.at(node);
 	}
 
-	std::vector<milk::U32> milk::NodeTree::getChildren(U32 node) {
+	std::vector<milk::U32> milk::NodeTree::getChildren(U32 node) const {
 		return m_children.at(node);
 	}
 
-	std::string milk::NodeTree::getName(U32 node) {
+	std::string milk::NodeTree::getName(U32 node) const {
 		return m_names.at(node);
 	}
 
@@ -93,7 +93,7 @@ namespace milk {
 		m_names.at(node) = name;
 	}
 
-	milk::Vector2 milk::NodeTree::getPosition(U32 node) {
+	milk::Vector2 milk::NodeTree::getPosition(U32 node) const {
 		return m_positions.at(node);
 	}
 

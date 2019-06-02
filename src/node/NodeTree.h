@@ -19,13 +19,13 @@ namespace milk {
 
 		U32 add(U32 parentNode, const std::string& name, Vector2 position);
 		void remove(U32 node);
-		bool isAlive(U32 node);
+		bool isAlive(U32 node) const;
 		void setParent(U32 node, U32 parentNode);
-		U32 getParent(U32 node);
-		std::vector<U32> getChildren(U32 node);
-		std::string getName(U32 node);
+		U32 getParent(U32 node) const;
+		std::vector<U32> getChildren(U32 node) const;
+		std::string getName(U32 node) const;
 		void setName(U32 node, const std::string& name);
-		Vector2 getPosition(U32 node);
+		Vector2 getPosition(U32 node) const;
 		void setPosition(U32 node, Vector2 position);
 
 	private:
