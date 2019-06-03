@@ -6,7 +6,7 @@
 #include "window/Renderer.h"
 
 bool milk::state::init(milk::MilkState& milkState) {
-	milkState.scriptenv->init(&milkState);
+	milkState.scriptenv->init();
 	MilkStartupConfig config = milkState.scriptenv->getConfiguration("res/config.lua");
 
 	if (!milkState.window->init(config.winTitle, config.winWidth, config.winHeight, config.winFullscreen)) {

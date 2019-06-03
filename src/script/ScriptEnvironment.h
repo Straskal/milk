@@ -13,12 +13,10 @@ namespace milk {
 	public:
 		virtual ~ScriptEnvironment() = default;
 
-		virtual void init(MilkState* milkState) = 0;
+		virtual void init() = 0;
 		virtual void free() = 0;
 
 		virtual MilkStartupConfig getConfiguration(const std::string& configFile) = 0;
-
-		virtual void addScript(u32 id, const std::string& scriptName) = 0;
 
 		virtual void tick() = 0;
 		virtual void postTick() = 0;

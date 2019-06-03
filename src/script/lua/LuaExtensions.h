@@ -10,7 +10,7 @@ extern "C" {
 }
 
 namespace milk {
-	namespace luaenv {
+	namespace luax {
 		std::string getStringField(lua_State* L, const std::string& key) {
 			lua_getfield(L, -1, key.c_str());
 			std::string result = std::string{ (const char*)lua_tostring(L, -1) };

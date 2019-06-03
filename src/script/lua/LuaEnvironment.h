@@ -15,12 +15,10 @@ namespace milk {
 	namespace lua {
 		class LuaEnvironment : public ScriptEnvironment {
 		public:
-			void init(MilkState* milkState) override;
+			void init() override;
 			void free() override;
 
 			MilkStartupConfig getConfiguration(const std::string& configFile) override;
-
-			void addScript(u32 id, const std::string& scriptName) override;
 
 			void tick() override;
 			void postTick() override;
@@ -28,12 +26,13 @@ namespace milk {
 			void postRender() override;
 
 		private:
-			lua_State* luaState_;
-			std::unordered_map<u32, std::unordered_map<std::string, int>> scriptIdMap_;
-			std::vector<int> newScripts_;
-			std::vector<int> tickCallbacks_;
-			std::vector<int> postTickCallbacks_;
-			std::vector<int> renderCallbacks_;
+			lua_State* m_L;
+			std::unordered_map<u32, int> m_scripts;
+			std::vector<int> m_newScripts;
+			std::vector<int> m_tickCallbacks;
+			std::vector<int> m_postTickCallbacks;
+			std::vector<int> m_renderCallbacks;
+			std::vector<int> m_postRenderCallbacks;
 		};
 	}
 }

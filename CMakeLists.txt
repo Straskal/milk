@@ -92,12 +92,11 @@ set(MILK_SRC_NODE
 
 # script
 set(MILK_SRC_SCRIPT
+	src/script/NodeTemplate.h
     src/script/ScriptEnvironment.h
 )
 
 set(MILK_SRC_SCRIPT_LUA
-	src/script/lua/LuaApi.cpp
-	src/script/lua/LuaApi.h
 	src/script/lua/LuaEnvironment.cpp
 	src/script/lua/LuaEnvironment.h
 	src/script/lua/LuaExtensions.h
