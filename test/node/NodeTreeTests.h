@@ -39,13 +39,33 @@ namespace milk {
 		ASSERT_NE(rootChildren.end(), std::find(rootChildren.begin(), rootChildren.end(), node));
 	}
 
+	TEST(NodeTreeTests, Remove_CannotRemoveRootNode) {
+		NodeTree nt;
+		U32 root = nt.root();
+		nt.remove(root);
+
+		ASSERT_TRUE(nt.isAlive(root));
+	}
+
+	TEST(NodeTreeTests, Remove_CannotRemoveGlobalNode) {
+		NodeTree nt;
+		U32 global = nt.global();
+		nt.remove(global);
+
+		ASSERT_TRUE(nt.isAlive(global));
+	}
+
 	TEST(NodeTreeTests, Remove_RemovesNode) {
 		NodeTree nt;
 		U32 root = nt.root();
 		U32 node = nt.add(root, "stv", Vector2(15.f, -100.f));
+		U32 node1 = nt.add(node, "stvchild", Vector2(15.f, -100.f));
+		U32 node2 = nt.add(node1, "stvgrandchild", Vector2(15.f, -100.f));
 		nt.remove(node);
 
 		ASSERT_FALSE(nt.isAlive(node));
+		ASSERT_FALSE(nt.isAlive(node1));
+		ASSERT_FALSE(nt.isAlive(node2));
 
 		std::vector<U32> rootChildren = nt.getChildren(root);
 		ASSERT_EQ(rootChildren.end(), std::find(rootChildren.begin(), rootChildren.end(), node));

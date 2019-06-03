@@ -22,7 +22,7 @@ namespace milk {
 		Window* window;
 		Renderer* renderer;
 		ScriptEnvironment* scriptenv;
-		NodeTree* rootnode;
+		NodeTree* nodes;
 		bool running;
 	};
 

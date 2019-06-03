@@ -43,6 +43,9 @@ namespace milk {
 	}
 
 	void milk::NodeTree::remove(U32 node) {
+		if (node == m_invalidNode || node == m_rootNode || node == m_globalNode)
+			return;
+
 		std::vector<U32> children = m_children.at(node);
 		for (int i = 0; i < children.size(); ++i)
 			remove(children.at(i));
