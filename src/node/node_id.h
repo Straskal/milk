@@ -28,14 +28,14 @@
 */
 namespace milk {
 	struct NodeIdData {
-		std::queue<U16> freeIndeces;
-		std::vector<U16> generations;
+		std::queue<u16> freeIndeces;
+		std::vector<u16> generations;
 	};
 
 	namespace node_id {
-		U32 make(NodeIdData& data, const U32 GENERATION_BITS, const int MAX_FREE_INDECES);
-		void recycle(NodeIdData& data, const U32 GENERATION_BITS, U32 id);
-		bool valid(const NodeIdData& data, const U32 GENERATION_BITS, const U32 INDEX_BITS, U32 id);
+		u32 make(NodeIdData& data, const u32 GENERATION_BITS, const int MAX_FREE_INDECES);
+		void recycle(NodeIdData& data, const u32 GENERATION_BITS, u32 id);
+		bool valid(const NodeIdData& data, const u32 GENERATION_BITS, const u32 INDEX_BITS, u32 id);
 	}
 }
 

@@ -54,7 +54,7 @@ void milk::sdl::Renderer::draw(
 	const milk::Texture& texture,
 	const milk::Rectangle& sourceRectangle,
 	const milk::Rectangle& destinationRectangle,
-	milk::U8 flipFlags) {
+	milk::u8 flipFlags) {
 	SDL_Rect src = { sourceRectangle.x, sourceRectangle.y, sourceRectangle.width, sourceRectangle.height };
 	SDL_Rect dst = { destinationRectangle.x, destinationRectangle.y, destinationRectangle.width, destinationRectangle.height };
 

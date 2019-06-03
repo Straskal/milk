@@ -4,13 +4,13 @@
 #include <cstdint>
 
 namespace milk {
-	typedef int_fast8_t I8;
-	typedef int_fast16_t I16;
-	typedef int_fast32_t I32;
+	using i8 = int_fast8_t;
+	using i16 = int_fast16_t;
+	using i32 = int_fast32_t;
 
-	typedef uint_fast8_t U8;
-	typedef uint_fast16_t U16;
-	typedef uint_fast32_t U32;
+	using u8 = uint_fast8_t;
+	using u16 = uint_fast16_t;
+	using u32 = uint_fast32_t;
 }
 
 #endif

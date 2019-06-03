@@ -20,7 +20,7 @@ namespace milk {
 
 			MilkStartupConfig getConfiguration(const std::string& configFile) override;
 
-			void addScript(U32 id, const std::string& scriptName) override;
+			void addScript(u32 id, const std::string& scriptName) override;
 
 			void tick() override;
 			void postTick() override;
@@ -29,7 +29,7 @@ namespace milk {
 
 		private:
 			lua_State* luaState_;
-			std::unordered_map<U32, std::unordered_map<std::string, int>> scriptIdMap_;
+			std::unordered_map<u32, std::unordered_map<std::string, int>> scriptIdMap_;
 			std::vector<int> newScripts_;
 			std::vector<int> tickCallbacks_;
 			std::vector<int> postTickCallbacks_;

@@ -5,12 +5,12 @@
 
 namespace milk {
 	struct Color {
-		U8 red;
-		U8 blue;
-		U8 green;
-		U8 alpha;
+		u8 red;
+		u8 blue;
+		u8 green;
+		u8 alpha;
 
-		explicit Color(U8 red = 0x00, U8 blue = 0x00, U8 green = 0x00, U8 alpha = 0x00)
+		explicit Color(u8 red = 0x00, u8 blue = 0x00, u8 green = 0x00, u8 alpha = 0x00)
 			: red(red)
 			, blue(blue)
 			, green(green)

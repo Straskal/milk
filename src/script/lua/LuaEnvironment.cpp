@@ -11,9 +11,9 @@ extern "C" {
 namespace milk {
 	namespace {
 		void insertScript(
-			U32 id,
+			u32 id,
 			lua_State* L,
-			std::unordered_map<U32, std::unordered_map<std::string, int>>& scriptidmap,
+			std::unordered_map<u32, std::unordered_map<std::string, int>>& scriptidmap,
 			std::vector<int>& newscripts,
 			const std::string& name
 		) {
@@ -25,7 +25,7 @@ namespace milk {
 			}
 			int ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-			std::unordered_map<U32, std::unordered_map<std::string, int>>::iterator found = scriptidmap.find(id);
+			std::unordered_map<u32, std::unordered_map<std::string, int>>::iterator found = scriptidmap.find(id);
 			if (found != scriptidmap.end()) {
 				found->second.insert(std::make_pair(name, ref));
 			}
@@ -106,7 +106,7 @@ milk::MilkStartupConfig milk::lua::LuaEnvironment::getConfiguration(const std::s
 	return config;
 }
 
-void milk::lua::LuaEnvironment::addScript(U32 id, const std::string& scriptName) {
+void milk::lua::LuaEnvironment::addScript(u32 id, const std::string& scriptName) {
 	insertScript(id, luaState_, scriptIdMap_, newScripts_, scriptName);	
 }
 

@@ -18,7 +18,7 @@ namespace milk {
 
 		virtual MilkStartupConfig getConfiguration(const std::string& configFile) = 0;
 
-		virtual void addScript(U32 id, const std::string& scriptName) = 0;
+		virtual void addScript(u32 id, const std::string& scriptName) = 0;
 
 		virtual void tick() = 0;
 		virtual void postTick() = 0;
