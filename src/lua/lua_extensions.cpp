@@ -6,11 +6,21 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+void milk::lua::set_string_field(lua_State* L, const char* key, const char* value) {
+	lua_pushstring(L, value);
+	lua_setfield(L, -2, key);
+}
+
 std::string milk::lua::get_string_field(lua_State* L, const char* key) {
 	lua_getfield(L, -1, key);
 	std::string result = std::string{ (const char*)lua_tostring(L, -1) };
 	lua_pop(L, 1);
 	return result;
+}
+
+void milk::lua::set_int_field(lua_State* L, const char* key, int value) {
+	lua_pushinteger(L, value);
+	lua_setfield(L, -2, key);
 }
 
 int milk::lua::get_int_field(lua_State* L, const char* key) {
