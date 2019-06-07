@@ -54,7 +54,7 @@ void milk::sdl::Window::fullscreen(bool fs) {
 	}
 }
 
-void* milk::sdl::Window::handle() const {
+SDL_Window* milk::sdl::Window::handle() const {
 	return m_handle;
 }
 

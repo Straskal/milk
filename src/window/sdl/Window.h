@@ -21,7 +21,7 @@ namespace milk
 			bool init(const std::string& title, int width, int height, bool fs);
 			bool fullscreen() const override;
 			void fullscreen(bool fs) override;
-			void* handle() const;
+			SDL_Window* handle() const;
 			void free();
 
 		private:
