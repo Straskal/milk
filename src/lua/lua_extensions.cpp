@@ -42,4 +42,5 @@ void milk::lua::register_module(lua_State* L, const char* name, const luaL_Reg* 
 	lua_getfield(L, -1, "loaded");
 	luaL_newlib(L, funcs);
 	lua_setfield(L, -2, name);
+	lua_pop(L, 1);
 }

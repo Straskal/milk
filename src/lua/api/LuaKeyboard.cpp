@@ -2,7 +2,6 @@
 
 extern "C" {
 #include "lua.h"
-#include "lualib.h"
 #include "lauxlib.h"
 }
 
@@ -44,8 +43,9 @@ void milk::LuaKeyboard::bind(lua_State* L) {
 	lua_getfield(L, -1, "loaded");
 	luaL_newlib(L, lib);
 
-	// Create keys table
+	// Create milk.keyboard.KEYS table
 	lua_newtable(L);
+	lua::set_int_field(L, "ESC", (int)Keys::ESCAPE);
 	lua::set_int_field(L, "A", (int)Keys::A);
 	lua::set_int_field(L, "B", (int)Keys::B);
 	lua::set_int_field(L, "C", (int)Keys::C);
@@ -72,7 +72,7 @@ void milk::LuaKeyboard::bind(lua_State* L) {
 	lua::set_int_field(L, "X", (int)Keys::X);
 	lua::set_int_field(L, "Y", (int)Keys::Y);
 	lua::set_int_field(L, "Z", (int)Keys::Z);
-	lua_setfield(L, -2, "keys");
+	lua_setfield(L, -2, "KEYS");
 
 	lua_setfield(L, -2, "milk.keyboard");
 

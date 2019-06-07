@@ -10,7 +10,7 @@ namespace milk
 		virtual ~Window() = default;
 
 		virtual bool fullscreen() const = 0;
-		virtual void fullscreen(bool fs) = 0;
+		virtual void fullscreen(bool toggle) = 0;
 	};
 }
 

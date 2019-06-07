@@ -20,7 +20,7 @@ namespace milk
 
 			bool init(const std::string& title, int width, int height, bool fs);
 			bool fullscreen() const override;
-			void fullscreen(bool fs) override;
+			void fullscreen(bool toggle) override;
 			SDL_Window* handle() const;
 			void free();
 
