@@ -6,8 +6,8 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-#include "main/Locator.h"
-#include "script/lua_extensions.h"
+#include "core/Locator.h"
+#include "lua/lua_extensions.h"
 #include "window/Window.h"
 
 namespace {

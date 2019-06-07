@@ -6,8 +6,8 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-#include "api/LuaWindow.h"
-#include "script/lua_extensions.h"
+#include "LuaWindow.h"
+#include "lua/lua_extensions.h"
 #include "input/Keyboard.h"
 
 namespace {

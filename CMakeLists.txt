@@ -51,7 +51,15 @@ find_package(Lua53 REQUIRED)
 include(CTest)	
 enable_testing()
 
-# common
+# core
+set(MILK_SRC_CORE
+	src/core/Locator.cpp
+	src/core/Locator.h
+	src/core/MilkState.cpp
+	src/core/MilkState.h
+)
+
+# data
 set(MILK_SRC_DATA
 	src/data/int.h
 )
@@ -70,14 +78,6 @@ set(MILK_SRC_GRAPHICS
 )
 
 # math
-set(MILK_SRC_MAIN
-	src/main/Locator.cpp
-	src/main/Locator.h
-	src/main/MilkState.cpp
-	src/main/MilkState.h
-)
-
-# math
 set(MILK_SRC_MATH
 	src/math/Matrix3.h
 	src/math/Rectangle.h
@@ -92,14 +92,14 @@ set(MILK_SRC_NODE
 	src/node/NodeTree.h
 )
 
-# script
-set(MILK_SRC_SCRIPT
-	src/script/LuaApi.cpp
-	src/script/LuaApi.h
-	src/script/lua_extensions.cpp
-	src/script/lua_extensions.h
-	src/script/api/LuaWindow.cpp
-	src/script/api/LuaWindow.h
+# lua
+set(MILK_SRC_LUA
+	src/lua/lua_extensions.cpp
+	src/lua/lua_extensions.h
+	src/lua/api/LuaApi.cpp
+	src/lua/api/LuaApi.h
+	src/lua/api/LuaWindow.cpp
+	src/lua/api/LuaWindow.h
 )
 
 # window
@@ -113,11 +113,11 @@ set(MILK_SRC_WINDOW
 )
 
 set(MILK_SRC_FILES
+	${MILK_SRC_CORE}
 	${MILK_SRC_DATA}
 	${MILK_SRC_INPUT}
 	${MILK_SRC_GRAPHICS}
-	${MILK_SRC_SCRIPT}
-	${MILK_SRC_MAIN}
+	${MILK_SRC_LUA}
 	${MILK_SRC_MATH}
 	${MILK_SRC_NODE}
 	${MILK_SRC_WINDOW}
@@ -156,7 +156,7 @@ target_link_libraries(milklib
 # milk exe
 #---------------------------------------------------------------------------
 
-add_executable(milk src/main/main.cpp)
+add_executable(milk src/main.cpp)
 
 target_link_libraries(milk milklib)
 

@@ -10,8 +10,8 @@ extern "C" {
 
 #include "Locator.h"
 #include "input/Keyboard.h"
-#include "script/LuaApi.h"
-#include "script/lua_extensions.h"
+#include "lua/lua_extensions.h"
+#include "lua/api/LuaApi.h"
 #include "graphics/Color.h"
 #include "window/sdl/Window.h"
 #include "window/sdl/Renderer.h"
