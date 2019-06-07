@@ -51,6 +51,7 @@ int milk::MilkState::run(const std::string& configPath) {
 	lua_getfield(m_lua, -1, "renderer");
 	int vwidth = lua::get_int_field(m_lua, "vwidth");
 	int vheight = lua::get_int_field(m_lua, "vheight");
+
 	// Pop the entire config table off of the stack
 	lua_pop(m_lua, 1);
 
@@ -70,7 +71,7 @@ int milk::MilkState::run(const std::string& configPath) {
 	Locator::renderer = m_renderer;
 	Locator::keyboard = m_keyboard;
 
-	LuaApi::registerApi(m_lua);
+	LuaApi::bind(m_lua);
 
 	luaL_dofile(m_lua, "res/main.lua");
 	int maintable = luaL_ref(m_lua, LUA_REGISTRYINDEX);

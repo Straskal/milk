@@ -11,21 +11,16 @@
 
 #include "math/Rectangle.h"
 
-milk::sdl::Renderer::Renderer() {
-	m_resolution.width = 0;
-	m_resolution.height = 0;
-	m_handle = nullptr;
-}
+const static int FIRST_SUPPORTED_RENDERING_DRIVER = -1;
+
+milk::sdl::Renderer::Renderer()
+	: m_resolution{ 0, 0 }
+	, m_handle{ nullptr }{ }
 
 bool milk::sdl::Renderer::init(void* windowHandle, int resolutionWidth, int resolutionHeight) {
 	m_resolution.width = resolutionWidth;
 	m_resolution.height = resolutionHeight;
-
-	m_handle = SDL_CreateRenderer(
-		(SDL_Window*)windowHandle, 
-		-1, 
-		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
-	);
+	m_handle = SDL_CreateRenderer((SDL_Window*)windowHandle, FIRST_SUPPORTED_RENDERING_DRIVER, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
 	if (m_handle == nullptr) {
 		std::cout << "Error creating SDL_Renderer: " << SDL_GetError() << std::endl;
