@@ -4,6 +4,9 @@
 #include "window/Window.h"
 #include "window/Renderer.h"
 
+/*
+	The Locators intended usage is for lua modules only.
+*/
 namespace milk {
 	struct Locator {
 		static Window* window;

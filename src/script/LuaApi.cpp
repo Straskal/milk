@@ -6,15 +6,11 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-#include "main/Locator.h"
+#include "api/LuaWindow.h"
+#include "script/lua_extensions.h"
 #include "input/Keyboard.h"
 
 namespace {
-	int toggle_fullscreen(lua_State* L) {
-		milk::Locator::window->toggleFullscreen();
-		return 0;
-	}
-
 	int is_key_down(lua_State* L) {
 		const char* key = lua_tostring(L, 1);
 		bool pressed = milk::Keyboard::getKeyPressed((SDL_Keycode)key[0]);
@@ -23,15 +19,12 @@ namespace {
 	}
 
 	static const luaL_Reg lib[] = {
-		{ "toggle_fullscreen", toggle_fullscreen },
 		{ "is_key_down", is_key_down },
 		{ NULL, NULL }
 	};
 }
 
 void milk::LuaApi::registerApi(lua_State* L) {
-	lua_getglobal(L, "package");
-	lua_getfield(L, -1, "loaded");
-	luaL_newlib(L, lib);
-	lua_setfield(L, -2, "milk");
+	lua::register_module(L, "milk", lib);
+	LuaWindow::Register(L);
 }

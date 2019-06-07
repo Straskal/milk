@@ -40,17 +40,18 @@ int milk::MilkState::run(const std::string& configPath) {
 	bool winFullscreen = lua::get_bool_field(m_lua, "fullscreen");
 	lua_pop(m_lua, -2);
 
-	lua_getfield(m_lua, -1, "renderer");
-	int vwidth = lua::get_int_field(m_lua, "vwidth");
-	int vheight = lua::get_int_field(m_lua, "vheight");
-	lua_pop(m_lua, 1);
-
 	m_window = new sdl::Window();
 	if (!m_window->init(winTitle, winWidth, winHeight, winFullscreen)) {
 		m_window->free(); delete m_window; m_window = nullptr;
 		lua_close(m_lua);
 		return MILK_FAIL;
 	}
+	
+	lua_getfield(m_lua, -1, "renderer");
+	int vwidth = lua::get_int_field(m_lua, "vwidth");
+	int vheight = lua::get_int_field(m_lua, "vheight");
+	// Pop the entire config table off of the stack
+	lua_pop(m_lua, 1);
 
 	m_renderer = new sdl::Renderer();
 	if (!m_renderer->init(m_window->handle(), vwidth, vheight)) {
@@ -60,6 +61,7 @@ int milk::MilkState::run(const std::string& configPath) {
 		return MILK_FAIL;
 	}
 
+	// 'Register' systems with the service locator
 	Locator::window = m_window;
 	Locator::renderer = m_renderer;
 

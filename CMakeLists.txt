@@ -98,15 +98,14 @@ set(MILK_SRC_SCRIPT
 	src/script/LuaApi.h
 	src/script/lua_extensions.cpp
 	src/script/lua_extensions.h
+	src/script/api/LuaWindow.cpp
+	src/script/api/LuaWindow.h
 )
 
 # window
 set(MILK_SRC_WINDOW
 	src/window/Renderer.h
-	src/window/Window.h
-)
-
-set(MILK_SRC_WINDOW_SDL
+	src/window/Window.h	
 	src/window/sdl/Renderer.cpp
 	src/window/sdl/Renderer.h
 	src/window/sdl/Window.cpp
@@ -122,7 +121,6 @@ set(MILK_SRC_FILES
 	${MILK_SRC_MATH}
 	${MILK_SRC_NODE}
 	${MILK_SRC_WINDOW}
-	${MILK_SRC_WINDOW_SDL}
 )
 
 add_library(milklib ${MILK_SRC_FILES})

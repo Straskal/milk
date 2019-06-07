@@ -26,3 +26,10 @@ bool milk::lua::get_bool_field(lua_State* L, const char* key) {
 	lua_pop(L, 1);
 	return result;
 }
+
+void milk::lua::register_module(lua_State* L, const char* name, const luaL_Reg* funcs) {
+	lua_getglobal(L, "package");
+	lua_getfield(L, -1, "loaded");
+	luaL_newlib(L, funcs);
+	lua_setfield(L, -2, name);
+}
