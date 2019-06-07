@@ -6,8 +6,11 @@
 struct lua_State;
 
 namespace milk {
-	class Renderer;
-	class Window;
+	namespace sdl {
+		class Renderer;
+		class Window;
+		class Keyboard;
+	}
 
 	class MilkState {
 	public:
@@ -17,8 +20,9 @@ namespace milk {
 
 	private:
 		lua_State* m_lua;
-		Window* m_window;
-		Renderer* m_renderer;
+		sdl::Window* m_window;
+		sdl::Renderer* m_renderer;
+		sdl::Keyboard* m_keyboard;
 		bool m_running;
 	};
 }

@@ -66,8 +66,9 @@ set(MILK_SRC_DATA
 
 # input
 set(MILK_SRC_INPUT
-	src/input/Keyboard.cpp
 	src/input/Keyboard.h
+	src/input/sdl/Keyboard.cpp
+	src/input/sdl/Keyboard.h
 )
 
 # graphics
@@ -98,6 +99,8 @@ set(MILK_SRC_LUA
 	src/lua/lua_extensions.h
 	src/lua/api/LuaApi.cpp
 	src/lua/api/LuaApi.h
+	src/lua/api/LuaKeyboard.cpp
+	src/lua/api/LuaKeyboard.h
 	src/lua/api/LuaWindow.cpp
 	src/lua/api/LuaWindow.h
 )

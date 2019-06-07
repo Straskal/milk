@@ -6,15 +6,9 @@
 namespace milk {
 	class Keyboard {
 	public:
-		static bool getKey(SDL_Keycode keycode);
-		static bool getKeyPressed(SDL_Keycode keycode);
-		static bool getKeyReleased(SDL_Keycode keycode);
-		static void initialize();
-		static void updateKeyboardState();
-
-	private:
-		static Uint8 m_previousState[SDL_NUM_SCANCODES];
-		static Uint8 m_currentState[SDL_NUM_SCANCODES];
+		virtual bool isKeyDown(SDL_Keycode keycode) = 0;
+		virtual bool isKeyPressed(SDL_Keycode keycode) = 0;
+		virtual bool isKeyReleased(SDL_Keycode keycode) = 0;
 	};
 }
 

@@ -1,10 +1,10 @@
-#ifndef MILK_LUA_WINDOW_H
-#define MILK_LUA_WINDOW_H
+#ifndef MILK_LUA_KEYBOARD_H
+#define MILK_LUA_KEYBOARD_H
 
 struct lua_State;
 
 namespace milk {
-	class LuaWindow {
+	class LuaKeyboard {
 	public:
 		static void bind(lua_State* L);
 	};

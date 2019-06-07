@@ -9,7 +9,7 @@ extern "C" {
 }
 
 #include "Locator.h"
-#include "input/Keyboard.h"
+#include "input/sdl/Keyboard.h"
 #include "lua/lua_extensions.h"
 #include "lua/api/LuaApi.h"
 #include "graphics/Color.h"
@@ -25,6 +25,7 @@ milk::MilkState::MilkState()
 	: m_lua{ nullptr }
 	, m_window{ nullptr }
 	, m_renderer{ nullptr }
+	, m_keyboard{ nullptr }
 	, m_running{ true }{ }
 
 int milk::MilkState::run(const std::string& configPath) {
@@ -46,7 +47,7 @@ int milk::MilkState::run(const std::string& configPath) {
 		lua_close(m_lua);
 		return MILK_FAIL;
 	}
-	
+
 	lua_getfield(m_lua, -1, "renderer");
 	int vwidth = lua::get_int_field(m_lua, "vwidth");
 	int vheight = lua::get_int_field(m_lua, "vheight");
@@ -61,11 +62,13 @@ int milk::MilkState::run(const std::string& configPath) {
 		return MILK_FAIL;
 	}
 
+	m_keyboard = new sdl::Keyboard();
+	m_keyboard->init();
+
 	// 'Register' systems with the service locator
 	Locator::window = m_window;
 	Locator::renderer = m_renderer;
-
-	Keyboard::initialize();
+	Locator::keyboard = m_keyboard;
 
 	LuaApi::registerApi(m_lua);
 
@@ -82,7 +85,7 @@ int milk::MilkState::run(const std::string& configPath) {
 			}
 		}
 
-		Keyboard::updateKeyboardState();
+		m_keyboard->updateState();
 
 		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, maintable);
 		lua_getfield(m_lua, -1, "tick");

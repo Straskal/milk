@@ -18,11 +18,11 @@ namespace milk
 		public:
 			Window();
 
-			bool init(const std::string& title, int width, int height, bool fs) override;
+			bool init(const std::string& title, int width, int height, bool fs);
 			bool fullscreen() const override;
 			void fullscreen(bool fs) override;
-			void* handle() const override;
-			void free() override;
+			void* handle() const;
+			void free();
 
 		private:
 			SDL_Window* m_handle;

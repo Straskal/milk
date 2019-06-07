@@ -30,6 +30,6 @@ namespace {
 	};
 }
 
-void milk::LuaWindow::Register(lua_State* L) {
+void milk::LuaWindow::bind(lua_State* L) {
 	lua::register_module(L, "milk.window", lib);
 }
