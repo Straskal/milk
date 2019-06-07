@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 
-#include "main/milkTests.h"
 #include "math/Matrix3Tests.h"
 #include "math/RectangleTests.h"
 #include "node/NodeTreeTests.h"
