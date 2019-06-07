@@ -102,6 +102,7 @@ int milk::MilkState::run(const std::string& configPath) {
 
 	m_renderer->free(); delete m_renderer; m_renderer = nullptr;
 	m_window->free(); delete m_window; m_window = nullptr;
+	delete m_keyboard; m_keyboard = nullptr;
 	lua_close(m_lua);
 
 	return MILK_SUCCESS;
