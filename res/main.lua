@@ -16,27 +16,14 @@ local callbacks = {};
 
 function callbacks.tick()
 	if keyboard.is_key_released(KEYS.F) then 
-		window.set_fullscreen(not window.is_fullscreen()) 
+	local toggle = not window.is_fullscreen()
+		window.set_fullscreen(toggle) 
 	end
 
-	if keyboard.is_key_released(KEYS.Y) then 
-		print(window.get_title())
-	end
-
-	if keyboard.is_key_down(KEYS.A) then 
-		x = x - speed
-	end
-
-	if keyboard.is_key_down(KEYS.W) then 
-		y = y - speed
-	end
-
-	if keyboard.is_key_down(KEYS.S) then 
-		y = y + speed
-	end
-	if keyboard.is_key_down(KEYS.D) then 
-		x = x + speed
-	end
+	if keyboard.is_key_down(KEYS.W) then y = y - speed end
+	if keyboard.is_key_down(KEYS.A) then x = x - speed end
+	if keyboard.is_key_down(KEYS.S) then y = y + speed end
+	if keyboard.is_key_down(KEYS.D) then x = x + speed end
 
 	renderer.draw_rect(x, y, 50, 50);
 end
