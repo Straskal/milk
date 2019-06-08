@@ -4,8 +4,7 @@ local keyboard = require "milk.keyboard"
 local KEYS = keyboard.KEYS
 
 window.set_title("Butt Dragons")
-window.set_size(1280, 720);
-window.set_fullscreen(true)
+window.set_size(1280, 720)
 renderer.set_resolution(640, 360)
 
 local speed = 2
@@ -18,6 +17,11 @@ function callbacks.tick()
 	if keyboard.is_key_released(KEYS.F) then 
 		local toggle = not window.is_fullscreen()
 		window.set_fullscreen(toggle) 
+	end
+
+	if keyboard.is_key_pressed(KEYS.L) then
+		local w, h = window.get_size()
+		print("size:" .. " " .. w .. ", " .. h)
 	end
 
 	if keyboard.is_key_down(KEYS.W) then y = y - speed end

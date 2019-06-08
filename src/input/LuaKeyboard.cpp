@@ -25,7 +25,7 @@ namespace {
 		int isnum;
 		int key = lua_tointegerx(L, 1, &isnum);
 		if (isnum) {
-			bool pressed = milk::Locator::keyboard->isKeyReleased((SDL_Keycode)key);
+			bool pressed = milk::Locator::keyboard->isKeyPressed((SDL_Keycode)key);
 			lua_pushboolean(L, pressed);
 			return 1;
 		}
