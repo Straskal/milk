@@ -16,7 +16,7 @@ local callbacks = {};
 
 function callbacks.tick()
 	if keyboard.is_key_released(KEYS.F) then 
-	local toggle = not window.is_fullscreen()
+		local toggle = not window.is_fullscreen()
 		window.set_fullscreen(toggle) 
 	end
 
