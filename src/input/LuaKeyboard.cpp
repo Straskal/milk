@@ -10,23 +10,38 @@ extern "C" {
 
 namespace {
 	int is_key_down(lua_State* L) {
-		int key = lua_tointeger(L, 1);
-		bool pressed = milk::Locator::keyboard->isKeyDown((SDL_Keycode)key);
-		lua_pushboolean(L, pressed);
+		int isnum;
+		int key = lua_tointegerx(L, 1, &isnum);
+		if (isnum) {
+			bool down = milk::Locator::keyboard->isKeyDown((SDL_Keycode)key);
+			lua_pushboolean(L, down);
+			return 1;
+		}
+		lua_pushboolean(L, false);
 		return 1;
 	}
 
 	int is_key_pressed(lua_State* L) {
-		int key = lua_tointeger(L, 1);
-		bool pressed = milk::Locator::keyboard->isKeyPressed((SDL_Keycode)key);
-		lua_pushboolean(L, pressed);
+		int isnum;
+		int key = lua_tointegerx(L, 1, &isnum);
+		if (isnum) {
+			bool pressed = milk::Locator::keyboard->isKeyReleased((SDL_Keycode)key);
+			lua_pushboolean(L, pressed);
+			return 1;
+		}
+		lua_pushboolean(L, false);
 		return 1;
 	}
 
 	int is_key_released (lua_State* L) {
-		int key = lua_tointeger(L, 1);
-		bool pressed = milk::Locator::keyboard->isKeyReleased((SDL_Keycode)key);
-		lua_pushboolean(L, pressed);
+		int isnum;
+		int key = lua_tointegerx(L, 1, &isnum);
+		if (isnum) {
+			bool released = milk::Locator::keyboard->isKeyReleased((SDL_Keycode)key);
+			lua_pushboolean(L, released);
+			return 1;
+		}
+		lua_pushboolean(L, false);
 		return 1;
 	}
 

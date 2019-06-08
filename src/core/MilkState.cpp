@@ -64,9 +64,8 @@ int milk::MilkState::run(const std::string& configPath) {
 	}
 
 	m_keyboard = new sdl::Keyboard();
-	m_keyboard->init();
 
-	// 'Register' systems with the service locator
+	// 'Register' systems with the service locator for lua modules
 	Locator::window = m_window;
 	Locator::renderer = m_renderer;
 	Locator::keyboard = m_keyboard;
@@ -88,11 +87,12 @@ int milk::MilkState::run(const std::string& configPath) {
 
 		m_keyboard->updateState();
 
+		m_renderer->clear(Color::black());
+
 		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, maintable);
 		lua_getfield(m_lua, -1, "tick");
 		lua_pcall(m_lua, 0, 0, NULL);
 
-		m_renderer->clear(Color::black());
 		m_renderer->present();
 
 		Uint32 frameTime = SDL_GetTicks() - frameStartTime;

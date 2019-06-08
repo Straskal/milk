@@ -5,20 +5,21 @@
 
 namespace milk {
 	struct Color {
-		u8 red;
-		u8 blue;
-		u8 green;
-		u8 alpha;
+		u8 r;
+		u8 b;
+		u8 g;
+		u8 a;
 
-		explicit Color(u8 red = 0x00, u8 blue = 0x00, u8 green = 0x00, u8 alpha = 0x00)
-			: red(red)
-			, blue(blue)
-			, green(green)
-			, alpha(alpha) {
+		explicit Color(u8 r = 0x00, u8 blue = 0x00, u8 green = 0x00, u8 alpha = 0x00)
+			: r(r)
+			, b(blue)
+			, g(green)
+			, a(alpha) {
 		}
 
 		static Color clear();
 		static Color black();
+		static Color red();
 	};
 
 	inline Color Color::clear() {
@@ -27,6 +28,10 @@ namespace milk {
 
 	inline Color Color::black() {
 		return Color{ 0x00, 0x00, 0x00, 0xFF };
+	}
+
+	inline Color Color::red() {
+		return Color{ 0xFF, 0x00, 0x00, 0xFF };
 	}
 }
 

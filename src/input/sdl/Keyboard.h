@@ -9,7 +9,8 @@ namespace milk {
 	namespace sdl {
 		class Keyboard : public milk::Keyboard {
 		public:
-			void init();
+			Keyboard();
+
 			void updateState();
 			bool isKeyDown(SDL_Keycode keycode) override;
 			bool isKeyPressed(SDL_Keycode keycode) override;

@@ -2,24 +2,25 @@
 
 extern "C" {
 #include "lua.h"
-#include "lualib.h"
 #include "lauxlib.h"
 }
 
+#include "Window.h"
 #include "core/Locator.h"
 #include "lua/lua_extensions.h"
-#include "window/Window.h"
 
 namespace {
 	int set_fullscreen(lua_State* L) {
-		bool fs = lua_toboolean(L, 1);
-		milk::Locator::window->fullscreen(fs);
+		if (lua_isboolean(L, 1)) {
+			bool toggle = lua_toboolean(L, 1);
+			milk::Locator::window->fullscreen(toggle);
+		}		
 		return 0;
 	}
 
 	int is_fullscreen(lua_State* L) {
-		bool fs = milk::Locator::window->fullscreen();
-		lua_pushboolean(L, fs);
+		bool toggle = milk::Locator::window->fullscreen();
+		lua_pushboolean(L, toggle);
 		return 1;
 	}
 
@@ -31,5 +32,9 @@ namespace {
 }
 
 void milk::LuaWindow::bind(lua_State* L) {
-	lua::register_module(L, "milk.window", lib);
+	lua_getglobal(L, "package");
+	lua_getfield(L, -1, "loaded");
+	luaL_newlib(L, lib);
+	lua_setfield(L, -2, "milk.window");
+	lua_pop(L, 1);
 }

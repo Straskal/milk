@@ -7,12 +7,12 @@
 
 #include "Renderer.h"
 
-milk::sdl::Window::Window() 
+milk::sdl::Window::Window()
 	: m_handle{ nullptr }
 	, m_width{ 0 }
 	, m_height{ 0 } { }
 
-bool milk::sdl::Window::init(const std::string& title, int width,  int height, bool fullscreenToggle) {
+bool milk::sdl::Window::init(const std::string& title, int width, int height, bool fullscreenToggle) {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
 		std::cout << "Error initializing SDL_Video & SDL_Timer: " << SDL_GetError() << std::endl;
 		return false;
@@ -31,11 +31,29 @@ bool milk::sdl::Window::init(const std::string& title, int width,  int height, b
 	return true;
 }
 
+std::string milk::sdl::Window::title() const {
+	return SDL_GetWindowTitle(m_handle);
+}
+
+void milk::sdl::Window::title(const std::string& title) {
+	SDL_SetWindowTitle(m_handle, title.c_str());
+}
+
+milk::Vector2 milk::sdl::Window::size() const {
+	int w, h;
+	SDL_GetWindowSize(m_handle, &w, &h);
+	return Vector2{ (float)w, (float)h };
+}
+
+void milk::sdl::Window::size(int width, int height) {
+	SDL_SetWindowSize(m_handle, width, height);
+}
+
 bool milk::sdl::Window::fullscreen() const {
 	return (SDL_GetWindowFlags(m_handle) & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN;
 }
 
-void milk::sdl::Window::fullscreen(bool toggle) {
+void milk::sdl::Window::fullscreen(const bool toggle) {
 	if (toggle == fullscreen()) {
 		return;
 	}
