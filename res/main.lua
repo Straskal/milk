@@ -20,7 +20,7 @@ function callbacks.tick()
 	end
 
 	if keyboard.is_key_pressed(KEYS.L) then
-		local w, h = window.get_size()
+		local w, h = milkwindow.get_size()
 		print("size:" .. " " .. w .. ", " .. h)
 	end
 

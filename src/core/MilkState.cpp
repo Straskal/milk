@@ -1,5 +1,7 @@
 #include "MilkState.h"
 
+#include <iostream>
+
 #include "SDL.h"
 
 extern "C" {
@@ -75,7 +77,10 @@ int milk::MilkState::run(const std::string& configPath) {
 
 		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, maintable);
 		lua_getfield(m_lua, -1, "tick");
-		lua_pcall(m_lua, 0, 0, NULL);
+		if (lua_pcall(m_lua, 0, 0, NULL) != LUA_OK) {
+			const char* err = lua_tostring(m_lua, -1);
+			std::cout << err << std::endl;
+		}
 
 		m_renderer->present();
 
