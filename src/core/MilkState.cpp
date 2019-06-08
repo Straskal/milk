@@ -29,37 +29,16 @@ milk::MilkState::MilkState()
 	, m_running{ true }{ }
 
 int milk::MilkState::run(const std::string& configPath) {
-	m_lua = luaL_newstate();
-	luaL_openlibs(m_lua);
-
-	luaL_dofile(m_lua, configPath.c_str());
-
-	lua_getfield(m_lua, -1, "window");
-	std::string winTitle = lua::get_string_field(m_lua, "title");
-	int winHeight = lua::get_int_field(m_lua, "height");
-	int winWidth = lua::get_int_field(m_lua, "width");
-	bool winFullscreen = lua::get_bool_field(m_lua, "fullscreen");
-	lua_pop(m_lua, -2);
-
 	m_window = new sdl::Window();
-	if (!m_window->init(winTitle, winWidth, winHeight, winFullscreen)) {
+	if (!m_window->init()) {
 		m_window->free(); delete m_window; m_window = nullptr;
-		lua_close(m_lua);
 		return MILK_FAIL;
 	}
 
-	lua_getfield(m_lua, -1, "renderer");
-	int vwidth = lua::get_int_field(m_lua, "vwidth");
-	int vheight = lua::get_int_field(m_lua, "vheight");
-
-	// Pop the entire config table off of the stack
-	lua_pop(m_lua, 1);
-
 	m_renderer = new sdl::Renderer();
-	if (!m_renderer->init(m_window->handle(), vwidth, vheight)) {
+	if (!m_renderer->init(m_window->handle())) {
 		m_renderer->free(); delete m_renderer; m_renderer = nullptr;
 		m_window->free(); delete m_window; m_window = nullptr;
-		lua_close(m_lua);
 		return MILK_FAIL;
 	}
 
@@ -70,10 +49,15 @@ int milk::MilkState::run(const std::string& configPath) {
 	Locator::renderer = m_renderer;
 	Locator::keyboard = m_keyboard;
 
+	m_lua = luaL_newstate();
+	luaL_openlibs(m_lua);
+
 	LuaApi::bind(m_lua);
 
 	luaL_dofile(m_lua, "res/main.lua");
 	int maintable = luaL_ref(m_lua, LUA_REGISTRYINDEX);
+
+	m_window->show();
 
 	while (m_running) {
 		int frameStartTime = SDL_GetTicks();

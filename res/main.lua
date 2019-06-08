@@ -3,15 +3,24 @@ local renderer = require "milk.renderer"
 local keyboard = require "milk.keyboard"
 local KEYS = keyboard.KEYS
 
-local callbacks = {};
+window.set_title("Butt Dragons")
+window.set_size(1280, 720);
+window.set_fullscreen(true)
+renderer.set_resolution(640, 360)
 
 local speed = 2
 local x = 10
 local y = 10
 
+local callbacks = {};
+
 function callbacks.tick()
 	if keyboard.is_key_released(KEYS.F) then 
 		window.set_fullscreen(not window.is_fullscreen()) 
+	end
+
+	if keyboard.is_key_released(KEYS.Y) then 
+		print(window.get_title())
 	end
 
 	if keyboard.is_key_down(KEYS.A) then 

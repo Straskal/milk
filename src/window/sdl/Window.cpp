@@ -9,25 +9,20 @@
 
 milk::sdl::Window::Window()
 	: m_handle{ nullptr }
-	, m_width{ 0 }
-	, m_height{ 0 } { }
+	, m_width{ 800 }
+	, m_height{ 600 } { }
 
-bool milk::sdl::Window::init(const std::string& title, int width, int height, bool fullscreenToggle) {
+bool milk::sdl::Window::init() {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
 		std::cout << "Error initializing SDL_Video & SDL_Timer: " << SDL_GetError() << std::endl;
 		return false;
 	}
 
-	m_width = width;
-	m_height = height;
-	m_handle = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
-
+	m_handle = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_width, m_height, SDL_WINDOW_HIDDEN);
 	if (m_handle == nullptr) {
 		std::cout << "Error creating SDL_Window: " << SDL_GetError() << std::endl;
 		return false;
 	}
-
-	fullscreen(fullscreenToggle);
 	return true;
 }
 
@@ -46,7 +41,10 @@ milk::Vector2 milk::sdl::Window::size() const {
 }
 
 void milk::sdl::Window::size(int width, int height) {
+	m_width = width;
+	m_height = height;
 	SDL_SetWindowSize(m_handle, width, height);
+	SDL_SetWindowPosition(m_handle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 }
 
 bool milk::sdl::Window::fullscreen() const {
@@ -70,6 +68,10 @@ void milk::sdl::Window::fullscreen(const bool toggle) {
 		SDL_SetWindowSize(m_handle, m_width, m_height);
 		SDL_SetWindowPosition(m_handle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	}
+}
+
+void milk::sdl::Window::show() {
+	SDL_ShowWindow(m_handle);
 }
 
 SDL_Window* milk::sdl::Window::handle() const {

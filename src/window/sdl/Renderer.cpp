@@ -17,9 +17,8 @@ milk::sdl::Renderer::Renderer()
 	: m_resolution{ 0, 0 }
 	, m_handle{ nullptr }{ }
 
-bool milk::sdl::Renderer::init(SDL_Window* windowHandle, int resolutionWidth, int resolutionHeight) {
-	m_resolution.width = resolutionWidth;
-	m_resolution.height = resolutionHeight;
+bool milk::sdl::Renderer::init(SDL_Window* windowHandle) {
+	SDL_GetWindowSize(windowHandle, &m_resolution.width, &m_resolution.height);
 	m_handle = SDL_CreateRenderer(windowHandle, FIRST_SUPPORTED_RENDERING_DRIVER, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
 	if (m_handle == nullptr) {
@@ -28,7 +27,7 @@ bool milk::sdl::Renderer::init(SDL_Window* windowHandle, int resolutionWidth, in
 	}
 
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
-	SDL_RenderSetLogicalSize(m_handle, resolutionWidth, resolutionHeight);
+	SDL_RenderSetLogicalSize(m_handle, m_resolution.width, m_resolution.height);
 	SDL_SetRenderDrawBlendMode(m_handle, SDL_BLENDMODE_BLEND);
 	return true;
 }
@@ -61,6 +60,12 @@ void milk::sdl::Renderer::present() {
 
 milk::Resolution milk::sdl::Renderer::resolution() const {
 	return m_resolution;
+}
+
+void milk::sdl::Renderer::resolution(int w, int h) {
+	m_resolution.width = w;
+	m_resolution.height = h;
+	SDL_RenderSetLogicalSize(m_handle, w, h);
 }
 
 void milk::sdl::Renderer::free() {

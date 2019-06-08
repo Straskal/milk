@@ -10,8 +10,8 @@ namespace milk
 	struct Rectangle;
 
 	struct Resolution {
-		unsigned int width;
-		unsigned int height;
+		int width;
+		int height;
 	};
 
 	class Renderer {
@@ -23,6 +23,7 @@ namespace milk
 		virtual void draw(const Texture& texture, const Rectangle& sourceRectangle, const Rectangle& destinationRectangle, u8 flipFlags) = 0;
 		virtual void present() = 0;
 		virtual Resolution resolution() const = 0;
+		virtual void resolution(int w, int h) = 0;
 	};
 }
 

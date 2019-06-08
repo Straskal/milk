@@ -21,8 +21,16 @@ namespace {
 		return 0;
 	}
 
+	int set_resolution(lua_State* L) {
+		int w = luaL_checkinteger(L, 1);
+		int h = luaL_checkinteger(L, 2);
+		milk::Locator::renderer->resolution(w, h);
+		return 0;
+	}
+
 	static const luaL_Reg lib[] = {
 		{ "draw_rect", draw_rect },
+		{ "set_resolution", set_resolution },
 		{ NULL, NULL }
 	};
 }
