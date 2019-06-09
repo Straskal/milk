@@ -57,7 +57,7 @@ int milk::MilkState::run(const std::string& configPath) {
 	LuaApi::bind(m_lua);
 
 	luaL_dofile(m_lua, "res/main.lua");
-	int maintable = luaL_ref(m_lua, LUA_REGISTRYINDEX);
+	int callbacks = luaL_ref(m_lua, LUA_REGISTRYINDEX);
 
 	m_window->show();
 
@@ -73,15 +73,20 @@ int milk::MilkState::run(const std::string& configPath) {
 
 		m_keyboard->updateState();
 
-		m_renderer->clear(Color::black());
-
-		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, maintable);
+		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, callbacks);
 		lua_getfield(m_lua, -1, "tick");
 		if (lua_pcall(m_lua, 0, 0, NULL) != LUA_OK) {
 			const char* err = lua_tostring(m_lua, -1);
 			std::cout << err << std::endl;
 		}
-
+		
+		m_renderer->clear(Color::black());
+		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, callbacks);
+		lua_getfield(m_lua, -1, "render");
+		if (lua_pcall(m_lua, 0, 0, NULL) != LUA_OK) {
+			const char* err = lua_tostring(m_lua, -1);
+			std::cout << err << std::endl;
+		}
 		m_renderer->present();
 
 		Uint32 frameTime = SDL_GetTicks() - frameStartTime;

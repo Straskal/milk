@@ -3,6 +3,7 @@ local renderer = require "milk.renderer"
 local keyboard = require "milk.keyboard"
 local KEYS = keyboard.KEYS
 
+-- initialize settings
 window.set_title("Butt Dragons")
 window.set_size(1280, 720)
 renderer.set_resolution(640, 360)
@@ -20,7 +21,7 @@ function callbacks.tick()
 	end
 
 	if keyboard.is_key_pressed(KEYS.L) then
-		local w, h = milkwindow.get_size()
+		local w, h = window.get_size()
 		print("size:" .. " " .. w .. ", " .. h)
 	end
 
@@ -28,7 +29,9 @@ function callbacks.tick()
 	if keyboard.is_key_down(KEYS.A) then x = x - speed end
 	if keyboard.is_key_down(KEYS.S) then y = y + speed end
 	if keyboard.is_key_down(KEYS.D) then x = x + speed end
+end
 
+function callbacks.render()
 	renderer.draw_rect(x, y, 50, 50);
 end
 
