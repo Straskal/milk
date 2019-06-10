@@ -2,8 +2,8 @@
 #define MILK_LOCATOR_H
 
 #include "input/Keyboard.h"
-#include "window/Window.h"
-#include "window/Renderer.h"
+#include "video/Window.h"
+#include "video/Renderer.h"
 
 /*
 	The Locators intended usage is for lua modules only.

@@ -5,9 +5,9 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-#include "Window.h"
 #include "core/Locator.h"
-#include "lua/lua_extensions.h"
+#include "core/lua_extensions.h"
+#include "video/Window.h"
 
 namespace {
 	int get_title(lua_State* L) {

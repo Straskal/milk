@@ -6,7 +6,7 @@ extern "C" {
 }
 
 #include "core/Locator.h"
-#include "lua/lua_extensions.h"
+#include "core/lua_extensions.h"
 
 namespace {
 	int is_key_down(lua_State* L) {

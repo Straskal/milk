@@ -55,29 +55,28 @@ enable_testing()
 set(MILK_SRC_CORE
 	src/core/Locator.cpp
 	src/core/Locator.h
+	src/core/lua_extensions.cpp
+	src/core/lua_extensions.h
+	src/core/LuaApi.cpp
+	src/core/LuaApi.h
 	src/core/MilkState.cpp
 	src/core/MilkState.h
 )
 
 # data
 set(MILK_SRC_DATA
+	src/data/id.cpp
+	src/data/id.h
 	src/data/int.h
 )
 
 # input
 set(MILK_SRC_INPUT
 	src/input/Keyboard.h
-	src/input/LuaKeyboard.cpp
-	src/input/LuaKeyboard.h
-	src/input/sdl/Keyboard.cpp
-	src/input/sdl/Keyboard.h
-)
-
-# graphics
-set(MILK_SRC_GRAPHICS
-	src/graphics/Color.h
-	src/graphics/Texture.cpp
-	src/graphics/Texture.h
+	src/input/lua/LuaKeyboard.cpp
+	src/input/lua/LuaKeyboard.h
+	src/input/sdl/SDLKeyboard.cpp
+	src/input/sdl/SDLKeyboard.h
 )
 
 # math
@@ -87,44 +86,28 @@ set(MILK_SRC_MATH
 	src/math/Vector2.h
 )
 
-# node
-set(MILK_SRC_NODE
-	src/node/node_id.cpp
-	src/node/node_id.h
-	src/node/NodeTree.cpp
-	src/node/NodeTree.h
-)
-
-# lua
-set(MILK_SRC_LUA
-	src/lua/lua_extensions.cpp
-	src/lua/lua_extensions.h
-	src/lua/api/LuaApi.cpp
-	src/lua/api/LuaApi.h
-)
-
 # window
 set(MILK_SRC_WINDOW
-	src/window/Renderer.h
-	src/window/Window.h	
-	src/window/LuaRenderer.cpp
-	src/window/LuaRenderer.h
-	src/window/LuaWindow.cpp
-	src/window/LuaWindow.h
-	src/window/sdl/Renderer.cpp
-	src/window/sdl/Renderer.h
-	src/window/sdl/Window.cpp
-	src/window/sdl/Window.h
+	src/video/Color.h
+	src/video/Renderer.h
+	src/video/Texture.cpp
+	src/video/Texture.h
+	src/video/Window.h	
+	src/video/lua/LuaRenderer.cpp
+	src/video/lua/LuaRenderer.h
+	src/video/lua/LuaWindow.cpp
+	src/video/lua/LuaWindow.h
+	src/video/sdl/SDLRenderer.cpp
+	src/video/sdl/SDLRenderer.h
+	src/video/sdl/SDLWindow.cpp
+	src/video/sdl/SDLWindow.h
 )
 
 set(MILK_SRC_FILES
 	${MILK_SRC_CORE}
 	${MILK_SRC_DATA}
 	${MILK_SRC_INPUT}
-	${MILK_SRC_GRAPHICS}
-	${MILK_SRC_LUA}
 	${MILK_SRC_MATH}
-	${MILK_SRC_NODE}
 	${MILK_SRC_WINDOW}
 )
 
@@ -207,16 +190,9 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 set (TESTS
 	test/math/Matrix3Tests.h
 	test/math/RectangleTests.h
-	test/node/NodeIdTests.h
-	test/node/NodeTreeTests.h
-	test/window/MockRenderer.h
-	test/window/MockRenderer.h
 )
 
-set(MOCKS
-)
-
-add_executable(milktests test/main.cpp ${TESTS} ${MOCKS})
+add_executable(milktests test/main.cpp ${TESTS})
 
 target_include_directories(milktests
 	PRIVATE

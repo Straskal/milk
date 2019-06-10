@@ -11,12 +11,13 @@ extern "C" {
 }
 
 #include "Locator.h"
-#include "input/sdl/Keyboard.h"
-#include "lua/lua_extensions.h"
-#include "lua/api/LuaApi.h"
-#include "graphics/Color.h"
-#include "window/sdl/Window.h"
-#include "window/sdl/Renderer.h"
+#include "LuaApi.h"
+#include "lua_extensions.h"
+
+#include "input/sdl/SDLKeyboard.h"
+#include "video/Color.h"
+#include "video/sdl/SDLWindow.h"
+#include "video/sdl/SDLRenderer.h"
 
 static const int MILK_SUCCESS = 0;
 static const int MILK_FAIL = 1;
@@ -31,20 +32,20 @@ milk::MilkState::MilkState()
 	, m_running{ true }{ }
 
 int milk::MilkState::run(const std::string& configPath) {
-	m_window = new sdl::Window();
+	m_window = new SDLWindow();
 	if (!m_window->init()) {
 		m_window->free(); delete m_window; m_window = nullptr;
 		return MILK_FAIL;
 	}
 
-	m_renderer = new sdl::Renderer();
+	m_renderer = new SDLRenderer();
 	if (!m_renderer->init(m_window->handle())) {
 		m_renderer->free(); delete m_renderer; m_renderer = nullptr;
 		m_window->free(); delete m_window; m_window = nullptr;
 		return MILK_FAIL;
 	}
 
-	m_keyboard = new sdl::Keyboard();
+	m_keyboard = new SDLKeyboard();
 
 	// 'Register' systems with the service locator for lua modules
 	Locator::window = m_window;

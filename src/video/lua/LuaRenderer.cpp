@@ -6,9 +6,9 @@ extern "C" {
 }
 
 #include "core/Locator.h"
-#include "graphics/Color.h"
+#include "core/lua_extensions.h"
 #include "math/Rectangle.h"
-#include "lua/lua_extensions.h"
+#include "video/Color.h"
 
 namespace {
 	int draw_rect(lua_State* L) {

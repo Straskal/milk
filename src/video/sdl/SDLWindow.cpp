@@ -1,18 +1,15 @@
-#include "Window.h"
-#include "Window.h"
+#include "SDLWindow.h"
 
 #include <iostream>
 
 #include "SDL.h"
 
-#include "Renderer.h"
-
-milk::sdl::Window::Window()
+milk::SDLWindow::SDLWindow()
 	: m_handle{ nullptr }
 	, m_width{ 800 }
 	, m_height{ 600 } { }
 
-bool milk::sdl::Window::init() {
+bool milk::SDLWindow::init() {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
 		std::cout << "Error initializing SDL_Video & SDL_Timer: " << SDL_GetError() << std::endl;
 		return false;
@@ -26,32 +23,32 @@ bool milk::sdl::Window::init() {
 	return true;
 }
 
-std::string milk::sdl::Window::title() const {
+std::string milk::SDLWindow::title() const {
 	return SDL_GetWindowTitle(m_handle);
 }
 
-void milk::sdl::Window::title(const std::string& title) {
+void milk::SDLWindow::title(const std::string& title) {
 	SDL_SetWindowTitle(m_handle, title.c_str());
 }
 
-milk::Vector2 milk::sdl::Window::size() const {
+milk::Vector2 milk::SDLWindow::size() const {
 	int w, h;
 	SDL_GetWindowSize(m_handle, &w, &h);
 	return Vector2{ (float)w, (float)h };
 }
 
-void milk::sdl::Window::size(int width, int height) {
+void milk::SDLWindow::size(int width, int height) {
 	m_width = width;
 	m_height = height;
 	SDL_SetWindowSize(m_handle, width, height);
 	SDL_SetWindowPosition(m_handle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 }
 
-bool milk::sdl::Window::fullscreen() const {
+bool milk::SDLWindow::fullscreen() const {
 	return (SDL_GetWindowFlags(m_handle) & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN;
 }
 
-void milk::sdl::Window::fullscreen(const bool toggle) {
+void milk::SDLWindow::fullscreen(const bool toggle) {
 	if (toggle == fullscreen()) {
 		return;
 	}
@@ -70,15 +67,15 @@ void milk::sdl::Window::fullscreen(const bool toggle) {
 	}
 }
 
-void milk::sdl::Window::show() {
+void milk::SDLWindow::show() {
 	SDL_ShowWindow(m_handle);
 }
 
-SDL_Window* milk::sdl::Window::handle() const {
+SDL_Window* milk::SDLWindow::handle() const {
 	return m_handle;
 }
 
-void milk::sdl::Window::free() {
+void milk::SDLWindow::free() {
 	SDL_DestroyWindow(m_handle);
 	SDL_Quit();
 }

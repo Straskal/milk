@@ -1,8 +1,8 @@
 #include "LuaApi.h"
 
-#include "input/LuaKeyboard.h"
-#include "window/LuaWindow.h"
-#include "window/LuaRenderer.h"
+#include "input/lua/LuaKeyboard.h"
+#include "video/lua/LuaWindow.h"
+#include "video/lua/LuaRenderer.h"
 
 void milk::LuaApi::bind(lua_State* L) {
 	LuaWindow::bind(L);
