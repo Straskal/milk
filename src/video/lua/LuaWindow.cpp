@@ -56,7 +56,7 @@ namespace {
 		return 0;
 	}
 
-	static const luaL_Reg lib[] = {
+	const luaL_Reg lib[] = {
 		{ "get_title", get_title },
 		{ "set_title", set_title },
 		{ "get_size", get_size },

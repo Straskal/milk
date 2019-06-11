@@ -68,6 +68,10 @@ void milk::SDLRenderer::resolution(int w, int h) {
 	SDL_RenderSetLogicalSize(m_handle, w, h);
 }
 
+SDL_Renderer* milk::SDLRenderer::handle() const {
+	return m_handle;
+}
+
 void milk::SDLRenderer::free() {
 	SDL_DestroyRenderer(m_handle);
 }

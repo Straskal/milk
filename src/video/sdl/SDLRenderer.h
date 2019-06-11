@@ -18,6 +18,7 @@ namespace milk {
 		void present() override;
 		Resolution resolution() const override;
 		void resolution(int w, int h) override;
+		SDL_Renderer* handle() const;
 		void free();
 
 	private:

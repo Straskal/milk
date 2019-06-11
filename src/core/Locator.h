@@ -4,6 +4,7 @@
 #include "input/Keyboard.h"
 #include "video/Window.h"
 #include "video/Renderer.h"
+#include "video/TextureCache.h"
 
 /*
 	The Locators intended usage is for lua modules only.
@@ -13,6 +14,7 @@ namespace milk {
 		static Window* window;
 		static Renderer* renderer;
 		static Keyboard* keyboard;
+		static TextureCache* textures;
 	};
 }
 

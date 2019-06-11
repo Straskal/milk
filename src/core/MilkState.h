@@ -9,6 +9,7 @@ namespace milk {
 	class SDLRenderer;
 	class SDLWindow;
 	class SDLKeyboard;
+	class SDLTextureCache;
 
 	class MilkState {
 	public:
@@ -21,7 +22,7 @@ namespace milk {
 		SDLWindow* m_window;
 		SDLRenderer* m_renderer;
 		SDLKeyboard* m_keyboard;
-		bool m_running;
+		SDLTextureCache* m_textures;
 	};
 }
 

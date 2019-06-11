@@ -48,6 +48,7 @@ milk::Texture* milk::SDLTextureCache::reference(const std::string& path) {
 	texture->height = height;
 
 	m_textures.insert(std::make_pair(path, texture));
+	return texture;
 }
 
 void milk::SDLTextureCache::dereference(Texture* texture) {
@@ -59,5 +60,6 @@ void milk::SDLTextureCache::dereference(Texture* texture) {
 }
 
 void milk::SDLTextureCache::free() {
+	SDL_assert(m_textures.size() == 0);
 	IMG_Quit();
 }

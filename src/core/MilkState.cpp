@@ -18,6 +18,7 @@ extern "C" {
 #include "video/Color.h"
 #include "video/sdl/SDLWindow.h"
 #include "video/sdl/SDLRenderer.h"
+#include "video/sdl/SDLTextureCache.h"
 
 static const int MILK_SUCCESS = 0;
 static const int MILK_FAIL = 1;
@@ -29,7 +30,7 @@ milk::MilkState::MilkState()
 	, m_window{ nullptr }
 	, m_renderer{ nullptr }
 	, m_keyboard{ nullptr }
-	, m_running{ true }{ }
+	, m_textures{ nullptr } {}
 
 int milk::MilkState::run(const std::string& configPath) {
 	m_window = new SDLWindow();
@@ -45,12 +46,21 @@ int milk::MilkState::run(const std::string& configPath) {
 		return MILK_FAIL;
 	}
 
+	m_textures = new SDLTextureCache();
+	if (!m_textures->init(m_renderer->handle())) {
+		m_textures->free(); delete m_textures; m_textures = nullptr;
+		m_renderer->free(); delete m_renderer; m_renderer = nullptr;
+		m_window->free(); delete m_window; m_window = nullptr;
+		return MILK_FAIL;
+	}
+
 	m_keyboard = new SDLKeyboard();
 
 	// 'Register' systems with the service locator for lua modules
 	Locator::window = m_window;
 	Locator::renderer = m_renderer;
 	Locator::keyboard = m_keyboard;
+	Locator::textures = m_textures;
 
 	m_lua = luaL_newstate();
 	luaL_openlibs(m_lua);
@@ -68,7 +78,7 @@ int milk::MilkState::run(const std::string& configPath) {
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT) {
-				m_running = false;
+				m_window->close();
 			}
 		}
 
@@ -80,7 +90,7 @@ int milk::MilkState::run(const std::string& configPath) {
 			const char* err = lua_tostring(m_lua, -1);
 			std::cout << err << std::endl;
 		}
-		
+
 		m_renderer->clear(Color::black());
 		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, callbacks);
 		lua_getfield(m_lua, -1, "render");
@@ -96,10 +106,11 @@ int milk::MilkState::run(const std::string& configPath) {
 		}
 	}
 
+	lua_close(m_lua); // Close lua first. This garbage collects all lua tables & releases asset references.
+	m_textures->free(); delete m_textures; m_textures = nullptr;
 	m_renderer->free(); delete m_renderer; m_renderer = nullptr;
 	m_window->free(); delete m_window; m_window = nullptr;
 	delete m_keyboard; m_keyboard = nullptr;
-	lua_close(m_lua);
 
 	return MILK_SUCCESS;
 }

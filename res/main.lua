@@ -4,6 +4,7 @@ local input = require "milk.input"
 -- submodules
 local window = video.window
 local renderer = video.renderer
+local textures = video.textures
 local keyboard = input.keyboard
 local keys = keyboard.keys
 
@@ -12,6 +13,8 @@ window.set_title("Butt Dragons")
 window.set_size(1280, 720)
 renderer.set_resolution(640, 360)
 
+local player, success = textures.load("res/player.png")
+print(success)
 local speed = 2
 local x = 10
 local y = 10
@@ -41,7 +44,7 @@ function callbacks.tick()
 end
 
 function callbacks.render()
-	renderer.draw_rect(x, y, 50, 50);
+	renderer.draw(player, x, y);
 end
 
 return callbacks
