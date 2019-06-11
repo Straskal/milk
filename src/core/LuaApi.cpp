@@ -8,12 +8,14 @@ extern "C" {
 #include "input/lua/LuaKeyboard.h"
 #include "video/lua/LuaWindow.h"
 #include "video/lua/LuaRenderer.h"
+#include "video/lua/LuaTextureCache.h"
 
 namespace {
 	void open_video_module(lua_State* L) {
 		lua_newtable(L);
 		milk::LuaWindow::set_window_submodule(L);
 		milk::LuaRenderer::set_renderer_submodule(L);
+		milk::LuaTextureCache::set_texture_cache_submodule(L);
 		lua_setfield(L, -2, "milk.video");
 	}
 

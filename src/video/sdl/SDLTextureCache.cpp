@@ -27,13 +27,13 @@ milk::Texture* milk::SDLTextureCache::reference(const std::string& path) {
 		return found->second;
 	}
 
-	auto sdlsurface = IMG_Load(path.c_str());
+	SDL_Surface* sdlsurface = IMG_Load(path.c_str());
 	if (sdlsurface == nullptr) {
 		std::cout << "Error loading image: " << IMG_GetError() << std::endl;
-		return false;
+		return nullptr;
 	}
 
-	auto sdltexture = SDL_CreateTextureFromSurface(m_rendererHandle, sdlsurface);
+	SDL_Texture* sdltexture = SDL_CreateTextureFromSurface(m_rendererHandle, sdlsurface);
 	SDL_FreeSurface(sdlsurface);
 
 	int width;
