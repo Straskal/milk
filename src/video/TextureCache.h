@@ -9,7 +9,7 @@ namespace milk {
 	class TextureCache {
 	public:
 		virtual Texture* reference(const std::string& path) = 0;
-		virtual void dereference(const std::string& path) = 0;
+		virtual void dereference(Texture* texture) = 0;
 	};
 }
 

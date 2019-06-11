@@ -6,13 +6,16 @@
 #include "math/Vector2.h"
 
 namespace milk {
-	class Texture {
-	public:
-		virtual ~Texture();
+	struct Texture {
+		std::string path;
+		void* handle;
+		int refCount;
+		int width;
+		int height;
+	};
 
-		virtual std::string name() const = 0;
-		virtual Vector2 size() const = 0;
-		virtual void* handle() const = 0;
+	struct TextureHandle {
+		Texture* texture;
 	};
 }
 
