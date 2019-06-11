@@ -6,7 +6,7 @@ struct lua_State;
 namespace milk {
 	class LuaKeyboard {
 	public:
-		static void bind(lua_State* L);
+		static void set_keyboard_submodule(lua_State* L);
 	};
 }
 

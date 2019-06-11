@@ -24,11 +24,14 @@ namespace milk
 		bool fullscreen() const override;
 		void fullscreen(bool toggle) override;
 		void show();
+		void close() override;
+		bool shouldClose() const;
 		SDL_Window* handle() const;
 		void free();
 
 	private:
 		SDL_Window* m_handle;
+		bool m_shouldClose;
 		int m_width;
 		int m_height;
 	};

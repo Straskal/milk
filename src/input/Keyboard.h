@@ -1,8 +1,6 @@
 #ifndef MILK_KEYBOARD_H
 #define MILK_KEYBOARD_H
 
-#include "SDL.h"
-
 namespace milk {
 	enum class Keys {
 		ESCAPE = '\033',
@@ -36,9 +34,9 @@ namespace milk {
 
 	class Keyboard {
 	public:
-		virtual bool isKeyDown(SDL_Keycode keycode) = 0;
-		virtual bool isKeyPressed(SDL_Keycode keycode) = 0;
-		virtual bool isKeyReleased(SDL_Keycode keycode) = 0;
+		virtual bool isKeyDown(Keys keycode) = 0;
+		virtual bool isKeyPressed(Keys keycode) = 0;
+		virtual bool isKeyReleased(Keys keycode) = 0;
 	};
 }
 

@@ -35,6 +35,7 @@ namespace {
 	};
 }
 
-void milk::LuaRenderer::bind(lua_State* L) {
-	luaM::register_module(L, "milk.renderer", lib);
+void milk::LuaRenderer::set_renderer_submodule(lua_State* L) {
+	luaL_newlib(L, lib);
+	lua_setfield(L, -2, "renderer");
 }

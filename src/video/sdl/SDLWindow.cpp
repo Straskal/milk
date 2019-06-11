@@ -6,6 +6,7 @@
 
 milk::SDLWindow::SDLWindow()
 	: m_handle{ nullptr }
+	, m_shouldClose{ false }
 	, m_width{ 800 }
 	, m_height{ 600 } { }
 
@@ -69,6 +70,14 @@ void milk::SDLWindow::fullscreen(const bool toggle) {
 
 void milk::SDLWindow::show() {
 	SDL_ShowWindow(m_handle);
+}
+
+void milk::SDLWindow::close() {
+	m_shouldClose = true;
+}
+
+bool milk::SDLWindow::shouldClose() const {
+	return m_shouldClose;
 }
 
 SDL_Window* milk::SDLWindow::handle() const {

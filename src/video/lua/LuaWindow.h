@@ -6,7 +6,7 @@ struct lua_State;
 namespace milk {
 	class LuaWindow {
 	public:
-		static void bind(lua_State* L);
+		static void set_window_submodule(lua_State* L);
 	};
 }
 

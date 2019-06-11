@@ -46,9 +46,14 @@ namespace {
 	}
 
 	int is_fullscreen(lua_State* L) {
-		bool toggle = milk::Locator::window->fullscreen();
-		lua_pushboolean(L, toggle);
+		bool fs = milk::Locator::window->fullscreen();
+		lua_pushboolean(L, fs);
 		return 1;
+	}
+	
+	int close(lua_State* L) {
+		milk::Locator::window->close();
+		return 0;
 	}
 
 	static const luaL_Reg lib[] = {
@@ -58,14 +63,12 @@ namespace {
 		{ "set_size", set_size },
 		{ "set_fullscreen", set_fullscreen },
 		{ "is_fullscreen", is_fullscreen },
+		{ "close", close },
 		{ NULL, NULL }
 	};
 }
 
-void milk::LuaWindow::bind(lua_State* L) {
-	lua_getglobal(L, "package");
-	lua_getfield(L, -1, "loaded");
+void milk::LuaWindow::set_window_submodule(lua_State* L) {
 	luaL_newlib(L, lib);
-	lua_setfield(L, -2, "milk.window");
-	lua_pop(L, 1);
+	lua_setfield(L, -2, "window");
 }

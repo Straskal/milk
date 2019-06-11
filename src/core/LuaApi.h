@@ -6,7 +6,7 @@ struct lua_State;
 namespace milk {
 	class LuaApi {
 	public:
-		static void bind(lua_State* L);
+		static void open(lua_State* L);
 	};
 }
 

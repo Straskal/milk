@@ -55,14 +55,14 @@ int milk::MilkState::run(const std::string& configPath) {
 	m_lua = luaL_newstate();
 	luaL_openlibs(m_lua);
 
-	LuaApi::bind(m_lua);
+	LuaApi::open(m_lua);
 
 	luaL_dofile(m_lua, "res/main.lua");
 	int callbacks = luaL_ref(m_lua, LUA_REGISTRYINDEX);
 
 	m_window->show();
 
-	while (m_running) {
+	while (!m_window->shouldClose()) {
 		int frameStartTime = SDL_GetTicks();
 
 		SDL_Event event;
