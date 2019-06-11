@@ -34,6 +34,8 @@ namespace milk {
 
 	class Keyboard {
 	public:
+		virtual ~Keyboard() = default;
+
 		virtual bool isKeyDown(Keys keycode) = 0;
 		virtual bool isKeyPressed(Keys keycode) = 0;
 		virtual bool isKeyReleased(Keys keycode) = 0;
