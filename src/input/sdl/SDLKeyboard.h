@@ -1,5 +1,5 @@
-#ifndef MILK_SDL_KEYBOARD_H
-#define MILK_SDL_KEYBOARD_H
+#ifndef _SDL_KEYBOARD_H_
+#define _SDL_KEYBOARD_H_
 
 #include "input/Keyboard.h"
 

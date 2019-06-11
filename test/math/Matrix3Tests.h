@@ -1,5 +1,5 @@
-#ifndef MILK_MATRIX3_TESTS_H
-#define MILK_MATRIX3_TESTS_H
+#ifndef _MATRIX3_TESTS_H_
+#define _MATRIX3_TESTS_H_
 
 #include "gtest/gtest.h"
 

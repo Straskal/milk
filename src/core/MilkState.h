@@ -1,5 +1,5 @@
-#ifndef MILK_H
-#define MILK_H
+#ifndef _MILK_H_
+#define _MILK_H_
 
 #include <string>
 

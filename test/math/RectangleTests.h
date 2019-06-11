@@ -1,5 +1,5 @@
-#ifndef MILK_RECTANGLETESTS_H
-#define MILK_RECTANGLETESTS_H
+#ifndef _RECTANGLETESTS_H_
+#define _RECTANGLETESTS_H_
 
 #include "gtest/gtest.h"
 

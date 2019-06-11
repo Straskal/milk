@@ -1,5 +1,5 @@
-#ifndef MILK_LUA_API_H
-#define MILK_LUA_API_H
+#ifndef _LUA_API_H_
+#define _LUA_API_H_
 
 struct lua_State;
 

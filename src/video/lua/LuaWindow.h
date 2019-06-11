@@ -1,5 +1,5 @@
-#ifndef MILK_LUA_WINDOW_H
-#define MILK_LUA_WINDOW_H
+#ifndef _LUA_WINDOW_H_
+#define _LUA_WINDOW_H_
 
 struct lua_State;
 

@@ -1,5 +1,5 @@
-#ifndef MILK_LUA_TEXTURE_CACHE_H
-#define MILK_LUA_TEXTURE_CACHE_H
+#ifndef _LUA_TEXTURE_CACHE_H_
+#define _LUA_TEXTURE_CACHE_H_
 
 struct lua_State;
 

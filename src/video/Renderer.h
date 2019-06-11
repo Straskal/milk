@@ -1,5 +1,5 @@
-#ifndef MILK_RENDERER_H
-#define MILK_RENDERER_H
+#ifndef _RENDERER_H_
+#define _RENDERER_H_
 
 #include "data/int.h"
 

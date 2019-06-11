@@ -1,8 +1,17 @@
 #include "lua_extensions.h"
 
+#include <iostream>
+
 extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
+}
+
+namespace {
+	int luaM_readonly_error(lua_State* L) {
+		std::cout << "Attempt to modify readonly table" << std::endl;
+		return 0;
+	}
 }
 
 void milk::luaM::set_string_field(lua_State* L, const char* key, const char* value) {
@@ -34,12 +43,4 @@ bool milk::luaM::get_bool_field(lua_State* L, const char* key) {
 	bool result = (bool)lua_toboolean(L, -1);
 	lua_pop(L, 1);
 	return result;
-}
-
-void milk::luaM::register_module(lua_State* L, const char* name, const luaL_Reg* funcs) {
-	lua_getglobal(L, "package");
-	lua_getfield(L, -1, "loaded");
-	luaL_newlib(L, funcs);
-	lua_setfield(L, -2, name);
-	lua_pop(L, 1);
 }

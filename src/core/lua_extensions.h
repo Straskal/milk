@@ -1,5 +1,5 @@
-#ifndef MILK_LUA_EXTENSIONS_H
-#define MILK_LUA_EXTENSIONS_H
+#ifndef _LUA_EXTENSIONS_H_
+#define _LUA_EXTENSIONS_H_
 
 #include <string>
 
@@ -13,7 +13,6 @@ namespace milk {
 		void set_int_field(lua_State* L, const char* key, int value);
 		int get_int_field(lua_State* L, const char* key);
 		bool get_bool_field(lua_State* L, const char* key);
-		void register_module(lua_State* L, const char* name, const luaL_Reg* funcs);
 	}
 }
 

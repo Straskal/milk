@@ -1,5 +1,5 @@
-#ifndef MILK_LUA_KEYBOARD_H
-#define MILK_LUA_KEYBOARD_H
+#ifndef _LUA_KEYBOARD_H_
+#define _LUA_KEYBOARD_H_
 
 struct lua_State;
 

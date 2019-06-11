@@ -1,5 +1,5 @@
-#ifndef MILK_SDL_RENDERER_H
-#define MILK_SDL_RENDERER_H
+#ifndef _SDL_RENDERER_H_
+#define _SDL_RENDERER_H_
 
 #include "video/Renderer.h"
 

@@ -1,5 +1,5 @@
-#ifndef MILK_MATRIX3_H
-#define MILK_MATRIX3_H
+#ifndef _MATRIX3_H_
+#define _MATRIX3_H_
 
 namespace milk {
 	struct Matrix3 {

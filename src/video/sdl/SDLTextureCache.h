@@ -1,5 +1,5 @@
-#ifndef MILK_SDL_TEXTURE_CACHE_H
-#define MILK_SDL_TEXTURE_CACHE_H
+#ifndef _SDL_TEXTURE_CACHE_H_
+#define _SDL_TEXTURE_CACHE_H_
 
 #include <string>
 #include <unordered_map>

@@ -50,6 +50,6 @@ namespace {
 }
 
 void milk::LuaRenderer::set_renderer_submodule(lua_State* L) {
-	luaL_newlib(L, lib);
+	luaL_newlib(L, lib); 
 	lua_setfield(L, -2, "renderer");
 }

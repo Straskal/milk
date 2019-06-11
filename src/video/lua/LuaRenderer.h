@@ -1,5 +1,5 @@
-#ifndef MILK_LUA_RENDERER_H
-#define MILK_LUA_RENDERER_H
+#ifndef _LUA_RENDERER_H_
+#define _LUA_RENDERER_H_
 
 struct lua_State;
 

@@ -1,5 +1,5 @@
-#ifndef MILK_COLOR_H
-#define MILK_COLOR_H
+#ifndef _COLOR_H_
+#define _COLOR_H_
 
 #include "data/int.h"
 

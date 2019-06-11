@@ -1,5 +1,5 @@
-#ifndef MILK_KEYBOARD_H
-#define MILK_KEYBOARD_H
+#ifndef _KEYBOARD_H_
+#define _KEYBOARD_H_
 
 namespace milk {
 	enum class Keys {

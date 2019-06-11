@@ -1,5 +1,5 @@
-#ifndef MILK_LOCATOR_H
-#define MILK_LOCATOR_H
+#ifndef _LOCATOR_H_
+#define _LOCATOR_H_
 
 #include "input/Keyboard.h"
 #include "video/Window.h"
@@ -7,7 +7,7 @@
 #include "video/TextureCache.h"
 
 /*
-	The Locators intended usage is for lua modules only.
+	The Locator's intended usage is for Lua modules.
 */
 namespace milk {
 	struct Locator {

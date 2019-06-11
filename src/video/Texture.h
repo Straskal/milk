@@ -1,5 +1,5 @@
-#ifndef MILK_TEXTURE_H
-#define MILK_TEXTURE_H
+#ifndef _TEXTURE_H_
+#define _TEXTURE_H_
 
 #include <string>
 

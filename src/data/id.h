@@ -1,5 +1,5 @@
-﻿#ifndef MILK_ID_H
-#define MILK_ID_H
+﻿#ifndef _ID_H_
+#define _ID_H_
 
 #include <queue>
 #include <vector>

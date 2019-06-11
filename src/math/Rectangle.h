@@ -1,5 +1,5 @@
-#ifndef MILK_RECTANGLE_H
-#define MILK_RECTANGLE_H
+#ifndef _RECTANGLE_H_
+#define _RECTANGLE_H_
 
 namespace milk {
 	struct Rectangle {
@@ -47,9 +47,9 @@ namespace milk {
 	}
 
 	inline bool Rectangle::empty() {
-		return x == 0 
-			&& y == 0 
-			&& width == 0 
+		return x == 0
+			&& y == 0
+			&& width == 0
 			&& height == 0;
 	}
 }

@@ -1,5 +1,5 @@
-#ifndef MILK_TEXTURE_CACHE_H
-#define MILK_TEXTURE_CACHE_H
+#ifndef _TEXTURE_CACHE_H_
+#define _TEXTURE_CACHE_H_
 
 #include <string>
 

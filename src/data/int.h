@@ -1,5 +1,5 @@
-#ifndef MILK_INT_H
-#define MILK_INT_H
+#ifndef _INT_H_
+#define _INT_H_
 
 #include <cstdint>
 
