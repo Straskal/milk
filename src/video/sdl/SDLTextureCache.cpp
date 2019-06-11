@@ -24,6 +24,7 @@ bool milk::SDLTextureCache::init(SDL_Renderer* rendererHandle) {
 milk::Texture* milk::SDLTextureCache::reference(const std::string& path) {
 	auto found = m_textures.find(path);
 	if (found != m_textures.end()) {
+		++found->second->refCount;
 		return found->second;
 	}
 
