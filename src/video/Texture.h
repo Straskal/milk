@@ -1,22 +1,18 @@
 #ifndef MILK_TEXTURE_H
 #define MILK_TEXTURE_H
 
-struct SDL_Texture;
+#include <string>
+
+#include "math/Vector2.h"
 
 namespace milk {
 	class Texture {
 	public:
-		Texture(SDL_Texture* sdlTexture, int width, int height);
-		~Texture();
+		virtual ~Texture();
 
-		SDL_Texture* get() const;
-		int width() const;
-		int height() const;
-
-	private:
-		SDL_Texture* m_handle;
-		int m_width;
-		int m_height;
+		virtual std::string name() const = 0;
+		virtual Vector2 size() const = 0;
+		virtual void* handle() const = 0;
 	};
 }
 

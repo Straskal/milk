@@ -90,8 +90,8 @@ set(MILK_SRC_MATH
 set(MILK_SRC_WINDOW
 	src/video/Color.h
 	src/video/Renderer.h
-	src/video/Texture.cpp
 	src/video/Texture.h
+	src/video/TextureCache.h
 	src/video/Window.h	
 	src/video/lua/LuaRenderer.cpp
 	src/video/lua/LuaRenderer.h
