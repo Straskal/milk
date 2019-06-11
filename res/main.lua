@@ -13,11 +13,12 @@ window.set_title("Butt Dragons")
 window.set_size(1280, 720)
 renderer.set_resolution(640, 360)
 
-local player, success = textures.load("res/player.png")
-print(success)
-local speed = 2
-local x = 10
-local y = 10
+local player = {
+	texture = textures.load("res/player.png"),
+	speed = 2,
+	x = 10,
+	y = 10
+}
 
 -- callback table
 local callbacks = {};
@@ -34,17 +35,22 @@ function callbacks.tick()
 
 	if keyboard.is_key_pressed(keys.L) then
 		local w, h = window.get_size()
-		print("size:" .. " " .. w .. ", " .. h)
+		print("window size:" .. " " .. w .. ", " .. h)
 	end
 
-	if keyboard.is_key_down(keys.W) then y = y - speed end
-	if keyboard.is_key_down(keys.A) then x = x - speed end
-	if keyboard.is_key_down(keys.S) then y = y + speed end
-	if keyboard.is_key_down(keys.D) then x = x + speed end
+	if keyboard.is_key_pressed(keys.O) then
+		local w, h = player.texture:get_size()
+		print("texture size:" .. " " .. w .. ", " .. h)
+	end
+
+	if keyboard.is_key_down(keys.W) then player.y = player.y - player.speed end
+	if keyboard.is_key_down(keys.A) then player.x = player.x - player.speed end
+	if keyboard.is_key_down(keys.S) then player.y = player.y + player.speed end
+	if keyboard.is_key_down(keys.D) then player.x = player.x + player.speed end
 end
 
 function callbacks.render()
-	renderer.draw(player, x, y);
+	renderer.draw(player.texture, player.x, player.y);
 end
 
 return callbacks

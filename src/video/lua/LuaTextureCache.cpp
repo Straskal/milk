@@ -40,7 +40,7 @@ namespace {
 		{ NULL, NULL }
 	};
 
-	int size(lua_State* L) {
+	int texture_get_size(lua_State* L) {
 		milk::TextureHandle* handle = (milk::TextureHandle*)luaL_checkudata(L, 1, TEXTURE_HANDLE_METATABLE);
 		lua_pushinteger(L, handle->texture->width);
 		lua_pushinteger(L, handle->texture->height);
@@ -49,7 +49,7 @@ namespace {
 
 	const luaL_Reg handle_m[] = {
 		{ "__gc", dereference },
-		{ "size", size },
+		{ "get_size", texture_get_size },
 		{ NULL, NULL }
 	};
 }
