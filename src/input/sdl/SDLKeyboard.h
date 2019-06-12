@@ -11,6 +11,7 @@ namespace milk {
 		SDLKeyboard();
 
 		void updateState();
+
 		bool isKeyDown(Keys keycode) override;
 		bool isKeyPressed(Keys keycode) override;
 		bool isKeyReleased(Keys keycode) override;

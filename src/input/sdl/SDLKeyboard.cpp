@@ -14,13 +14,13 @@ void milk::SDLKeyboard::updateState() {
 }
 
 bool milk::SDLKeyboard::isKeyDown(Keys keycode) {
-	return m_currentState[SDL_GetScancodeFromKey((SDL_Keycode)keycode)];
+	return m_currentState[(SDL_Scancode)keycode];
 }
 
 bool milk::SDLKeyboard::isKeyPressed(Keys keycode) {
-	return m_currentState[SDL_GetScancodeFromKey((SDL_Keycode)keycode)] && !m_previousState[SDL_GetScancodeFromKey((SDL_Keycode)keycode)];
+	return m_currentState[(SDL_Scancode)keycode] && !m_previousState[(SDL_Scancode)keycode];
 }
 
 bool milk::SDLKeyboard::isKeyReleased(Keys keycode) {
-	return !m_currentState[SDL_GetScancodeFromKey((SDL_Keycode)keycode)] && m_previousState[SDL_GetScancodeFromKey((SDL_Keycode)keycode)];
+	return !m_currentState[(SDL_Scancode)keycode] && m_previousState[(SDL_Scancode)keycode];
 }

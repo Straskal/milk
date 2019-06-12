@@ -9,38 +9,6 @@ extern "C" {
 #include "core/lua_extensions.h"
 
 namespace {
-	void set_key_enum(lua_State* L) {
-		lua_newtable(L);
-		milk::luaM::set_int_field(L, "ESC", (int)milk::Keys::ESCAPE);
-		milk::luaM::set_int_field(L, "A", (int)milk::Keys::A);
-		milk::luaM::set_int_field(L, "B", (int)milk::Keys::B);
-		milk::luaM::set_int_field(L, "C", (int)milk::Keys::C);
-		milk::luaM::set_int_field(L, "D", (int)milk::Keys::D);
-		milk::luaM::set_int_field(L, "E", (int)milk::Keys::E);
-		milk::luaM::set_int_field(L, "F", (int)milk::Keys::F);
-		milk::luaM::set_int_field(L, "G", (int)milk::Keys::G);
-		milk::luaM::set_int_field(L, "H", (int)milk::Keys::H);
-		milk::luaM::set_int_field(L, "I", (int)milk::Keys::I);
-		milk::luaM::set_int_field(L, "J", (int)milk::Keys::J);
-		milk::luaM::set_int_field(L, "K", (int)milk::Keys::K);
-		milk::luaM::set_int_field(L, "L", (int)milk::Keys::L);
-		milk::luaM::set_int_field(L, "M", (int)milk::Keys::M);
-		milk::luaM::set_int_field(L, "N", (int)milk::Keys::N);
-		milk::luaM::set_int_field(L, "O", (int)milk::Keys::O);
-		milk::luaM::set_int_field(L, "P", (int)milk::Keys::P);
-		milk::luaM::set_int_field(L, "Q", (int)milk::Keys::Q);
-		milk::luaM::set_int_field(L, "R", (int)milk::Keys::R);
-		milk::luaM::set_int_field(L, "S", (int)milk::Keys::S);
-		milk::luaM::set_int_field(L, "T", (int)milk::Keys::T);
-		milk::luaM::set_int_field(L, "U", (int)milk::Keys::U);
-		milk::luaM::set_int_field(L, "V", (int)milk::Keys::V);
-		milk::luaM::set_int_field(L, "W", (int)milk::Keys::W);
-		milk::luaM::set_int_field(L, "X", (int)milk::Keys::X);
-		milk::luaM::set_int_field(L, "Y", (int)milk::Keys::Y);
-		milk::luaM::set_int_field(L, "Z", (int)milk::Keys::Z);
-		lua_setfield(L, -2, "keys");
-	}
-
 	int is_key_down(lua_State* L) {
 		int isnum;
 		int key = lua_tointegerx(L, 1, &isnum);
@@ -83,10 +51,98 @@ namespace {
 		{ "is_key_released", is_key_released },
 		{ NULL, NULL }
 	};
+
+	const struct luaM_KeysEnum {
+		const char* name;
+		int key;
+	} enum_map[] = {
+		{ "A", milk::Keys::A },
+		{ "B", milk::Keys::B },
+		{ "C", milk::Keys::C },
+		{ "D", milk::Keys::D },
+		{ "E", milk::Keys::E },
+		{ "F", milk::Keys::F },
+		{ "G", milk::Keys::G },
+		{ "H", milk::Keys::H },
+		{ "I", milk::Keys::I },
+		{ "J", milk::Keys::J },
+		{ "K", milk::Keys::K },
+		{ "L", milk::Keys::L },
+		{ "M", milk::Keys::M },
+		{ "N", milk::Keys::N },
+		{ "O", milk::Keys::O },
+		{ "P", milk::Keys::P },
+		{ "Q", milk::Keys::Q },
+		{ "R", milk::Keys::R },
+		{ "S", milk::Keys::S },
+		{ "T", milk::Keys::T },
+		{ "U", milk::Keys::U },
+		{ "V", milk::Keys::V },
+		{ "W", milk::Keys::W },
+		{ "X", milk::Keys::X },
+		{ "Y", milk::Keys::Y },
+		{ "Z", milk::Keys::Z },
+		{ "NUM1", milk::Keys::NUM1 },
+		{ "NUM2", milk::Keys::NUM2 },
+		{ "NUM3", milk::Keys::NUM3 },
+		{ "NUM4", milk::Keys::NUM4 },
+		{ "NUM5", milk::Keys::NUM5 },
+		{ "NUM6", milk::Keys::NUM6 },
+		{ "NUM7", milk::Keys::NUM7 },
+		{ "NUM8", milk::Keys::NUM8 },
+		{ "NUM9", milk::Keys::NUM9 },
+		{ "NUM0", milk::Keys::NUM0 },
+		{ "RETURN", milk::Keys::RETURN },
+		{ "ESCAPE", milk::Keys::ESCAPE },
+		{ "BACKSPACE", milk::Keys::BACKSPACE },
+		{ "TAB", milk::Keys::TAB },
+		{ "SPACE", milk::Keys::SPACE },
+		{ "MINUS", milk::Keys::MINUS },
+		{ "EQUALS", milk::Keys::EQUALS },
+		{ "LEFTBRACKET", milk::Keys::LEFTBRACKET },
+		{ "RIGHTBRACKET", milk::Keys::RIGHTBRACKET },
+		{ "BACKSLASH", milk::Keys::BACKSLASH },
+		{ "SEMICOLON", milk::Keys::SEMICOLON },
+		{ "APOSTROPHE", milk::Keys::APOSTROPHE },
+		{ "TILDE", milk::Keys::GRAVE },
+		{ "COMMA", milk::Keys::COMMA },
+		{ "PERIOD", milk::Keys::PERIOD },
+		{ "SLASH", milk::Keys::SLASH },
+		{ "CAPSLOCK", milk::Keys::CAPSLOCK },
+		{ "F1", milk::Keys::F1 },
+		{ "F2", milk::Keys::F2 },
+		{ "F3", milk::Keys::F3 },
+		{ "F4", milk::Keys::F4 },
+		{ "F5", milk::Keys::F5 },
+		{ "F6", milk::Keys::F6 },
+		{ "F7", milk::Keys::F7 },
+		{ "F8", milk::Keys::F8 },
+		{ "F9", milk::Keys::F9 },
+		{ "F10", milk::Keys::F10 },
+		{ "F11", milk::Keys::F11 },
+		{ "F12", milk::Keys::F12 },
+		{ "DELETE", milk::Keys::DELETE },
+		{ "RIGHT", milk::Keys::RIGHT },
+		{ "LEFT", milk::Keys::LEFT },
+		{ "DOWN", milk::Keys::DOWN },
+		{ "UP", milk::Keys::UP },
+		{ "LCTRL", milk::Keys::LCTRL },
+		{ "LSHIFT", milk::Keys::LSHIFT },
+		{ "LALT", milk::Keys::LALT },
+		{ "RCTRL", milk::Keys::RCTRL },
+		{ "RSHIFT", milk::Keys::RSHIFT }
+	};
 }
 
 void milk::LuaKeyboard::set_keyboard_submodule(lua_State* L) {
 	luaL_newlib(L, lib);
-	set_key_enum(L);
+
+	lua_newtable(L);
+	unsigned int size = sizeof(enum_map) / sizeof(luaM_KeysEnum);
+	for (int i = 0; i < size; ++i) {
+		milk::luaM::set_int_field(L, enum_map[i].name, enum_map[i].key);
+	}
+	lua_setfield(L, -2, "keys");
+
 	lua_setfield(L, -2, "keyboard");
 }

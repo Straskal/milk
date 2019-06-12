@@ -14,6 +14,7 @@ window.set_size(1280, 720)
 renderer.set_resolution(640, 360)
 
 local player = {
+	texture = textures.load("res/player.png"),
 	speed = 2,
 	x = 10,
 	y = 10
@@ -28,19 +29,13 @@ function callbacks.tick()
 		window.set_fullscreen(toggle) 
 	end
 
-	if keyboard.is_key_released(keys.ESC) then 
+	if keyboard.is_key_released(keys.ESCAPE) then 
 		window.close()
 	end
 
 	if keyboard.is_key_pressed(keys.L) then
 		local w, h = window.get_size()
 		print("window size:" .. " " .. w .. ", " .. h)
-	end
-
-	if keyboard.is_key_pressed(keys.O) then
-		if not player.texture then player.texture = textures.load("res/player.png") end
-		local w, h = player.texture:get_size()
-		print("texture size:" .. " " .. w .. ", " .. h)
 	end
 
 	if keyboard.is_key_down(keys.W) then player.y = player.y - player.speed end
@@ -50,9 +45,7 @@ function callbacks.tick()
 end
 
 function callbacks.render()
-	if player.texture then
-		renderer.draw(player.texture, player.x, player.y);
-	end
+	renderer.draw(player.texture, player.x, player.y)
 end
 
 return callbacks
