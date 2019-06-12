@@ -95,8 +95,8 @@ set(MILK_SRC_WINDOW
 	src/video/Window.h	
 	src/video/lua/LuaRenderer.cpp
 	src/video/lua/LuaRenderer.h
-	src/video/lua/LuaTextureCache.cpp
-	src/video/lua/LuaTextureCache.h
+	src/video/lua/LuaTexture.cpp
+	src/video/lua/LuaTexture.h
 	src/video/lua/LuaWindow.cpp
 	src/video/lua/LuaWindow.h
 	src/video/sdl/SDLRenderer.cpp

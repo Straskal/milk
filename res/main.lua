@@ -4,7 +4,7 @@ local input = require "milk.input"
 -- submodules
 local window = video.window
 local renderer = video.renderer
-local textures = video.textures
+local texture = video.texture
 local keyboard = input.keyboard
 local keys = keyboard.keys
 
@@ -14,7 +14,7 @@ window.set_size(1280, 720)
 renderer.set_resolution(640, 360)
 
 local player = {
-	texture = textures.load("res/player.png"),
+	texture = texture.new("res/player.png"),
 	position = { x = 0, y = 0 },
 	speed = 2
 }

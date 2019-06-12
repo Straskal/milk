@@ -1,4 +1,4 @@
-#include "LuaTextureCache.h"
+#include "LuaTexture.h"
 
 extern "C" {
 #include "lua.h"
@@ -11,7 +11,7 @@ extern "C" {
 const static char* TEXTURE_HANDLE_METATABLE = "milk.texturehandle";
 
 namespace {
-	int reference(lua_State* L) {
+	int new_texture(lua_State* L) {
 		if (lua_isstring(L, 1)) {
 			const char* value = lua_tostring(L, 1);
 			milk::Texture* texture = milk::Locator::textures->reference(value);
@@ -29,18 +29,18 @@ namespace {
 		return 2;
 	}
 
-	int dereference(lua_State* L) {
+	const luaL_Reg lib[] = {
+		{ "new", new_texture },
+		{ NULL, NULL }
+	};
+
+	int gc(lua_State* L) {
 		milk::TextureHandle* handle = (milk::TextureHandle*)luaL_checkudata(L, 1, TEXTURE_HANDLE_METATABLE);
 		milk::Locator::textures->dereference(handle->texture);
 		return 0;
 	}
 
-	const luaL_Reg lib[] = {
-		{ "load", reference },
-		{ NULL, NULL }
-	};
-
-	int texture_get_size(lua_State* L) {
+	int get_size(lua_State* L) {
 		milk::TextureHandle* handle = (milk::TextureHandle*)luaL_checkudata(L, 1, TEXTURE_HANDLE_METATABLE);
 		lua_pushinteger(L, handle->texture->width);
 		lua_pushinteger(L, handle->texture->height);
@@ -48,13 +48,13 @@ namespace {
 	}
 
 	const luaL_Reg handle_m[] = {
-		{ "__gc", dereference },
-		{ "get_size", texture_get_size },
+		{ "__gc", gc },
+		{ "get_size", get_size },
 		{ NULL, NULL }
 	};
 }
 
-void milk::LuaTextureCache::set_texture_cache_submodule(lua_State* L) {
+void milk::LuaTexture::set_texture_submodule(lua_State* L) {
 	luaL_newmetatable(L, TEXTURE_HANDLE_METATABLE);
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
@@ -62,5 +62,5 @@ void milk::LuaTextureCache::set_texture_cache_submodule(lua_State* L) {
 	lua_pop(L, 1); // Pop meta table off of stack
 
 	luaL_newlib(L, lib);
-	lua_setfield(L, -2, "textures");
+	lua_setfield(L, -2, "texture");
 }
