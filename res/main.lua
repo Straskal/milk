@@ -24,24 +24,24 @@ local player = {
 local callbacks = {};
 
 function callbacks.tick()
-	if keyboard.is_key_released(keys.F) then 
+	if keyboard.was_key_released(keys.F) then 
 		local toggle = not window.is_fullscreen()
 		window.set_fullscreen(toggle) 
 	end
 
-	if keyboard.is_key_released(keys.ESCAPE) then 
+	if keyboard.was_key_released(keys.ESCAPE) then 
 		window.close()
 	end
 
-	if keyboard.is_key_pressed(keys.L) then
+	if keyboard.was_key_pressed(keys.L) then
 		local w, h = window.get_size()
 		print("window size:" .. " " .. w .. ", " .. h)
 	end
 
-	if keyboard.is_key_down(keys.W) then player.y = player.y - player.speed end
-	if keyboard.is_key_down(keys.A) then player.x = player.x - player.speed end
-	if keyboard.is_key_down(keys.S) then player.y = player.y + player.speed end
-	if keyboard.is_key_down(keys.D) then player.x = player.x + player.speed end
+	if keyboard.is_key_pressed(keys.W) then player.y = player.y - player.speed end
+	if keyboard.is_key_pressed(keys.A) then player.x = player.x - player.speed end
+	if keyboard.is_key_pressed(keys.S) then player.y = player.y + player.speed end
+	if keyboard.is_key_pressed(keys.D) then player.x = player.x + player.speed end
 end
 
 function callbacks.render()

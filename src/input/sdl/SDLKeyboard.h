@@ -12,9 +12,9 @@ namespace milk {
 
 		void updateState();
 
-		bool isKeyDown(Keys keycode) override;
 		bool isKeyPressed(Keys keycode) override;
-		bool isKeyReleased(Keys keycode) override;
+		bool wasKeyPressed(Keys keycode) override;
+		bool wasKeyReleased(Keys keycode) override;
 
 	private:
 		Uint8 m_previousState[SDL_NUM_SCANCODES];
