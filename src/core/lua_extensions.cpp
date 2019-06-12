@@ -1,6 +1,7 @@
 #include "lua_extensions.h"
 
 #include <iostream>
+#include <cmath>
 
 extern "C" {
 #include "lua.h"
@@ -33,7 +34,14 @@ void milk::luaM::set_int_field(lua_State* L, const char* key, int value) {
 
 int milk::luaM::get_int_field(lua_State* L, const char* key) {
 	lua_getfield(L, -1, key);
-	int result = (int)lua_tointeger(L, -1);
+	int result = std::round(lua_tonumber(L, -1));
+	lua_pop(L, 1);
+	return result;
+}
+
+int milk::luaM::get_int_field(lua_State* L, int index, const char* key) {
+	lua_getfield(L, index, key);
+	int result = std::round(lua_tonumber(L, -1));
 	lua_pop(L, 1);
 	return result;
 }

@@ -86,7 +86,8 @@ int milk::MilkState::run(const std::string& configPath) {
 
 		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, callbacks);
 		lua_getfield(m_lua, -1, "tick");
-		if (lua_pcall(m_lua, 0, 0, NULL) != LUA_OK) {
+		lua_pushnumber(m_lua, 1);
+		if (lua_pcall(m_lua, 1, 0, NULL) != LUA_OK) {
 			const char* err = lua_tostring(m_lua, -1);
 			std::cout << err << std::endl;
 		}
@@ -94,7 +95,8 @@ int milk::MilkState::run(const std::string& configPath) {
 		m_renderer->clear(Color::black());
 		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, callbacks);
 		lua_getfield(m_lua, -1, "render");
-		if (lua_pcall(m_lua, 0, 0, NULL) != LUA_OK) {
+		lua_pushnumber(m_lua, 1);
+		if (lua_pcall(m_lua, 1, 0, NULL) != LUA_OK) {
 			const char* err = lua_tostring(m_lua, -1);
 			std::cout << err << std::endl;
 		}

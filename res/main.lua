@@ -15,15 +15,14 @@ renderer.set_resolution(640, 360)
 
 local player = {
 	texture = textures.load("res/player.png"),
-	speed = 2,
-	x = 10,
-	y = 10
+	position = { x = 0, y = 0 },
+	speed = 2
 }
 
 -- callback table
 local callbacks = {};
 
-function callbacks.tick()
+function callbacks.tick(dt)
 	if keyboard.was_key_released(keys.F) then 
 		local toggle = not window.is_fullscreen()
 		window.set_fullscreen(toggle) 
@@ -38,14 +37,15 @@ function callbacks.tick()
 		print("window size:" .. " " .. w .. ", " .. h)
 	end
 
-	if keyboard.is_key_pressed(keys.W) then player.y = player.y - player.speed end
-	if keyboard.is_key_pressed(keys.A) then player.x = player.x - player.speed end
-	if keyboard.is_key_pressed(keys.S) then player.y = player.y + player.speed end
-	if keyboard.is_key_pressed(keys.D) then player.x = player.x + player.speed end
+	local position = player.position
+	if keyboard.is_key_pressed(keys.W) then position.y = position.y - player.speed * dt end
+	if keyboard.is_key_pressed(keys.A) then position.x = position.x - player.speed * dt end
+	if keyboard.is_key_pressed(keys.S) then position.y = position.y + player.speed * dt end
+	if keyboard.is_key_pressed(keys.D) then position.x = position.x + player.speed * dt end
 end
 
-function callbacks.render()
-	renderer.draw(player.texture, player.x, player.y)
+function callbacks.render(dt)
+	renderer.draw(player.texture, player.position, { x = 0, y = 0, w = 64, h = 64 })
 end
 
 return callbacks
