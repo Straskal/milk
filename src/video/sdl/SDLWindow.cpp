@@ -32,10 +32,10 @@ void milk::SDLWindow::title(const std::string& title) {
 	SDL_SetWindowTitle(m_handle, title.c_str());
 }
 
-milk::Vector2 milk::SDLWindow::size() const {
+std::tuple<int, int> milk::SDLWindow::dimensions() const {
 	int w, h;
 	SDL_GetWindowSize(m_handle, &w, &h);
-	return Vector2{ (float)w, (float)h };
+	return std::make_tuple(w, h);
 }
 
 void milk::SDLWindow::size(int width, int height) {

@@ -16,13 +16,12 @@ namespace milk {
 		void drawRectangle(const Rectangle* destinationRectangle, const Color* color) override;
 		void draw(const Texture* texture, const Rectangle* sourceRectangle, const Rectangle* destinationRectangle, u8 flipFlags) override;
 		void present() override;
-		Resolution resolution() const override;
+		std::tuple<int, int> resolution() const override;
 		void resolution(int w, int h) override;
 		SDL_Renderer* handle() const;
 		void free();
 
 	private:
-		Resolution m_resolution;
 		SDL_Renderer* m_handle;
 	};
 }

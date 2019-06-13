@@ -19,7 +19,7 @@ namespace milk
 		bool init();
 		std::string title() const override;
 		void title(const std::string& title) override;
-		Vector2 size() const override;
+		std::tuple<int, int> dimensions() const override;
 		void size(int width, int height) override;
 		bool fullscreen() const override;
 		void fullscreen(bool toggle) override;

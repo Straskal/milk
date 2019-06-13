@@ -24,9 +24,9 @@ namespace {
 	}
 
 	int get_size(lua_State* L) {
-		milk::Vector2 sz = milk::Locator::window->size();
-		lua_pushinteger(L, sz.x);
-		lua_pushinteger(L, sz.y);
+		std::tuple<int, int> dim = milk::Locator::window->dimensions();
+		lua_pushinteger(L, std::get<0>(dim));
+		lua_pushinteger(L, std::get<1>(dim));
 		return 2;
 	}
 
