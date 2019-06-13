@@ -5,6 +5,7 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+#include "LuaTexture.h"
 #include "core/Locator.h"
 #include "core/lua_extensions.h"
 #include "math/Rectangle.h"
@@ -13,7 +14,7 @@ extern "C" {
 
 namespace {
 	int draw(lua_State* L) {
-		milk::TextureHandle* handle = (milk::TextureHandle*)luaL_checkudata(L, 1, "milk.texturehandle");
+		milk::TextureHandle* handle = (milk::TextureHandle*)luaL_checkudata(L, 1, milk::LuaTexture::METATABLE);
 		milk::Texture* texture = handle->texture;
 
 		// draw(texture, pos)
