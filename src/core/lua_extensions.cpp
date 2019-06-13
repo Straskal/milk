@@ -52,3 +52,11 @@ bool milk::luaM::get_bool_field(lua_State* L, const char* key) {
 	lua_pop(L, 1);
 	return result;
 }
+
+void milk::luaM::invoke_method(lua_State* L, const char* key) {
+	lua_getfield(L, -1, key);
+	if (lua_pcall(L, 0, 0, NULL) != LUA_OK) {
+		const char* err = lua_tostring(L, -1);
+		std::cout << err << std::endl;
+	}
+}

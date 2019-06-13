@@ -18,7 +18,6 @@ milk::SDLRenderer::SDLRenderer()
 
 bool milk::SDLRenderer::init(SDL_Window* windowHandle) {
 	m_handle = SDL_CreateRenderer(windowHandle, FIRST_SUPPORTED_RENDERING_DRIVER, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
 	if (m_handle == nullptr) {
 		std::cout << "Error creating SDL_Renderer: " << SDL_GetError() << std::endl;
 		return false;
@@ -27,15 +26,15 @@ bool milk::SDLRenderer::init(SDL_Window* windowHandle) {
 	// Default the resolution to the window dimensions.
 	int w, h;
 	SDL_GetWindowSize(windowHandle, &w, &h);
+	SDL_RenderSetLogicalSize(m_handle, w, h);
 
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
-	SDL_RenderSetLogicalSize(m_handle, w, h);
 	SDL_SetRenderDrawBlendMode(m_handle, SDL_BLENDMODE_BLEND);
 	return true;
 }
 
-void milk::SDLRenderer::clear(const Color* color) {
-	SDL_SetRenderDrawColor(m_handle, color->r, color->b, color->g, color->a);
+void milk::SDLRenderer::clear() {
+	SDL_SetRenderDrawColor(m_handle, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderClear(m_handle);
 }
 

@@ -14,6 +14,7 @@ namespace milk {
 		int get_int_field(lua_State* L, const char* key);
 		int get_int_field(lua_State* L, int index, const char* key);
 		bool get_bool_field(lua_State* L, const char* key);
+		void invoke_method(lua_State* L, const char* key);
 	}
 }
 

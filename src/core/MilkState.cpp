@@ -22,8 +22,10 @@ extern "C" {
 
 static const int MILK_SUCCESS = 0;
 static const int MILK_FAIL = 1;
-
 static const int MILLISECONDS_PER_FRAME = 1000 / 60; // = 16
+
+#define freeptr(x) delete x; x = nullptr
+#define deinit_system(x) freeptr(x); delete x; x = nullptr
 
 milk::MilkState::MilkState()
 	: m_lua{ nullptr }
@@ -35,22 +37,22 @@ milk::MilkState::MilkState()
 int milk::MilkState::run(const std::string& configPath) {
 	m_window = new SDLWindow();
 	if (!m_window->init()) {
-		m_window->free(); delete m_window; m_window = nullptr;
+		deinit_system(m_window);
 		return MILK_FAIL;
 	}
 
 	m_renderer = new SDLRenderer();
 	if (!m_renderer->init(m_window->handle())) {
-		m_renderer->free(); delete m_renderer; m_renderer = nullptr;
-		m_window->free(); delete m_window; m_window = nullptr;
+		deinit_system(m_renderer);
+		deinit_system(m_window);
 		return MILK_FAIL;
 	}
 
 	m_textures = new SDLTextureCache();
 	if (!m_textures->init(m_renderer->handle())) {
-		m_textures->free(); delete m_textures; m_textures = nullptr;
-		m_renderer->free(); delete m_renderer; m_renderer = nullptr;
-		m_window->free(); delete m_window; m_window = nullptr;
+		deinit_system(m_renderer);
+		deinit_system(m_window);
+		deinit_system(m_textures);
 		return MILK_FAIL;
 	}
 
@@ -64,15 +66,23 @@ int milk::MilkState::run(const std::string& configPath) {
 
 	m_lua = luaL_newstate();
 	luaL_openlibs(m_lua);
-
 	LuaApi::open(m_lua);
 
+	// Call do file and push callback table onto stack
+	// If main.lua did not return a table, then frig off.
 	luaL_dofile(m_lua, "res/main.lua");
-	int callbacks = luaL_ref(m_lua, LUA_REGISTRYINDEX);
+	if (lua_isnil(m_lua, -1) || !lua_istable(m_lua, -1)) {
+		lua_close(m_lua);
+		deinit_system(m_renderer);
+		deinit_system(m_window);
+		deinit_system(m_textures);
+		freeptr(m_keyboard);
+		return MILK_FAIL;
+	}
 
+	// Show the window AFTER running main.lua
+	// This gives main.lua a chance to customize the window, renderer, etc...
 	m_window->show();
-
-	Color renderClear = Color::black();
 
 	while (!m_window->shouldClose()) {
 		int frameStart = SDL_GetTicks();
@@ -86,20 +96,10 @@ int milk::MilkState::run(const std::string& configPath) {
 
 		m_keyboard->updateState();
 
-		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, callbacks);
-		lua_getfield(m_lua, -1, "tick");
-		if (lua_pcall(m_lua, 0, 0, NULL) != LUA_OK) {
-			const char* err = lua_tostring(m_lua, -1);
-			std::cout << err << std::endl;
-		}
+		luaM::invoke_method(m_lua, "tick");
 
-		m_renderer->clear(&renderClear);
-		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, callbacks);
-		lua_getfield(m_lua, -1, "render");
-		if (lua_pcall(m_lua, 0, 0, NULL) != LUA_OK) {
-			const char* err = lua_tostring(m_lua, -1);
-			std::cout << err << std::endl;
-		}
+		m_renderer->clear();
+		luaM::invoke_method(m_lua, "render");
 		m_renderer->present();
 
 		Uint32 frameTime = SDL_GetTicks() - frameStart;
@@ -108,11 +108,10 @@ int milk::MilkState::run(const std::string& configPath) {
 		}
 	}
 
-	lua_close(m_lua); // Close lua first. This garbage collects all lua tables & releases asset references.
-	m_textures->free(); delete m_textures; m_textures = nullptr;
-	m_renderer->free(); delete m_renderer; m_renderer = nullptr;
-	m_window->free(); delete m_window; m_window = nullptr;
-	delete m_keyboard; m_keyboard = nullptr;
-
+	lua_close(m_lua);
+	deinit_system(m_renderer);
+	deinit_system(m_window);
+	deinit_system(m_textures);
+	freeptr(m_keyboard);
 	return MILK_SUCCESS;
 }

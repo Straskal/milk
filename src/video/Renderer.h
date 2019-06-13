@@ -16,7 +16,7 @@ namespace milk
 	public:
 		virtual ~Renderer() = default;
 
-		virtual void clear(const Color* color) = 0;
+		virtual void clear() = 0;
 		virtual void drawRectangle(const Rectangle* destinationRectangle, const Color* color) = 0;
 		virtual void draw(const Texture* texture, const Rectangle* sourceRectangle, const Rectangle* destinationRectangle, u8 flipFlags) = 0;
 		virtual void present() = 0;
