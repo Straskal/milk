@@ -25,7 +25,7 @@ static const int MILK_FAIL = 1;
 static const int MILLISECONDS_PER_FRAME = 1000 / 60; // = 16
 
 #define freeptr(x) delete x; x = nullptr
-#define deinit_system(x) freeptr(x); delete x; x = nullptr
+#define deinit_system(x) x->free(); freeptr(x)
 
 milk::MilkState::MilkState()
 	: m_lua{ nullptr }
