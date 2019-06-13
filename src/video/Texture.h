@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include "math/Vector2.h"
-
 namespace milk {
 	struct Texture {
 		std::string path;
@@ -12,10 +10,6 @@ namespace milk {
 		int refCount;
 		int width;
 		int height;
-	};
-
-	struct TextureHandle {
-		Texture* texture;
 	};
 }
 

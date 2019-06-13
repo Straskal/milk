@@ -32,26 +32,26 @@ bool milk::SDLRenderer::init(SDL_Window* windowHandle) {
 	return true;
 }
 
-void milk::SDLRenderer::clear(const Color& color) {
-	SDL_SetRenderDrawColor(m_handle, color.r, color.b, color.g, color.a);
+void milk::SDLRenderer::clear(const Color* color) {
+	SDL_SetRenderDrawColor(m_handle, color->r, color->b, color->g, color->a);
 	SDL_RenderClear(m_handle);
 }
 
-void milk::SDLRenderer::drawRectangle(const milk::Rectangle& destinationRectangle, const milk::Color& color) {
-	SDL_Rect dst = { destinationRectangle.x, destinationRectangle.y, destinationRectangle.width, destinationRectangle.height };
-	SDL_SetRenderDrawColor(m_handle, color.r, color.b, color.g, color.a);
+void milk::SDLRenderer::drawRectangle(const milk::Rectangle* destinationRectangle, const milk::Color* color) {
+	SDL_Rect dst = { destinationRectangle->x, destinationRectangle->y, destinationRectangle->width, destinationRectangle->height };
+	SDL_SetRenderDrawColor(m_handle, color->r, color->b, color->g, color->a);
 	SDL_RenderFillRect(m_handle, &dst);
 }
 
 void milk::SDLRenderer::draw(
-	const milk::Texture& texture,
-	const milk::Rectangle& sourceRectangle,
-	const milk::Rectangle& destinationRectangle,
+	const milk::Texture* texture,
+	const milk::Rectangle* sourceRectangle,
+	const milk::Rectangle* destinationRectangle,
 	milk::u8 flipFlags
 ) {
-	SDL_Rect src = { sourceRectangle.x, sourceRectangle.y, sourceRectangle.width, sourceRectangle.height };
-	SDL_Rect dst = { destinationRectangle.x, destinationRectangle.y, destinationRectangle.width, destinationRectangle.height };
-	SDL_RenderCopyEx(m_handle, (SDL_Texture*)texture.handle, &src, &dst, 0, nullptr, (SDL_RendererFlip)flipFlags);
+	SDL_Rect src = { sourceRectangle->x, sourceRectangle->y, sourceRectangle->width, sourceRectangle->height };
+	SDL_Rect dst = { destinationRectangle->x, destinationRectangle->y, destinationRectangle->width, destinationRectangle->height };
+	SDL_RenderCopyEx(m_handle, (SDL_Texture*)texture->handle, &src, &dst, 0, nullptr, (SDL_RendererFlip)flipFlags);
 }
 
 void milk::SDLRenderer::present() {

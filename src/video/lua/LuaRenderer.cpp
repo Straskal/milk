@@ -15,18 +15,18 @@ extern "C" {
 namespace {
 	int draw(lua_State* L) {
 		milk::TextureHandle* handle = (milk::TextureHandle*)luaL_checkudata(L, 1, milk::LuaTexture::METATABLE);
-		milk::Texture* texture = handle->texture;
+		milk::Texture* tex = handle->texture;
 
 		// draw(texture, pos)
 		if (lua_gettop(L) == 2) {
-			int w = texture->width;
-			int h = texture->height;
+			int w = tex->width;
+			int h = tex->height;
 			int x = milk::luaM::get_int_field(L, 2, "x");
 			int y = milk::luaM::get_int_field(L, 2, "y");
 
 			milk::Rectangle src = { 0, 0, w, h };
 			milk::Rectangle dst = { x, y, w, h };
-			milk::Locator::renderer->draw(*handle->texture, src, dst, 0);
+			milk::Locator::renderer->draw(handle->texture, &src, &dst, 0);
 		}
 		// draw(texture, pos, srcrect)
 		else if (lua_gettop(L) == 3) {
@@ -40,7 +40,7 @@ namespace {
 
 			milk::Rectangle src = { rectx, recty, rectw, recth };
 			milk::Rectangle dst = { posx, posy, rectw, recth };
-			milk::Locator::renderer->draw(*handle->texture, src, dst, 0);
+			milk::Locator::renderer->draw(handle->texture, &src, &dst, 0);
 		}		
 		return 0;
 	}

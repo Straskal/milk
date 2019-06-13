@@ -92,7 +92,7 @@ int milk::MilkState::run(const std::string& configPath) {
 			std::cout << err << std::endl;
 		}
 
-		m_renderer->clear(Color::black());
+		m_renderer->clear(&Color::black());
 		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, callbacks);
 		lua_getfield(m_lua, -1, "render");
 		lua_pushnumber(m_lua, 1);

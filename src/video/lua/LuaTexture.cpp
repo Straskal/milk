@@ -29,7 +29,7 @@ namespace {
 		return 2;
 	}
 
-	const luaL_Reg lib[] = {
+	const luaL_Reg lib_funcs[] = {
 		{ "new", new_texture },
 		{ NULL, NULL }
 	};
@@ -47,7 +47,7 @@ namespace {
 		return 2;
 	}
 
-	const luaL_Reg handle_m[] = {
+	const luaL_Reg meta_funcs[] = {
 		{ "__gc", gc },
 		{ "get_size", get_size },
 		{ NULL, NULL }
@@ -58,9 +58,9 @@ void milk::LuaTexture::set_texture_submodule(lua_State* L) {
 	luaL_newmetatable(L, METATABLE);
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
-	luaL_setfuncs(L, handle_m, 0);
+	luaL_setfuncs(L, meta_funcs, 0);
 	lua_pop(L, 1); // Pop metatable off of stack
 
-	luaL_newlib(L, lib);
+	luaL_newlib(L, lib_funcs);
 	lua_setfield(L, -2, "texture");
 }
