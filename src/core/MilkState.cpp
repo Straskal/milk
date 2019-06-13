@@ -72,6 +72,8 @@ int milk::MilkState::run(const std::string& configPath) {
 
 	m_window->show();
 
+	Color renderClear = Color::black();
+
 	while (!m_window->shouldClose()) {
 		int frameStart = SDL_GetTicks();
 
@@ -91,7 +93,7 @@ int milk::MilkState::run(const std::string& configPath) {
 			std::cout << err << std::endl;
 		}
 
-		m_renderer->clear(&Color::black());
+		m_renderer->clear(&renderClear);
 		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, callbacks);
 		lua_getfield(m_lua, -1, "render");
 		if (lua_pcall(m_lua, 0, 0, NULL) != LUA_OK) {
