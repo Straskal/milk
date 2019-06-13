@@ -12,8 +12,8 @@ milk::SDLTextureCache::SDLTextureCache()
 }
 
 bool milk::SDLTextureCache::init(SDL_Renderer* rendererHandle) {
-	int imgFlags = IMG_INIT_JPG | IMG_INIT_PNG;
-	if ((IMG_Init(imgFlags) & imgFlags) != imgFlags) {
+	int flags = IMG_INIT_JPG | IMG_INIT_PNG;
+	if ((IMG_Init(flags) & flags) != flags) {
 		std::cout << "Error initializing SDL_image: " << IMG_GetError() << std::endl;
 		return false;
 	}
@@ -21,7 +21,7 @@ bool milk::SDLTextureCache::init(SDL_Renderer* rendererHandle) {
 	return true;
 }
 
-milk::Texture* milk::SDLTextureCache::reference(const std::string& path) {
+milk::Texture* milk::SDLTextureCache::load(const std::string& path) {
 	auto found = m_textures.find(path);
 	if (found != m_textures.end()) {
 		++found->second->refCount;

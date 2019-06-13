@@ -14,7 +14,7 @@ namespace {
 	int new_texture(lua_State* L) {
 		if (lua_isstring(L, 1)) {
 			const char* value = lua_tostring(L, 1);
-			milk::Texture* texture = milk::Locator::textures->reference(value);
+			milk::Texture* texture = milk::Locator::textures->load(value);
 			if (texture != nullptr) {
 				milk::TextureHandle* handle = (milk::TextureHandle*)lua_newuserdata(L, sizeof(milk::TextureHandle*));
 				luaL_getmetatable(L, milk::LuaTexture::METATABLE);

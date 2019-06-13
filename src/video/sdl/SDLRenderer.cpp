@@ -24,8 +24,10 @@ bool milk::SDLRenderer::init(SDL_Window* windowHandle) {
 		return false;
 	}
 
+	// Default the resolution to the window dimensions.
 	int w, h;
 	SDL_GetWindowSize(windowHandle, &w, &h);
+
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 	SDL_RenderSetLogicalSize(m_handle, w, h);
 	SDL_SetRenderDrawBlendMode(m_handle, SDL_BLENDMODE_BLEND);

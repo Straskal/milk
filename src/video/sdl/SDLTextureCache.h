@@ -14,7 +14,9 @@ namespace milk {
 		SDLTextureCache();
 
 		bool init(SDL_Renderer* rendererHandle);
-		Texture* reference(const std::string& path) override;
+
+		// Textures are reference counted. Every time a texture is freed or not reference from lua, dereference is called.
+		Texture* load(const std::string& path) override;
 		void dereference(Texture* texture) override;
 		void free();
 

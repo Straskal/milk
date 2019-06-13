@@ -16,6 +16,8 @@ bool milk::SDLWindow::init() {
 		return false;
 	}
 
+	// We create a hidden window that must be explicitly shown via show()
+	// This is done in order to give lua a chance to change the window settings before showing it.
 	m_handle = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_width, m_height, SDL_WINDOW_HIDDEN);
 	if (m_handle == nullptr) {
 		std::cout << "Error creating SDL_Window: " << SDL_GetError() << std::endl;
