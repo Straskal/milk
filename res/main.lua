@@ -64,7 +64,7 @@ end
 
 function callbacks.render()
 	for i = 1, #positions do		
-		renderer.draw(tex, positions[i], { x = 0, y = 0, w = 64, h = 64 })
+		renderer.drawex(tex, positions[i], { x = 0, y = 0, w = 64, h = 64 })
 	end
 end
 
