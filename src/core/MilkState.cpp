@@ -73,7 +73,7 @@ int milk::MilkState::run(const std::string& configPath) {
 	m_window->show();
 
 	while (!m_window->shouldClose()) {
-		int frameStartTime = SDL_GetTicks();
+		int frameStart = SDL_GetTicks();
 
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
@@ -86,8 +86,7 @@ int milk::MilkState::run(const std::string& configPath) {
 
 		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, callbacks);
 		lua_getfield(m_lua, -1, "tick");
-		lua_pushnumber(m_lua, 1);
-		if (lua_pcall(m_lua, 1, 0, NULL) != LUA_OK) {
+		if (lua_pcall(m_lua, 0, 0, NULL) != LUA_OK) {
 			const char* err = lua_tostring(m_lua, -1);
 			std::cout << err << std::endl;
 		}
@@ -95,14 +94,13 @@ int milk::MilkState::run(const std::string& configPath) {
 		m_renderer->clear(&Color::black());
 		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, callbacks);
 		lua_getfield(m_lua, -1, "render");
-		lua_pushnumber(m_lua, 1);
-		if (lua_pcall(m_lua, 1, 0, NULL) != LUA_OK) {
+		if (lua_pcall(m_lua, 0, 0, NULL) != LUA_OK) {
 			const char* err = lua_tostring(m_lua, -1);
 			std::cout << err << std::endl;
 		}
 		m_renderer->present();
 
-		Uint32 frameTime = SDL_GetTicks() - frameStartTime;
+		Uint32 frameTime = SDL_GetTicks() - frameStart;
 		if (frameTime < MILLISECONDS_PER_FRAME) {
 			SDL_Delay((Uint32)(MILLISECONDS_PER_FRAME - frameTime));
 		}

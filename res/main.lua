@@ -13,11 +13,12 @@ window.set_title("Butt Dragons")
 window.set_size(1280, 720)
 renderer.set_resolution(640, 360)
 
-local player = {
-	texture = texture.new("res/player.png"),
-	position = { x = 0, y = 0 },
-	speed = 2
-}
+local tex = texture.new("res/player.png")
+local positions = {}
+local speed = 2
+for i = 1, 100 do
+	positions[i] = { x = i * 20, y = i * 20 }
+end
 
 -- callback table
 local callbacks = {};
@@ -37,15 +38,34 @@ function callbacks.tick(dt)
 		print("window size:" .. " " .. w .. ", " .. h)
 	end
 
-	local position = player.position
-	if keyboard.is_key_pressed(keys.W) then position.y = position.y - player.speed * dt end
-	if keyboard.is_key_pressed(keys.A) then position.x = position.x - player.speed * dt end
-	if keyboard.is_key_pressed(keys.S) then position.y = position.y + player.speed * dt end
-	if keyboard.is_key_pressed(keys.D) then position.x = position.x + player.speed * dt end
+	if keyboard.is_key_pressed(keys.W) then 
+		for i = 1, #positions do
+			positions[i].y = positions[i].y - speed
+		end
+	end
+	if keyboard.is_key_pressed(keys.A) then 
+		for i = 1, #positions do
+			positions[i].x = positions[i].x - speed
+		end
+	end
+
+	if keyboard.is_key_pressed(keys.S) then 
+		for i = 1, #positions do
+			positions[i].y = positions[i].y + speed
+		end
+	end
+
+	if keyboard.is_key_pressed(keys.D) then 
+		for i = 1, #positions do
+			positions[i].x = positions[i].x + speed
+		end
+	end
 end
 
-function callbacks.render(dt)
-	renderer.draw(player.texture, player.position, { x = 0, y = 0, w = 64, h = 64 })
+function callbacks.render()
+	for i = 1, #positions do		
+		renderer.draw(tex, positions[i], { x = 0, y = 0, w = 64, h = 64 })
+	end
 end
 
 return callbacks
