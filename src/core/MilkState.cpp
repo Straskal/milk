@@ -25,7 +25,7 @@ static const int MILK_FAIL = 1;
 static const int MILLISECONDS_PER_FRAME = 1000 / 60; // = 16
 
 #define free_ptr(x) delete x; x = nullptr
-#define deinit_system(x) x->free(); free_ptr(x)
+#define deinit_and_free_ptr(x) x->free(); free_ptr(x)
 
 milk::MilkState::MilkState()
 	: m_lua{ nullptr }
@@ -37,22 +37,22 @@ milk::MilkState::MilkState()
 int milk::MilkState::run(const std::string& configPath) {
 	m_window = new SDLWindow();
 	if (!m_window->init()) {
-		deinit_system(m_window);
+		deinit_and_free_ptr(m_window);
 		return MILK_FAIL;
 	}
 
 	m_renderer = new SDLRenderer();
 	if (!m_renderer->init(m_window->handle())) {
-		deinit_system(m_renderer);
-		deinit_system(m_window);
+		deinit_and_free_ptr(m_renderer);
+		deinit_and_free_ptr(m_window);
 		return MILK_FAIL;
 	}
 
 	m_textures = new SDLTextureCache();
 	if (!m_textures->init(m_renderer->handle())) {
-		deinit_system(m_renderer);
-		deinit_system(m_window);
-		deinit_system(m_textures);
+		deinit_and_free_ptr(m_renderer);
+		deinit_and_free_ptr(m_window);
+		deinit_and_free_ptr(m_textures);
 		return MILK_FAIL;
 	}
 
@@ -74,9 +74,9 @@ int milk::MilkState::run(const std::string& configPath) {
 	if (lua_gettop(m_lua) != 1 || !lua_istable(m_lua, -1)) {
 		lua_close(m_lua);
 		free_ptr(m_keyboard);
-		deinit_system(m_renderer);
-		deinit_system(m_window);
-		deinit_system(m_textures);
+		deinit_and_free_ptr(m_renderer);
+		deinit_and_free_ptr(m_window);
+		deinit_and_free_ptr(m_textures);
 		std::cout << "main.lua must return a single table containing callback functions" << std::endl;
 		return MILK_FAIL;
 	}
@@ -113,8 +113,8 @@ int milk::MilkState::run(const std::string& configPath) {
 
 	lua_close(m_lua);
 	free_ptr(m_keyboard);
-	deinit_system(m_renderer);
-	deinit_system(m_window);
-	deinit_system(m_textures);
+	deinit_and_free_ptr(m_renderer);
+	deinit_and_free_ptr(m_window);
+	deinit_and_free_ptr(m_textures);
 	return MILK_SUCCESS;
 }
