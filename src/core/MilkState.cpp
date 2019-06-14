@@ -24,8 +24,8 @@ static const int MILK_SUCCESS = 0;
 static const int MILK_FAIL = 1;
 static const int MILLISECONDS_PER_FRAME = 1000 / 60; // = 16
 
-#define freeptr(x) delete x; x = nullptr
-#define deinit_system(x) x->free(); freeptr(x)
+#define free_ptr(x) delete x; x = nullptr
+#define deinit_system(x) x->free(); free_ptr(x)
 
 milk::MilkState::MilkState()
 	: m_lua{ nullptr }
@@ -69,14 +69,15 @@ int milk::MilkState::run(const std::string& configPath) {
 	LuaApi::open(m_lua);
 
 	// Call do file and push callback table onto stack
-	// If main.lua did not return a table, then frig off.
+	// If main.lua did not return a single table, then frig off.
 	luaL_dofile(m_lua, "res/main.lua");
-	if (lua_isnil(m_lua, -1) || !lua_istable(m_lua, -1)) {
+	if (lua_gettop(m_lua) != 1 || !lua_istable(m_lua, -1)) {
 		lua_close(m_lua);
 		deinit_system(m_renderer);
 		deinit_system(m_window);
 		deinit_system(m_textures);
-		freeptr(m_keyboard);
+		free_ptr(m_keyboard); 
+		std::cout << "main.lua must return a single table containing callback functions" << std::endl;
 		return MILK_FAIL;
 	}
 
@@ -96,9 +97,11 @@ int milk::MilkState::run(const std::string& configPath) {
 
 		m_keyboard->updateState();
 
+		// Callback table is top of stack
 		luaM::invoke_method(m_lua, "tick");
 
 		m_renderer->clear();
+		// Callback table is top of stack
 		luaM::invoke_method(m_lua, "render");
 		m_renderer->present();
 
@@ -112,6 +115,6 @@ int milk::MilkState::run(const std::string& configPath) {
 	deinit_system(m_renderer);
 	deinit_system(m_window);
 	deinit_system(m_textures);
-	freeptr(m_keyboard);
+	free_ptr(m_keyboard);
 	return MILK_SUCCESS;
 }

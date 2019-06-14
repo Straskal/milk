@@ -31,5 +31,6 @@ void milk::LuaApi::open(lua_State* L) {
 	lua_getfield(L, -1, "loaded");
 	open_video_module(L);
 	open_input_module(L);	
-	lua_pop(L, 1);
+	// Pop the loaded table and package table off of stack
+	lua_pop(L, 2);
 }
