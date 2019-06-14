@@ -207,20 +207,11 @@ target_include_directories(milktests
 target_link_libraries(milktests
 	PRIVATE
 		milklib
-		gmock
 		gtest
 		gtest_main
 )
 
 add_test(NAME milktests COMMAND milktests)
-
-#---------------------------------------------------------------------------
-# set start up project for visual studio
-#---------------------------------------------------------------------------
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT milk)
-endif()
 
 #---------------------------------------------------------------------------
 # post build step to copy dlls to executable output file
