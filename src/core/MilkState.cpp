@@ -73,10 +73,10 @@ int milk::MilkState::run(const std::string& configPath) {
 	luaL_dofile(m_lua, "res/main.lua");
 	if (lua_gettop(m_lua) != 1 || !lua_istable(m_lua, -1)) {
 		lua_close(m_lua);
+		free_ptr(m_keyboard);
 		deinit_system(m_renderer);
 		deinit_system(m_window);
 		deinit_system(m_textures);
-		free_ptr(m_keyboard); 
 		std::cout << "main.lua must return a single table containing callback functions" << std::endl;
 		return MILK_FAIL;
 	}
@@ -112,9 +112,9 @@ int milk::MilkState::run(const std::string& configPath) {
 	}
 
 	lua_close(m_lua);
+	free_ptr(m_keyboard);
 	deinit_system(m_renderer);
 	deinit_system(m_window);
 	deinit_system(m_textures);
-	free_ptr(m_keyboard);
 	return MILK_SUCCESS;
 }
