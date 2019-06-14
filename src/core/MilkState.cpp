@@ -77,7 +77,7 @@ int milk::MilkState::run(const std::string& configPath) {
 		deinit_and_free_ptr(m_renderer);
 		deinit_and_free_ptr(m_window);
 		deinit_and_free_ptr(m_textures);
-		std::cout << "main.lua must return a single table containing callback functions" << std::endl;
+		std::cout << "ERROR: main.lua must return a single table containing callback functions" << std::endl;
 		return MILK_FAIL;
 	}
 
