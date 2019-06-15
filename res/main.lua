@@ -19,7 +19,7 @@ local callbacks = {};
 
 -- game logic goes here
 function callbacks.tick()
-	if input.keyboard.was_key_pressed(keys.F)
+	if input.keyboard.was_key_pressed(keys.F) then
 		local toggle = not video.window.is_fullscreen()
 		video.window.set_fullscreen(toggle)
 	end

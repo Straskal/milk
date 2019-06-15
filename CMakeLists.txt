@@ -86,8 +86,8 @@ set(MILK_SRC_MATH
 	src/math/Vector2.h
 )
 
-# window
-set(MILK_SRC_WINDOW
+# video
+set(MILK_SRC_VIDEO
 	src/video/Color.h
 	src/video/Renderer.h
 	src/video/Texture.h
@@ -112,7 +112,7 @@ set(MILK_SRC_FILES
 	${MILK_SRC_DATA}
 	${MILK_SRC_INPUT}
 	${MILK_SRC_MATH}
-	${MILK_SRC_WINDOW}
+	${MILK_SRC_VIDEO}
 )
 
 add_library(milklib ${MILK_SRC_FILES})
@@ -123,7 +123,6 @@ target_include_directories(milklib
 		${SDL2_IMAGE_INCLUDE_DIRS}
 		${LUA53_INCLUDE_DIR}
 		src
-		libs
 )
 
 if (WIN32)
@@ -133,7 +132,6 @@ if (WIN32)
 			${SDL2_IMAGE_INCLUDE_DIRS}
 			${LUA53_INCLUDE_DIR}
 			src
-			libs
 	)
 endif()
 
