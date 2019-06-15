@@ -150,8 +150,6 @@ add_executable(milk src/main.cpp)
 
 target_link_libraries(milk milklib)
 
-file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${milk_BINARY_DIR})
-
 #---------------------------------------------------------------------------
 # add milk lib tests
 #---------------------------------------------------------------------------
@@ -226,3 +224,9 @@ if (WIN32)
 			"${PROJECT_SOURCE_DIR}/libs"
 			$<TARGET_FILE_DIR:milk>)
 endif()
+
+#---------------------------------------------------------------------------
+# to make life easier for testing, build process will copy the res folder to the build output folder
+#---------------------------------------------------------------------------
+
+file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${milk_BINARY_DIR})
