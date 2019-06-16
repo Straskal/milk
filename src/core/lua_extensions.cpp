@@ -8,13 +8,6 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-namespace {
-	int luaM_readonly_error(lua_State* L) {
-		std::cout << "Attempt to modify readonly table" << std::endl;
-		return 0;
-	}
-}
-
 void milk::luaM::set_string_field(lua_State* L, const char* key, const char* value) {
 	lua_pushstring(L, value);
 	lua_setfield(L, -2, key);
@@ -51,12 +44,4 @@ bool milk::luaM::get_bool_field(lua_State* L, const char* key) {
 	bool result = (bool)lua_toboolean(L, -1);
 	lua_pop(L, 1);
 	return result;
-}
-
-void milk::luaM::invoke_method(lua_State* L, const char* key) {
-	lua_getfield(L, -1, key);
-	if (lua_pcall(L, 0, 0, NULL) != LUA_OK) {
-		const char* err = lua_tostring(L, -1);
-		std::cout << err << std::endl;
-	}
 }

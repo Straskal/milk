@@ -20,12 +20,28 @@ extern "C" {
 #include "video/sdl/SDLRenderer.h"
 #include "video/sdl/SDLTextureCache.h"
 
+#define free_ptr(x) delete x; x = nullptr
+#define deinit_and_free_ptr(x) x->free(); free_ptr(x)
+
 static const int MILK_SUCCESS = 0;
 static const int MILK_FAIL = 1;
 static const int MILLISECONDS_PER_FRAME = 1000 / 60; // = 16
 
-#define free_ptr(x) delete x; x = nullptr
-#define deinit_and_free_ptr(x) x->free(); free_ptr(x)
+// The error handler and callbacks are not stored as lua references.
+// They always just sit at the bottom of the stack.
+static const int ERROR_HANDLER_STACK_INDEX = 1;
+static const int CALLBACK_TABLE_STACK_INDEX = 2;
+
+static int error_handler(lua_State* L) {
+	luaL_traceback(L, L, lua_tostring(L, 1), 0);
+	return 1;
+}
+
+static void print_runtime_error(const char* err) {
+	std::cout << "RUNTIME ERROR: " << err << std::endl << std::endl;
+	std::cout << "Press enter to continue execution..." << std::endl;
+	int _ = std::getchar(); // Wait for user input before continuing execution
+}
 
 milk::MilkState::MilkState()
 	: m_lua{ nullptr }
@@ -68,16 +84,31 @@ int milk::MilkState::run(const std::string& configPath) {
 	luaL_openlibs(m_lua);
 	LuaApi::open(m_lua);
 
-	// Call do file and push callback table onto stack
-	// If main.lua did not return a single table, then frig off.
-	luaL_dofile(m_lua, "res/main.lua");
-	if (lua_gettop(m_lua) != 1 || !lua_istable(m_lua, -1)) {
+	// Our error handler is going to the #1 on the stack
+	lua_pushcfunction(m_lua, error_handler);
+
+	if (luaL_loadfile(m_lua, "res/main.lua") != LUA_OK || lua_pcall(m_lua, 0, 1, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
+		const char* stacktrace = lua_tostring(m_lua, -1);
+		print_runtime_error(stacktrace);
+
 		lua_close(m_lua);
 		free_ptr(m_keyboard);
 		deinit_and_free_ptr(m_renderer);
 		deinit_and_free_ptr(m_window);
 		deinit_and_free_ptr(m_textures);
-		std::cout << "ERROR: main.lua must return a single table containing callback functions" << std::endl;
+		return MILK_FAIL;
+	}
+
+	// If main.lua fails or does not return a single table, then frig off.
+	if (!lua_istable(m_lua, -1)) {
+		const char* stacktrace = lua_tostring(m_lua, -1);
+		print_runtime_error(stacktrace);
+
+		lua_close(m_lua);
+		free_ptr(m_keyboard);
+		deinit_and_free_ptr(m_renderer);
+		deinit_and_free_ptr(m_window);
+		deinit_and_free_ptr(m_textures);
 		return MILK_FAIL;
 	}
 
@@ -96,15 +127,27 @@ int milk::MilkState::run(const std::string& configPath) {
 		}
 
 		m_keyboard->updateState();
-
-		// Callback table is top of stack
-		luaM::invoke_method(m_lua, "tick");
+		
+		lua_getfield(m_lua, CALLBACK_TABLE_STACK_INDEX, "tick");
+		if (lua_pcall(m_lua, 0, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
+			const char* stacktrace = lua_tostring(m_lua, -1);
+			lua_pop(m_lua, 1); // Pop stacktrace from stack
+			print_runtime_error(stacktrace);
+		}
 
 		m_renderer->clear();
-		// Callback table is top of stack
-		luaM::invoke_method(m_lua, "render");
+
+		lua_getfield(m_lua, CALLBACK_TABLE_STACK_INDEX, "render");
+		if (lua_pcall(m_lua, 0, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
+			const char* stacktrace = lua_tostring(m_lua, -1);
+			lua_pop(m_lua, 1); // Pop stacktrace from stack
+			print_runtime_error(stacktrace);
+		}
+
 		m_renderer->present();
 
+		// As of right now, milk runs at a fixed timestep of 16 milliseconds.
+		// The only time that this becomes a problem is if the game can't run at 60 FPS.
 		Uint32 frameTime = SDL_GetTicks() - frameStart;
 		if (frameTime < MILLISECONDS_PER_FRAME) {
 			SDL_Delay((Uint32)(MILLISECONDS_PER_FRAME - frameTime));
