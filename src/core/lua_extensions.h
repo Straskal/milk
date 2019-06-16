@@ -8,6 +8,11 @@ struct luaL_Reg;
 
 namespace milk {
 	namespace luaM {
+		struct Enum {
+			const char* name;
+			int key;
+		};
+
 		void set_string_field(lua_State* L, const char* key, const char* value);
 		std::string get_string_field(lua_State* L, const char* key);
 		void set_int_field(lua_State* L, const char* key, int value);
