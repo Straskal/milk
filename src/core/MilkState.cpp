@@ -2,13 +2,13 @@
 
 #include <iostream>
 
-#include "SDL.h"
-
 extern "C" {
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
 }
+
+#include "SDL.h"
 
 #include "Locator.h"
 #include "LuaApi.h"
@@ -101,8 +101,7 @@ int milk::MilkState::run(const std::string& configPath) {
 
 	// If main.lua fails or does not return a single table, then frig off.
 	if (!lua_istable(m_lua, -1)) {
-		const char* stacktrace = lua_tostring(m_lua, -1);
-		print_runtime_error(stacktrace);
+		print_runtime_error("main.lua must return a table containing callback functions.");
 
 		lua_close(m_lua);
 		free_ptr(m_keyboard);
