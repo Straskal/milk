@@ -87,8 +87,6 @@ int milk::MilkState::run(const std::string& configPath) {
 	// Our error handler is going to the #1 on the stack
 	lua_pushcfunction(m_lua, error_handler);
 
-	// Call do file and push callback table onto stack
-	// If main.lua fails or does not return a single table, then frig off.
 	if (luaL_loadfile(m_lua, "res/main.lua") != LUA_OK || lua_pcall(m_lua, 0, 1, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
 		std::cout << "STARTUP ERROR: " << lua_tostring(m_lua, -1) << std::endl;
 
@@ -100,6 +98,7 @@ int milk::MilkState::run(const std::string& configPath) {
 		return MILK_FAIL;
 	}
 
+	// If main.lua fails or does not return a single table, then frig off.
 	if (!lua_istable(m_lua, -1)) {
 		std::cout << "STARTUP ERROR: main.lua must return a single table containing callback functions" << std::endl;
 
