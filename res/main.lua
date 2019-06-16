@@ -13,6 +13,7 @@ local playerposition = { x = 0, y = 0 }
 local sourcerectangle = { x = 0, y = 0, w = 64, h = 64 }
 local lastanimtime = 0
 local SECONDS_PER_ANIM_FRAME = 0.1
+local PLAYER_SPEED = 2
 
 -- callback table
 local callbacks = {};
@@ -22,6 +23,22 @@ function callbacks.tick()
 	if input.keyboard.was_key_pressed(keys.F) then
 		local toggle = not video.window.is_fullscreen()
 		video.window.set_fullscreen(toggle)
+	end
+	if input.keyboard.was_key_released(keys.ESCAPE) then
+		video.window.close()
+	end
+
+	if input.keyboard.is_key_pressed(keys.W) then
+		playerposition.y = playerposition.y - 1 * PLAYER_SPEED
+	end
+	if input.keyboard.is_key_pressed(keys.A) then
+		playerposition.x = playerposition.x - 1 * PLAYER_SPEED
+	end
+	if input.keyboard.is_key_pressed(keys.S) then
+		playerposition.y = playerposition.y + 1 * PLAYER_SPEED
+	end
+	if input.keyboard.is_key_pressed(keys.D) then
+		playerposition.x = playerposition.x + 1 * PLAYER_SPEED
 	end
 
 	local totaltime = os.clock()
