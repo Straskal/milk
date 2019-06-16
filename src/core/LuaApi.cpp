@@ -10,20 +10,22 @@ extern "C" {
 #include "video/lua/LuaRenderer.h"
 #include "video/lua/LuaTexture.h"
 
-namespace {
-	int luaopen_video(lua_State* L) {
-		lua_newtable(L);
-		milk::LuaWindow::set_window_submodule(L);
-		milk::LuaRenderer::set_renderer_submodule(L);
-		milk::LuaTexture::set_texture_submodule(L);
-		return 1;
-	}
+static int luaopen_video(lua_State* L) {
+	lua_newtable(L);
+	milk::LuaWindow::pushWindowTable(L);
+	lua_setfield(L, -2, "window");
+	milk::LuaRenderer::pushRendererTable(L);
+	lua_setfield(L, -2, "renderer");
+	milk::LuaTexture::pushTextureTable(L);
+	lua_setfield(L, -2, "texture");
+	return 1;
+}
 
-	int luaopen_input(lua_State* L) {
-		lua_newtable(L);
-		milk::LuaKeyboard::set_keyboard_submodule(L);
-		return 1;
-	}
+static int luaopen_input(lua_State* L) {
+	lua_newtable(L);
+	milk::LuaKeyboard::pushKeyboardTable(L);
+	lua_setfield(L, -2, "keyboard");
+	return 1;
 }
 
 void milk::LuaApi::open(lua_State* L) {

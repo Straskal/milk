@@ -52,13 +52,11 @@ static const luaL_Reg meta_funcs[] = {
 	{ NULL, NULL }
 };
 
-void milk::LuaTexture::set_texture_submodule(lua_State* L) {
+void milk::LuaTexture::pushTextureTable(lua_State* L) {
 	luaL_newmetatable(L, METATABLE);
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
 	luaL_setfuncs(L, meta_funcs, 0);
 	lua_pop(L, 1); // Pop metatable off of stack
-
 	luaL_newlib(L, funcs);
-	lua_setfield(L, -2, "texture");
 }

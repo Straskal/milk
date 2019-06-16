@@ -66,7 +66,6 @@ static const luaL_Reg funcs[] = {
 	{ NULL, NULL }
 };
 
-void milk::LuaWindow::set_window_submodule(lua_State* L) {
+void milk::LuaWindow::pushWindowTable(lua_State* L) {
 	luaL_newlib(L, funcs);
-	lua_setfield(L, -2, "window");
 }

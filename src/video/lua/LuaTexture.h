@@ -14,7 +14,7 @@ namespace milk {
 	public:
 		static const char* METATABLE;
 
-		static void set_texture_submodule(lua_State* L);
+		static void pushTextureTable(lua_State* L);
 	};
 }
 

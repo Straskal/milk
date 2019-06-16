@@ -59,7 +59,6 @@ static const luaL_Reg funcs[] = {
 	{ NULL, NULL }
 };
 
-void milk::LuaRenderer::set_renderer_submodule(lua_State* L) {
+void milk::LuaRenderer::pushRendererTable(lua_State* L) {
 	luaL_newlib(L, funcs);
-	lua_setfield(L, -2, "renderer");
 }

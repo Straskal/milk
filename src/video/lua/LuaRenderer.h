@@ -6,7 +6,7 @@ struct lua_State;
 namespace milk {
 	class LuaRenderer {
 	public:
-		static void set_renderer_submodule(lua_State* L);
+		static void pushRendererTable(lua_State* L);
 	};
 }
 
