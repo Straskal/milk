@@ -17,7 +17,7 @@ namespace milk {
 		static Renderer* renderer;
 		static Keyboard* keyboard;
 		static TextureCache* textures;
-		static SoundCache* audioCache;
+		static SoundCache* sounds;
 		static AudioPlayer* audioPlayer;
 	};
 }

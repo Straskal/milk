@@ -93,7 +93,7 @@ int milk::MilkState::run(const std::string& configPath) {
 	Locator::renderer = m_renderer;
 	Locator::keyboard = m_keyboard;
 	Locator::textures = m_textures;
-	Locator::audioCache = m_audioCache;
+	Locator::sounds = m_audioCache;
 	Locator::audioPlayer = m_audioPlayer;
 
 	m_lua = luaL_newstate();
