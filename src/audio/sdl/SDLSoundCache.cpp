@@ -6,6 +6,11 @@
 #include "SDL_mixer.h"
 
 #include "audio/Sound.h"
+#include "audio/sdl/SDLAudioPlayer.h"
+
+milk::SDLSoundCache::SDLSoundCache(SDLAudioPlayer* audioPlayer)
+	: m_audioPlayer{ audioPlayer } {
+}
 
 milk::Sound* milk::SDLSoundCache::load(const std::string& path) {
 	auto found = m_sounds.find(path);
@@ -19,7 +24,7 @@ milk::Sound* milk::SDLSoundCache::load(const std::string& path) {
 		std::cout << "Mix_LoadWAV: " << Mix_GetError() << std::endl;
 		return nullptr;
 	}
-	
+
 	Sound* sound = new Sound();
 	sound->path = path;
 	sound->handle = sample;
@@ -29,9 +34,12 @@ milk::Sound* milk::SDLSoundCache::load(const std::string& path) {
 	return sound;
 }
 
-void milk::SDLSoundCache::dereference(Sound* sound) {
+void milk::SDLSoundCache::dereference(SoundHandle* soundHandle) {
+	Sound* sound = soundHandle->sound;
 	if (--sound->refCount <= 0) {
 		m_sounds.erase(sound->path);
+		// We do NOT want to free a chunk that is currently playing.
+		m_audioPlayer->stopSound(soundHandle);
 		Mix_FreeChunk((Mix_Chunk*)sound->handle);
 		delete sound; sound = nullptr;
 	}

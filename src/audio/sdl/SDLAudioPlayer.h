@@ -7,8 +7,8 @@ namespace milk {
 	class SDLAudioPlayer : public AudioPlayer {
 	public:
 		bool init();
-
-		void playSound(Sound* sound) override;
+		void playSound(SoundHandle* soundHandle) override;
+		void stopSound(SoundHandle* soundHandle) override;
 		void free();
 	};
 }

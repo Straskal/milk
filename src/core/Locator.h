@@ -14,8 +14,8 @@
 namespace milk {
 	struct Locator {
 		static Window* window;
-		static Renderer* renderer;
 		static Keyboard* keyboard;
+		static Renderer* renderer;
 		static TextureCache* textures;
 		static SoundCache* sounds;
 		static AudioPlayer* audioPlayer;

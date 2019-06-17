@@ -37,13 +37,13 @@ static const luaL_Reg funcs[] = {
 
 static int gc(lua_State* L) {
 	milk::SoundHandle* handle = (milk::SoundHandle*)luaL_checkudata(L, 1, milk::LuaSound::METATABLE);
-	milk::Locator::sounds->dereference(handle->sound);
+	milk::Locator::sounds->dereference(handle);
 	return 0;
 }
 
 static int play(lua_State* L) {
 	milk::SoundHandle* handle = (milk::SoundHandle*)luaL_checkudata(L, 1, milk::LuaSound::METATABLE);
-	milk::Locator::audioPlayer->playSound(handle->sound);
+	milk::Locator::audioPlayer->playSound(handle);
 	return 0;
 }
 
