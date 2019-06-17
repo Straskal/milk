@@ -5,6 +5,7 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+#include "audio/lua/LuaSound.h"
 #include "input/lua/LuaKeyboard.h"
 #include "video/lua/LuaWindow.h"
 #include "video/lua/LuaRenderer.h"
@@ -28,6 +29,11 @@ static int luaopen_input(lua_State* L) {
 	return 1;
 }
 
+static int luaopen_sound(lua_State* L) {
+	milk::LuaSound::pushSoundTable(L);
+	return 1;
+}
+
 void milk::LuaApi::open(lua_State* L) {
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "preload");
@@ -35,6 +41,8 @@ void milk::LuaApi::open(lua_State* L) {
 	lua_setfield(L, -2, "milk.video");
 	lua_pushcfunction(L, luaopen_input);
 	lua_setfield(L, -2, "milk.input");
+	lua_pushcfunction(L, luaopen_sound);
+	lua_setfield(L, -2, "milk.sound");
 	// Pop the preload table and package table off of stack
 	lua_pop(L, 2);
 }

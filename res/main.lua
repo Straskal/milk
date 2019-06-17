@@ -1,5 +1,6 @@
 local video = require("milk.video")
 local input = require("milk.input")
+local sound = require("milk.sound")
 
 local keys = input.keyboard.keys
 
@@ -9,6 +10,7 @@ video.window.set_size(1280, 720)
 video.renderer.set_resolution(640, 360)
 
 local playertexture = video.texture.new("res/player.png")
+local wavsound = sound.new("res/sound.wav");
 local playerposition = { x = 0, y = 0 }
 local sourcerectangle = { x = 0, y = 0, w = 64, h = 64 }
 local lastanimtime = 0
@@ -26,6 +28,10 @@ function callbacks.tick()
 	end
 	if input.keyboard.was_key_released(keys.ESCAPE) then
 		video.window.close()
+	end
+
+	if input.keyboard.was_key_pressed(keys.SPACE) then
+		wavsound:play()
 	end
 
 	if input.keyboard.is_key_pressed(keys.W) then

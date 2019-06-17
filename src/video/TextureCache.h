@@ -4,7 +4,7 @@
 #include <string>
 
 namespace milk {
-	class Texture;
+	struct Texture;
 
 	class TextureCache {
 	public:

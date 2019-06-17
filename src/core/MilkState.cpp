@@ -14,6 +14,8 @@ extern "C" {
 #include "LuaApi.h"
 #include "lua_extensions.h"
 
+#include "audio/sdl/SDLAudioCache.h"
+#include "audio/sdl/SDLAudioPlayer.h"
 #include "input/sdl/SDLKeyboard.h"
 #include "video/Color.h"
 #include "video/sdl/SDLWindow.h"
@@ -48,7 +50,9 @@ milk::MilkState::MilkState()
 	, m_window{ nullptr }
 	, m_renderer{ nullptr }
 	, m_keyboard{ nullptr }
-	, m_textures{ nullptr } {}
+	, m_textures{ nullptr }
+	, m_audioPlayer{ nullptr }
+	, m_audioCache{ nullptr } { }
 
 int milk::MilkState::run(const std::string& configPath) {
 	m_window = new SDLWindow();
@@ -72,6 +76,16 @@ int milk::MilkState::run(const std::string& configPath) {
 		return MILK_FAIL;
 	}
 
+	m_audioPlayer = new SDLAudioPlayer();
+	if (!m_audioPlayer->init()) {
+		deinit_and_free_ptr(m_audioPlayer);
+		deinit_and_free_ptr(m_renderer);
+		deinit_and_free_ptr(m_window);
+		deinit_and_free_ptr(m_textures);
+		return MILK_FAIL;
+	}
+
+	m_audioCache = new SDLAudioCache();
 	m_keyboard = new SDLKeyboard();
 
 	// 'Register' systems with the service locator for lua modules
@@ -79,6 +93,8 @@ int milk::MilkState::run(const std::string& configPath) {
 	Locator::renderer = m_renderer;
 	Locator::keyboard = m_keyboard;
 	Locator::textures = m_textures;
+	Locator::audioCache = m_audioCache;
+	Locator::audioPlayer = m_audioPlayer;
 
 	m_lua = luaL_newstate();
 	luaL_openlibs(m_lua);
@@ -93,6 +109,8 @@ int milk::MilkState::run(const std::string& configPath) {
 
 		lua_close(m_lua);
 		free_ptr(m_keyboard);
+		free_ptr(m_audioCache);
+		deinit_and_free_ptr(m_audioPlayer);
 		deinit_and_free_ptr(m_renderer);
 		deinit_and_free_ptr(m_window);
 		deinit_and_free_ptr(m_textures);
@@ -105,6 +123,8 @@ int milk::MilkState::run(const std::string& configPath) {
 
 		lua_close(m_lua);
 		free_ptr(m_keyboard);
+		free_ptr(m_audioCache);
+		deinit_and_free_ptr(m_audioPlayer);
 		deinit_and_free_ptr(m_renderer);
 		deinit_and_free_ptr(m_window);
 		deinit_and_free_ptr(m_textures);
@@ -126,7 +146,7 @@ int milk::MilkState::run(const std::string& configPath) {
 		}
 
 		m_keyboard->updateState();
-		
+
 		lua_getfield(m_lua, CALLBACK_TABLE_STACK_INDEX, "tick");
 		if (lua_pcall(m_lua, 0, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
 			const char* stacktrace = lua_tostring(m_lua, -1);
@@ -155,6 +175,8 @@ int milk::MilkState::run(const std::string& configPath) {
 
 	lua_close(m_lua);
 	free_ptr(m_keyboard);
+	free_ptr(m_audioCache);
+	deinit_and_free_ptr(m_audioPlayer);
 	deinit_and_free_ptr(m_renderer);
 	deinit_and_free_ptr(m_window);
 	deinit_and_free_ptr(m_textures);

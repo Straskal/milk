@@ -35,12 +35,14 @@ if(WIN32)
 		# provide paths for minGW/minGW-w64 development libs
 		# set(SDL2_PATH ...)
 		# set(SDL2_IMAGE_PATH ...)
+		# set(SDL2_MIXER_PATH ...)
 		# set(ENV{LUA_DIR} ...)
 	elseif (MSVC)
 		# provide paths for visual c++ development libs
 		# these are just the paths that I use. Feel free to change them in your environment.
 		set(SDL2_PATH C:/ExternalLibs/SDL2-2.0.9)
 		set(SDL2_IMAGE_PATH C:/ExternalLibs/SDL2_image-2.0.4)
+		set(SDL2_MIXER_PATH C:/ExternalLibs/SDL2_mixer-2.0.4)
 		set(ENV{LUA_DIR} C:/ExternalLibs/lua53)
 	endif()
 endif()
@@ -51,11 +53,25 @@ endif()
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
+find_package(SDL2_mixer REQUIRED)
 find_package(Lua53 REQUIRED)
 
 #---------------------------------------------------------------------------
 # milk lib
 #---------------------------------------------------------------------------
+
+# audio
+set(MILK_SRC_AUDIO
+	src/audio/AudioCache.h
+	src/audio/AudioPlayer.h
+	src/audio/Sound.h
+	src/audio/lua/LuaSound.cpp
+	src/audio/lua/LuaSound.h
+	src/audio/sdl/SDLAudioCache.cpp
+	src/audio/sdl/SDLAudioCache.h
+	src/audio/sdl/SDLAudioPlayer.cpp
+	src/audio/sdl/SDLAudioPlayer.h
+)
 
 # core
 set(MILK_SRC_CORE
@@ -112,6 +128,7 @@ set(MILK_SRC_VIDEO
 )
 
 set(MILK_SRC_FILES
+	${MILK_SRC_AUDIO}
 	${MILK_SRC_CORE}
 	${MILK_SRC_DATA}
 	${MILK_SRC_INPUT}
@@ -125,6 +142,7 @@ target_include_directories(milklib
 	PUBLIC
 		${SDL2_INCLUDE_DIR}
 		${SDL2_IMAGE_INCLUDE_DIRS}
+		${SDL2_MIXER_INCLUDE_DIRS}
 		${LUA53_INCLUDE_DIR}
 		${MILK_SRC_DIR}
 )
@@ -134,6 +152,7 @@ if (WIN32)
 		PUBLIC
 			${SDL2_INCLUDE_DIR}
 			${SDL2_IMAGE_INCLUDE_DIRS}
+			${SDL2_MIXER_INCLUDE_DIRS}
 			${LUA53_INCLUDE_DIR}
 			${MILK_SRC_DIR}
 	)
@@ -143,6 +162,7 @@ target_link_libraries(milklib
 	PUBLIC
 		${SDL2_LIBRARY}
 		${SDL2_IMAGE_LIBRARIES}
+		${SDL2_MIXER_LIBRARIES}
 		${LUA53_LIBRARIES}
 )
 
