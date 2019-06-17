@@ -52,7 +52,7 @@ void milk::SDLRenderer::draw(
 ) {
 	SDL_Rect src = { sourceRectangle->x, sourceRectangle->y, sourceRectangle->width, sourceRectangle->height };
 	SDL_Rect dst = { destinationRectangle->x, destinationRectangle->y, destinationRectangle->width, destinationRectangle->height };
-	SDL_RenderCopyEx(m_handle, (SDL_Texture*)texture->handle, &src, &dst, 0, nullptr, (SDL_RendererFlip)flipFlags);
+	SDL_RenderCopyEx(m_handle, (SDL_Texture*)texture->data->handle, &src, &dst, 0, nullptr, (SDL_RendererFlip)flipFlags);
 }
 
 void milk::SDLRenderer::present() {

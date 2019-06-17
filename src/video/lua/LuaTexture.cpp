@@ -16,12 +16,12 @@ const char* METATABLE = "milk.texturehandle";
 static int new_texture(lua_State* L) {
 	if (lua_isstring(L, 1)) {
 		const char* value = lua_tostring(L, 1);
-		milk::Texture* texture = milk::Locator::textures->load(value);
-		if (texture != nullptr) {
-			milk::TextureHandle* handle = (milk::TextureHandle*)lua_newuserdata(L, sizeof(milk::TextureHandle*));
+		milk::TextureData* textureData = milk::Locator::textures->load(value);
+		if (textureData != nullptr) {
+			milk::Texture* texture = (milk::Texture*)lua_newuserdata(L, sizeof(milk::Texture*));
 			luaL_getmetatable(L, METATABLE);
 			lua_setmetatable(L, -2);
-			handle->texture = texture;
+			texture->data = textureData;
 			lua_pushboolean(L, true);
 			return 2;
 		}
@@ -37,29 +37,28 @@ static const luaL_Reg funcs[] = {
 };
 
 static int gc(lua_State* L) {
-	milk::TextureHandle* handle = (milk::TextureHandle*)luaL_checkudata(L, 1, METATABLE);
-	milk::Locator::textures->dereference(handle->texture);
+	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, METATABLE);
+	milk::Locator::textures->dereference(texture->data);
 	return 0;
 }
 
 static int draw(lua_State* L) {
-	milk::TextureHandle* handle = (milk::TextureHandle*)luaL_checkudata(L, 1, METATABLE);
-	milk::Texture* tex = handle->texture;
+	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, METATABLE);
+	milk::TextureData* data = texture->data;
 
-	int w = tex->width;
-	int h = tex->height;
+	int w = data->width;
+	int h = data->height;
 	int x = milk::luaM::get_int_field(L, 2, "x");
 	int y = milk::luaM::get_int_field(L, 2, "y");
 
 	milk::Rectangle src = { 0, 0, w, h };
 	milk::Rectangle dst = { x, y, w, h };
-	milk::Locator::renderer->draw(handle->texture, &src, &dst, 0);
+	milk::Locator::renderer->draw(texture, &src, &dst, 0);
 	return 0;
 }
 
 static int drawex(lua_State* L) {
-	milk::TextureHandle* handle = (milk::TextureHandle*)luaL_checkudata(L, 1, METATABLE);
-	milk::Texture* tex = handle->texture;
+	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, METATABLE);
 
 	int posx = milk::luaM::get_int_field(L, 2, "x");
 	int posy = milk::luaM::get_int_field(L, 2, "y");
@@ -71,14 +70,14 @@ static int drawex(lua_State* L) {
 
 	milk::Rectangle src = { rectx, recty, rectw, recth };
 	milk::Rectangle dst = { posx, posy, rectw, recth };
-	milk::Locator::renderer->draw(handle->texture, &src, &dst, 0);
+	milk::Locator::renderer->draw(texture, &src, &dst, 0);
 	return 0;
 }
 
 static int get_size(lua_State* L) {
-	milk::TextureHandle* handle = (milk::TextureHandle*)luaL_checkudata(L, 1, METATABLE);
-	lua_pushinteger(L, handle->texture->width);
-	lua_pushinteger(L, handle->texture->height);
+	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, METATABLE);
+	lua_pushinteger(L, texture->data->width);
+	lua_pushinteger(L, texture->data->height);
 	return 2;
 }
 

@@ -20,13 +20,13 @@ milk::SoundData* milk::SDLSoundCache::load(const std::string& path) {
 		return nullptr;
 	}
 
-	SoundData* sound = new SoundData();
-	sound->path = path;
-	sound->handle = sample;
-	sound->refCount = 1;
+	SoundData* soundData = new SoundData();
+	soundData->path = path;
+	soundData->handle = sample;
+	soundData->refCount = 1;
 
-	m_sounds.insert(std::make_pair(path, sound));
-	return sound;
+	m_sounds.insert(std::make_pair(path, soundData));
+	return soundData;
 }
 
 void milk::SDLSoundCache::dereference(SoundData* soundData) {

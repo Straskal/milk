@@ -21,7 +21,7 @@ bool milk::SDLTextureCache::init(SDL_Renderer* rendererHandle) {
 	return true;
 }
 
-milk::Texture* milk::SDLTextureCache::load(const std::string& path) {
+milk::TextureData* milk::SDLTextureCache::load(const std::string& path) {
 	auto found = m_textures.find(path);
 	if (found != m_textures.end()) {
 		++found->second->refCount;
@@ -37,26 +37,25 @@ milk::Texture* milk::SDLTextureCache::load(const std::string& path) {
 	SDL_Texture* sdltexture = SDL_CreateTextureFromSurface(m_rendererHandle, sdlsurface);
 	SDL_FreeSurface(sdlsurface);
 
-	int width;
-	int height;
-	SDL_QueryTexture(sdltexture, nullptr, nullptr, &width, &height);
+	int w, h;
+	SDL_QueryTexture(sdltexture, nullptr, nullptr, &w, &h);
 
-	Texture* texture = new Texture();
-	texture->path = path;
-	texture->refCount = 1;
-	texture->handle = sdltexture;
-	texture->width = width;
-	texture->height = height;
+	TextureData* textureData = new TextureData();
+	textureData->path = path;
+	textureData->refCount = 1;
+	textureData->handle = sdltexture;
+	textureData->width = w;
+	textureData->height = h;
 
-	m_textures.insert(std::make_pair(path, texture));
-	return texture;
+	m_textures.insert(std::make_pair(path, textureData));
+	return textureData;
 }
 
-void milk::SDLTextureCache::dereference(Texture* texture) {
-	if (--texture->refCount <= 0) {
-		m_textures.erase(texture->path);
-		SDL_DestroyTexture((SDL_Texture*)texture->handle);
-		delete texture; texture = nullptr;
+void milk::SDLTextureCache::dereference(TextureData* textureData) {
+	if (--textureData->refCount <= 0) {
+		m_textures.erase(textureData->path);
+		SDL_DestroyTexture((SDL_Texture*)textureData->handle);
+		delete textureData; textureData = nullptr;
 	}
 }
 

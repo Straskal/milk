@@ -4,14 +4,14 @@
 #include <string>
 
 namespace milk {
-	struct Texture;
+	struct TextureData;
 
 	class TextureCache {
 	public:
 		virtual ~TextureCache() = default;
 
-		virtual Texture* load(const std::string& path) = 0;
-		virtual void dereference(Texture* texture) = 0;
+		virtual TextureData* load(const std::string& path) = 0;
+		virtual void dereference(TextureData* textureData) = 0;
 	};
 }
 

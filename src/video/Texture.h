@@ -4,7 +4,7 @@
 #include <string>
 
 namespace milk {
-	struct Texture {
+	struct TextureData {
 		std::string path;
 		void* handle;
 		int refCount;
@@ -12,8 +12,8 @@ namespace milk {
 		int height;
 	};
 
-	struct TextureHandle {
-		Texture* texture;
+	struct Texture {
+		TextureData* data;
 	};
 }
 

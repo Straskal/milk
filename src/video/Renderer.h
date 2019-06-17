@@ -6,8 +6,7 @@
 #include "data/int.h"
 #include "math/Vector2.h"
 
-namespace milk
-{
+namespace milk {
 	struct Texture;
 	struct Color;
 	struct Rectangle;
