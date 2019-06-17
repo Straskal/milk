@@ -49,9 +49,16 @@ static int play(lua_State* L) {
 	return 0;
 }
 
+static int stop(lua_State* L) {
+	milk::SoundHandle* handle = (milk::SoundHandle*)luaL_checkudata(L, 1, METATABLE);
+	milk::Locator::audioPlayer->stopSound(handle);
+	return 0;
+}
+
 static const luaL_Reg meta_funcs[] = {
 	{ "__gc", gc },
 	{ "play", play },
+	{ "stop", stop },
 	{ NULL, NULL }
 };
 
