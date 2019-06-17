@@ -129,13 +129,13 @@ static const milk::luaM::Enum keys_enum[] = {
 	{ "RSHIFT", milk::Keys::RSHIFT }
 };
 
-void milk::LuaKeyboard::pushKeyboardTable(lua_State* L) {
+int milk::luaopen_keyboard(lua_State* L) {
 	luaL_newlib(L, funcs);
-
 	lua_newtable(L);
 	unsigned int size = sizeof(keys_enum) / sizeof(luaM::Enum);
 	for (int i = 0; i < size; ++i) {
 		milk::luaM::set_int_field(L, keys_enum[i].name, keys_enum[i].key);
 	}
 	lua_setfield(L, -2, "keys");
+	return 1;
 }

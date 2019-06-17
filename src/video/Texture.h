@@ -11,6 +11,10 @@ namespace milk {
 		int width;
 		int height;
 	};
+
+	struct TextureHandle {
+		Texture* texture;
+	};
 }
 
 #endif

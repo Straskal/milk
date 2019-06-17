@@ -4,10 +4,7 @@
 struct lua_State;
 
 namespace milk {
-	class LuaWindow {
-	public:
-		static void pushWindowTable(lua_State* L);
-	};
+	int luaopen_window(lua_State* L);
 }
 
 #endif

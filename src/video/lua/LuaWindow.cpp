@@ -36,6 +36,13 @@ static int set_size(lua_State* L) {
 	return 0;
 }
 
+static int set_virtual_resolution(lua_State* L) {
+	int w = luaL_checkinteger(L, 1);
+	int h = luaL_checkinteger(L, 2);
+	milk::Locator::renderer->resolution(w, h);
+	return 0;
+}
+
 static int set_fullscreen(lua_State* L) {
 	if (lua_isboolean(L, 1)) {
 		bool toggle = lua_toboolean(L, 1);
@@ -60,12 +67,14 @@ static const luaL_Reg funcs[] = {
 	{ "set_title", set_title },
 	{ "get_size", get_size },
 	{ "set_size", set_size },
+	{ "set_virtual_resolution", set_virtual_resolution },
 	{ "set_fullscreen", set_fullscreen },
 	{ "is_fullscreen", is_fullscreen },
 	{ "close", close },
 	{ NULL, NULL }
 };
 
-void milk::LuaWindow::pushWindowTable(lua_State* L) {
+int milk::luaopen_window(lua_State* L) {
 	luaL_newlib(L, funcs);
+	return 1;
 }

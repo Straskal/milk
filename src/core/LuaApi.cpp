@@ -5,36 +5,23 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+#include "audio/lua/LuaSound.h"
 #include "input/lua/LuaKeyboard.h"
 #include "video/lua/LuaWindow.h"
-#include "video/lua/LuaRenderer.h"
 #include "video/lua/LuaTexture.h"
 
-static int luaopen_video(lua_State* L) {
-	lua_newtable(L);
-	milk::LuaWindow::pushWindowTable(L);
-	lua_setfield(L, -2, "window");
-	milk::LuaRenderer::pushRendererTable(L);
-	lua_setfield(L, -2, "renderer");
-	milk::LuaTexture::pushTextureTable(L);
-	lua_setfield(L, -2, "texture");
-	return 1;
-}
-
-static int luaopen_input(lua_State* L) {
-	lua_newtable(L);
-	milk::LuaKeyboard::pushKeyboardTable(L);
-	lua_setfield(L, -2, "keyboard");
-	return 1;
+static void preload_package(lua_State* L, const char* name, lua_CFunction open) {
+	lua_getglobal(L, "package");
+	lua_getfield(L, -1, "preload");
+	lua_pushcfunction(L, open);
+	lua_setfield(L, -2, name);
+	// Pop the preload table and package table off of stack
+	lua_pop(L, 2);
 }
 
 void milk::LuaApi::open(lua_State* L) {
-	lua_getglobal(L, "package");
-	lua_getfield(L, -1, "preload");
-	lua_pushcfunction(L, luaopen_video);
-	lua_setfield(L, -2, "milk.video");
-	lua_pushcfunction(L, luaopen_input);
-	lua_setfield(L, -2, "milk.input");
-	// Pop the preload table and package table off of stack
-	lua_pop(L, 2);
+	preload_package(L, "milk.window", luaopen_window);
+	preload_package(L, "milk.keyboard", luaopen_keyboard);
+	preload_package(L, "milk.texture", luaopen_texture);
+	preload_package(L, "milk.sound", luaopen_sound);
 }
