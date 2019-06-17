@@ -4,14 +4,14 @@
 #include <string>
 
 namespace milk {
-	struct Sound;
+	struct SoundData;
 
 	class SoundCache {
 	public:
 		virtual ~SoundCache() = default;
 
-		virtual Sound* load(const std::string& path) = 0;
-		virtual void dereference(Sound* sound) = 0;
+		virtual SoundData* load(const std::string& path) = 0;
+		virtual void dereference(SoundData* soundData) = 0;
 	};
 }
 

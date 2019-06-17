@@ -14,13 +14,13 @@ static const char* METATABLE = "milk.soundhandle";
 static int new_sound(lua_State* L) {
 	if (lua_isstring(L, 1)) {
 		const char* value = lua_tostring(L, 1);
-		milk::Sound* sound = milk::Locator::sounds->load(value);
-		if (sound != nullptr) {
-			milk::SoundHandle* handle = (milk::SoundHandle*)lua_newuserdata(L, sizeof(milk::SoundHandle*));
+		milk::SoundData* soundData = milk::Locator::sounds->load(value);
+		if (soundData != nullptr) {
+			milk::Sound* sound = (milk::Sound*)lua_newuserdata(L, sizeof(milk::Sound*));
 			luaL_getmetatable(L, METATABLE);
 			lua_setmetatable(L, -2);
-			handle->sound = sound;
-			handle->channel = -1;
+			sound->data = soundData;
+			sound->channel = -1;
 			lua_pushboolean(L, true);
 			return 2;
 		}
@@ -36,22 +36,22 @@ static const luaL_Reg funcs[] = {
 };
 
 static int gc(lua_State* L) {
-	milk::SoundHandle* handle = (milk::SoundHandle*)luaL_checkudata(L, 1, METATABLE);
+	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, METATABLE);
 	// Stop sound before derefencing it. We do NOT want to release a sound from memory while it is playing.
-	milk::Locator::audioPlayer->stopSound(handle);
-	milk::Locator::sounds->dereference(handle->sound);
+	milk::Locator::audioPlayer->stopSound(sound);
+	milk::Locator::sounds->dereference(sound->data);
 	return 0;
 }
 
 static int play(lua_State* L) {
-	milk::SoundHandle* handle = (milk::SoundHandle*)luaL_checkudata(L, 1, METATABLE);
-	milk::Locator::audioPlayer->playSound(handle);
+	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, METATABLE);
+	milk::Locator::audioPlayer->playSound(sound);
 	return 0;
 }
 
 static int stop(lua_State* L) {
-	milk::SoundHandle* handle = (milk::SoundHandle*)luaL_checkudata(L, 1, METATABLE);
-	milk::Locator::audioPlayer->stopSound(handle);
+	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, METATABLE);
+	milk::Locator::audioPlayer->stopSound(sound);
 	return 0;
 }
 

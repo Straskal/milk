@@ -7,7 +7,7 @@
 
 #include "audio/Sound.h"
 
-milk::Sound* milk::SDLSoundCache::load(const std::string& path) {
+milk::SoundData* milk::SDLSoundCache::load(const std::string& path) {
 	auto found = m_sounds.find(path);
 	if (found != m_sounds.end()) {
 		++found->second->refCount;
@@ -20,7 +20,7 @@ milk::Sound* milk::SDLSoundCache::load(const std::string& path) {
 		return nullptr;
 	}
 
-	Sound* sound = new Sound();
+	SoundData* sound = new SoundData();
 	sound->path = path;
 	sound->handle = sample;
 	sound->refCount = 1;
@@ -29,11 +29,11 @@ milk::Sound* milk::SDLSoundCache::load(const std::string& path) {
 	return sound;
 }
 
-void milk::SDLSoundCache::dereference(Sound* sound) {
-	if (--sound->refCount <= 0) {
-		m_sounds.erase(sound->path);
-		Mix_FreeChunk((Mix_Chunk*)sound->handle);
-		delete sound; sound = nullptr;
+void milk::SDLSoundCache::dereference(SoundData* soundData) {
+	if (--soundData->refCount <= 0) {
+		m_sounds.erase(soundData->path);
+		Mix_FreeChunk((Mix_Chunk*)soundData->handle);
+		delete soundData; soundData = nullptr;
 	}
 }
 

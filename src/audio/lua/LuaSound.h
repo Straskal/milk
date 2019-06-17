@@ -4,8 +4,6 @@
 struct lua_State;
 
 namespace milk {
-	struct Sound;
-
 	int luaopen_sound(lua_State* L);
 }
 

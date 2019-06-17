@@ -4,14 +4,14 @@
 #include <string>
 
 namespace milk {
-	struct Sound {
+	struct SoundData {
 		std::string path;
 		void* handle;
 		int refCount;
 	};
 
-	struct SoundHandle {
-		Sound* sound;
+	struct Sound {
+		SoundData* data;
 		int channel;
 	};
 }
