@@ -39,10 +39,7 @@ bool milk::SDLAudioPlayer::init() {
 
 void milk::SDLAudioPlayer::playSound(SoundHandle* soundHandle) {
 	// If the sound is currently playing, then stop it.
-	if (soundHandle->channel != INVALID_CHANNEL) {
-		Mix_HaltChannel(soundHandle->channel);
-		soundHandle->channel = INVALID_CHANNEL;
-	}
+	stopSound(soundHandle);
 
 	Sound* sound = soundHandle->sound;
 	int channel = Mix_PlayChannel(FIRST_AVAILABLE_CHANNEL, (Mix_Chunk*)sound->handle, NO_LOOP);
