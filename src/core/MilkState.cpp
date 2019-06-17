@@ -14,7 +14,7 @@ extern "C" {
 #include "LuaApi.h"
 #include "lua_extensions.h"
 
-#include "audio/sdl/SDLAudioCache.h"
+#include "audio/sdl/SDLSoundCache.h"
 #include "audio/sdl/SDLAudioPlayer.h"
 #include "input/sdl/SDLKeyboard.h"
 #include "video/Color.h"
@@ -85,7 +85,7 @@ int milk::MilkState::run(const std::string& configPath) {
 		return MILK_FAIL;
 	}
 
-	m_audioCache = new SDLAudioCache();
+	m_audioCache = new SDLSoundCache();
 	m_keyboard = new SDLKeyboard();
 
 	// 'Register' systems with the service locator for lua modules
@@ -109,7 +109,7 @@ int milk::MilkState::run(const std::string& configPath) {
 
 		lua_close(m_lua);
 		free_ptr(m_keyboard);
-		free_ptr(m_audioCache);
+		deinit_and_free_ptr(m_audioCache);
 		deinit_and_free_ptr(m_audioPlayer);
 		deinit_and_free_ptr(m_renderer);
 		deinit_and_free_ptr(m_window);
@@ -123,7 +123,7 @@ int milk::MilkState::run(const std::string& configPath) {
 
 		lua_close(m_lua);
 		free_ptr(m_keyboard);
-		free_ptr(m_audioCache);
+		deinit_and_free_ptr(m_audioCache);
 		deinit_and_free_ptr(m_audioPlayer);
 		deinit_and_free_ptr(m_renderer);
 		deinit_and_free_ptr(m_window);
@@ -175,7 +175,7 @@ int milk::MilkState::run(const std::string& configPath) {
 
 	lua_close(m_lua);
 	free_ptr(m_keyboard);
-	free_ptr(m_audioCache);
+	deinit_and_free_ptr(m_audioCache);
 	deinit_and_free_ptr(m_audioPlayer);
 	deinit_and_free_ptr(m_renderer);
 	deinit_and_free_ptr(m_window);

@@ -1,7 +1,7 @@
 #ifndef _LOCATOR_H_
 #define _LOCATOR_H_
 
-#include "audio/AudioCache.h"
+#include "audio/SoundCache.h"
 #include "audio/AudioPlayer.h"
 #include "input/Keyboard.h"
 #include "video/Window.h"
@@ -17,7 +17,7 @@ namespace milk {
 		static Renderer* renderer;
 		static Keyboard* keyboard;
 		static TextureCache* textures;
-		static AudioCache* audioCache;
+		static SoundCache* audioCache;
 		static AudioPlayer* audioPlayer;
 	};
 }

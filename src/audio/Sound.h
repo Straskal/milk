@@ -7,8 +7,12 @@ namespace milk {
 	struct Sound {
 		std::string path;
 		void* handle;
-		int channel;
 		int refCount;
+	};
+
+	struct SoundHandle {
+		Sound* sound;
+		int channel;
 	};
 }
 

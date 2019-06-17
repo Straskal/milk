@@ -6,7 +6,7 @@ extern "C" {
 }
 
 #include "audio/Sound.h"
-#include "audio/AudioCache.h"
+#include "audio/SoundCache.h"
 #include "core/Locator.h"
 
 const char* milk::LuaSound::METATABLE = "milk.soundhandle";
@@ -14,7 +14,7 @@ const char* milk::LuaSound::METATABLE = "milk.soundhandle";
 static int new_sound(lua_State* L) {
 	if (lua_isstring(L, 1)) {
 		const char* value = lua_tostring(L, 1);
-		milk::Sound* sound = milk::Locator::audioCache->loadSound(value);
+		milk::Sound* sound = milk::Locator::audioCache->load(value);
 		if (sound != nullptr) {
 			milk::SoundHandle* handle = (milk::SoundHandle*)lua_newuserdata(L, sizeof(milk::SoundHandle*));
 			luaL_getmetatable(L, milk::LuaSound::METATABLE);
@@ -36,7 +36,7 @@ static const luaL_Reg funcs[] = {
 
 static int gc(lua_State* L) {
 	milk::SoundHandle* handle = (milk::SoundHandle*)luaL_checkudata(L, 1, milk::LuaSound::METATABLE);
-	milk::Locator::audioCache->dereferenceSound(handle->sound);
+	milk::Locator::audioCache->dereference(handle->sound);
 	return 0;
 }
 

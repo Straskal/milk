@@ -13,25 +13,21 @@ static const int FIRST_AVAILABLE_CHANNEL = -1;
 
 bool milk::SDLAudioPlayer::init() {
 	if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-		std::cout << "Error initializing SDL_Audio: " << SDL_GetError() << std::endl;
+		std::cout << "SDL_Init: Failed to initialize audio: " << SDL_GetError() << std::endl;
 		return false;
 	}
-
-	int flags = MIX_INIT_OGG | MIX_INIT_MP3;
-	if ((Mix_Init(flags) & flags) != flags) {
-		std::cout << "Mix_Init: Failed to init required ogg and mp3 support: " << Mix_GetError() << std::endl;
-		return false;
-	}
-
 	if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, STEREO_CHANNELS, MIX_CHUNK_SIZE) == -1) {
-		std::cout << "SDL_Mixer: Error opening audio: " << Mix_GetError() << std::endl;
+		std::cout << "SDL_Mixer: Failed to open audio: " << Mix_GetError() << std::endl;
 		return false;
 	}
 	return true;
 }
 
 void milk::SDLAudioPlayer::playSound(Sound* sound) {
-	if (Mix_PlayChannel(FIRST_AVAILABLE_CHANNEL, (Mix_Chunk*)sound->handle, 0) == -1) {
+	int channel = Mix_PlayChannel(FIRST_AVAILABLE_CHANNEL, (Mix_Chunk*)sound->handle, 0);
+	// This can either be a fatal error or a failure to find an available channel.
+	// If we ever have trouble finding an available channel, we may have to allocate one.
+	if (channel == -1) {
 		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
 	}
 }
