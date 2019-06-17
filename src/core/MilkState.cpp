@@ -85,7 +85,7 @@ int milk::MilkState::run(const std::string& configPath) {
 		return MILK_FAIL;
 	}
 
-	m_sounds = new SDLSoundCache(m_audioPlayer);
+	m_sounds = new SDLSoundCache();
 	m_keyboard = new SDLKeyboard();
 
 	// 'Register' systems with the service locator for lua modules

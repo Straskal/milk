@@ -10,14 +10,11 @@ namespace milk {
 
 	class SDLSoundCache : public SoundCache {
 	public:
-		SDLSoundCache(SDLAudioPlayer* audioPlayer);
-
 		Sound* load(const std::string& path) override;
-		void dereference(SoundHandle* texture) override;
+		void dereference(Sound* sound) override;
 		void free();
 
 	private:
-		SDLAudioPlayer* m_audioPlayer;
 		std::unordered_map<std::string, Sound*> m_sounds;
 	};
 }

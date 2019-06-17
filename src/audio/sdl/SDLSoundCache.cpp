@@ -8,10 +8,6 @@
 #include "audio/Sound.h"
 #include "audio/sdl/SDLAudioPlayer.h"
 
-milk::SDLSoundCache::SDLSoundCache(SDLAudioPlayer* audioPlayer)
-	: m_audioPlayer{ audioPlayer } {
-}
-
 milk::Sound* milk::SDLSoundCache::load(const std::string& path) {
 	auto found = m_sounds.find(path);
 	if (found != m_sounds.end()) {
@@ -34,12 +30,9 @@ milk::Sound* milk::SDLSoundCache::load(const std::string& path) {
 	return sound;
 }
 
-void milk::SDLSoundCache::dereference(SoundHandle* soundHandle) {
-	Sound* sound = soundHandle->sound;
+void milk::SDLSoundCache::dereference(Sound* sound) {
 	if (--sound->refCount <= 0) {
 		m_sounds.erase(sound->path);
-		// We do NOT want to free a chunk that is currently playing.
-		m_audioPlayer->stopSound(soundHandle);
 		Mix_FreeChunk((Mix_Chunk*)sound->handle);
 		delete sound; sound = nullptr;
 	}

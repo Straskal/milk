@@ -37,7 +37,9 @@ static const luaL_Reg funcs[] = {
 
 static int gc(lua_State* L) {
 	milk::SoundHandle* handle = (milk::SoundHandle*)luaL_checkudata(L, 1, milk::LuaSound::METATABLE);
-	milk::Locator::sounds->dereference(handle);
+	// Stop sound before derefencing it. We do NOT want to release a sound from memory while it is playing.
+	milk::Locator::audioPlayer->stopSound(handle);
+	milk::Locator::sounds->dereference(handle->sound);
 	return 0;
 }
 

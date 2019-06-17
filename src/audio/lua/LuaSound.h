@@ -9,6 +9,7 @@ namespace milk {
 	class LuaSound {
 	public:
 		static const char* METATABLE;
+
 		static void pushSoundTable(lua_State* L);
 	};
 }
