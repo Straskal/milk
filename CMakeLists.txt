@@ -60,6 +60,19 @@ find_package(Lua53 REQUIRED)
 # milk lib
 #---------------------------------------------------------------------------
 
+# audio
+set(MILK_SRC_AUDIO
+	src/audio/SoundCache.h
+	src/audio/SoundPlayer.h
+	src/audio/Sound.h
+	src/audio/lua/LuaSound.cpp
+	src/audio/lua/LuaSound.h
+	src/audio/sdl/SDLSoundCache.cpp
+	src/audio/sdl/SDLSoundCache.h
+	src/audio/sdl/SDLSoundPlayer.cpp
+	src/audio/sdl/SDLSoundPlayer.h
+)
+
 # core
 set(MILK_SRC_CORE
 	src/core/Locator.cpp
@@ -93,19 +106,6 @@ set(MILK_SRC_MATH
 	src/math/Vector2.h
 )
 
-# sound
-set(MILK_SRC_SOUND
-	src/sound/SoundCache.h
-	src/sound/SoundPlayer.h
-	src/sound/Sound.h
-	src/sound/lua/LuaSound.cpp
-	src/sound/lua/LuaSound.h
-	src/sound/sdl/SDLSoundCache.cpp
-	src/sound/sdl/SDLSoundCache.h
-	src/sound/sdl/SDLSoundPlayer.cpp
-	src/sound/sdl/SDLSoundPlayer.h
-)
-
 # video
 set(MILK_SRC_VIDEO
 	src/video/Color.h
@@ -128,10 +128,10 @@ set(MILK_SRC_VIDEO
 )
 
 set(MILK_SRC_FILES
+	${MILK_SRC_AUDIO}
 	${MILK_SRC_CORE}
 	${MILK_SRC_DATA}
 	${MILK_SRC_INPUT}
-	${MILK_SRC_SOUND}
 	${MILK_SRC_MATH}
 	${MILK_SRC_VIDEO}
 )

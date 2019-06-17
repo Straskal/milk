@@ -5,8 +5,8 @@
 #include "SDL.h"
 #include "SDL_mixer.h"
 
-#include "sound/Sound.h"
-#include "sound/sdl/SDLSoundPlayer.h"
+#include "audio/Sound.h"
+#include "audio/sdl/SDLSoundPlayer.h"
 
 milk::SDLSoundCache::SDLSoundCache(SDLSoundPlayer* soundPlayer)
 	: m_soundPlayer{ soundPlayer } {

@@ -5,8 +5,8 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+#include "audio/lua/LuaSound.h"
 #include "input/lua/LuaKeyboard.h"
-#include "sound/lua/LuaSound.h"
 #include "video/lua/LuaWindow.h"
 #include "video/lua/LuaRenderer.h"
 #include "video/lua/LuaTexture.h"

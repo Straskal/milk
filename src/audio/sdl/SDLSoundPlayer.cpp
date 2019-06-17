@@ -6,7 +6,7 @@
 #include "SDL.h"
 #include "SDL_mixer.h"
 
-#include "sound/Sound.h"
+#include "audio/Sound.h"
 
 static const int MIX_CHUNK_SIZE = 2048;
 static const int STEREO_CHANNELS = 2;

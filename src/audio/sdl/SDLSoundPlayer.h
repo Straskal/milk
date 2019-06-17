@@ -1,7 +1,7 @@
 #ifndef _SDL_SOUND_PLAYER_H_
 #define _SDL_SOUND_PLAYER_H_
 
-#include "sound/SoundPlayer.h"
+#include "audio/SoundPlayer.h"
 
 namespace milk {
 	class SDLSoundPlayer : public SoundPlayer {

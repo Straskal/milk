@@ -14,9 +14,9 @@ extern "C" {
 #include "LuaApi.h"
 #include "lua_extensions.h"
 
+#include "audio/sdl/SDLSoundCache.h"
+#include "audio/sdl/SDLSoundPlayer.h"
 #include "input/sdl/SDLKeyboard.h"
-#include "sound/sdl/SDLSoundCache.h"
-#include "sound/sdl/SDLSoundPlayer.h"
 #include "video/Color.h"
 #include "video/sdl/SDLWindow.h"
 #include "video/sdl/SDLRenderer.h"
