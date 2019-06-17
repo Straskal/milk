@@ -29,11 +29,6 @@ static int luaopen_input(lua_State* L) {
 	return 1;
 }
 
-static int luaopen_sound(lua_State* L) {
-	milk::LuaSound::pushSoundTable(L);
-	return 1;
-}
-
 void milk::LuaApi::open(lua_State* L) {
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "preload");
