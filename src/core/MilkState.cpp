@@ -156,7 +156,7 @@ int milk::MilkState::run(const std::string& configPath) {
 
 		m_renderer->clear();
 
-		lua_getfield(m_lua, CALLBACK_TABLE_STACK_INDEX, "render");
+		lua_getfield(m_lua, CALLBACK_TABLE_STACK_INDEX, "draw");
 		if (lua_pcall(m_lua, 0, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
 			const char* stacktrace = lua_tostring(m_lua, -1);
 			lua_pop(m_lua, 1); // Pop stacktrace from stack

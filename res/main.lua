@@ -1,15 +1,16 @@
-local video = require("milk.video")
-local input = require("milk.input")
+local window = require("milk.window")
+local keyboard = require("milk.keyboard")
+local texture = require("milk.texture")
 local sound = require("milk.sound")
 
-local keys = input.keyboard.keys
+local keys = keyboard.keys
 
 -- initialize game
-video.window.set_title("Butt Dragons")
-video.window.set_size(1280, 720)
-video.renderer.set_resolution(640, 360)
+window.set_title("Butt Dragons")
+window.set_size(1280, 720)
+window.set_virtual_resolution(640, 360)
 
-local playertexture = video.texture.new("res/player.png")
+local playertexture = texture.new("res/player.png")
 local wavsound = sound.new("res/sound.wav");
 local playerposition = { x = 0, y = 0 }
 local sourcerectangle = { x = 0, y = 0, w = 64, h = 64 }
@@ -22,28 +23,28 @@ local callbacks = {};
 
 -- game logic goes here
 function callbacks.tick()
-	if input.keyboard.was_key_pressed(keys.F) then
-		local toggle = not video.window.is_fullscreen()
-		video.window.set_fullscreen(toggle)
+	if keyboard.was_key_pressed(keys.F) then
+		local toggle = not window.is_fullscreen()
+		window.set_fullscreen(toggle)
 	end
-	if input.keyboard.was_key_released(keys.ESCAPE) then
-		video.window.close()
+	if keyboard.was_key_released(keys.ESCAPE) then
+		window.close()
 	end
 
-	if input.keyboard.was_key_pressed(keys.SPACE) then
+	if keyboard.was_key_pressed(keys.SPACE) then
 		wavsound:play()
 	end
 
-	if input.keyboard.is_key_pressed(keys.W) then
+	if keyboard.is_key_pressed(keys.W) then
 		playerposition.y = playerposition.y - 1 * PLAYER_SPEED
 	end
-	if input.keyboard.is_key_pressed(keys.A) then
+	if keyboard.is_key_pressed(keys.A) then
 		playerposition.x = playerposition.x - 1 * PLAYER_SPEED
 	end
-	if input.keyboard.is_key_pressed(keys.S) then
+	if keyboard.is_key_pressed(keys.S) then
 		playerposition.y = playerposition.y + 1 * PLAYER_SPEED
 	end
-	if input.keyboard.is_key_pressed(keys.D) then
+	if keyboard.is_key_pressed(keys.D) then
 		playerposition.x = playerposition.x + 1 * PLAYER_SPEED
 	end
 
@@ -58,8 +59,8 @@ function callbacks.tick()
 end
 
 -- render calls go here
-function callbacks.render()
-	video.renderer.drawex(playertexture, playerposition, sourcerectangle)
+function callbacks.draw()
+	playertexture:drawex(playerposition, sourcerectangle)
 end
 
 return callbacks

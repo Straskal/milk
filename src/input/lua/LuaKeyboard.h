@@ -4,10 +4,7 @@
 struct lua_State;
 
 namespace milk {
-	class LuaKeyboard {
-	public:
-		static void pushKeyboardTable(lua_State* L);
-	};
+	int luaopen_keyboard(lua_State* L);
 }
 
 #endif

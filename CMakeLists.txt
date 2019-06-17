@@ -113,8 +113,6 @@ set(MILK_SRC_VIDEO
 	src/video/Texture.h
 	src/video/TextureCache.h
 	src/video/Window.h	
-	src/video/lua/LuaRenderer.cpp
-	src/video/lua/LuaRenderer.h
 	src/video/lua/LuaTexture.cpp
 	src/video/lua/LuaTexture.h
 	src/video/lua/LuaWindow.cpp
