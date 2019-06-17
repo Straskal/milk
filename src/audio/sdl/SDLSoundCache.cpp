@@ -6,7 +6,6 @@
 #include "SDL_mixer.h"
 
 #include "audio/Sound.h"
-#include "audio/sdl/SDLAudioPlayer.h"
 
 milk::Sound* milk::SDLSoundCache::load(const std::string& path) {
 	auto found = m_sounds.find(path);
