@@ -1,7 +1,7 @@
 #ifndef _SDL_SOUND_CACHE_H_
 #define _SDL_SOUND_CACHE_H_
 
-#include "audio/SoundCache.h"
+#include "sound/SoundCache.h"
 
 #include <unordered_map>
 

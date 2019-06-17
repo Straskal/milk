@@ -1,9 +1,9 @@
 #ifndef _LOCATOR_H_
 #define _LOCATOR_H_
 
-#include "audio/SoundCache.h"
-#include "audio/SoundPlayer.h"
 #include "input/Keyboard.h"
+#include "sound/SoundCache.h"
+#include "sound/SoundPlayer.h"
 #include "video/Window.h"
 #include "video/Renderer.h"
 #include "video/TextureCache.h"

@@ -5,8 +5,8 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-#include "audio/Sound.h"
-#include "audio/SoundCache.h"
+#include "sound/Sound.h"
+#include "sound/SoundCache.h"
 #include "core/Locator.h"
 
 const char* milk::LuaSound::METATABLE = "milk.soundhandle";
