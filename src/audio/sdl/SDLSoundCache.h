@@ -6,18 +6,18 @@
 #include <unordered_map>
 
 namespace milk {
-	class SDLSoundPlayer;
+	class SDLAudioPlayer;
 
 	class SDLSoundCache : public SoundCache {
 	public:
-		SDLSoundCache(SDLSoundPlayer* soundPlayer);
+		SDLSoundCache(SDLAudioPlayer* audioPlayer);
 
 		Sound* load(const std::string& path) override;
 		void dereference(SoundHandle* texture) override;
 		void free();
 
 	private:
-		SDLSoundPlayer* m_soundPlayer;
+		SDLAudioPlayer* m_audioPlayer;
 		std::unordered_map<std::string, Sound*> m_sounds;
 	};
 }

@@ -1,4 +1,4 @@
-#include "SDLSoundPlayer.h"
+#include "SDLAudioPlayer.h"
 
 #include <iostream>
 #include <unordered_map>
@@ -23,7 +23,7 @@ static void on_channel_finished(int channel) {
 	soundHandle->channel = INVALID_CHANNEL;
 }
 
-bool milk::SDLSoundPlayer::init() {
+bool milk::SDLAudioPlayer::init() {
 	if (SDL_Init(SDL_INIT_AUDIO) < 0) {
 		std::cout << "SDL_Init: Failed to initialize audio: " << SDL_GetError() << std::endl;
 		return false;
@@ -37,7 +37,7 @@ bool milk::SDLSoundPlayer::init() {
 	return true;
 }
 
-void milk::SDLSoundPlayer::playSound(SoundHandle* soundHandle) {
+void milk::SDLAudioPlayer::playSound(SoundHandle* soundHandle) {
 	// If the sound is currently playing, then stop it.
 	if (soundHandle->channel != INVALID_CHANNEL) {
 		Mix_HaltChannel(soundHandle->channel);
@@ -56,14 +56,14 @@ void milk::SDLSoundPlayer::playSound(SoundHandle* soundHandle) {
 	soundHandle->channel = channel;
 }
 
-void milk::SDLSoundPlayer::stopSound(SoundHandle* soundHandle) {
+void milk::SDLAudioPlayer::stopSound(SoundHandle* soundHandle) {
 	if (soundHandle->channel != INVALID_CHANNEL) {
 		// This will call back to 'on_channel_finished', which resets this sound's channel to INVALID_CHANNEL.
 		Mix_HaltChannel(soundHandle->channel);
 	}
 }
 
-void milk::SDLSoundPlayer::free() {
+void milk::SDLAudioPlayer::free() {
 	Mix_CloseAudio();
 	Mix_Quit();
 }

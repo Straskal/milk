@@ -5,4 +5,4 @@ milk::Renderer* milk::Locator::renderer = nullptr;
 milk::Keyboard* milk::Locator::keyboard = nullptr;
 milk::TextureCache* milk::Locator::textures = nullptr;
 milk::SoundCache* milk::Locator::sounds = nullptr;
-milk::SoundPlayer* milk::Locator::audioPlayer = nullptr;
+milk::AudioPlayer* milk::Locator::audioPlayer = nullptr;

@@ -1,10 +1,10 @@
-#ifndef _SDL_SOUND_PLAYER_H_
-#define _SDL_SOUND_PLAYER_H_
+#ifndef _SDL_AUDIO_PLAYER_H_
+#define _SDL_AUDIO_PLAYER_H_
 
-#include "audio/SoundPlayer.h"
+#include "audio/AudioPlayer.h"
 
 namespace milk {
-	class SDLSoundPlayer : public SoundPlayer {
+	class SDLAudioPlayer : public AudioPlayer {
 	public:
 		bool init();
 		void playSound(SoundHandle* soundHandle) override;
