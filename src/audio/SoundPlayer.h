@@ -1,12 +1,12 @@
-#ifndef _AUDIO_PLAYER_H_
-#define _AUDIO_PLAYER_H_
+#ifndef _SOUND_PLAYER_H_
+#define _SOUND_PLAYER_H_
 
 namespace milk {
 	struct SoundHandle;
 
-	class AudioPlayer {
+	class SoundPlayer {
 	public:
-		virtual ~AudioPlayer() = default;
+		virtual ~SoundPlayer() = default;
 
 		virtual void playSound(SoundHandle* soundHandle) = 0;
 		virtual void stopSound(SoundHandle* soundHandle) = 0;

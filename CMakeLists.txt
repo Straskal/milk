@@ -63,14 +63,14 @@ find_package(Lua53 REQUIRED)
 # audio
 set(MILK_SRC_AUDIO
 	src/audio/SoundCache.h
-	src/audio/AudioPlayer.h
+	src/audio/SoundPlayer.h
 	src/audio/Sound.h
 	src/audio/lua/LuaSound.cpp
 	src/audio/lua/LuaSound.h
 	src/audio/sdl/SDLSoundCache.cpp
 	src/audio/sdl/SDLSoundCache.h
-	src/audio/sdl/SDLAudioPlayer.cpp
-	src/audio/sdl/SDLAudioPlayer.h
+	src/audio/sdl/SDLSoundPlayer.cpp
+	src/audio/sdl/SDLSoundPlayer.h
 )
 
 # core
