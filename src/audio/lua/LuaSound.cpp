@@ -20,6 +20,7 @@ static int new_sound(lua_State* L) {
 			luaL_getmetatable(L, milk::LuaSound::METATABLE);
 			lua_setmetatable(L, -2);
 			handle->sound = sound;
+			handle->channel = -1;
 			lua_pushboolean(L, true);
 			return 2;
 		}
