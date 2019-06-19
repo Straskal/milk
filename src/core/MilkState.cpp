@@ -22,6 +22,10 @@ extern "C" {
 #include "keyboard/sdl/SDLKeyboard.h"
 #include "window/sdl/SDLWindow.h"
 
+#ifndef MILK_MAIN_LUA_PATH
+#define MILK_MAIN_LUA_PATH "main.lua"
+#endif
+
 #define free_ptr(x) delete x; x = nullptr
 #define deinit_and_free_ptr(x) x->free(); free_ptr(x)
 
@@ -41,7 +45,7 @@ static int error_handler(lua_State* L) {
 
 static void print_runtime_error(const char* err) {
 	std::cout << "RUNTIME ERROR: " << err << std::endl << std::endl;
-	std::cout << "Press any key to continue execution..." << std::endl;
+	std::cout << "Press enter to continue execution..." << std::endl;
 	int _ = std::getchar(); // Wait for user input before continuing execution
 }
 
@@ -55,7 +59,7 @@ milk::MilkState::MilkState()
 	, m_music{ nullptr }
 	, m_sounds{ nullptr } { }
 
-int milk::MilkState::run(const std::string& configPath) {
+int milk::MilkState::run() {
 	m_window = new SDLWindow();
 	if (!m_window->init()) {
 		deinit_and_free_ptr(m_window);
@@ -106,7 +110,7 @@ int milk::MilkState::run(const std::string& configPath) {
 	// Our error handler is going to the #1 on the stack
 	lua_pushcfunction(m_lua, error_handler);
 
-	if (luaL_loadfile(m_lua, "res/main.lua") != LUA_OK || lua_pcall(m_lua, 0, 1, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
+	if (luaL_loadfile(m_lua, MILK_MAIN_LUA_PATH) != LUA_OK || lua_pcall(m_lua, 0, 1, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
 		const char* stacktrace = lua_tostring(m_lua, -1);
 		print_runtime_error(stacktrace);
 

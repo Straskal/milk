@@ -171,6 +171,11 @@ target_link_libraries(milklib
 		${LUA53_LIBRARIES}
 )
 
+target_compile_definitions(milklib
+	PRIVATE
+		MILK_MAIN_LUA_PATH="res/main.lua"
+)
+
 #---------------------------------------------------------------------------
 # milk exe
 #---------------------------------------------------------------------------

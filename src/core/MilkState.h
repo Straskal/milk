@@ -18,7 +18,7 @@ namespace milk {
 	public:
 		MilkState();
 
-		int run(const std::string& configPath);
+		int run();
 
 	private:
 		lua_State* m_lua;
