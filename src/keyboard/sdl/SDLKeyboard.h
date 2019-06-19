@@ -1,7 +1,7 @@
 #ifndef _SDL_KEYBOARD_H_
 #define _SDL_KEYBOARD_H_
 
-#include "input/Keyboard.h"
+#include "keyboard/Keyboard.h"
 
 #include "SDL.h"
 

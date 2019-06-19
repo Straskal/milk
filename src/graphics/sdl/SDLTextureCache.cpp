@@ -5,7 +5,7 @@
 #include "SDL.h"
 #include "SDL_image.h"
 
-#include "video/Texture.h"
+#include "graphics/Texture.h"
 
 milk::SDLTextureCache::SDLTextureCache()
 	: m_rendererHandle{ 0 } {

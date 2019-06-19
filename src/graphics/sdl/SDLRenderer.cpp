@@ -6,9 +6,8 @@
 #include "SDL_hints.h"
 #include "SDL_render.h"
 
-#include "video/Color.h"
-#include "video/Texture.h"
-
+#include "graphics/Color.h"
+#include "graphics/Texture.h"
 #include "math/Rectangle.h"
 
 const static int FIRST_SUPPORTED_RENDERING_DRIVER = -1;

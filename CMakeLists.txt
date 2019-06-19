@@ -63,10 +63,10 @@ find_package(Lua53 REQUIRED)
 # audio
 set(MILK_SRC_AUDIO
 	src/audio/AudioPlayer.h
+	src/audio/luaopen_milk_audio.cpp
+	src/audio/luaopen_milk_audio.h
 	src/audio/SoundCache.h
 	src/audio/Sound.h
-	src/audio/lua/LuaSound.cpp
-	src/audio/lua/LuaSound.h
 	src/audio/sdl/SDLAudioPlayer.cpp
 	src/audio/sdl/SDLAudioPlayer.h
 	src/audio/sdl/SDLSoundCache.cpp
@@ -77,10 +77,8 @@ set(MILK_SRC_AUDIO
 set(MILK_SRC_CORE
 	src/core/Locator.cpp
 	src/core/Locator.h
-	src/core/lua_extensions.cpp
-	src/core/lua_extensions.h
-	src/core/LuaApi.cpp
-	src/core/LuaApi.h
+	src/core/luamlib.cpp
+	src/core/luamlib.h
 	src/core/MilkState.cpp
 	src/core/MilkState.h
 )
@@ -90,13 +88,27 @@ set(MILK_SRC_DATA
 	src/data/int.h
 )
 
-# input
-set(MILK_SRC_INPUT
-	src/input/Keyboard.h
-	src/input/lua/LuaKeyboard.cpp
-	src/input/lua/LuaKeyboard.h
-	src/input/sdl/SDLKeyboard.cpp
-	src/input/sdl/SDLKeyboard.h
+# graphics
+set(MILK_SRC_GRAPHICS
+	src/graphics/Color.h
+	src/graphics/Renderer.h
+	src/graphics/Texture.h
+	src/graphics/TextureCache.h
+	src/graphics/luaopen_milk_graphics.cpp
+	src/graphics/luaopen_milk_graphics.h
+	src/graphics/sdl/SDLRenderer.cpp
+	src/graphics/sdl/SDLRenderer.h
+	src/graphics/sdl/SDLTextureCache.cpp
+	src/graphics/sdl/SDLTextureCache.h
+)
+
+# keyboard
+set(MILK_SRC_KEYBOARD
+	src/keyboard/Keyboard.h
+	src/keyboard/luaopen_milk_keyboard.cpp
+	src/keyboard/luaopen_milk_keyboard.h
+	src/keyboard/sdl/SDLKeyboard.cpp
+	src/keyboard/sdl/SDLKeyboard.h
 )
 
 # math
@@ -106,32 +118,23 @@ set(MILK_SRC_MATH
 	src/math/Vector2.h
 )
 
-# video
-set(MILK_SRC_VIDEO
-	src/video/Color.h
-	src/video/Renderer.h
-	src/video/Texture.h
-	src/video/TextureCache.h
-	src/video/Window.h	
-	src/video/lua/LuaTexture.cpp
-	src/video/lua/LuaTexture.h
-	src/video/lua/LuaWindow.cpp
-	src/video/lua/LuaWindow.h
-	src/video/sdl/SDLRenderer.cpp
-	src/video/sdl/SDLRenderer.h
-	src/video/sdl/SDLTextureCache.cpp
-	src/video/sdl/SDLTextureCache.h
-	src/video/sdl/SDLWindow.cpp
-	src/video/sdl/SDLWindow.h
+# window
+set(MILK_SRC_WINDOW
+	src/window/luaopen_milk_window.cpp
+	src/window/luaopen_milk_window.h
+	src/window/Window.h	
+	src/window/sdl/SDLWindow.cpp
+	src/window/sdl/SDLWindow.h
 )
 
 set(MILK_SRC_FILES
 	${MILK_SRC_AUDIO}
 	${MILK_SRC_CORE}
 	${MILK_SRC_DATA}
-	${MILK_SRC_INPUT}
+	${MILK_SRC_GRAPHICS}
+	${MILK_SRC_KEYBOARD}
 	${MILK_SRC_MATH}
-	${MILK_SRC_VIDEO}
+	${MILK_SRC_WINDOW}
 )
 
 add_library(milklib STATIC ${MILK_SRC_FILES})

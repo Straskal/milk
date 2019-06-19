@@ -11,16 +11,15 @@ extern "C" {
 #include "SDL.h"
 
 #include "Locator.h"
-#include "LuaApi.h"
-#include "lua_extensions.h"
+#include "luamlib.h"
 
 #include "audio/sdl/SDLAudioPlayer.h"
 #include "audio/sdl/SDLSoundCache.h"
-#include "input/sdl/SDLKeyboard.h"
-#include "video/Color.h"
-#include "video/sdl/SDLWindow.h"
-#include "video/sdl/SDLRenderer.h"
-#include "video/sdl/SDLTextureCache.h"
+#include "graphics/Color.h"
+#include "graphics/sdl/SDLRenderer.h"
+#include "graphics/sdl/SDLTextureCache.h"
+#include "keyboard/sdl/SDLKeyboard.h"
+#include "window/sdl/SDLWindow.h"
 
 #define free_ptr(x) delete x; x = nullptr
 #define deinit_and_free_ptr(x) x->free(); free_ptr(x)
@@ -98,7 +97,7 @@ int milk::MilkState::run(const std::string& configPath) {
 
 	m_lua = luaL_newstate();
 	luaL_openlibs(m_lua);
-	LuaApi::open(m_lua);
+	luaM_openlibs(m_lua);
 
 	// Our error handler is going to the #1 on the stack
 	lua_pushcfunction(m_lua, error_handler);

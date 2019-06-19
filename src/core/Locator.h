@@ -3,10 +3,10 @@
 
 #include "audio/AudioPlayer.h"
 #include "audio/SoundCache.h"
-#include "input/Keyboard.h"
-#include "video/Window.h"
-#include "video/Renderer.h"
-#include "video/TextureCache.h"
+#include "graphics/Renderer.h"
+#include "graphics/TextureCache.h"
+#include "keyboard/Keyboard.h"
+#include "window/Window.h"
 
 /*
 	The Locator's intended usage is for Lua modules.

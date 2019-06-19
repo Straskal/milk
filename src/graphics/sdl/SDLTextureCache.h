@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "video/TextureCache.h"
+#include "graphics/TextureCache.h"
 
 struct SDL_Renderer;
 

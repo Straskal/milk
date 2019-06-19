@@ -1,12 +1,7 @@
-#include "LuaKeyboard.h"
-
-extern "C" {
-#include "lua.h"
-#include "lauxlib.h"
-}
+#include "luaopen_milk_keyboard.h"
 
 #include "core/Locator.h"
-#include "core/lua_extensions.h"
+#include "core/luamlib.h"
 
 static int is_key_pressed(lua_State* L) {
 	int isnum;
@@ -44,14 +39,14 @@ static int was_key_released(lua_State* L) {
 	return 1;
 }
 
-static const luaL_Reg funcs[] = {
+static const luaL_Reg keyboard_funcs[] = {
 	{ "is_key_pressed", is_key_pressed },
 	{ "was_key_pressed", was_key_pressed },
 	{ "was_key_released", was_key_released },
 	{ NULL, NULL }
 };
 
-static const milk::luaM::Enum keys_enum[] = {
+static const milk::luaM_Enum keys_enum[] = {
 	{ "A", milk::Keys::A },
 	{ "B", milk::Keys::B },
 	{ "C", milk::Keys::C },
@@ -129,12 +124,12 @@ static const milk::luaM::Enum keys_enum[] = {
 	{ "RSHIFT", milk::Keys::RSHIFT }
 };
 
-int milk::luaopen_keyboard(lua_State* L) {
-	luaL_newlib(L, funcs);
+int milk::luaopen_milk_keyboard(lua_State* L) {
+	luaL_newlib(L, keyboard_funcs);
 	lua_newtable(L);
-	unsigned int size = sizeof(keys_enum) / sizeof(luaM::Enum);
+	unsigned int size = sizeof(keys_enum) / sizeof(luaM_Enum);
 	for (int i = 0; i < size; ++i) {
-		milk::luaM::set_int_field(L, keys_enum[i].name, keys_enum[i].key);
+		luaM_setintfield(L, -1, keys_enum[i].name, keys_enum[i].key);
 	}
 	lua_setfield(L, -2, "keys");
 	return 1;

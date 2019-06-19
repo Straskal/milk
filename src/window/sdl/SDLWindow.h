@@ -6,7 +6,7 @@
 
 #include <string>
 
-#include "video/Window.h"
+#include "window/Window.h"
 
 struct SDL_Window;
 
@@ -19,7 +19,7 @@ namespace milk
 		bool init();
 		std::string title() const override;
 		void title(const std::string& title) override;
-		std::tuple<int, int> dimensions() const override;
+		std::tuple<int, int> size() const override;
 		void size(int width, int height) override;
 		bool fullscreen() const override;
 		void fullscreen(bool toggle) override;

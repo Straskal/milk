@@ -1,17 +1,17 @@
 local window = require("milk.window")
 local keyboard = require("milk.keyboard")
-local texture = require("milk.texture")
-local sound = require("milk.sound")
+local graphics = require("milk.graphics")
+local audio = require("milk.audio")
 
 local keys = keyboard.keys
 
 -- initialize game
 window.set_title("Butt Dragons")
 window.set_size(1280, 720)
-window.set_virtual_resolution(640, 360)
+graphics.set_virtual_resolution(640, 360)
 
-local playertexture = texture.new("res/player.png")
-local wavsound = sound.new("res/sound.wav");
+local player_texture = graphics.new_texture("res/player.png")
+local player_sound = audio.new_sound("res/sound.wav");
 local playerposition = { x = 0, y = 0 }
 local sourcerectangle = { x = 0, y = 0, w = 64, h = 64 }
 local lastanimtime = 0
@@ -27,26 +27,14 @@ function callbacks.tick()
 		local toggle = not window.is_fullscreen()
 		window.set_fullscreen(toggle)
 	end
-	if keyboard.was_key_released(keys.ESCAPE) then
-		window.close()
-	end
 
-	if keyboard.was_key_pressed(keys.SPACE) then
-		wavsound:play()
-	end
+	if keyboard.was_key_released(keys.ESCAPE) then window.close() end
+	if keyboard.was_key_pressed(keys.SPACE) then audio.play_sound(player_sound) end
 
-	if keyboard.is_key_pressed(keys.W) then
-		playerposition.y = playerposition.y - 1 * PLAYER_SPEED
-	end
-	if keyboard.is_key_pressed(keys.A) then
-		playerposition.x = playerposition.x - 1 * PLAYER_SPEED
-	end
-	if keyboard.is_key_pressed(keys.S) then
-		playerposition.y = playerposition.y + 1 * PLAYER_SPEED
-	end
-	if keyboard.is_key_pressed(keys.D) then
-		playerposition.x = playerposition.x + 1 * PLAYER_SPEED
-	end
+	if keyboard.is_key_pressed(keys.W) then playerposition.y = playerposition.y - 1 * PLAYER_SPEED end
+	if keyboard.is_key_pressed(keys.A) then playerposition.x = playerposition.x - 1 * PLAYER_SPEED end
+	if keyboard.is_key_pressed(keys.S) then playerposition.y = playerposition.y + 1 * PLAYER_SPEED end
+	if keyboard.is_key_pressed(keys.D) then playerposition.x = playerposition.x + 1 * PLAYER_SPEED end
 
 	local totaltime = os.clock()
 	if totaltime - lastanimtime > SECONDS_PER_ANIM_FRAME then
@@ -58,9 +46,9 @@ function callbacks.tick()
 	end
 end
 
--- render calls go here
+-- draw calls go here
 function callbacks.draw()
-	playertexture:drawex(playerposition, sourcerectangle)
+	graphics.drawex(player_texture, playerposition, sourcerectangle)
 end
 
 return callbacks

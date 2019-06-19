@@ -1,31 +1,31 @@
-#include "LuaWindow.h"
+#include "luaopen_milk_window.h"
 
 extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
 }
 
+#include "Window.h"
 #include "core/Locator.h"
-#include "core/lua_extensions.h"
-#include "video/Window.h"
 
 static int get_title(lua_State* L) {
-	lua_pushstring(L, milk::Locator::window->title().c_str());
+	const char* t = milk::Locator::window->title().c_str();
+	lua_pushstring(L, t);
 	return 1;
 }
 
 static int set_title(lua_State* L) {
 	if (lua_isstring(L, 1)) {
-		const char* value = lua_tostring(L, 1);
-		milk::Locator::window->title(value);
+		const char* val = lua_tostring(L, 1);
+		milk::Locator::window->title(val);
 	}
 	return 0;
 }
 
 static int get_size(lua_State* L) {
-	std::tuple<int, int> dim = milk::Locator::window->dimensions();
-	lua_pushinteger(L, std::get<0>(dim));
-	lua_pushinteger(L, std::get<1>(dim));
+	std::tuple<int, int> sz = milk::Locator::window->size();
+	lua_pushinteger(L, std::get<0>(sz));
+	lua_pushinteger(L, std::get<1>(sz));
 	return 2;
 }
 
@@ -36,17 +36,10 @@ static int set_size(lua_State* L) {
 	return 0;
 }
 
-static int set_virtual_resolution(lua_State* L) {
-	int w = luaL_checkinteger(L, 1);
-	int h = luaL_checkinteger(L, 2);
-	milk::Locator::renderer->resolution(w, h);
-	return 0;
-}
-
 static int set_fullscreen(lua_State* L) {
 	if (lua_isboolean(L, 1)) {
-		bool toggle = lua_toboolean(L, 1);
-		milk::Locator::window->fullscreen(toggle);
+		bool fs = lua_toboolean(L, 1);
+		milk::Locator::window->fullscreen(fs);
 	}
 	return 0;
 }
@@ -62,19 +55,18 @@ static int close(lua_State* L) {
 	return 0;
 }
 
-static const luaL_Reg funcs[] = {
+static const luaL_Reg window_funcs[] = {
 	{ "get_title", get_title },
 	{ "set_title", set_title },
 	{ "get_size", get_size },
 	{ "set_size", set_size },
-	{ "set_virtual_resolution", set_virtual_resolution },
 	{ "set_fullscreen", set_fullscreen },
 	{ "is_fullscreen", is_fullscreen },
 	{ "close", close },
 	{ NULL, NULL }
 };
 
-int milk::luaopen_window(lua_State* L) {
-	luaL_newlib(L, funcs);
+int milk::luaopen_milk_window(lua_State* L) {
+	luaL_newlib(L, window_funcs);
 	return 1;
 }

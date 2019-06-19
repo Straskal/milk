@@ -1,7 +1,7 @@
 #ifndef _SDL_RENDERER_H_
 #define _SDL_RENDERER_H_
 
-#include "video/Renderer.h"
+#include "graphics/Renderer.h"
 
 struct SDL_Renderer;
 struct SDL_Window;

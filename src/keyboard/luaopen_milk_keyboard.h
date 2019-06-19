@@ -4,7 +4,7 @@
 struct lua_State;
 
 namespace milk {
-	int luaopen_keyboard(lua_State* L);
+	int luaopen_milk_keyboard(lua_State* L);
 }
 
 #endif
