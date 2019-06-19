@@ -30,7 +30,6 @@ function callbacks.tick()
 
 	if keyboard.was_key_released(keys.ESCAPE) then window.close() end
 	if keyboard.was_key_pressed(keys.SPACE) then audio.play_sound(player_sound) end
-
 	if keyboard.is_key_pressed(keys.W) then player_pos.y = player_pos.y - 1 * PLAYER_SPEED end
 	if keyboard.is_key_pressed(keys.A) then player_pos.x = player_pos.x - 1 * PLAYER_SPEED end
 	if keyboard.is_key_pressed(keys.S) then player_pos.y = player_pos.y + 1 * PLAYER_SPEED end
