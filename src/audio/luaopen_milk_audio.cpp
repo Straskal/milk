@@ -12,7 +12,7 @@ extern "C" {
 
 static const char* SOUND_METATABLE = "milk.sound";
 
-static int gc(lua_State* L) {
+static int soundmeta_gc(lua_State* L) {
 	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
 	// Stop sound before derefencing it. We do NOT want to release a sound from memory while it is playing.
 	milk::Locator::audioPlayer->stopSound(sound);
@@ -21,7 +21,7 @@ static int gc(lua_State* L) {
 }
 
 static const luaL_Reg soundmeta_funcs[] = {
-	{ "__gc", gc },
+	{ "__gc", soundmeta_gc },
 	{ NULL, NULL }
 };
 
