@@ -6,3 +6,4 @@ milk::Keyboard* milk::Locator::keyboard = nullptr;
 milk::TextureCache* milk::Locator::textures = nullptr;
 milk::SoundCache* milk::Locator::sounds = nullptr;
 milk::AudioPlayer* milk::Locator::audioPlayer = nullptr;
+milk::MusicCache* milk::Locator::music = nullptr;

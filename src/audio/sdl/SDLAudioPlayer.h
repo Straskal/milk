@@ -9,6 +9,9 @@ namespace milk {
 		bool init();
 		void playSound(Sound* sound) override;
 		void stopSound(Sound* sound) override;
+		void playMusic(Music* music) override;
+		void stopMusic() override;
+		bool isMusicPlaying(Music* music) override;
 		void free();
 	};
 }

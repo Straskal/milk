@@ -2,6 +2,7 @@
 #define _LOCATOR_H_
 
 #include "audio/AudioPlayer.h"
+#include "audio/MusicCache.h"
 #include "audio/SoundCache.h"
 #include "graphics/Renderer.h"
 #include "graphics/TextureCache.h"
@@ -18,6 +19,7 @@ namespace milk {
 		static Renderer* renderer;
 		static TextureCache* textures;
 		static AudioPlayer* audioPlayer;
+		static MusicCache* music;
 		static SoundCache* sounds;
 	};
 }

@@ -6,8 +6,6 @@
 #include <unordered_map>
 
 namespace milk {
-	class SDLAudioPlayer;
-
 	class SDLSoundCache : public SoundCache {
 	public:
 		SoundData* load(const std::string& path) override;
