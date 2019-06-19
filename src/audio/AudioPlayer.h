@@ -14,7 +14,6 @@ namespace milk {
 		virtual void playMusic(Music* music, int fadeTime) = 0;
 		virtual void loopMusic(Music* music, int fadeTime) = 0;
 		virtual void stopMusic(int fadeTime) = 0;
-		virtual bool isMusicPlaying(Music* music) = 0;
 	};
 }
 

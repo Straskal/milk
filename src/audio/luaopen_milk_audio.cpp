@@ -111,13 +111,6 @@ static int audio_stop_music(lua_State* L) {
 	return 0;
 }
 
-static int audio_is_music_playing(lua_State* L) {
-	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
-	bool playing = milk::Locator::audioPlayer->isMusicPlaying(music);
-	lua_pushboolean(L, playing);
-	return 1;
-}
-
 static const luaL_Reg audio_funcs[] = {
 	{ "new_sound", audio_new_sound },
 	{ "play_sound", audio_play_sound },

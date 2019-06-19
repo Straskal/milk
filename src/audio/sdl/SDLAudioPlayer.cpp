@@ -99,10 +99,6 @@ void milk::SDLAudioPlayer::stopMusic(int fadeTime) {
 	}
 }
 
-bool milk::SDLAudioPlayer::isMusicPlaying(Music* music) {
-	return music = current_music;
-}
-
 void milk::SDLAudioPlayer::free() {
 	Mix_CloseAudio();
 	Mix_Quit();

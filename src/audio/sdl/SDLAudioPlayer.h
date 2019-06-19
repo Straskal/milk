@@ -12,7 +12,6 @@ namespace milk {
 		void playMusic(Music* music, int fadeTime) override;
 		void loopMusic(Music* music, int fadeTime) override;
 		void stopMusic(int fadeTime) override;
-		bool isMusicPlaying(Music* music) override;
 		void free();
 	};
 }
