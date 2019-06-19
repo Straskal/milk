@@ -55,7 +55,7 @@ void milk::luaM_setintfield(lua_State* L, int index, const char* key, int value)
 
 int milk::luaM_getintfield(lua_State* L, int index, const char* key) {
 	lua_getfield(L, index, key);
-	int result = lua_tointeger(L, -1);
+	int result = luaL_checkinteger(L, -1);
 	lua_pop(L, 1);
 	return result;
 }
@@ -67,7 +67,7 @@ void milk::luaM_setnumfield(lua_State* L, int index, const char* key, double val
 
 double milk::luaM_getnumfield(lua_State* L, int index, const char* key) {
 	lua_getfield(L, index, key);
-	double result = lua_tonumber(L, -1);
+	double result = luaL_checknumber(L, -1);
 	lua_pop(L, 1);
 	return result;
 }
