@@ -11,7 +11,8 @@ window.set_size(1280, 720)
 graphics.set_virtual_resolution(640, 360)
 
 local player_texture = graphics.new_texture("res/player.png")
-local player_sound = audio.new_sound("res/sound.wav");
+local sound = audio.new_sound("res/sound.wav");
+local music = audio.new_music("res/music.mp3")
 local player_pos = { x = 0, y = 0 }
 local source_rect = { x = 0, y = 0, w = 64, h = 64 }
 local last_anim_time = 0
@@ -29,7 +30,9 @@ function callbacks.tick()
 	end
 
 	if keyboard.was_key_released(keys.ESCAPE) then window.close() end
-	if keyboard.was_key_pressed(keys.SPACE) then audio.play_sound(player_sound) end
+	if keyboard.was_key_pressed(keys.SPACE) then audio.play_sound(sound) end
+	if keyboard.was_key_pressed(keys.NUM1) then audio.play_music(music) end
+	if keyboard.was_key_pressed(keys.NUM2) then audio.stop_music() end
 	if keyboard.is_key_pressed(keys.W) then player_pos.y = player_pos.y - 1 * PLAYER_SPEED end
 	if keyboard.is_key_pressed(keys.A) then player_pos.x = player_pos.x - 1 * PLAYER_SPEED end
 	if keyboard.is_key_pressed(keys.S) then player_pos.y = player_pos.y + 1 * PLAYER_SPEED end

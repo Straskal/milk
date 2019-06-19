@@ -6,6 +6,7 @@
 #include "SDL.h"
 #include "SDL_mixer.h"
 
+#include "audio/Music.h"
 #include "audio/Sound.h"
 
 static const int MIX_CHUNK_SIZE = 2048;
@@ -13,8 +14,10 @@ static const int STEREO_CHANNELS = 2;
 static const int FIRST_AVAILABLE_CHANNEL = -1;
 static const int INVALID_CHANNEL = -1;
 static const int NO_LOOP = 0;
+static const int LOOP_FOREVER = -1;
 
 static std::unordered_map<int, milk::Sound*> channel_sound_map;
+static milk::Music* current_music = nullptr;
 
 // Called when a sound has finished playing or is stopped.
 static void on_channel_finished(int channel) {
@@ -23,17 +26,30 @@ static void on_channel_finished(int channel) {
 	soundHandle->channel = INVALID_CHANNEL;
 }
 
+// Called when music has finished playing or is stopped.
+static void on_music_finished() {
+	current_music = nullptr;
+}
+
 bool milk::SDLAudioPlayer::init() {
 	if (SDL_Init(SDL_INIT_AUDIO) < 0) {
 		std::cout << "SDL_Init: Failed to initialize audio: " << SDL_GetError() << std::endl;
 		return false;
 	}
+
+	int flags = MIX_INIT_OGG | MIX_INIT_MP3;
+	if (Mix_Init(flags) != flags) {
+		std::cout << "SDL_Mixer: Failed to initialize support for Ogg Vorbis and MP3: " << Mix_GetError() << std::endl;
+		return false;
+	}
+
 	if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, STEREO_CHANNELS, MIX_CHUNK_SIZE) == -1) {
 		std::cout << "SDL_Mixer: Failed to open audio: " << Mix_GetError() << std::endl;
 		return false;
 	}
 
 	Mix_ChannelFinished(on_channel_finished);
+	Mix_HookMusicFinished(on_music_finished);
 	return true;
 }
 
@@ -57,6 +73,25 @@ void milk::SDLAudioPlayer::stopSound(Sound* sound) {
 	if (sound->channel != INVALID_CHANNEL) {
 		Mix_HaltChannel(sound->channel);
 	}
+}
+
+void milk::SDLAudioPlayer::playMusic(Music* music) {
+	stopMusic();
+	MusicData* data = music->data;
+	if (Mix_PlayMusic((Mix_Music*)data->handle, LOOP_FOREVER) == -1) {
+		std::cout << "Mix_PlayMusic: " << Mix_GetError() << std::endl;
+	}
+	current_music = music;
+}
+
+void milk::SDLAudioPlayer::stopMusic() {
+	if (Mix_PlayingMusic()) {
+		Mix_HaltMusic();
+	}
+}
+
+bool milk::SDLAudioPlayer::isMusicPlaying(Music* music) {
+	return music = current_music;
 }
 
 void milk::SDLAudioPlayer::free() {

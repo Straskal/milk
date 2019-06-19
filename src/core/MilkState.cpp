@@ -14,6 +14,7 @@ extern "C" {
 #include "luamlib.h"
 
 #include "audio/sdl/SDLAudioPlayer.h"
+#include "audio/sdl/SDLMusicCache.h"
 #include "audio/sdl/SDLSoundCache.h"
 #include "graphics/Color.h"
 #include "graphics/sdl/SDLRenderer.h"
@@ -40,7 +41,7 @@ static int error_handler(lua_State* L) {
 
 static void print_runtime_error(const char* err) {
 	std::cout << "RUNTIME ERROR: " << err << std::endl << std::endl;
-	std::cout << "Press enter to continue execution..." << std::endl;
+	std::cout << "Press any key to continue execution..." << std::endl;
 	int _ = std::getchar(); // Wait for user input before continuing execution
 }
 
@@ -51,6 +52,7 @@ milk::MilkState::MilkState()
 	, m_keyboard{ nullptr }
 	, m_textures{ nullptr }
 	, m_audioPlayer{ nullptr }
+	, m_music{ nullptr }
 	, m_sounds{ nullptr } { }
 
 int milk::MilkState::run(const std::string& configPath) {
@@ -84,6 +86,7 @@ int milk::MilkState::run(const std::string& configPath) {
 		return MILK_FAIL;
 	}
 
+	m_music = new SDLMusicCache();
 	m_sounds = new SDLSoundCache();
 	m_keyboard = new SDLKeyboard();
 
@@ -94,6 +97,7 @@ int milk::MilkState::run(const std::string& configPath) {
 	Locator::textures = m_textures;
 	Locator::sounds = m_sounds;
 	Locator::audioPlayer = m_audioPlayer;
+	Locator::music = m_music;
 
 	m_lua = luaL_newstate();
 	luaL_openlibs(m_lua);
@@ -109,6 +113,7 @@ int milk::MilkState::run(const std::string& configPath) {
 		lua_close(m_lua);
 		free_ptr(m_keyboard);
 		deinit_and_free_ptr(m_sounds);
+		deinit_and_free_ptr(m_music);
 		deinit_and_free_ptr(m_audioPlayer);
 		deinit_and_free_ptr(m_renderer);
 		deinit_and_free_ptr(m_window);
@@ -123,6 +128,7 @@ int milk::MilkState::run(const std::string& configPath) {
 		lua_close(m_lua);
 		free_ptr(m_keyboard);
 		deinit_and_free_ptr(m_sounds);
+		deinit_and_free_ptr(m_music);
 		deinit_and_free_ptr(m_audioPlayer);
 		deinit_and_free_ptr(m_renderer);
 		deinit_and_free_ptr(m_window);
@@ -175,6 +181,7 @@ int milk::MilkState::run(const std::string& configPath) {
 	lua_close(m_lua);
 	free_ptr(m_keyboard);
 	deinit_and_free_ptr(m_sounds);
+	deinit_and_free_ptr(m_music);
 	deinit_and_free_ptr(m_audioPlayer);
 	deinit_and_free_ptr(m_renderer);
 	deinit_and_free_ptr(m_window);

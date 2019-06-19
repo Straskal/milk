@@ -7,6 +7,7 @@ struct lua_State;
 
 namespace milk {
 	class SDLAudioPlayer;
+	class SDLMusicCache;
 	class SDLSoundCache;
 	class SDLRenderer;
 	class SDLWindow;
@@ -27,6 +28,7 @@ namespace milk {
 		SDLTextureCache* m_textures;
 		SDLAudioPlayer* m_audioPlayer;
 		SDLSoundCache* m_sounds;
+		SDLMusicCache* m_music;
 	};
 }
 
