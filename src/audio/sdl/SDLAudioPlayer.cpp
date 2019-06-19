@@ -13,8 +13,8 @@ static const int MIX_CHUNK_SIZE = 2048;
 static const int STEREO_CHANNELS = 2;
 static const int FIRST_AVAILABLE_CHANNEL = -1;
 static const int INVALID_CHANNEL = -1;
+static const int LOOP = -1;
 static const int NO_LOOP = 0;
-static const int LOOP_FOREVER = -1;
 
 static std::unordered_map<int, milk::Sound*> channel_sound_map;
 static milk::Music* current_music = nullptr;
@@ -75,18 +75,27 @@ void milk::SDLAudioPlayer::stopSound(Sound* sound) {
 	}
 }
 
-void milk::SDLAudioPlayer::playMusic(Music* music) {
-	stopMusic();
+void milk::SDLAudioPlayer::playMusic(Music* music, int fadeTime) {
+	stopMusic(0);
 	MusicData* data = music->data;
-	if (Mix_PlayMusic((Mix_Music*)data->handle, LOOP_FOREVER) == -1) {
+	if (Mix_FadeInMusic((Mix_Music*)data->handle, NO_LOOP, fadeTime) == -1) {
 		std::cout << "Mix_PlayMusic: " << Mix_GetError() << std::endl;
 	}
 	current_music = music;
 }
 
-void milk::SDLAudioPlayer::stopMusic() {
+void milk::SDLAudioPlayer::loopMusic(Music* music, int fadeTime) {
+	stopMusic(0);
+	MusicData* data = music->data;
+	if (Mix_FadeInMusic((Mix_Music*)data->handle, LOOP, fadeTime) == -1) {
+		std::cout << "Mix_PlayMusic: " << Mix_GetError() << std::endl;
+	}
+	current_music = music;
+}
+
+void milk::SDLAudioPlayer::stopMusic(int fadeTime) {
 	if (Mix_PlayingMusic()) {
-		Mix_HaltMusic();
+		Mix_FadeOutMusic(fadeTime);
 	}
 }
 

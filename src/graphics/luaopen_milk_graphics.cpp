@@ -83,9 +83,11 @@ static int graphics_drawex(lua_State* L) {
 	int rectw = milk::luaM_getintfield(L, 3, "w");
 	int recth = milk::luaM_getintfield(L, 3, "h");
 
+	int flip = luaL_checkinteger(L, 4);
+
 	milk::Rectangle src = { rectx, recty, rectw, recth };
 	milk::Rectangle dst = { posx, posy, rectw, recth };
-	milk::Locator::renderer->draw(texture, &src, &dst, 0);
+	milk::Locator::renderer->draw(texture, &src, &dst, (milk::u8)flip);
 	return 0;
 }
 
@@ -97,8 +99,15 @@ static const luaL_Reg graphics_funcs[] = {
 	{ NULL, NULL }
 };
 
+static const milk::luaM_Enum flip_enum[] = {
+	{ "NONE", milk::FlipFlags::NO_FLIP },
+	{ "X", milk::FlipFlags::FLIP_X },
+	{ "Y", milk::FlipFlags::FLIP_Y }
+};
+
 int milk::luaopen_milk_graphics(lua_State* L) {
 	luaM_createmetatable(L, TEXTURE_METATABLE, texturemeta_funcs);
 	luaL_newlib(L, graphics_funcs);
+	luaM_setenumfield(L, -1, "flip_flags", flip_enum, sizeof(flip_enum)/sizeof(luaM_Enum));
 	return 1;
 }

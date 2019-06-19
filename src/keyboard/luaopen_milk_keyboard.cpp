@@ -5,7 +5,7 @@
 
 static int is_key_pressed(lua_State* L) {
 	int isnum;
-	int key = lua_tointegerx(L, 1, &isnum);
+	int key = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
 		bool down = milk::Locator::keyboard->isKeyPressed((milk::Keys)key);
 		lua_pushboolean(L, down);
@@ -17,7 +17,7 @@ static int is_key_pressed(lua_State* L) {
 
 static int was_key_pressed(lua_State* L) {
 	int isnum;
-	int key = lua_tointegerx(L, 1, &isnum);
+	int key = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
 		bool pressed = milk::Locator::keyboard->wasKeyPressed((milk::Keys)key);
 		lua_pushboolean(L, pressed);
@@ -29,7 +29,7 @@ static int was_key_pressed(lua_State* L) {
 
 static int was_key_released(lua_State* L) {
 	int isnum;
-	int key = lua_tointegerx(L, 1, &isnum);
+	int key = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
 		bool released = milk::Locator::keyboard->wasKeyReleased((milk::Keys)key);
 		lua_pushboolean(L, released);
@@ -126,11 +126,6 @@ static const milk::luaM_Enum keys_enum[] = {
 
 int milk::luaopen_milk_keyboard(lua_State* L) {
 	luaL_newlib(L, keyboard_funcs);
-	lua_newtable(L);
-	unsigned int size = sizeof(keys_enum) / sizeof(luaM_Enum);
-	for (int i = 0; i < size; ++i) {
-		luaM_setintfield(L, -1, keys_enum[i].name, keys_enum[i].key);
-	}
-	lua_setfield(L, -2, "keys");
+	luaM_setenumfield(L, -1, "keys", keys_enum, sizeof(keys_enum)/sizeof(luaM_Enum));
 	return 1;
 }

@@ -11,6 +11,12 @@ namespace milk {
 	struct Color;
 	struct Rectangle;
 
+	enum FlipFlags {
+		NO_FLIP,
+		FLIP_X = 1 << 0,
+		FLIP_Y = 1 << 1
+	};
+
 	class Renderer {
 	public:
 		virtual ~Renderer() = default;

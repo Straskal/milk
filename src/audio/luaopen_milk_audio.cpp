@@ -32,7 +32,7 @@ static const char* MUSIC_METATABLE = "milk.music";
 static int musicmeta_gc(lua_State* L) {
 	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
 	// Stop music before derefencing it. We do NOT want to release music from memory while it is playing.
-	milk::Locator::audioPlayer->stopMusic();
+	milk::Locator::audioPlayer->stopMusic(0);
 	milk::Locator::music->dereference(music->data);
 	return 0;
 }
@@ -93,12 +93,21 @@ static int audio_new_music(lua_State* L) {
 
 static int audio_play_music(lua_State* L) {
 	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
-	milk::Locator::audioPlayer->playMusic(music);
+	int fadeTime = (int)(luaL_optnumber(L, 2, 0) * 1000);
+	milk::Locator::audioPlayer->playMusic(music, fadeTime);
+	return 0;
+}
+
+static int audio_loop_music(lua_State* L) {
+	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
+	int fadeTime = (int)(luaL_optnumber(L, 2, 0) * 1000);
+	milk::Locator::audioPlayer->loopMusic(music, fadeTime);
 	return 0;
 }
 
 static int audio_stop_music(lua_State* L) {
-	milk::Locator::audioPlayer->stopMusic();
+	int fadeTime = (int)(luaL_optnumber(L, 1, 0) * 1000);
+	milk::Locator::audioPlayer->stopMusic(fadeTime);
 	return 0;
 }
 
@@ -115,6 +124,7 @@ static const luaL_Reg audio_funcs[] = {
 	{ "stop_sound", audio_stop_sound },
 	{ "new_music", audio_new_music },
 	{ "play_music", audio_play_music },
+	{ "loop_music", audio_loop_music },
 	{ "stop_music", audio_stop_music },
 	{ NULL, NULL }
 };

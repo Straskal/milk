@@ -24,6 +24,7 @@ namespace milk {
 	void luaM_setnumfield(lua_State* L, int index, const char* key, double value);
 	double luaM_getnumfield(lua_State* L, int index, const char* key);
 	bool luaM_getboolfield(lua_State* L, int index, const char* key);
+	void luaM_setenumfield(lua_State* L, int index, const char* name, const luaM_Enum* e, size_t size);
 }
 
 #endif
