@@ -20,6 +20,7 @@ local source_rect = { x = 0, y = 0, w = 64, h = 64 }
 local last_anim_time = 0
 local SECONDS_PER_ANIM_FRAME = 0.1
 local PLAYER_SPEED = 2
+local MUSIC_FADE_SECONDS = 1
 
 -- callback table
 local callbacks = {};
@@ -33,8 +34,8 @@ function callbacks.tick()
 
 	if keyboard.was_key_released(keys.ESCAPE) then window.close() end
 	if keyboard.was_key_pressed(keys.SPACE) then audio.play_sound(sound) end
-	if keyboard.was_key_pressed(keys.NUM1) then audio.loop_music(music) end
-	if keyboard.was_key_pressed(keys.NUM2) then audio.stop_music(1) end
+	if keyboard.was_key_pressed(keys.NUM1) then audio.loop_music(music, MUSIC_FADE_SECONDS) end
+	if keyboard.was_key_pressed(keys.NUM2) then audio.stop_music(MUSIC_FADE_SECONDS) end
 
 	if keyboard.is_key_pressed(keys.W) then player_pos.y = player_pos.y - 1 * PLAYER_SPEED end
 	if keyboard.is_key_pressed(keys.S) then player_pos.y = player_pos.y + 1 * PLAYER_SPEED end

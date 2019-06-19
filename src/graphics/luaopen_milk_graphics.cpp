@@ -66,9 +66,11 @@ static int graphics_draw(lua_State* L) {
 	int x = milk::luaM_getintfield(L, 2, "x");
 	int y = milk::luaM_getintfield(L, 2, "y");
 
+	int flip = luaL_optinteger(L, 3, milk::NO_FLIP);
+
 	milk::Rectangle src = { 0, 0, w, h };
 	milk::Rectangle dst = { x, y, w, h };
-	milk::Locator::renderer->draw(texture, &src, &dst, 0);
+	milk::Locator::renderer->draw(texture, &src, &dst, (milk::u8)flip);
 	return 0;
 }
 
@@ -83,7 +85,7 @@ static int graphics_drawex(lua_State* L) {
 	int rectw = milk::luaM_getintfield(L, 3, "w");
 	int recth = milk::luaM_getintfield(L, 3, "h");
 
-	int flip = luaL_checkinteger(L, 4);
+	int flip = luaL_optinteger(L, 4, milk::NO_FLIP);
 
 	milk::Rectangle src = { rectx, recty, rectw, recth };
 	milk::Rectangle dst = { posx, posy, rectw, recth };
