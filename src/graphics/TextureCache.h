@@ -10,7 +10,7 @@ namespace milk {
 	public:
 		virtual ~TextureCache() = default;
 
-		virtual TextureData* load(const std::string& path) = 0;
+		virtual TextureData* load(const char* path) = 0;
 		virtual void dereference(TextureData* textureData) = 0;
 	};
 }

@@ -10,7 +10,7 @@ namespace milk {
 	public:
 		virtual ~MusicCache() = default;
 
-		virtual MusicData* load(const std::string& path) = 0;
+		virtual MusicData* load(const char* path) = 0;
 		virtual void dereference(MusicData* musicData) = 0;
 	};
 }

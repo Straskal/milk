@@ -8,7 +8,7 @@
 namespace milk {
 	class SDLMusicCache : public MusicCache {
 	public:
-		MusicData* load(const std::string& path) override;
+		MusicData* load(const char* path) override;
 		void dereference(MusicData* musicData) override;
 		void free();
 

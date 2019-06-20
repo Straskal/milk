@@ -7,14 +7,14 @@
 
 #include "audio/Music.h"
 
-milk::MusicData* milk::SDLMusicCache::load(const std::string& path) {
+milk::MusicData* milk::SDLMusicCache::load(const char* path) {
 	auto found = m_music.find(path);
 	if (found != m_music.end()) {
 		++found->second->refCount;
 		return found->second;
 	}
 
-	Mix_Music* music = Mix_LoadMUS(path.c_str());
+	Mix_Music* music = Mix_LoadMUS(path);
 	if (!music) {
 		std::cout << "Mix_LoadMUS: " << Mix_GetError() << std::endl;
 		return nullptr;

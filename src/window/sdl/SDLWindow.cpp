@@ -26,12 +26,12 @@ bool milk::SDLWindow::init() {
 	return true;
 }
 
-std::string milk::SDLWindow::title() const {
+const char* milk::SDLWindow::title() const {
 	return SDL_GetWindowTitle(m_handle);
 }
 
-void milk::SDLWindow::title(const std::string& title) {
-	SDL_SetWindowTitle(m_handle, title.c_str());
+void milk::SDLWindow::title(const char* title) {
+	SDL_SetWindowTitle(m_handle, title);
 }
 
 std::tuple<int, int> milk::SDLWindow::size() const {

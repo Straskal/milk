@@ -7,14 +7,14 @@
 
 #include "audio/Sound.h"
 
-milk::SoundData* milk::SDLSoundCache::load(const std::string& path) {
+milk::SoundData* milk::SDLSoundCache::load(const char* path) {
 	auto found = m_sounds.find(path);
 	if (found != m_sounds.end()) {
 		++found->second->refCount;
 		return found->second;
 	}
 
-	Mix_Chunk* sample = Mix_LoadWAV(path.c_str());
+	Mix_Chunk* sample = Mix_LoadWAV(path);
 	if (!sample) {
 		std::cout << "Mix_LoadWAV: " << Mix_GetError() << std::endl;
 		return nullptr;

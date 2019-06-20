@@ -21,14 +21,14 @@ bool milk::SDLTextureCache::init(SDL_Renderer* rendererHandle) {
 	return true;
 }
 
-milk::TextureData* milk::SDLTextureCache::load(const std::string& path) {
+milk::TextureData* milk::SDLTextureCache::load(const char* path) {
 	auto found = m_textures.find(path);
 	if (found != m_textures.end()) {
 		++found->second->refCount;
 		return found->second;
 	}
 
-	SDL_Surface* sdlsurface = IMG_Load(path.c_str());
+	SDL_Surface* sdlsurface = IMG_Load(path);
 	if (sdlsurface == nullptr) {
 		std::cout << "Error loading image: " << IMG_GetError() << std::endl;
 		return nullptr;

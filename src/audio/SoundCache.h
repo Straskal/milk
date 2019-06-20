@@ -10,7 +10,7 @@ namespace milk {
 	public:
 		virtual ~SoundCache() = default;
 
-		virtual SoundData* load(const std::string& path) = 0;
+		virtual SoundData* load(const char* path) = 0;
 		virtual void dereference(SoundData* soundData) = 0;
 	};
 }

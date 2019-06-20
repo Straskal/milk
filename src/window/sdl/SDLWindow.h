@@ -17,8 +17,8 @@ namespace milk
 		SDLWindow();
 
 		bool init();
-		std::string title() const override;
-		void title(const std::string& title) override;
+		const char* title() const override;
+		void title(const char* title) override;
 		std::tuple<int, int> size() const override;
 		void size(int width, int height) override;
 		bool fullscreen() const override;

@@ -8,7 +8,7 @@
 namespace milk {
 	class SDLSoundCache : public SoundCache {
 	public:
-		SoundData* load(const std::string& path) override;
+		SoundData* load(const char* path) override;
 		void dereference(SoundData* soundData) override;
 		void free();
 

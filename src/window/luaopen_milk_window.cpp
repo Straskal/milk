@@ -9,7 +9,7 @@ extern "C" {
 #include "core/Locator.h"
 
 static int window_get_title(lua_State* L) {
-	const char* t = milk::Locator::window->title().c_str();
+	const char* t = milk::Locator::window->title();
 	lua_pushstring(L, t);
 	return 1;
 }
