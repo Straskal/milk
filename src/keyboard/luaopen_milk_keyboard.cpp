@@ -4,11 +4,11 @@
 #include "core/Locator.h"
 #include "core/luamlib.h"
 
-static int is_key_pressed(lua_State* L) {
+static int is_key_down(lua_State* L) {
 	int isnum;
 	int key = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
-		bool down = milk::Locator::keyboard->isKeyPressed((milk::Keys)key);
+		bool down = milk::Locator::keyboard->isKeyDown((milk::Keys)key);
 		lua_pushboolean(L, down);
 		return 1;
 	}
@@ -16,11 +16,11 @@ static int is_key_pressed(lua_State* L) {
 	return 1;
 }
 
-static int was_key_pressed(lua_State* L) {
+static int is_key_pressed(lua_State* L) {
 	int isnum;
 	int key = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
-		bool pressed = milk::Locator::keyboard->wasKeyPressed((milk::Keys)key);
+		bool pressed = milk::Locator::keyboard->isKeyPressed((milk::Keys)key);
 		lua_pushboolean(L, pressed);
 		return 1;
 	}
@@ -28,11 +28,11 @@ static int was_key_pressed(lua_State* L) {
 	return 1;
 }
 
-static int was_key_released(lua_State* L) {
+static int is_key_released(lua_State* L) {
 	int isnum;
 	int key = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
-		bool released = milk::Locator::keyboard->wasKeyReleased((milk::Keys)key);
+		bool released = milk::Locator::keyboard->isKeyReleased((milk::Keys)key);
 		lua_pushboolean(L, released);
 		return 1;
 	}
@@ -41,9 +41,9 @@ static int was_key_released(lua_State* L) {
 }
 
 static const luaL_Reg keyboard_funcs[] = {
+	{ "is_key_down", is_key_down },
 	{ "is_key_pressed", is_key_pressed },
-	{ "was_key_pressed", was_key_pressed },
-	{ "was_key_released", was_key_released },
+	{ "is_key_released", is_key_released },
 	{ NULL, NULL }
 };
 

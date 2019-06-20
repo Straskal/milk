@@ -5,6 +5,7 @@ local audio = require("milk.audio")
 local mouse = require("milk.mouse")
 
 local keys = keyboard.keys
+local mouse_buttons = mouse.buttons
 local flip_flags = graphics.flip_flags
 
 -- initialize game
@@ -30,24 +31,24 @@ local callbacks = {};
 
 -- game logic goes here
 function callbacks.tick()
-	if keyboard.was_key_pressed(keys.F) then
+	if keyboard.is_key_pressed(keys.F) then
 		local toggle = not window.is_fullscreen()
 		window.set_fullscreen(toggle)
 	end
 
-	if keyboard.was_key_released(keys.ESCAPE) then window.close() end
-	if mouse.was_left_pressed() then audio.play_sound(sound) end
-	if keyboard.was_key_pressed(keys.NUM1) then audio.loop_music(music, MUSIC_FADE_SECONDS) end
-	if keyboard.was_key_pressed(keys.NUM2) then audio.stop_music(MUSIC_FADE_SECONDS) end
+	if keyboard.is_key_released(keys.ESCAPE) then window.close() end
+	if mouse.is_button_pressed(mouse_buttons.LEFT) then audio.play_sound(sound) end
+	if keyboard.is_key_pressed(keys.NUM1) then audio.loop_music(music, MUSIC_FADE_SECONDS) end
+	if keyboard.is_key_pressed(keys.NUM2) then audio.stop_music(MUSIC_FADE_SECONDS) end
 
-	if keyboard.is_key_pressed(keys.W) then player_pos.y = player_pos.y - 1 * PLAYER_SPEED end
-	if keyboard.is_key_pressed(keys.S) then player_pos.y = player_pos.y + 1 * PLAYER_SPEED end
+	if keyboard.is_key_down(keys.W) then player_pos.y = player_pos.y - 1 * PLAYER_SPEED end
+	if keyboard.is_key_down(keys.S) then player_pos.y = player_pos.y + 1 * PLAYER_SPEED end
 
-	if keyboard.is_key_pressed(keys.A) then 
+	if keyboard.is_key_down(keys.A) then 
 		player_pos.x = player_pos.x - 1 * PLAYER_SPEED 
 		player_flip = player_flip | flip_flags.X;
 	end
-	if keyboard.is_key_pressed(keys.D) then 
+	if keyboard.is_key_down(keys.D) then 
 		player_pos.x = player_pos.x + 1 * PLAYER_SPEED
 		player_flip = player_flip & ~flip_flags.X;
 	end
