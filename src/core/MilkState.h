@@ -1,18 +1,17 @@
 #ifndef _MILK_H_
 #define _MILK_H_
 
-#include <string>
-
 struct lua_State;
 
 namespace milk {
+	class SDLWindow;
+	class SDLMouse;
+	class SDLKeyboard;
+	class SDLRenderer;
+	class SDLTextureCache;
 	class SDLAudioPlayer;
 	class SDLMusicCache;
 	class SDLSoundCache;
-	class SDLRenderer;
-	class SDLWindow;
-	class SDLKeyboard;
-	class SDLTextureCache;
 
 	class MilkState {
 	public:
@@ -23,8 +22,9 @@ namespace milk {
 	private:
 		lua_State* m_lua;
 		SDLWindow* m_window;
-		SDLRenderer* m_renderer;
+		SDLMouse* m_mouse;
 		SDLKeyboard* m_keyboard;
+		SDLRenderer* m_renderer;
 		SDLTextureCache* m_textures;
 		SDLAudioPlayer* m_audioPlayer;
 		SDLSoundCache* m_sounds;

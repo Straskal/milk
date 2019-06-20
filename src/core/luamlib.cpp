@@ -2,6 +2,7 @@
 
 #include "audio/luaopen_milk_audio.h"
 #include "graphics/luaopen_milk_graphics.h"
+#include "mouse/luaopen_milk_mouse.h"
 #include "keyboard/luaopen_milk_keyboard.h"
 #include "window/luaopen_milk_window.h"
 
@@ -23,6 +24,7 @@ void milk::luaM_preloadpackage(lua_State* L, const char* name, lua_CFunction ope
 
 void milk::luaM_openlibs(lua_State* L) {
 	luaM_preloadpackage(L, "milk.window", luaopen_milk_window);
+	luaM_preloadpackage(L, "milk.mouse", luaopen_milk_mouse);
 	luaM_preloadpackage(L, "milk.keyboard", luaopen_milk_keyboard);
 	luaM_preloadpackage(L, "milk.graphics", luaopen_milk_graphics);
 	luaM_preloadpackage(L, "milk.audio", luaopen_milk_audio);

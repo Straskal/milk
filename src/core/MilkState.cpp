@@ -20,6 +20,7 @@ extern "C" {
 #include "graphics/sdl/SDLRenderer.h"
 #include "graphics/sdl/SDLTextureCache.h"
 #include "keyboard/sdl/SDLKeyboard.h"
+#include "mouse/sdl/SDLMouse.h"
 #include "window/sdl/SDLWindow.h"
 
 #ifndef MILK_MAIN_LUA_PATH
@@ -52,8 +53,9 @@ static void print_runtime_error(const char* err) {
 milk::MilkState::MilkState()
 	: m_lua{ nullptr }
 	, m_window{ nullptr }
-	, m_renderer{ nullptr }
+	, m_mouse{ nullptr }
 	, m_keyboard{ nullptr }
+	, m_renderer{ nullptr }
 	, m_textures{ nullptr }
 	, m_audioPlayer{ nullptr }
 	, m_music{ nullptr }
@@ -92,15 +94,17 @@ int milk::MilkState::run() {
 
 	m_music = new SDLMusicCache();
 	m_sounds = new SDLSoundCache();
+	m_mouse = new SDLMouse();
 	m_keyboard = new SDLKeyboard();
 
 	// 'Register' systems with the service locator for lua modules
 	Locator::window = m_window;
-	Locator::renderer = m_renderer;
+	Locator::mouse = m_mouse;
 	Locator::keyboard = m_keyboard;
+	Locator::renderer = m_renderer;
 	Locator::textures = m_textures;
-	Locator::sounds = m_sounds;
 	Locator::audioPlayer = m_audioPlayer;
+	Locator::sounds = m_sounds;
 	Locator::music = m_music;
 
 	m_lua = luaL_newstate();
@@ -116,6 +120,7 @@ int milk::MilkState::run() {
 
 		lua_close(m_lua);
 		free_ptr(m_keyboard);
+		free_ptr(m_mouse);
 		deinit_and_free_ptr(m_sounds);
 		deinit_and_free_ptr(m_music);
 		deinit_and_free_ptr(m_audioPlayer);
@@ -131,6 +136,7 @@ int milk::MilkState::run() {
 
 		lua_close(m_lua);
 		free_ptr(m_keyboard);
+		free_ptr(m_mouse);
 		deinit_and_free_ptr(m_sounds);
 		deinit_and_free_ptr(m_music);
 		deinit_and_free_ptr(m_audioPlayer);
@@ -154,6 +160,7 @@ int milk::MilkState::run() {
 			}
 		}
 
+		m_mouse->updateState();
 		m_keyboard->updateState();
 
 		lua_getfield(m_lua, CALLBACK_TABLE_STACK_INDEX, "tick");
@@ -184,6 +191,7 @@ int milk::MilkState::run() {
 
 	lua_close(m_lua);
 	free_ptr(m_keyboard);
+	free_ptr(m_mouse);
 	deinit_and_free_ptr(m_sounds);
 	deinit_and_free_ptr(m_music);
 	deinit_and_free_ptr(m_audioPlayer);

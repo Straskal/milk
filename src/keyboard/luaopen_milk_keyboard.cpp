@@ -1,5 +1,6 @@
 #include "luaopen_milk_keyboard.h"
 
+#include "Keyboard.h"
 #include "core/Locator.h"
 #include "core/luamlib.h"
 

@@ -63,12 +63,12 @@ find_package(Lua53 REQUIRED)
 # audio
 set(MILK_SRC_AUDIO
 	src/audio/AudioPlayer.h
-	src/audio/luaopen_milk_audio.cpp
-	src/audio/luaopen_milk_audio.h
 	src/audio/Music.h
 	src/audio/MusicCache.h
 	src/audio/SoundCache.h
 	src/audio/Sound.h
+	src/audio/luaopen_milk_audio.cpp
+	src/audio/luaopen_milk_audio.h
 	src/audio/sdl/SDLAudioPlayer.cpp
 	src/audio/sdl/SDLAudioPlayer.h
 	src/audio/sdl/SDLMusicCache.cpp
@@ -122,11 +122,20 @@ set(MILK_SRC_MATH
 	src/math/Vector2.h
 )
 
+# mouse
+set(MILK_SRC_MOUSE
+	src/mouse/Mouse.h
+	src/mouse/luaopen_milk_mouse.cpp
+	src/mouse/luaopen_milk_mouse.h
+	src/mouse/sdl/SDLMouse.cpp
+	src/mouse/sdl/SDLMouse.h
+)
+
 # window
 set(MILK_SRC_WINDOW
+	src/window/Window.h	
 	src/window/luaopen_milk_window.cpp
 	src/window/luaopen_milk_window.h
-	src/window/Window.h	
 	src/window/sdl/SDLWindow.cpp
 	src/window/sdl/SDLWindow.h
 )
@@ -138,6 +147,7 @@ set(MILK_SRC_FILES
 	${MILK_SRC_GRAPHICS}
 	${MILK_SRC_KEYBOARD}
 	${MILK_SRC_MATH}
+	${MILK_SRC_MOUSE}
 	${MILK_SRC_WINDOW}
 )
 

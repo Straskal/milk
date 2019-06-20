@@ -5,6 +5,7 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+#include "AudioPlayer.h"
 #include "Music.h"
 #include "MusicCache.h"
 #include "Sound.h"

@@ -2,6 +2,7 @@ local window = require("milk.window")
 local keyboard = require("milk.keyboard")
 local graphics = require("milk.graphics")
 local audio = require("milk.audio")
+local mouse = require("milk.mouse")
 
 local keys = keyboard.keys
 local flip_flags = graphics.flip_flags
@@ -35,7 +36,7 @@ function callbacks.tick()
 	end
 
 	if keyboard.was_key_released(keys.ESCAPE) then window.close() end
-	if keyboard.was_key_pressed(keys.SPACE) then audio.play_sound(sound) end
+	if mouse.was_left_pressed() then audio.play_sound(sound) end
 	if keyboard.was_key_pressed(keys.NUM1) then audio.loop_music(music, MUSIC_FADE_SECONDS) end
 	if keyboard.was_key_pressed(keys.NUM2) then audio.stop_music(MUSIC_FADE_SECONDS) end
 

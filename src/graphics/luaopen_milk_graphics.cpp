@@ -6,7 +6,9 @@ extern "C" {
 }
 
 #include "Color.h"
+#include "Renderer.h"
 #include "Texture.h"
+#include "TextureCache.h"
 #include "core/Locator.h"
 #include "core/luamlib.h"
 #include "math/Rectangle.h"

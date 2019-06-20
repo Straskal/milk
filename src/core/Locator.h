@@ -1,20 +1,22 @@
 #ifndef _LOCATOR_H_
 #define _LOCATOR_H_
 
-#include "audio/AudioPlayer.h"
-#include "audio/MusicCache.h"
-#include "audio/SoundCache.h"
-#include "graphics/Renderer.h"
-#include "graphics/TextureCache.h"
-#include "keyboard/Keyboard.h"
-#include "window/Window.h"
-
 /*
 	The Locator's intended usage is for Lua modules.
 */
 namespace milk {
+	class Window;
+	class Mouse;
+	class Keyboard;
+	class Renderer;
+	class TextureCache;
+	class AudioPlayer;
+	class MusicCache;
+	class SoundCache;
+
 	struct Locator {
 		static Window* window;
+		static Mouse* mouse;
 		static Keyboard* keyboard;
 		static Renderer* renderer;
 		static TextureCache* textures;
