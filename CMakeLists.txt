@@ -83,8 +83,8 @@ set(MILK_SRC_CORE
 	src/core/Locator.h
 	src/core/luamlib.cpp
 	src/core/luamlib.h
-	src/core/MilkState.cpp
-	src/core/MilkState.h
+	src/core/run.cpp
+	src/core/run.h
 )
 
 # data
