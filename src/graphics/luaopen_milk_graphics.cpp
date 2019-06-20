@@ -109,11 +109,49 @@ static int graphics_drawex(lua_State* L) {
 	return 0;
 }
 
+static int graphics_draw_rect(lua_State* L) {
+	int rectx = milk::luaM_getintfield(L, 1, "x");
+	int recty = milk::luaM_getintfield(L, 1, "y");
+	int rectw = milk::luaM_getintfield(L, 1, "w");
+	int recth = milk::luaM_getintfield(L, 1, "h");
+
+	milk::u8 r = (milk::u8)milk::luaM_getintfield(L, 2, "r");
+	milk::u8 b = (milk::u8)milk::luaM_getintfield(L, 2, "b");
+	milk::u8 g = (milk::u8)milk::luaM_getintfield(L, 2, "g");
+	milk::u8 a = (milk::u8)milk::luaM_getintfield(L, 2, "a");
+
+	milk::Rectangle rect = { rectx, recty, rectw, recth };
+	milk::Color color = { r, b, g, a };
+
+	milk::Locator::renderer->drawRectangle(&rect, &color);
+	return 0;
+}
+
+static int graphics_draw_filled_rect(lua_State* L) {
+	int rectx = milk::luaM_getintfield(L, 1, "x");
+	int recty = milk::luaM_getintfield(L, 1, "y");
+	int rectw = milk::luaM_getintfield(L, 1, "w");
+	int recth = milk::luaM_getintfield(L, 1, "h");
+
+	milk::u8 r = (milk::u8)milk::luaM_getintfield(L, 2, "r");
+	milk::u8 b = (milk::u8)milk::luaM_getintfield(L, 2, "b");
+	milk::u8 g = (milk::u8)milk::luaM_getintfield(L, 2, "g");
+	milk::u8 a = (milk::u8)milk::luaM_getintfield(L, 2, "a");
+
+	milk::Rectangle rect = { rectx, recty, rectw, recth };
+	milk::Color color = { r, b, g, a };
+
+	milk::Locator::renderer->drawRectangleFilled(&rect, &color);
+	return 0;
+}
+
 static const luaL_Reg graphics_funcs[] = {
 	{ "new_texture", graphics_new_texture },
 	{ "set_virtual_resolution", graphics_set_virtual_resolution },
 	{ "draw", graphics_draw },
 	{ "drawex", graphics_drawex },
+	{ "draw_rect", graphics_draw_rect },
+	{ "draw_filled_rect", graphics_draw_filled_rect },
 	{ NULL, NULL }
 };
 

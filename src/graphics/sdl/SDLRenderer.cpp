@@ -37,7 +37,13 @@ void milk::SDLRenderer::clear() {
 	SDL_RenderClear(m_handle);
 }
 
-void milk::SDLRenderer::drawRectangle(const milk::Rectangle* destinationRectangle, const milk::Color* color) {
+void milk::SDLRenderer::drawRectangle(const Rectangle* destinationRectangle, const Color* color) {
+	SDL_Rect dst = { destinationRectangle->x, destinationRectangle->y, destinationRectangle->width, destinationRectangle->height };
+	SDL_SetRenderDrawColor(m_handle, color->r, color->b, color->g, color->a);
+	SDL_RenderDrawRect(m_handle, &dst);
+}
+
+void milk::SDLRenderer::drawRectangleFilled(const milk::Rectangle* destinationRectangle, const milk::Color* color) {
 	SDL_Rect dst = { destinationRectangle->x, destinationRectangle->y, destinationRectangle->width, destinationRectangle->height };
 	SDL_SetRenderDrawColor(m_handle, color->r, color->b, color->g, color->a);
 	SDL_RenderFillRect(m_handle, &dst);

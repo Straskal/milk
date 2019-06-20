@@ -21,6 +21,8 @@ local last_anim_time = 0
 local SECONDS_PER_ANIM_FRAME = 0.1
 local PLAYER_SPEED = 2
 local MUSIC_FADE_SECONDS = 1
+local rect = { x = 10, y = 10, w = 300, h = 300 }
+local rect_color = { r = 0xFF, b = 0x00, g = 0x00, a = 0xFF }
 
 -- callback table
 local callbacks = {};
@@ -61,6 +63,7 @@ end
 
 -- draw calls go here
 function callbacks.draw()
+	graphics.draw_rect(rect, rect_color)
 	graphics.drawex(player_texture, player_pos, source_rect, player_flip)
 end
 
