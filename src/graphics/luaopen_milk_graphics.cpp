@@ -19,6 +19,20 @@ static int texturemeta_gc(lua_State* L) {
 	return 0;
 }
 
+static int texturemeta_get_path(lua_State* L) {
+	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
+	const char* path = texture->data->path.c_str();
+	lua_pushstring(L, path);
+	return 1;
+}
+
+static int texturemeta_get_ref_count(lua_State* L) {
+	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
+	int refCount = texture->data->refCount;
+	lua_pushinteger(L, refCount);
+	return 1;
+}
+
 static int texturemeta_get_size(lua_State* L) {
 	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
 	lua_pushinteger(L, texture->data->width);
@@ -28,6 +42,8 @@ static int texturemeta_get_size(lua_State* L) {
 
 static const luaL_Reg texturemeta_funcs[] = {
 	{ "__gc", texturemeta_gc },
+	{ "get_path", texturemeta_get_path },
+	{ "get_ref_count", texturemeta_get_ref_count },
 	{ "get_size", texturemeta_get_size },
 	{ NULL, NULL }
 };
