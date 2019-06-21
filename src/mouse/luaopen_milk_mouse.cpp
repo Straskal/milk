@@ -8,6 +8,8 @@ extern "C" {
 #include "Mouse.h"
 #include "core/Locator.h"
 #include "core/luamlib.h"
+#include "graphics/Renderer.h"
+#include "window/Window.h"
 
 static int mouse_is_button_down(lua_State* L) {
 	int isnum;
@@ -45,10 +47,25 @@ static int mouse_is_button_released(lua_State* L) {
 	return 1;
 }
 
-static int mouse_get_position(lua_State* L) {
+static int mouse_get_win_position(lua_State* L) {
 	std::tuple<int, int> pos = milk::Locator::mouse->getPosition();
-	lua_pushboolean(L, std::get<0>(pos));
-	lua_pushboolean(L, std::get<1>(pos));
+	lua_pushinteger(L, std::get<0>(pos));
+	lua_pushinteger(L, std::get<1>(pos));
+	return 2;
+}
+
+static int mouse_get_position(lua_State* L) {
+	// SDL's logical resolution filter only applies to events pumped through the event loop, not the real time state updates.
+	// This means that we have to handle it ourselves.
+	std::tuple<int, int> pos = milk::Locator::mouse->getPosition();
+	std::tuple<int, int> winsize = milk::Locator::window->size();
+	std::tuple<int, int> resolution = milk::Locator::renderer->resolution();
+
+	int mousex = (float)((float)std::get<0>(pos) / std::get<0>(winsize)) * std::get<0>(resolution);
+	int mousey = (float)((float)std::get<1>(pos) / std::get<1>(winsize)) * std::get<1>(resolution);
+
+	lua_pushinteger(L, mousex);
+	lua_pushinteger(L, mousey);
 	return 2;
 }
 
@@ -57,6 +74,7 @@ static const luaL_Reg mouse_funcs[] = {
 	{ "is_button_pressed", mouse_is_button_pressed },
 	{ "is_button_released", mouse_is_button_released },
 	{ "get_position", mouse_get_position },
+	{ "get_win_position", mouse_get_win_position },
 	{ NULL, NULL }
 };
 

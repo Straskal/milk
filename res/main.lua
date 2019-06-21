@@ -35,9 +35,19 @@ function callbacks.tick()
 		local toggle = not window.is_fullscreen()
 		window.set_fullscreen(toggle)
 	end
+	
+	if mouse.is_button_pressed(mouse_buttons.LEFT) then 
+		local mx, my = mouse.get_position()
+		print("mouse: " .. mx .. " " .. my)
+		print("player: " .. player_pos.x .. " " .. player_pos.y)
+		if mx <= player_pos.x + 64 and mx >= player_pos.x then
+			if my <= player_pos.y + 64 and my >= player_pos.y then
+				audio.play_sound(sound) 
+			end
+		end
+	end
 
 	if keyboard.is_key_released(keys.ESCAPE) then window.close() end
-	if mouse.is_button_pressed(mouse_buttons.LEFT) then audio.play_sound(sound) end
 	if keyboard.is_key_pressed(keys.NUM1) then audio.loop_music(music, MUSIC_FADE_SECONDS) end
 	if keyboard.is_key_pressed(keys.NUM2) then audio.stop_music(MUSIC_FADE_SECONDS) end
 
