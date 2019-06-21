@@ -14,18 +14,23 @@ window.set_size(1280, 720)
 graphics.set_virtual_resolution(640, 360)
 
 local player_texture = graphics.new_texture("res/player.png")
-local player_flip = flip_flags.NONE
 local sound = audio.new_sound("res/sound.wav");
 local music = audio.new_music("res/music.mp3")
+local player_flip = flip_flags.NONE
+
 local player_pos = { x = 0, y = 0 }
 local source_rect = { x = 0, y = 0, w = 64, h = 64 }
+
 local last_anim_time = 0
+
+local rect = { x = 10, y = 10, w = 300, h = 300 }
+local rect_color = { r = 1, b = 0, g = 0, a = 1 }
+
+local hover_over_player = false
+
 local SECONDS_PER_ANIM_FRAME = 0.1
 local PLAYER_SPEED = 2
 local MUSIC_FADE_SECONDS = 1
-local rect = { x = 10, y = 10, w = 300, h = 300 }
-local rect_color = { r = 1, b = 0, g = 0, a = 1 }
-local hover_over_player = false
 
 -- callback table
 local callbacks = {};
