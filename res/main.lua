@@ -24,7 +24,8 @@ local SECONDS_PER_ANIM_FRAME = 0.1
 local PLAYER_SPEED = 2
 local MUSIC_FADE_SECONDS = 1
 local rect = { x = 10, y = 10, w = 300, h = 300 }
-local rect_color = { r = 0xFF, b = 0x00, g = 0x00, a = 0xFF }
+local rect_color = { r = 1, b = 0, g = 0, a = 1 }
+local hover_over_player = false
 
 -- callback table
 local callbacks = {};
@@ -35,16 +36,15 @@ function callbacks.tick()
 		local toggle = not window.is_fullscreen()
 		window.set_fullscreen(toggle)
 	end
-	
-	if mouse.is_button_pressed(mouse_buttons.LEFT) then 
-		local mx, my = mouse.get_position()
-		print("mouse: " .. mx .. " " .. my)
-		print("player: " .. player_pos.x .. " " .. player_pos.y)
-		if mx <= player_pos.x + 64 and mx >= player_pos.x then
-			if my <= player_pos.y + 64 and my >= player_pos.y then
-				audio.play_sound(sound) 
-			end
+
+	local mx, my = mouse.get_position()
+	if mx <= player_pos.x + 64 and mx >= player_pos.x and my <= player_pos.y + 64 and my >= player_pos.y then
+		if mouse.is_button_pressed(mouse_buttons.LEFT) then 
+			audio.play_sound(sound)
 		end
+		hover_over_player = true
+	else
+		hover_over_player = false
 	end
 
 	if keyboard.is_key_released(keys.ESCAPE) then window.close() end
@@ -75,8 +75,13 @@ end
 
 -- draw calls go here
 function callbacks.draw()
-	graphics.draw_rect(rect, rect_color)
-	graphics.drawex(player_texture, player_pos, source_rect, player_flip)
+	graphics.set_draw_color(rect_color.r, rect_color.b, rect_color.g, rect_color.a)
+	graphics.draw_rect(rect.x, rect.y, rect.w, rect.h)
+	if hover_over_player then
+		graphics.draw_rect(player_pos.x, player_pos.y, source_rect.w, source_rect.h)
+	end
+	graphics.set_draw_color(1, 1, 1, 1)
+	graphics.drawex(player_texture, player_pos.x, player_pos.y, source_rect.x, source_rect.y, source_rect.w, source_rect.h, player_flip)
 end
 
 return callbacks

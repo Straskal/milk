@@ -13,8 +13,9 @@ namespace milk {
 
 		bool init(SDL_Window* windowHandle);
 		void clear() override;
-		void drawRectangle(const Rectangle* destinationRectangle, const Color* color) override;
-		void drawRectangleFilled(const Rectangle* destinationRectangle, const Color* color) override;
+		void setDrawColor(const Color* color) override;
+		void drawRectangle(const Rectangle* destinationRectangle) override;
+		void drawRectangleFilled(const Rectangle* destinationRectangle) override;
 		void draw(const Texture* texture, const Rectangle* sourceRectangle, const Rectangle* destinationRectangle, u8 flipFlags) override;
 		void present() override;
 		std::tuple<int, int> resolution() const override;
