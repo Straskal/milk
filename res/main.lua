@@ -47,13 +47,24 @@ function callbacks.tick()
 		hover_over_player = false
 	end
 
-	if keyboard.is_key_released(keys.ESCAPE) then window.close() end
-	if keyboard.is_key_pressed(keys.NUM1) then audio.loop_music(music, MUSIC_FADE_SECONDS) end
-	if keyboard.is_key_pressed(keys.NUM2) then audio.stop_music(MUSIC_FADE_SECONDS) end
+	if keyboard.is_key_released(keys.ESCAPE) then 
+		window.close() 
+	end
 
-	if keyboard.is_key_down(keys.W) then player_pos.y = player_pos.y - 1 * PLAYER_SPEED end
-	if keyboard.is_key_down(keys.S) then player_pos.y = player_pos.y + 1 * PLAYER_SPEED end
+	if keyboard.is_key_pressed(keys.NUM1) then
+		audio.loop_music(music, MUSIC_FADE_SECONDS) 
+	end
 
+	if keyboard.is_key_pressed(keys.NUM2) then 
+		audio.stop_music(MUSIC_FADE_SECONDS) 
+	end
+
+	if keyboard.is_key_down(keys.W) then 
+		player_pos.y = player_pos.y - 1 * PLAYER_SPEED
+	end
+	if keyboard.is_key_down(keys.S) then 
+		player_pos.y = player_pos.y + 1 * PLAYER_SPEED 
+	end
 	if keyboard.is_key_down(keys.A) then 
 		player_pos.x = player_pos.x - 1 * PLAYER_SPEED 
 		player_flip = player_flip | flip_flags.X;
