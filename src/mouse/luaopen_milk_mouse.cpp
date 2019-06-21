@@ -61,8 +61,8 @@ static int mouse_get_position(lua_State* L) {
 	std::tuple<int, int> winsize = milk::Locator::window->size();
 	std::tuple<int, int> resolution = milk::Locator::renderer->resolution();
 
-	int mousex = (float)((float)std::get<0>(pos) / std::get<0>(winsize)) * std::get<0>(resolution);
-	int mousey = (float)((float)std::get<1>(pos) / std::get<1>(winsize)) * std::get<1>(resolution);
+	int mousex = (int)(((float)std::get<0>(pos) / std::get<0>(winsize)) * std::get<0>(resolution));
+	int mousey = (int)(((float)std::get<1>(pos) / std::get<1>(winsize)) * std::get<1>(resolution));
 
 	lua_pushinteger(L, mousex);
 	lua_pushinteger(L, mousey);
