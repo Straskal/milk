@@ -106,12 +106,10 @@ static int graphics_drawex(lua_State* L) {
 	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
 	int posx = luaL_checkinteger(L, 2);
 	int posy = luaL_checkinteger(L, 3);
-
 	int rectx = luaL_checkinteger(L, 4);
 	int recty = luaL_checkinteger(L, 5);
 	int rectw = luaL_checkinteger(L, 6);
 	int recth = luaL_checkinteger(L, 7);
-
 	int flip = luaL_optinteger(L, 8, milk::NO_FLIP);
 
 	milk::Rectangle src = { rectx, recty, rectw, recth };
