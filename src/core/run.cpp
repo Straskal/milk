@@ -67,10 +67,10 @@ static bool init() {
 	mouse = new milk::SDLMouse();
 	keyboard = new milk::SDLKeyboard();
 
-	return window->init()
+	return window->init() // SDL_Init
 		&& renderer->init(window->handle())
-		&& texture_cache->init(renderer->handle())
-		&& audio_player->init();
+		&& texture_cache->init(renderer->handle()) // IMG_Init
+		&& audio_player->init(); // Mix_init
 }
 
 // 'Register' systems with the service locator for lua modules
