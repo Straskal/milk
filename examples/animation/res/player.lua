@@ -55,7 +55,7 @@ local tick = function(self)
             self.current_anim_frame = 1
         end
         set_source_rect(self)
-		self.last_anim_time = totaltime
+        self.last_anim_time = totaltime
     end
 
     -- input
@@ -95,7 +95,7 @@ local new = function()
         init = init,
         tick = tick,
         draw = draw
-     }
+    }
 end
 
 return {
