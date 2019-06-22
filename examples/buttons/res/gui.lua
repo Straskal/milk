@@ -52,7 +52,7 @@ function gui.button(id, x, y, texture, src_rect)
         end
     else
         graphics.set_draw_color(1, 1, 1, 1)
-            graphics.drawx(texture, x, y, src_rect.x, src_rect.y, src_rect.w, src_rect.h, 1, 0)
+        graphics.drawx(texture, x, y, src_rect.x, src_rect.y, src_rect.w, src_rect.h, 1, 0)
     end
     -- if button is not down but control is hot and active then the user has clicked this button
     return not isdown and hot_id == id and active_id == id
