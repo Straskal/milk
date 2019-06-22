@@ -10,11 +10,8 @@ namespace milk {
 	public:
 		SDLMouse();
 
-		// Called at the beginning of each frame to reset it's scroll value
 		void frameBegin();
 		void handleEvent(SDL_Event* e);
-
-		// Must be called after polling all events in event loop.
 		void updateState();
 
 		std::tuple<int, int> getPosition() const override;

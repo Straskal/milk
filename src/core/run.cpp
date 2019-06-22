@@ -171,14 +171,11 @@ int milk::run() {
 		deinit();
 		return MILK_FAIL;
 	}
-
 	register_locator();
-
 	if (!init_api_and_callbacks()) {
 		deinit();
 		return MILK_FAIL;
 	}
-
 	main_loop();
 	deinit();
 	return MILK_SUCCESS;
