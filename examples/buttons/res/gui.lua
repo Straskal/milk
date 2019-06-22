@@ -3,18 +3,17 @@ local keyboard = require("milk.keyboard")
 local graphics = require("milk.graphics")
 local mouse_buttons = mouse.buttons
 
--- helpers
-local is_mouse_hover = function(x, y, w, h)
-    local mx, my = mouse.get_position()
-    return mx > x and mx <= x + w and my > y and my <= y + h
-end
-
 -- state
 local mousex = 0
 local mousey = 0
 local isdown = false
 local hot_id = -1
 local active_id = -1
+
+-- helpers
+local is_mouse_hover = function(x, y, w, h)
+    return mousex > x and mousex <= x + w and mousey > y and mousey <= y + h
+end
 
 -- styling
 local hot_color = { 0.1, 1, 1, 1 }
@@ -24,6 +23,7 @@ local gui = {}
 
 function gui.start()
     hot_id = 0
+    mousex, mousey = mouse.get_position()
     isdown = mouse.is_button_down(mouse_buttons.LEFT)
 end
 
