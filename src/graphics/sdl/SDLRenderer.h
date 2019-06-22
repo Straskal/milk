@@ -1,6 +1,9 @@
 #ifndef _SDL_RENDERER_H_
 #define _SDL_RENDERER_H_
 
+#include "SDL_render.h"
+#include "SDL_rect.h"
+
 #include "graphics/Renderer.h"
 
 struct SDL_Renderer;
@@ -25,6 +28,10 @@ namespace milk {
 
 	private:
 		SDL_Renderer* m_handle;
+		
+		// These values are cached so we don't create them with every draw call
+		SDL_Rect m_sourceRect;
+		SDL_Rect m_destRect;
 	};
 }
 

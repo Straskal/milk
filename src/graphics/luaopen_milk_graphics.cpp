@@ -15,6 +15,10 @@ extern "C" {
 
 static const char* TEXTURE_METATABLE = "milk.texture";
 
+static milk::Color draw_color;
+static milk::Rectangle source_rect;
+static milk::Rectangle dest_rect;
+
 static int texturemeta_gc(lua_State* L) {
 	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
 	milk::Locator::textures->dereference(texture->data);
@@ -81,8 +85,12 @@ static int graphics_set_draw_color(lua_State* L) {
 	milk::u8 g = (milk::u8)(luaL_checknumber(L, 3) * 255);
 	milk::u8 a = (milk::u8)(luaL_checknumber(L, 4) * 255);
 
-	milk::Color color = { r, b, g, a };
-	milk::Locator::renderer->setDrawColor(&color);
+	draw_color.r = r;
+	draw_color.b = b;
+	draw_color.g = g;
+	draw_color.a = a;
+
+	milk::Locator::renderer->setDrawColor(&draw_color);
 	return 0;
 }
 
@@ -96,9 +104,17 @@ static int graphics_draw(lua_State* L) {
 	int w = data->width;
 	int h = data->height;
 
-	milk::Rectangle src = { 0, 0, w, h };
-	milk::Rectangle dst = { x, y, w, h };
-	milk::Locator::renderer->draw(texture, &src, &dst, (milk::u8)flip);
+	source_rect.x = 0;
+	source_rect.y = 0;
+	source_rect.width = w;
+	source_rect.height = h;
+
+	dest_rect.x = x;
+	dest_rect.y = y;
+	dest_rect.width = w;
+	dest_rect.height = h;
+
+	milk::Locator::renderer->draw(texture, &source_rect, &dest_rect, (milk::u8)flip);
 	return 0;
 }
 
@@ -112,9 +128,17 @@ static int graphics_drawex(lua_State* L) {
 	int recth = luaL_checkinteger(L, 7);
 	int flip = luaL_optinteger(L, 8, milk::NO_FLIP);
 
-	milk::Rectangle src = { rectx, recty, rectw, recth };
-	milk::Rectangle dst = { posx, posy, rectw, recth };
-	milk::Locator::renderer->draw(texture, &src, &dst, (milk::u8)flip);
+	source_rect.x = rectx;
+	source_rect.y = recty;
+	source_rect.width = rectw;
+	source_rect.height = recth;
+
+	dest_rect.x = posx;
+	dest_rect.y = posy;
+	dest_rect.width = rectw;
+	dest_rect.height = recth;
+
+	milk::Locator::renderer->draw(texture, &source_rect, &dest_rect, (milk::u8)flip);
 	return 0;
 }
 
@@ -124,8 +148,12 @@ static int graphics_draw_rect(lua_State* L) {
 	int rectw = luaL_checkinteger(L, 3);
 	int recth = luaL_checkinteger(L, 4);
 
-	milk::Rectangle rect = { rectx, recty, rectw, recth };
-	milk::Locator::renderer->drawRectangle(&rect);
+	dest_rect.x = rectx;
+	dest_rect.y = recty;
+	dest_rect.width = rectw;
+	dest_rect.height = recth;
+
+	milk::Locator::renderer->drawRectangle(&dest_rect);
 	return 0;
 }
 
@@ -135,8 +163,12 @@ static int graphics_draw_filled_rect(lua_State* L) {
 	int rectw = luaL_checkinteger(L, 3);
 	int recth = luaL_checkinteger(L, 4);
 
-	milk::Rectangle rect = { rectx, recty, rectw, recth };
-	milk::Locator::renderer->drawRectangleFilled(&rect);
+	dest_rect.x = rectx;
+	dest_rect.y = recty;
+	dest_rect.width = rectw;
+	dest_rect.height = recth;
+
+	milk::Locator::renderer->drawRectangleFilled(&dest_rect);
 	return 0;
 }
 

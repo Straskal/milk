@@ -12,8 +12,17 @@
 
 const static int FIRST_SUPPORTED_RENDERING_DRIVER = -1;
 
+static void milkrect_to_sdlrect(const milk::Rectangle* milkrect, SDL_Rect* sdlrect) {
+	sdlrect->x = milkrect->x;
+	sdlrect->y = milkrect->y;
+	sdlrect->w = milkrect->width;
+	sdlrect->h = milkrect->height;
+}
+
 milk::SDLRenderer::SDLRenderer()
-	: m_handle{ nullptr } { }
+	: m_handle{ nullptr }
+	, m_sourceRect{ 0, 0, 0, 0 }
+	, m_destRect{ 0, 0, 0, 0 } {}
 
 bool milk::SDLRenderer::init(SDL_Window* windowHandle) {
 	m_handle = SDL_CreateRenderer(windowHandle, FIRST_SUPPORTED_RENDERING_DRIVER, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -42,13 +51,13 @@ void milk::SDLRenderer::setDrawColor(const Color* color) {
 }
 
 void milk::SDLRenderer::drawRectangle(const Rectangle* destinationRectangle) {
-	SDL_Rect dst = { destinationRectangle->x, destinationRectangle->y, destinationRectangle->width, destinationRectangle->height };
-	SDL_RenderDrawRect(m_handle, &dst);
+	milkrect_to_sdlrect(destinationRectangle, &m_destRect);
+	SDL_RenderDrawRect(m_handle, &m_destRect);
 }
 
 void milk::SDLRenderer::drawRectangleFilled(const milk::Rectangle* destinationRectangle) {
-	SDL_Rect dst = { destinationRectangle->x, destinationRectangle->y, destinationRectangle->width, destinationRectangle->height };
-	SDL_RenderFillRect(m_handle, &dst);
+	milkrect_to_sdlrect(destinationRectangle, &m_destRect);
+	SDL_RenderFillRect(m_handle, &m_destRect);
 }
 
 void milk::SDLRenderer::draw(
@@ -61,9 +70,9 @@ void milk::SDLRenderer::draw(
 	SDL_GetRenderDrawColor(m_handle, &r, &g, &b, NULL);
 	SDL_Texture* t = (SDL_Texture*)texture->data->handle;
 	SDL_SetTextureColorMod(t, r, g, b);
-	SDL_Rect src = { sourceRectangle->x, sourceRectangle->y, sourceRectangle->width, sourceRectangle->height };
-	SDL_Rect dst = { destinationRectangle->x, destinationRectangle->y, destinationRectangle->width, destinationRectangle->height };
-	SDL_RenderCopyEx(m_handle, t, &src, &dst, 0, nullptr, (SDL_RendererFlip)flipFlags);
+	milkrect_to_sdlrect(sourceRectangle, &m_sourceRect);
+	milkrect_to_sdlrect(destinationRectangle, &m_destRect);
+	SDL_RenderCopyEx(m_handle, t, &m_sourceRect, &m_destRect, 0, nullptr, (SDL_RendererFlip)flipFlags);
 }
 
 void milk::SDLRenderer::present() {
