@@ -126,7 +126,8 @@ static int graphics_drawex(lua_State* L) {
 	int recty = luaL_checkinteger(L, 5);
 	int rectw = luaL_checkinteger(L, 6);
 	int recth = luaL_checkinteger(L, 7);
-	int flip = luaL_optinteger(L, 8, milk::NO_FLIP);
+	int scale = luaL_checkinteger(L, 8);
+	int flip = luaL_optinteger(L, 9, milk::NO_FLIP);
 
 	source_rect.x = rectx;
 	source_rect.y = recty;
@@ -135,8 +136,8 @@ static int graphics_drawex(lua_State* L) {
 
 	dest_rect.x = posx;
 	dest_rect.y = posy;
-	dest_rect.width = rectw;
-	dest_rect.height = recth;
+	dest_rect.width = rectw * scale;
+	dest_rect.height = recth * scale;
 
 	milk::Locator::renderer->draw(texture, &source_rect, &dest_rect, (milk::u8)flip);
 	return 0;

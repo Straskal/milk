@@ -20,6 +20,7 @@ local player_flip = flip_flags.NONE
 
 local player_pos = { x = 0, y = 0 }
 local source_rect = { x = 0, y = 0, w = 64, h = 64 }
+local player_scale = 1
 
 local last_anim_time = 0
 
@@ -42,12 +43,10 @@ function callbacks.tick()
 		window.set_fullscreen(toggle)
 	end
 
-	print(mouse.get_scroll())
-
-	if mouse.get_scroll() > 0 and rect_color[1] < 1 then
-		rect_color[1] = rect_color[1] + 0.1
-	elseif mouse.get_scroll() < 0 and rect_color[1] > 0.1 then
-		rect_color[1] = rect_color[1] - 0.1
+	if mouse.get_scroll() > 0 then
+		player_scale = player_scale + 1
+	elseif mouse.get_scroll() < 0 then
+		player_scale = player_scale - 1
 	end
 	
 	local mx, my = mouse.get_position()
@@ -101,11 +100,15 @@ end
 function callbacks.draw()
 	graphics.set_draw_color(table.unpack(rect_color))
 	graphics.draw_rect(rect.x, rect.y, rect.w, rect.h)
+
 	if hover_over_player then
 		graphics.draw_rect(player_pos.x, player_pos.y, source_rect.w, source_rect.h)
 	end
+
 	graphics.set_draw_color(1, 1, 1, 1)
-	graphics.drawex(player_texture, player_pos.x, player_pos.y, source_rect.x, source_rect.y, source_rect.w, source_rect.h, player_flip)
+	local p = player_pos
+	local s = source_rect
+	graphics.drawex(player_texture, p.x, p.y, s.x, s.y, s.w, s.h, player_scale, player_flip)
 end
 
 return callbacks
