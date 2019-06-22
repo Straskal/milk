@@ -3,6 +3,7 @@
 
 #include "audio/SoundCache.h"
 
+#include <string>
 #include <unordered_map>
 
 namespace milk {

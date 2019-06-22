@@ -108,7 +108,7 @@ function callbacks.draw()
 	graphics.set_draw_color(1, 1, 1, 1)
 	local p = player_pos
 	local s = source_rect
-	graphics.drawex(player_texture, p.x, p.y, s.x, s.y, s.w, s.h, player_scale, player_flip)
+	graphics.drawx(player_texture, p.x, p.y, s.x, s.y, s.w, s.h, player_scale, player_flip)
 end
 
 return callbacks

@@ -118,7 +118,7 @@ static int graphics_draw(lua_State* L) {
 	return 0;
 }
 
-static int graphics_drawex(lua_State* L) {
+static int graphics_drawx(lua_State* L) {
 	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
 	int posx = luaL_checkinteger(L, 2);
 	int posy = luaL_checkinteger(L, 3);
@@ -178,7 +178,7 @@ static const luaL_Reg graphics_funcs[] = {
 	{ "set_virtual_resolution", graphics_set_virtual_resolution },
 	{ "set_draw_color", graphics_set_draw_color },
 	{ "draw", graphics_draw },
-	{ "drawex", graphics_drawex },
+	{ "drawx", graphics_drawx },
 	{ "draw_rect", graphics_draw_rect },
 	{ "draw_filled_rect", graphics_draw_filled_rect },
 	{ NULL, NULL }
