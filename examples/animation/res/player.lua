@@ -64,17 +64,17 @@ local tick = function(self)
 
     if keyboard.is_key_down(keys.W) then
         self.vy = -1 * PLAYER_SPEED
-	end
-	if keyboard.is_key_down(keys.S) then 
-		self.vy = 1 * PLAYER_SPEED
-	end
-	if keyboard.is_key_down(keys.A) then 
-		self.vx = -1 * PLAYER_SPEED
-		self.flip = self.flip | flip_flags.X;
-	end
-	if keyboard.is_key_down(keys.D) then 
-		self.vx = 1 * PLAYER_SPEED
-		self.flip = self.flip & ~flip_flags.X;
+    end
+    if keyboard.is_key_down(keys.S) then 
+        self.vy = 1 * PLAYER_SPEED
+    end
+    if keyboard.is_key_down(keys.A) then 
+        self.vx = -1 * PLAYER_SPEED
+        self.flip = self.flip | flip_flags.X;
+    end
+    if keyboard.is_key_down(keys.D) then 
+        self.vx = 1 * PLAYER_SPEED
+        self.flip = self.flip & ~flip_flags.X;
     end
     self.x = self.x + self.vx
     self.y = self.y + self.vy
