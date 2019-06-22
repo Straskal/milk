@@ -268,11 +268,3 @@ if (WIN32)
 			${MILK_LIBS_DIR}
 			$<TARGET_FILE_DIR:milk>)
 endif()
-
-#---------------------------------------------------------------------------
-# to make life easier for testing, the generation process will copy the res/ folder to the build output folder
-#---------------------------------------------------------------------------
-
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-	file(COPY ${MILK_RESOURCES_DIR} DESTINATION ${milk_BINARY_DIR})
-endif()
