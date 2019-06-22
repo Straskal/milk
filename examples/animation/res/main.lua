@@ -7,7 +7,7 @@ local keys = keyboard.keys
 local Player = require("res.player")
 
 -- initialize game
-window.set_title("test game")
+window.set_title("Animation test")
 window.set_size(1280, 720)
 graphics.set_virtual_resolution(640, 360)
 
