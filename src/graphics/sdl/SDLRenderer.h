@@ -30,6 +30,7 @@ namespace milk {
 		SDL_Renderer* m_handle;
 		
 		// These values are cached so we don't create them with every draw call
+		SDL_Color m_drawColor;
 		SDL_Rect m_sourceRect;
 		SDL_Rect m_destRect;
 	};

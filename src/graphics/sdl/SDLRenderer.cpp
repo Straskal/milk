@@ -19,8 +19,16 @@ static void milkrect_to_sdlrect(const milk::Rectangle* milkrect, SDL_Rect* sdlre
 	sdlrect->h = milkrect->height;
 }
 
+static void milkcolor_to_sdlcolor(const milk::Color* milkrect, SDL_Color* sdlrect) {
+	sdlrect->r = milkrect->r;
+	sdlrect->b = milkrect->b;
+	sdlrect->g = milkrect->g;
+	sdlrect->a = milkrect->a;
+}
+
 milk::SDLRenderer::SDLRenderer()
 	: m_handle{ nullptr }
+	, m_drawColor{ 0xFF, 0xFF, 0xFF, 0xFF }
 	, m_sourceRect{ 0, 0, 0, 0 }
 	, m_destRect{ 0, 0, 0, 0 } {}
 
@@ -44,9 +52,11 @@ bool milk::SDLRenderer::init(SDL_Window* windowHandle) {
 void milk::SDLRenderer::clear() {
 	SDL_SetRenderDrawColor(m_handle, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderClear(m_handle);
+	SDL_SetRenderDrawColor(m_handle, m_drawColor.r, m_drawColor.b, m_drawColor.g, m_drawColor.a);
 }
 
 void milk::SDLRenderer::setDrawColor(const Color* color) {
+	milkcolor_to_sdlcolor(color, &m_drawColor);
 	SDL_SetRenderDrawColor(m_handle, color->r, color->b, color->g, color->a);
 }
 

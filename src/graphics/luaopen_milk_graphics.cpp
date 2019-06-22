@@ -15,9 +15,9 @@ extern "C" {
 
 static const char* TEXTURE_METATABLE = "milk.texture";
 
-static milk::Color draw_color;
-static milk::Rectangle source_rect;
-static milk::Rectangle dest_rect;
+static milk::Color draw_color = { 0xFF, 0xFF, 0xFF, 0xFF };
+static milk::Rectangle source_rect = { 0, 0, 0, 0};
+static milk::Rectangle dest_rect = { 0, 0, 0, 0 };
 
 static int texturemeta_gc(lua_State* L) {
 	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
