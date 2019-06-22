@@ -114,11 +114,14 @@ static void main_loop() {
 	while (!window->shouldClose()) {
 		int frameStart = SDL_GetTicks();
 
+		mouse->frameBegin();
+
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT) {
 				window->close();
 			}
+			mouse->handleEvent(&event);
 		}
 
 		mouse->updateState();

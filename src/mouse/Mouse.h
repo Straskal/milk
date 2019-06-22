@@ -18,6 +18,7 @@ namespace milk {
 		virtual bool isButtonDown(MouseButtons button) const = 0;
 		virtual bool isButtonPressed(MouseButtons button) const = 0;
 		virtual bool isButtonReleased(MouseButtons button) const = 0;
+		virtual int getScroll() const = 0;
 	};
 }
 

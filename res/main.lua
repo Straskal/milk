@@ -42,6 +42,14 @@ function callbacks.tick()
 		window.set_fullscreen(toggle)
 	end
 
+	print(mouse.get_scroll())
+
+	if mouse.get_scroll() > 0 and rect_color.r < 1 then
+		rect_color.r = rect_color.r + 0.1
+	elseif mouse.get_scroll() < 0 and rect_color.r > 0.1 then
+		rect_color.r = rect_color.r - 0.1
+	end
+	
 	local mx, my = mouse.get_position()
 	if mx <= player_pos.x + 64 and mx >= player_pos.x and my <= player_pos.y + 64 and my >= player_pos.y then
 		if mouse.is_button_pressed(mouse_buttons.LEFT) then 
