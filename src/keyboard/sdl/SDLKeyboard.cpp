@@ -5,7 +5,7 @@
 
 milk::SDLKeyboard::SDLKeyboard() {
 	std::memset(m_previousState, 0, sizeof(Uint8) * SDL_NUM_SCANCODES);
-	std::memcpy(m_currentState, SDL_GetKeyboardState(NULL), sizeof(Uint8) * SDL_NUM_SCANCODES);
+	std::memset(m_currentState, 0, sizeof(Uint8) * SDL_NUM_SCANCODES);
 }
 
 void milk::SDLKeyboard::updateState() {
@@ -13,14 +13,14 @@ void milk::SDLKeyboard::updateState() {
 	std::memcpy(m_currentState, SDL_GetKeyboardState(NULL), sizeof(Uint8) * SDL_NUM_SCANCODES);
 }
 
-bool milk::SDLKeyboard::isKeyPressed(Keys keycode) {
+bool milk::SDLKeyboard::isKeyDown(Keys keycode) {
 	return m_currentState[(SDL_Scancode)keycode];
 }
 
-bool milk::SDLKeyboard::wasKeyPressed(Keys keycode) {
+bool milk::SDLKeyboard::isKeyPressed(Keys keycode) {
 	return m_currentState[(SDL_Scancode)keycode] && !m_previousState[(SDL_Scancode)keycode];
 }
 
-bool milk::SDLKeyboard::wasKeyReleased(Keys keycode) {
+bool milk::SDLKeyboard::isKeyReleased(Keys keycode) {
 	return !m_currentState[(SDL_Scancode)keycode] && m_previousState[(SDL_Scancode)keycode];
 }

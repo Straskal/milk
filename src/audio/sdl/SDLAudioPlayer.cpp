@@ -32,7 +32,7 @@ static void on_music_finished() {
 }
 
 bool milk::SDLAudioPlayer::init() {
-	if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+	if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
 		std::cout << "SDL_Init: Failed to initialize audio: " << SDL_GetError() << std::endl;
 		return false;
 	}
@@ -102,4 +102,5 @@ void milk::SDLAudioPlayer::stopMusic(int fadeTime) {
 void milk::SDLAudioPlayer::free() {
 	Mix_CloseAudio();
 	Mix_Quit();
+	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }

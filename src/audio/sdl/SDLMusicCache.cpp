@@ -33,7 +33,8 @@ void milk::SDLMusicCache::dereference(MusicData* musicData) {
 	if (--musicData->refCount <= 0) {
 		m_music.erase(musicData->path);
 		Mix_FreeMusic((Mix_Music*)musicData->handle);
-		delete musicData; musicData = nullptr;
+		delete musicData; 
+		musicData = nullptr;
 	}
 }
 

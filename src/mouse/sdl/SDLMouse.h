@@ -10,21 +10,22 @@ namespace milk {
 	public:
 		SDLMouse();
 
+		void frameBegin();
+		void handleEvent(SDL_Event* e);
 		void updateState();
 
 		std::tuple<int, int> getPosition() const override;
-		bool isLeftButtonPressed() const override;
-		bool isRightButtonPressed() const override;
-		bool wasLeftButtonPressed() const override;
-		bool wasRightButtonPressed() const override;
-		bool wasLeftButtonReleased() const override;
-		bool wasRightButtonReleased() const override;
+		bool isButtonDown(MouseButtons button) const override;
+		bool isButtonPressed(MouseButtons button) const override;
+		bool isButtonReleased(MouseButtons button) const override;
+		int getScroll() const override;
 
 	private:
 		Uint32 m_currentState;
 		Uint32 m_previousState;
 		int m_x;
 		int m_y;
+		int m_scroll;
 	};
 }
 

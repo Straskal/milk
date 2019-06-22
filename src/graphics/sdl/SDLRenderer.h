@@ -1,6 +1,9 @@
 #ifndef _SDL_RENDERER_H_
 #define _SDL_RENDERER_H_
 
+#include "SDL_render.h"
+#include "SDL_rect.h"
+
 #include "graphics/Renderer.h"
 
 struct SDL_Renderer;
@@ -13,8 +16,9 @@ namespace milk {
 
 		bool init(SDL_Window* windowHandle);
 		void clear() override;
-		void drawRectangle(const Rectangle* destinationRectangle, const Color* color) override;
-		void drawRectangleFilled(const Rectangle* destinationRectangle, const Color* color) override;
+		void setDrawColor(const Color* color) override;
+		void drawRectangle(const Rectangle* destinationRectangle) override;
+		void drawRectangleFilled(const Rectangle* destinationRectangle) override;
 		void draw(const Texture* texture, const Rectangle* sourceRectangle, const Rectangle* destinationRectangle, u8 flipFlags) override;
 		void present() override;
 		std::tuple<int, int> resolution() const override;
@@ -24,6 +28,11 @@ namespace milk {
 
 	private:
 		SDL_Renderer* m_handle;
+		
+		// These values are cached so we don't create them with every draw call
+		SDL_Color m_drawColor;
+		SDL_Rect m_sourceRect;
+		SDL_Rect m_destRect;
 	};
 }
 

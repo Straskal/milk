@@ -1,8 +1,20 @@
 #include "SDLMouse.h"
 
-milk::SDLMouse::SDLMouse() {
-	m_currentState = SDL_GetMouseState(&m_x, &m_y);
-	m_previousState = m_currentState;
+milk::SDLMouse::SDLMouse()
+	: m_currentState{ 0 }
+	, m_previousState{ 0 }
+	, m_x{ 0 }
+	, m_y{ 0 }
+	, m_scroll{ 0 } {}
+
+void milk::SDLMouse::frameBegin() {
+	m_scroll = 0;
+}
+
+void milk::SDLMouse::handleEvent(SDL_Event* e) {
+	if (e->type == SDL_MOUSEWHEEL) {
+		m_scroll = e->wheel.y;
+	}
 }
 
 void milk::SDLMouse::updateState() {
@@ -14,26 +26,18 @@ std::tuple<int, int> milk::SDLMouse::getPosition() const {
 	return std::make_tuple(m_x, m_y);
 }
 
-bool milk::SDLMouse::isLeftButtonPressed() const {
-	return m_currentState & SDL_BUTTON(SDL_BUTTON_LEFT);
+bool milk::SDLMouse::isButtonDown(MouseButtons button) const {
+	return m_currentState & SDL_BUTTON(button);
 }
 
-bool milk::SDLMouse::isRightButtonPressed() const {
-	return m_currentState & SDL_BUTTON(SDL_BUTTON_RIGHT);
+bool milk::SDLMouse::isButtonPressed(MouseButtons button) const {
+	return (m_currentState & SDL_BUTTON(button) && !(m_previousState & SDL_BUTTON(button)));
 }
 
-bool milk::SDLMouse::wasLeftButtonPressed() const {
-	return (m_currentState & SDL_BUTTON(SDL_BUTTON_LEFT) && !(m_previousState & SDL_BUTTON(SDL_BUTTON_LEFT)));
+bool milk::SDLMouse::isButtonReleased(MouseButtons button) const {
+	return !(m_currentState & SDL_BUTTON(button) && (m_previousState & SDL_BUTTON(button)));
 }
 
-bool milk::SDLMouse::wasRightButtonPressed() const {
-	return (m_currentState & SDL_BUTTON(SDL_BUTTON_RIGHT) && !(m_previousState & SDL_BUTTON(SDL_BUTTON_RIGHT)));
-}
-
-bool milk::SDLMouse::wasLeftButtonReleased() const {
-	return !(m_currentState & SDL_BUTTON(SDL_BUTTON_LEFT) && (m_previousState & SDL_BUTTON(SDL_BUTTON_LEFT)));
-}
-
-bool milk::SDLMouse::wasRightButtonReleased() const {
-	return !(m_currentState & SDL_BUTTON(SDL_BUTTON_RIGHT) && (m_previousState & SDL_BUTTON(SDL_BUTTON_RIGHT)));
+int milk::SDLMouse::getScroll() const {
+	return m_scroll;
 }

@@ -15,6 +15,10 @@ extern "C" {
 
 static const char* TEXTURE_METATABLE = "milk.texture";
 
+static milk::Color draw_color = { 0xFF, 0xFF, 0xFF, 0xFF };
+static milk::Rectangle source_rect = { 0, 0, 0, 0};
+static milk::Rectangle dest_rect = { 0, 0, 0, 0 };
+
 static int texturemeta_gc(lua_State* L) {
 	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
 	milk::Locator::textures->dereference(texture->data);
@@ -75,83 +79,106 @@ static int graphics_set_virtual_resolution(lua_State* L) {
 	return 0;
 }
 
-static int graphics_draw(lua_State* L) {
-	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
-	milk::TextureData* data = texture->data;
+static int graphics_set_draw_color(lua_State* L) {
+	milk::u8 r = (milk::u8)(luaL_checknumber(L, 1) * 255);
+	milk::u8 b = (milk::u8)(luaL_checknumber(L, 2) * 255);
+	milk::u8 g = (milk::u8)(luaL_checknumber(L, 3) * 255);
+	milk::u8 a = (milk::u8)(luaL_checknumber(L, 4) * 255);
 
-	int w = data->width;
-	int h = data->height;
-	int x = milk::luaM_getintfield(L, 2, "x");
-	int y = milk::luaM_getintfield(L, 2, "y");
+	draw_color.r = r;
+	draw_color.b = b;
+	draw_color.g = g;
+	draw_color.a = a;
 
-	int flip = luaL_optinteger(L, 3, milk::NO_FLIP);
-
-	milk::Rectangle src = { 0, 0, w, h };
-	milk::Rectangle dst = { x, y, w, h };
-	milk::Locator::renderer->draw(texture, &src, &dst, (milk::u8)flip);
+	milk::Locator::renderer->setDrawColor(&draw_color);
 	return 0;
 }
 
-static int graphics_drawex(lua_State* L) {
+static int graphics_draw(lua_State* L) {
 	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
-
-	int posx = milk::luaM_getintfield(L, 2, "x");
-	int posy = milk::luaM_getintfield(L, 2, "y");
-
-	int rectx = milk::luaM_getintfield(L, 3, "x");
-	int recty = milk::luaM_getintfield(L, 3, "y");
-	int rectw = milk::luaM_getintfield(L, 3, "w");
-	int recth = milk::luaM_getintfield(L, 3, "h");
-
+	int x = luaL_checkinteger(L, 2);
+	int y = luaL_checkinteger(L, 3);
 	int flip = luaL_optinteger(L, 4, milk::NO_FLIP);
 
-	milk::Rectangle src = { rectx, recty, rectw, recth };
-	milk::Rectangle dst = { posx, posy, rectw, recth };
-	milk::Locator::renderer->draw(texture, &src, &dst, (milk::u8)flip);
+	milk::TextureData* data = texture->data;
+	int w = data->width;
+	int h = data->height;
+
+	source_rect.x = 0;
+	source_rect.y = 0;
+	source_rect.width = w;
+	source_rect.height = h;
+
+	dest_rect.x = x;
+	dest_rect.y = y;
+	dest_rect.width = w;
+	dest_rect.height = h;
+
+	milk::Locator::renderer->draw(texture, &source_rect, &dest_rect, (milk::u8)flip);
+	return 0;
+}
+
+static int graphics_drawx(lua_State* L) {
+	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
+	int posx = luaL_checkinteger(L, 2);
+	int posy = luaL_checkinteger(L, 3);
+	int rectx = luaL_checkinteger(L, 4);
+	int recty = luaL_checkinteger(L, 5);
+	int rectw = luaL_checkinteger(L, 6);
+	int recth = luaL_checkinteger(L, 7);
+	int scale = luaL_checkinteger(L, 8);
+	int flip = luaL_optinteger(L, 9, milk::NO_FLIP);
+
+	source_rect.x = rectx;
+	source_rect.y = recty;
+	source_rect.width = rectw;
+	source_rect.height = recth;
+
+	dest_rect.x = posx;
+	dest_rect.y = posy;
+	dest_rect.width = rectw * scale;
+	dest_rect.height = recth * scale;
+
+	milk::Locator::renderer->draw(texture, &source_rect, &dest_rect, (milk::u8)flip);
 	return 0;
 }
 
 static int graphics_draw_rect(lua_State* L) {
-	int rectx = milk::luaM_getintfield(L, 1, "x");
-	int recty = milk::luaM_getintfield(L, 1, "y");
-	int rectw = milk::luaM_getintfield(L, 1, "w");
-	int recth = milk::luaM_getintfield(L, 1, "h");
+	int rectx = luaL_checkinteger(L, 1);
+	int recty = luaL_checkinteger(L, 2);
+	int rectw = luaL_checkinteger(L, 3);
+	int recth = luaL_checkinteger(L, 4);
 
-	milk::u8 r = (milk::u8)milk::luaM_getintfield(L, 2, "r");
-	milk::u8 b = (milk::u8)milk::luaM_getintfield(L, 2, "b");
-	milk::u8 g = (milk::u8)milk::luaM_getintfield(L, 2, "g");
-	milk::u8 a = (milk::u8)milk::luaM_getintfield(L, 2, "a");
+	dest_rect.x = rectx;
+	dest_rect.y = recty;
+	dest_rect.width = rectw;
+	dest_rect.height = recth;
 
-	milk::Rectangle rect = { rectx, recty, rectw, recth };
-	milk::Color color = { r, b, g, a };
-
-	milk::Locator::renderer->drawRectangle(&rect, &color);
+	milk::Locator::renderer->drawRectangle(&dest_rect);
 	return 0;
 }
 
 static int graphics_draw_filled_rect(lua_State* L) {
-	int rectx = milk::luaM_getintfield(L, 1, "x");
-	int recty = milk::luaM_getintfield(L, 1, "y");
-	int rectw = milk::luaM_getintfield(L, 1, "w");
-	int recth = milk::luaM_getintfield(L, 1, "h");
+	int rectx = luaL_checkinteger(L, 1);
+	int recty = luaL_checkinteger(L, 2);
+	int rectw = luaL_checkinteger(L, 3);
+	int recth = luaL_checkinteger(L, 4);
 
-	milk::u8 r = (milk::u8)milk::luaM_getintfield(L, 2, "r");
-	milk::u8 b = (milk::u8)milk::luaM_getintfield(L, 2, "b");
-	milk::u8 g = (milk::u8)milk::luaM_getintfield(L, 2, "g");
-	milk::u8 a = (milk::u8)milk::luaM_getintfield(L, 2, "a");
+	dest_rect.x = rectx;
+	dest_rect.y = recty;
+	dest_rect.width = rectw;
+	dest_rect.height = recth;
 
-	milk::Rectangle rect = { rectx, recty, rectw, recth };
-	milk::Color color = { r, b, g, a };
-
-	milk::Locator::renderer->drawRectangleFilled(&rect, &color);
+	milk::Locator::renderer->drawRectangleFilled(&dest_rect);
 	return 0;
 }
 
 static const luaL_Reg graphics_funcs[] = {
 	{ "new_texture", graphics_new_texture },
 	{ "set_virtual_resolution", graphics_set_virtual_resolution },
+	{ "set_draw_color", graphics_set_draw_color },
 	{ "draw", graphics_draw },
-	{ "drawex", graphics_drawex },
+	{ "drawx", graphics_drawx },
 	{ "draw_rect", graphics_draw_rect },
 	{ "draw_filled_rect", graphics_draw_filled_rect },
 	{ NULL, NULL }
@@ -166,6 +193,6 @@ static const milk::luaM_Enum flip_enum[] = {
 int milk::luaopen_milk_graphics(lua_State* L) {
 	luaM_createmetatable(L, TEXTURE_METATABLE, texturemeta_funcs);
 	luaL_newlib(L, graphics_funcs);
-	luaM_setenumfield(L, -1, "flip_flags", flip_enum, sizeof(flip_enum)/sizeof(luaM_Enum));
+	luaM_setenumfield(L, -1, "flip_flags", flip_enum, sizeof(flip_enum) / sizeof(luaM_Enum));
 	return 1;
 }

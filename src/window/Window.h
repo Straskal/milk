@@ -3,8 +3,6 @@
 
 #include <tuple>
 
-#include "math/Vector2.h"
-
 namespace milk {
 	class Window {
 	public:

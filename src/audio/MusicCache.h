@@ -1,8 +1,6 @@
 #ifndef _MUSIC_CACHE_H_
 #define _MUSIC_CACHE_H_
 
-#include <string>
-
 namespace milk {
 	struct MusicData;
 

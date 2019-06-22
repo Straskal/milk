@@ -33,7 +33,8 @@ void milk::SDLSoundCache::dereference(SoundData* soundData) {
 	if (--soundData->refCount <= 0) {
 		m_sounds.erase(soundData->path);
 		Mix_FreeChunk((Mix_Chunk*)soundData->handle);
-		delete soundData; soundData = nullptr;
+		delete soundData; 
+		soundData = nullptr;
 	}
 }
 
