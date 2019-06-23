@@ -76,10 +76,9 @@ void milk::SDLRenderer::draw(
 	const milk::Rectangle* destinationRectangle,
 	milk::u8 flipFlags
 ) {
-	Uint8 r, b, g;
-	SDL_GetRenderDrawColor(m_handle, &r, &g, &b, NULL);
 	SDL_Texture* t = (SDL_Texture*)texture->data->handle;
-	SDL_SetTextureColorMod(t, r, g, b);
+	SDL_SetTextureColorMod(t, m_drawColor.r, m_drawColor.g, m_drawColor.b);
+	SDL_SetTextureAlphaMod(t, m_drawColor.a);
 	milkrect_to_sdlrect(sourceRectangle, &m_sourceRect);
 	milkrect_to_sdlrect(destinationRectangle, &m_destRect);
 	SDL_RenderCopyEx(m_handle, t, &m_sourceRect, &m_destRect, 0, nullptr, (SDL_RendererFlip)flipFlags);
