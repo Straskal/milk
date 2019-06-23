@@ -4,11 +4,15 @@
 
 #include "SDL.h"
 
+static const int DEFAULT_WIDTH = 800;
+static const int DEFAULT_HEIGHT = 600;
+
+// We define this bad boi here because SDL does not, and we don't want magic numbers chilling up in this boi, son.
+static const int MILK_SDL_WINDOW_NO_FLAG = 0;
+
 milk::SDLWindow::SDLWindow()
 	: m_handle{ nullptr }
-	, m_shouldClose{ false }
-	, m_width{ 800 }
-	, m_height{ 600 } { }
+	, m_shouldClose{ false } { }
 
 bool milk::SDLWindow::init() {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
@@ -18,7 +22,7 @@ bool milk::SDLWindow::init() {
 
 	// We create a hidden window that must be explicitly shown via show()
 	// This is done in order to give lua a chance to change the window settings before showing it.
-	m_handle = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_width, m_height, SDL_WINDOW_HIDDEN);
+	m_handle = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, DEFAULT_WIDTH, DEFAULT_HEIGHT, SDL_WINDOW_HIDDEN);
 	if (m_handle == nullptr) {
 		std::cout << "Error creating SDL_Window: " << SDL_GetError() << std::endl;
 		return false;
@@ -41,33 +45,31 @@ std::tuple<int, int> milk::SDLWindow::size() const {
 }
 
 void milk::SDLWindow::size(int width, int height) {
-	m_width = width;
-	m_height = height;
 	SDL_SetWindowSize(m_handle, width, height);
 	SDL_SetWindowPosition(m_handle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 }
 
 bool milk::SDLWindow::fullscreen() const {
-	return (SDL_GetWindowFlags(m_handle) & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN;
+	return (SDL_GetWindowFlags(m_handle) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP;
 }
 
 void milk::SDLWindow::fullscreen(const bool toggle) {
-	if (toggle == fullscreen()) {
-		return;
+	if (toggle != fullscreen()) {
+		if (toggle) {
+			SDL_SetWindowFullscreen(m_handle, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		}
+		else {
+			SDL_SetWindowFullscreen(m_handle, MILK_SDL_WINDOW_NO_FLAG);
+		}
 	}
+}
 
-	if (toggle) {
-		int displayIndex = SDL_GetWindowDisplayIndex(m_handle);
-		SDL_Rect displayBounds;
-		SDL_GetDisplayBounds(displayIndex, &displayBounds);
-		SDL_SetWindowSize(m_handle, displayBounds.w, displayBounds.h);
-		SDL_SetWindowFullscreen(m_handle, SDL_WINDOW_FULLSCREEN);
-	}
-	else {
-		SDL_SetWindowFullscreen(m_handle, MILK_SDL_WINDOW_NO_FLAG);
-		SDL_SetWindowSize(m_handle, m_width, m_height);
-		SDL_SetWindowPosition(m_handle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	}
+void milk::SDLWindow::minimize() {
+	SDL_MinimizeWindow(m_handle);
+}
+
+void milk::SDLWindow::restore() {
+	SDL_RestoreWindow(m_handle);
 }
 
 void milk::SDLWindow::show() {
