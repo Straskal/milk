@@ -1,9 +1,6 @@
 #ifndef _SDL_WINDOW_H_
 #define _SDL_WINDOW_H_
 
-// We define this bad boi here because SDL does not, and we don't want magic numbers chilling up in this boi.
-#define MILK_SDL_WINDOW_NO_FLAG 0
-
 #include <string>
 
 #include "window/Window.h"
@@ -23,6 +20,8 @@ namespace milk
 		void size(int width, int height) override;
 		bool fullscreen() const override;
 		void fullscreen(bool toggle) override;
+		void minimize() override;
+		void restore() override;
 		void show();
 		void close() override;
 		bool shouldClose() const;
@@ -32,8 +31,6 @@ namespace milk
 	private:
 		SDL_Window* m_handle;
 		bool m_shouldClose;
-		int m_width;
-		int m_height;
 	};
 }
 
