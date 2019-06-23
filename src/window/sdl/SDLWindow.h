@@ -1,9 +1,6 @@
 #ifndef _SDL_WINDOW_H_
 #define _SDL_WINDOW_H_
 
-// We define this bad boi here because SDL does not, and we don't want magic numbers chilling up in this boi.
-#define MILK_SDL_WINDOW_NO_FLAG 0
-
 #include <string>
 
 #include "window/Window.h"

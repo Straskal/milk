@@ -4,6 +4,12 @@
 
 #include "SDL.h"
 
+static const int DEFAULT_WIDTH = 800;
+static const int DEFAULT_HEIGHT = 600;
+
+// We define this bad boi here because SDL does not, and we don't want magic numbers chilling up in this boi, son.
+static const int MILK_SDL_WINDOW_NO_FLAG = 0;
+
 milk::SDLWindow::SDLWindow()
 	: m_handle{ nullptr }
 	, m_shouldClose{ false } { }
@@ -16,7 +22,7 @@ bool milk::SDLWindow::init() {
 
 	// We create a hidden window that must be explicitly shown via show()
 	// This is done in order to give lua a chance to change the window settings before showing it.
-	m_handle = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_HIDDEN);
+	m_handle = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, DEFAULT_WIDTH, DEFAULT_HEIGHT, SDL_WINDOW_HIDDEN);
 	if (m_handle == nullptr) {
 		std::cout << "Error creating SDL_Window: " << SDL_GetError() << std::endl;
 		return false;
