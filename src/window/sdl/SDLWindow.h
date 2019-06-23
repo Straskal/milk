@@ -23,6 +23,8 @@ namespace milk
 		void size(int width, int height) override;
 		bool fullscreen() const override;
 		void fullscreen(bool toggle) override;
+		void minimize() override;
+		void restore() override;
 		void show();
 		void close() override;
 		bool shouldClose() const;
@@ -32,8 +34,6 @@ namespace milk
 	private:
 		SDL_Window* m_handle;
 		bool m_shouldClose;
-		int m_width;
-		int m_height;
 	};
 }
 
