@@ -1,13 +1,10 @@
 local window = require("milk.window")
-local keyboard = require("milk.keyboard")
 local graphics = require("milk.graphics")
-local audio = require("milk.audio")
-local keys = keyboard.keys
 
-local gameplay_state = require("res.state_gameplay")
+local state_menu = require("res.state_menu")
 
 -- initialize game
-window.set_title("Game state test")
+window.set_title("GUI")
 window.set_size(1280, 720)
 graphics.set_virtual_resolution(640, 360)
 
@@ -26,17 +23,19 @@ function game.pop_state()
 	table.remove(game.states)
 end
 
-game.push_state(gameplay_state)
+-- initial state
+game.push_state(state_menu)
 
 function game.tick()
+	-- only update the top state
 	local top = game.states[#game.states]
 	top:tick(game)
 end
 
 function game.draw()
-	local states = game.states
-	for i = 1, #states do
-		states[i]:draw(game)
+	-- but draw all states
+	for i = 1, #game.states do
+		game.states[i]:draw(game)
 	end
 end
 

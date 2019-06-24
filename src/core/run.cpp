@@ -1,6 +1,7 @@
 #include "run.h"
 
 #include <iostream>
+#include <limits>
 
 extern "C" {
 #include "lua.h"
@@ -22,10 +23,6 @@ extern "C" {
 #include "keyboard/sdl/SDLKeyboard.h"
 #include "mouse/sdl/SDLMouse.h"
 #include "window/sdl/SDLWindow.h"
-
-#ifndef MILK_MAIN_LUA_PATH
-#define MILK_MAIN_LUA_PATH "main.lua"
-#endif
 
 #define free_ptr(x) delete x; x = nullptr
 #define deinit_and_free_ptr(x) x->free(); free_ptr(x)
@@ -52,9 +49,15 @@ static int error_handler(lua_State* L) {
 }
 
 static void print_runtime_error(const char* err) {
+	// Minimize window before displaying the error and locking the event loop.
+	// This basically avoids locking the game down, which is super frusterating when throwing an error when in fullscreen mode.
+	// This also makes it very convenient when an error is thrown because the game is moved out of the way of the console :)
+	window->minimize();
 	std::cout << "RUNTIME ERROR: " << err << std::endl << std::endl;
 	std::cout << "Press enter to continue execution..." << std::endl;
-	int _ = std::getchar(); // Wait for user input before continuing execution
+	// Ignore all characters other than newline
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	window->restore();
 }
 
 static bool init() {
@@ -95,7 +98,7 @@ static bool init_api_and_callbacks() {
 	// Our error handler is going to be #1 on the stack
 	lua_pushcfunction(lua, error_handler);
 
-	if (luaL_loadfile(lua, MILK_MAIN_LUA_PATH) != LUA_OK || lua_pcall(lua, 0, 1, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
+	if (luaL_loadfile(lua, "main.lua") != LUA_OK || lua_pcall(lua, 0, 1, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
 		const char* stacktrace = lua_tostring(lua, -1);
 		print_runtime_error(stacktrace);
 		return false;
@@ -106,6 +109,8 @@ static bool init_api_and_callbacks() {
 		print_runtime_error("main.lua must return a table containing callback functions.");
 		return false;
 	}
+
+	return true;
 }
 
 static void main_loop() {

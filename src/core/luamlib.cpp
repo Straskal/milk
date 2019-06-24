@@ -57,7 +57,7 @@ void milk::luaM_setintfield(lua_State* L, int index, const char* key, int value)
 
 int milk::luaM_getintfield(lua_State* L, int index, const char* key) {
 	lua_getfield(L, index, key);
-	int result = luaL_checkinteger(L, -1);
+	int result = (int)luaL_checkinteger(L, -1);
 	lua_pop(L, 1);
 	return result;
 }
@@ -69,7 +69,7 @@ void milk::luaM_setnumfield(lua_State* L, int index, const char* key, double val
 
 double milk::luaM_getnumfield(lua_State* L, int index, const char* key) {
 	lua_getfield(L, index, key);
-	double result = luaL_checknumber(L, -1);
+	double result = (double)luaL_checknumber(L, -1);
 	lua_pop(L, 1);
 	return result;
 }
@@ -83,7 +83,7 @@ bool milk::luaM_getboolfield(lua_State* L, int index, const char* key) {
 
 void milk::luaM_setenumfield(lua_State* L, int index, const char* name, const luaM_Enum* e, size_t size) {
 	lua_newtable(L);
-	for (int i = 0; i < size; ++i) {
+	for (unsigned int i = 0; i < size; ++i) {
 		luaM_setintfield(L, -1, e[i].name, e[i].key);
 	}
 	lua_setfield(L, correct_index(index), name);
