@@ -20,10 +20,6 @@ set(MILK_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 set(MILKTESTS_SRC_DIR ${CMAKE_SOURCE_DIR}/test)
 set(MILK_LIBS_DIR ${CMAKE_SOURCE_DIR}/libs)
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-	set(MILK_RESOURCES_DIR ${CMAKE_SOURCE_DIR}/res)
-endif()
-
 include(CTest)
 
 #---------------------------------------------------------------------------
@@ -179,11 +175,6 @@ target_link_libraries(milklib
 		${SDL2_IMAGE_LIBRARIES}
 		${SDL2_MIXER_LIBRARIES}
 		${LUA53_LIBRARIES}
-)
-
-target_compile_definitions(milklib
-	PRIVATE
-		MILK_MAIN_LUA_PATH="res/main.lua"
 )
 
 #---------------------------------------------------------------------------

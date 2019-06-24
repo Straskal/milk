@@ -24,10 +24,6 @@ extern "C" {
 #include "mouse/sdl/SDLMouse.h"
 #include "window/sdl/SDLWindow.h"
 
-#ifndef MILK_MAIN_LUA_PATH
-#define MILK_MAIN_LUA_PATH "main.lua"
-#endif
-
 #define free_ptr(x) delete x; x = nullptr
 #define deinit_and_free_ptr(x) x->free(); free_ptr(x)
 
@@ -102,7 +98,7 @@ static bool init_api_and_callbacks() {
 	// Our error handler is going to be #1 on the stack
 	lua_pushcfunction(lua, error_handler);
 
-	if (luaL_loadfile(lua, MILK_MAIN_LUA_PATH) != LUA_OK || lua_pcall(lua, 0, 1, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
+	if (luaL_loadfile(lua, "main.lua") != LUA_OK || lua_pcall(lua, 0, 1, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
 		const char* stacktrace = lua_tostring(lua, -1);
 		print_runtime_error(stacktrace);
 		return false;
