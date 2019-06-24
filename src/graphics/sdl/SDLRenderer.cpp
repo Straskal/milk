@@ -26,11 +26,11 @@ static void milkrectf_to_sdlrectf(const milk::RectangleF* milkrect, SDL_FRect* s
 	sdlrect->h = milkrect->h;
 }
 
-static void milkcolor_to_sdlcolor(const milk::Color* milkrect, SDL_Color* sdlrect) {
-	sdlrect->r = milkrect->r;
-	sdlrect->b = milkrect->b;
-	sdlrect->g = milkrect->g;
-	sdlrect->a = milkrect->a;
+static void milkcolor_to_sdlcolor(const milk::Color* milkcolor, SDL_Color* sdlcolor) {
+	sdlcolor->r = milkcolor->r;
+	sdlcolor->b = milkcolor->b;
+	sdlcolor->g = milkcolor->g;
+	sdlcolor->a = milkcolor->a;
 }
 
 milk::SDLRenderer::SDLRenderer()
