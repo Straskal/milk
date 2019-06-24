@@ -2,4 +2,4 @@
 
 ---
 
-![alt](https://github.com/Straskal/milk/blob/v0.6-alpha-dev/examples/animation/animation.gif "tite")
+![alt](https://github.com/Straskal/milk/blob/master/examples/animation/animation.gif "tite")
