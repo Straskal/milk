@@ -49,6 +49,7 @@ bool milk::SDLRenderer::init(SDL_Window* windowHandle) {
 	SDL_GetWindowSize(windowHandle, &w, &h);
 	SDL_RenderSetLogicalSize(m_handle, w, h);
 
+	SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 	SDL_SetRenderDrawBlendMode(m_handle, SDL_BLENDMODE_BLEND);
 	return true;
