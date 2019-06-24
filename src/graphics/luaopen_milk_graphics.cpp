@@ -121,7 +121,7 @@ static int graphics_drawx(lua_State* L) {
 	int recty = (int)luaL_checkinteger(L, 5);
 	int rectw = (int)luaL_checkinteger(L, 6);
 	int recth = (int)luaL_checkinteger(L, 7);
-	float scale = (float)luaL_checkinteger(L, 8);
+	float scale = (float)luaL_checknumber(L, 8);
 	int flip = (int)luaL_optinteger(L, 9, milk::NO_FLIP);
 
 	source_rect.x = rectx;
