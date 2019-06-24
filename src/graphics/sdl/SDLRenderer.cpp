@@ -2,9 +2,7 @@
 
 #include <iostream>
 
-#include "SDL_assert.h"
-#include "SDL_hints.h"
-#include "SDL_render.h"
+#include "SDL.h"
 
 #include "graphics/Color.h"
 #include "graphics/Texture.h"
@@ -15,8 +13,15 @@ const static int FIRST_SUPPORTED_RENDERING_DRIVER = -1;
 static void milkrect_to_sdlrect(const milk::Rectangle* milkrect, SDL_Rect* sdlrect) {
 	sdlrect->x = milkrect->x;
 	sdlrect->y = milkrect->y;
-	sdlrect->w = milkrect->width;
-	sdlrect->h = milkrect->height;
+	sdlrect->w = milkrect->w;
+	sdlrect->h = milkrect->h;
+}
+
+static void milkrectf_to_sdlrectf(const milk::RectangleF* milkrect, SDL_FRect* sdlrect) {
+	sdlrect->x = milkrect->x;
+	sdlrect->y = milkrect->y;
+	sdlrect->w = milkrect->w;
+	sdlrect->h = milkrect->h;
 }
 
 static void milkcolor_to_sdlcolor(const milk::Color* milkrect, SDL_Color* sdlrect) {
@@ -60,28 +65,28 @@ void milk::SDLRenderer::setDrawColor(const Color* color) {
 	SDL_SetRenderDrawColor(m_handle, color->r, color->b, color->g, color->a);
 }
 
-void milk::SDLRenderer::drawRectangle(const Rectangle* destinationRectangle) {
-	milkrect_to_sdlrect(destinationRectangle, &m_destRect);
-	SDL_RenderDrawRect(m_handle, &m_destRect);
+void milk::SDLRenderer::drawRectangle(const RectangleF* destinationRectangle) {
+	milkrectf_to_sdlrectf(destinationRectangle, &m_destRect);
+	SDL_RenderDrawRectF(m_handle, &m_destRect);
 }
 
-void milk::SDLRenderer::drawRectangleFilled(const milk::Rectangle* destinationRectangle) {
-	milkrect_to_sdlrect(destinationRectangle, &m_destRect);
-	SDL_RenderFillRect(m_handle, &m_destRect);
+void milk::SDLRenderer::drawRectangleFilled(const RectangleF* destinationRectangle) {
+	milkrectf_to_sdlrectf(destinationRectangle, &m_destRect);
+	SDL_RenderFillRectF(m_handle, &m_destRect);
 }
 
 void milk::SDLRenderer::draw(
 	const milk::Texture* texture,
 	const milk::Rectangle* sourceRectangle,
-	const milk::Rectangle* destinationRectangle,
+	const milk::RectangleF* destinationRectangle,
 	milk::u8 flipFlags
 ) {
 	SDL_Texture* t = (SDL_Texture*)texture->data->handle;
 	SDL_SetTextureColorMod(t, m_drawColor.r, m_drawColor.g, m_drawColor.b);
 	SDL_SetTextureAlphaMod(t, m_drawColor.a);
 	milkrect_to_sdlrect(sourceRectangle, &m_sourceRect);
-	milkrect_to_sdlrect(destinationRectangle, &m_destRect);
-	SDL_RenderCopyEx(m_handle, t, &m_sourceRect, &m_destRect, 0, nullptr, (SDL_RendererFlip)flipFlags);
+	milkrectf_to_sdlrectf(destinationRectangle, &m_destRect);
+	SDL_RenderCopyExF(m_handle, t, &m_sourceRect, &m_destRect, 0, nullptr, (SDL_RendererFlip)flipFlags);
 }
 
 void milk::SDLRenderer::present() {

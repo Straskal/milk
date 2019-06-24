@@ -40,7 +40,7 @@ if(WIN32)
 	elseif (MSVC)
 		# provide paths for visual c++ development libs
 		# these are just the paths that I use. Feel free to change them in your environment.
-		set(SDL2_PATH C:/ExternalLibs/SDL2-2.0.9)
+		set(SDL2_PATH C:/ExternalLibs/SDL2-2.0.10)
 		set(SDL2_IMAGE_PATH C:/ExternalLibs/SDL2_image-2.0.4)
 		set(SDL2_MIXER_PATH C:/ExternalLibs/SDL2_mixer-2.0.4)
 		set(ENV{LUA_DIR} C:/ExternalLibs/lua53)
@@ -51,9 +51,9 @@ endif()
 # find dependencies
 #---------------------------------------------------------------------------
 
-find_package(SDL2 REQUIRED)
-find_package(SDL2_image REQUIRED)
-find_package(SDL2_mixer REQUIRED)
+find_package(SDL2 2.0.10 EXACT REQUIRED)
+find_package(SDL2_image 2.0.4 EXACT REQUIRED)
+find_package(SDL2_mixer 2.0.4 EXACT REQUIRED)
 find_package(Lua53 REQUIRED)
 
 #---------------------------------------------------------------------------
@@ -229,29 +229,6 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 	${CMAKE_CURRENT_BINARY_DIR}/googletest-build
 	EXCLUDE_FROM_ALL
 )
-
-# create test exe
-set (TESTS
-	test/math/Matrix3Tests.h
-	test/math/RectangleTests.h
-)
-
-add_executable(milktests test/main.cpp ${TESTS})
-
-target_include_directories(milktests
-	PRIVATE
-		${MILKTESTS_SRC_DIR}
-)
-
-# link test exe with libs
-target_link_libraries(milktests
-	PRIVATE
-		milklib
-		gtest
-		gtest_main
-)
-
-add_test(NAME milktests COMMAND milktests)
 
 #---------------------------------------------------------------------------
 # post build step to copy dlls to executable output file
