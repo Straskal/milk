@@ -109,6 +109,8 @@ static bool init_api_and_callbacks() {
 		print_runtime_error("main.lua must return a table containing callback functions.");
 		return false;
 	}
+
+	return true;
 }
 
 static void main_loop() {
