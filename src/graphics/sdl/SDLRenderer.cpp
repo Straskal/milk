@@ -8,7 +8,9 @@
 #include "graphics/Texture.h"
 #include "math/Rectangle.h"
 
-const static int FIRST_SUPPORTED_RENDERING_DRIVER = -1;
+static const int FIRST_SUPPORTED_RENDERING_DRIVER = -1;
+static const char* BATCHING_ON = "1";
+static const char* NEAREST_PIXEL_SAMPLING = "nearest";
 
 static void milkrect_to_sdlrect(const milk::Rectangle* milkrect, SDL_Rect* sdlrect) {
 	sdlrect->x = milkrect->x;
@@ -49,8 +51,8 @@ bool milk::SDLRenderer::init(SDL_Window* windowHandle) {
 	SDL_GetWindowSize(windowHandle, &w, &h);
 	SDL_RenderSetLogicalSize(m_handle, w, h);
 
-	SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+	SDL_SetHint(SDL_HINT_RENDER_BATCHING, BATCHING_ON);
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, NEAREST_PIXEL_SAMPLING);
 	SDL_SetRenderDrawBlendMode(m_handle, SDL_BLENDMODE_BLEND);
 	return true;
 }
