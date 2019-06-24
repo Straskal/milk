@@ -75,6 +75,7 @@ static int graphics_new_texture(lua_State* L) {
 static int graphics_set_virtual_resolution(lua_State* L) {
 	int w = (int)luaL_checkinteger(L, 1);
 	int h = (int)luaL_checkinteger(L, 2);
+
 	milk::Locator::renderer->resolution(w, h);
 	return 0;
 }
