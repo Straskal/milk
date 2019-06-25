@@ -17,7 +17,7 @@ static const char* SOUND_METATABLE = "milk.sound";
 
 static int soundmeta_gc(lua_State* L) {
 	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
-	// Stop sound before derefencing it. We do NOT want to release a sound from memory while it is playing.
+	// We do NOT want to release a sound from memory while it is playing.
 	milk::Locator::audioPlayer->stopSound(sound);
 	milk::Locator::sounds->dereference(sound->data);
 	return 0;
@@ -48,8 +48,10 @@ static const char* MUSIC_METATABLE = "milk.music";
 
 static int musicmeta_gc(lua_State* L) {
 	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
-	// Stop music before derefencing it. We do NOT want to release music from memory while it is playing.
-	milk::Locator::audioPlayer->stopMusic(0);
+	// We do NOT want to release music from memory while it is playing.
+	if (milk::Locator::audioPlayer->isMusicPlaying(music)) {
+		milk::Locator::audioPlayer->stopMusic(0);
+	}
 	milk::Locator::music->dereference(music->data);
 	return 0;
 }

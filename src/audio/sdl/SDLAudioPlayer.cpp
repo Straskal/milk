@@ -54,9 +54,7 @@ bool milk::SDLAudioPlayer::init() {
 }
 
 void milk::SDLAudioPlayer::playSound(Sound* sound) {
-	// If the sound is currently playing, then stop it.
 	stopSound(sound);
-
 	SoundData* soundData = sound->data;
 	int channel = Mix_PlayChannel(FIRST_AVAILABLE_CHANNEL, (Mix_Chunk*)soundData->handle, NO_LOOP);
 	// This can either be a fatal error or a failure to find an available channel.
@@ -97,6 +95,10 @@ void milk::SDLAudioPlayer::stopMusic(int fadeTime) {
 	if (Mix_PlayingMusic()) {
 		Mix_FadeOutMusic(fadeTime);
 	}
+}
+
+bool milk::SDLAudioPlayer::isMusicPlaying(const Music* music) const {
+	return music == current_music;
 }
 
 void milk::SDLAudioPlayer::free() {
