@@ -11,6 +11,7 @@ namespace milk {
 
 		virtual void playSound(Sound* sound) = 0;
 		virtual void stopSound(Sound* sound) = 0;
+		virtual void setSoundVolume(Sound* sound, float volume) = 0;
 		virtual void playMusic(Music* music, int fadeTime) = 0;
 		virtual void loopMusic(Music* music, int fadeTime) = 0;
 		virtual void stopMusic(int fadeTime) = 0;

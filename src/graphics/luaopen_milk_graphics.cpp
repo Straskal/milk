@@ -59,7 +59,7 @@ static int graphics_new_texture(lua_State* L) {
 		const char* value = lua_tostring(L, 1);
 		milk::TextureData* textureData = milk::Locator::textures->load(value);
 		if (textureData != nullptr) {
-			milk::Texture* texture = (milk::Texture*)lua_newuserdata(L, sizeof(milk::Texture*));
+			milk::Texture* texture = (milk::Texture*)lua_newuserdata(L, sizeof(milk::Texture));
 			luaL_getmetatable(L, TEXTURE_METATABLE);
 			lua_setmetatable(L, -2);
 			texture->data = textureData;
