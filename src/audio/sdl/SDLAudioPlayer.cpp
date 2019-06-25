@@ -92,18 +92,17 @@ void milk::SDLAudioPlayer::free() {
 void milk::SDLAudioPlayer::playSound(Sound* sound) {
 	stopSound(sound);
 
-	SoundData* data = sound->data;
 	int cnum = free_channels.front();
 	free_channels.pop();
+	sound->channel = cnum;
 
 	Channel* channel = &channels.at(cnum);
 	channel->sound = sound;
 	channel->type = PlaybackType::CONTROLLED;
 	channel_volume[cnum] = (int)(sound->volume * master_volume);
-	sound->channel = cnum;
 
 	Mix_Volume(cnum, channel_volume[cnum]);
-	if (Mix_PlayChannel(cnum, (Mix_Chunk*)data->handle, NO_LOOP) == -1) {
+	if (Mix_PlayChannel(cnum, (Mix_Chunk*)sound->data->handle, NO_LOOP) == -1) {
 		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
 		return;
 	}
