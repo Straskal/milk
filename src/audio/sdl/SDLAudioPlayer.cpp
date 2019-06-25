@@ -40,9 +40,9 @@ static milk::Music* current_music = nullptr;
 
 static void on_channel_finished(int cnum) {
 	Channel* channel = &channels.at(cnum);
-	milk::Sound* s = channel->sound;
+	milk::Sound* sound = channel->sound;
 	if (channel->type == PlaybackType::CONTROLLED && channel->sound != nullptr) {
-		s->channel = INVALID_CHANNEL;
+		sound->channel = INVALID_CHANNEL;
 	}
 	else if (channel->type == PlaybackType::FIRE_AND_FORGET) {
 		// TODO
