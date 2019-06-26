@@ -1,10 +1,12 @@
 #ifndef _MUSIC_CACHE_H_
 #define _MUSIC_CACHE_H_
 
-namespace milk {
+namespace milk
+{
 	struct MusicData;
 
-	class MusicCache {
+	class MusicCache
+	{
 	public:
 		virtual ~MusicCache() = default;
 

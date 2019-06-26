@@ -6,19 +6,22 @@
 #include "data/int.h"
 #include "math/Vector2.h"
 
-namespace milk {
+namespace milk
+{
 	struct Texture;
 	struct Color;
 	struct Rectangle;
 	struct RectangleF;
 
-	enum FlipFlags {
+	enum FlipFlags
+	{
 		NO_FLIP,
 		FLIP_X = 1 << 0,
 		FLIP_Y = 1 << 1
 	};
 
-	class Renderer {
+	class Renderer
+	{
 	public:
 		virtual ~Renderer() = default;
 

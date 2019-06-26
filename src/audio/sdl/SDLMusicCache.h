@@ -6,8 +6,10 @@
 #include <string>
 #include <unordered_map>
 
-namespace milk {
-	class SDLMusicCache : public MusicCache {
+namespace milk
+{
+	class SDLMusicCache : public MusicCache
+	{
 	public:
 		MusicData* load(const char* path) override;
 		void dereference(MusicData* musicData) override;

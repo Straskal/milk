@@ -5,8 +5,10 @@
 
 #include "mouse/Mouse.h"
 
-namespace milk {
-	class SDLMouse : public Mouse {
+namespace milk
+{
+	class SDLMouse : public Mouse
+	{
 	public:
 		SDLMouse();
 

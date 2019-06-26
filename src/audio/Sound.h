@@ -3,14 +3,17 @@
 
 #include <string>
 
-namespace milk {
-	struct SoundData {
+namespace milk
+{
+	struct SoundData
+	{
 		std::string path;
 		void* handle;
 		int refCount;
 	};
 
-	struct Sound {
+	struct Sound
+	{
 		SoundData* data;
 		int channel;
 		float volume;

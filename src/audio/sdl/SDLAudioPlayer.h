@@ -3,8 +3,10 @@
 
 #include "audio/AudioPlayer.h"
 
-namespace milk {
-	class SDLAudioPlayer : public AudioPlayer {
+namespace milk
+{
+	class SDLAudioPlayer : public AudioPlayer
+	{
 	public:
 		bool init();
 		void free();

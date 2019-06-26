@@ -9,8 +9,10 @@
 struct SDL_Renderer;
 struct SDL_Window;
 
-namespace milk {
-	class SDLRenderer : public Renderer {
+namespace milk
+{
+	class SDLRenderer : public Renderer
+	{
 	public:
 		SDLRenderer();
 
@@ -28,7 +30,7 @@ namespace milk {
 
 	private:
 		SDL_Renderer* m_handle;
-		
+
 		// These values are cached so we don't create them with every draw call
 		SDL_Color m_drawColor;
 		SDL_Rect m_sourceRect;

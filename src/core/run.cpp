@@ -43,12 +43,14 @@ static milk::SDLSoundCache* sound_cache = nullptr;
 static milk::SDLMusicCache* music_cache = nullptr;
 static lua_State* lua = nullptr;
 
-static int error_handler(lua_State* L) {
+static int error_handler(lua_State* L)
+{
 	luaL_traceback(L, L, lua_tostring(L, 1), 0);
 	return 1;
 }
 
-static void print_runtime_error(const char* err) {
+static void print_runtime_error(const char* err)
+{
 	// Minimize window before displaying the error and locking the event loop.
 	// This basically avoids locking the game down, which is super frusterating when throwing an error when in fullscreen mode.
 	// This also makes it very convenient when an error is thrown because the game is moved out of the way of the console :)
@@ -60,7 +62,8 @@ static void print_runtime_error(const char* err) {
 	window->restore();
 }
 
-static bool init() {
+static bool init()
+{
 	window = new milk::SDLWindow();
 	renderer = new milk::SDLRenderer();
 	texture_cache = new milk::SDLTextureCache();
@@ -77,7 +80,8 @@ static bool init() {
 }
 
 // 'Register' systems with the service locator for lua modules
-static void register_locator() {
+static void register_locator()
+{
 	milk::Locator::window = window;
 	milk::Locator::renderer = renderer;
 	milk::Locator::textures = texture_cache;
@@ -88,7 +92,8 @@ static void register_locator() {
 	milk::Locator::keyboard = keyboard;
 }
 
-static bool init_api_and_callbacks() {
+static bool init_api_and_callbacks()
+{
 	lua = luaL_newstate();
 	luaL_openlibs(lua);
 
@@ -113,7 +118,8 @@ static bool init_api_and_callbacks() {
 	return true;
 }
 
-static void main_loop() {
+static void main_loop()
+{
 	window->show();
 
 	while (!window->shouldClose()) {
@@ -159,7 +165,8 @@ static void main_loop() {
 	}
 }
 
-static void deinit() {
+static void deinit()
+{
 	lua_close(lua);
 	free_ptr(keyboard);
 	free_ptr(mouse);
@@ -171,7 +178,8 @@ static void deinit() {
 	deinit_and_free_ptr(window);
 }
 
-int milk::run() {
+int milk::run()
+{
 	if (!init()) {
 		print_runtime_error("Error during startup!");
 		deinit();

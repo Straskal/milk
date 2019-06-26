@@ -8,10 +8,12 @@
 #include "graphics/Texture.h"
 
 milk::SDLTextureCache::SDLTextureCache()
-	: m_rendererHandle{ 0 } {
+	: m_rendererHandle{ 0 }
+{
 }
 
-bool milk::SDLTextureCache::init(SDL_Renderer* rendererHandle) {
+bool milk::SDLTextureCache::init(SDL_Renderer* rendererHandle)
+{
 	int flags = IMG_INIT_JPG | IMG_INIT_PNG;
 	if ((IMG_Init(flags) & flags) != flags) {
 		std::cout << "Error initializing SDL_image: " << IMG_GetError() << std::endl;
@@ -21,7 +23,8 @@ bool milk::SDLTextureCache::init(SDL_Renderer* rendererHandle) {
 	return true;
 }
 
-milk::TextureData* milk::SDLTextureCache::load(const char* path) {
+milk::TextureData* milk::SDLTextureCache::load(const char* path)
+{
 	auto found = m_textures.find(path);
 	if (found != m_textures.end()) {
 		++found->second->refCount;
@@ -51,7 +54,8 @@ milk::TextureData* milk::SDLTextureCache::load(const char* path) {
 	return textureData;
 }
 
-void milk::SDLTextureCache::dereference(TextureData* textureData) {
+void milk::SDLTextureCache::dereference(TextureData* textureData)
+{
 	if (--textureData->refCount <= 0) {
 		m_textures.erase(textureData->path);
 		SDL_DestroyTexture((SDL_Texture*)textureData->handle);
@@ -59,7 +63,8 @@ void milk::SDLTextureCache::dereference(TextureData* textureData) {
 	}
 }
 
-void milk::SDLTextureCache::free() {
+void milk::SDLTextureCache::free()
+{
 	SDL_assert(m_textures.size() == 0);
 	IMG_Quit();
 }

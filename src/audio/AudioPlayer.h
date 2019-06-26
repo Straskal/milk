@@ -1,11 +1,13 @@
 #ifndef _AUDIO_PLAYER_H_
 #define _AUDIO_PLAYER_H_
 
-namespace milk {
+namespace milk
+{
 	struct Music;
 	struct Sound;
 
-	class AudioPlayer {
+	class AudioPlayer
+	{
 	public:
 		virtual ~AudioPlayer() = default;
 

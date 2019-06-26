@@ -1,9 +1,11 @@
 #ifndef _KEYBOARD_H_
 #define _KEYBOARD_H_
 
-namespace milk {
+namespace milk
+{
 	// These have a 1:1 relationship with SDL_Scancodes
-	enum Keys {
+	enum Keys
+	{
 		UNKNOWN = 0,
 		A = 4,
 		B = 5,
@@ -83,7 +85,8 @@ namespace milk {
 		MAX_KEYS
 	};
 
-	class Keyboard {
+	class Keyboard
+	{
 	public:
 		virtual ~Keyboard() = default;
 

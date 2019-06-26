@@ -3,14 +3,17 @@
 
 #include <tuple>
 
-namespace milk {
-	enum MouseButtons {
+namespace milk
+{
+	enum MouseButtons
+	{
 		MOUSE_LEFT = 1,
 		MOUSE_MIDDLE,
 		MOUSE_RIGHT
 	};
 
-	class Mouse {
+	class Mouse
+	{
 	public:
 		virtual ~Mouse() = default;
 

@@ -3,14 +3,17 @@
 
 #include <string>
 
-namespace milk {
-	struct MusicData {
+namespace milk
+{
+	struct MusicData
+	{
 		std::string path;
 		void* handle;
 		int refCount;
 	};
 
-	struct Music {
+	struct Music
+	{
 		MusicData* data;
 	};
 }

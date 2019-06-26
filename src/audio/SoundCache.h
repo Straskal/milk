@@ -1,10 +1,12 @@
 #ifndef _SOUND_CACHE_H_
 #define _SOUND_CACHE_H_
 
-namespace milk {
+namespace milk
+{
 	struct SoundData;
 
-	class SoundCache {
+	class SoundCache
+	{
 	public:
 		virtual ~SoundCache() = default;
 

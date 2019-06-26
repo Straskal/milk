@@ -7,7 +7,8 @@
 
 #include "audio/Music.h"
 
-milk::MusicData* milk::SDLMusicCache::load(const char* path) {
+milk::MusicData* milk::SDLMusicCache::load(const char* path)
+{
 	auto found = m_music.find(path);
 	if (found != m_music.end()) {
 		++found->second->refCount;
@@ -29,15 +30,17 @@ milk::MusicData* milk::SDLMusicCache::load(const char* path) {
 	return musicData;
 }
 
-void milk::SDLMusicCache::dereference(MusicData* musicData) {
+void milk::SDLMusicCache::dereference(MusicData* musicData)
+{
 	if (--musicData->refCount <= 0) {
 		m_music.erase(musicData->path);
 		Mix_FreeMusic((Mix_Music*)musicData->handle);
-		delete musicData; 
+		delete musicData;
 		musicData = nullptr;
 	}
 }
 
-void milk::SDLMusicCache::free() {
+void milk::SDLMusicCache::free()
+{
 	SDL_assert(m_music.size() == 0);
 }

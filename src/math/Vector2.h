@@ -5,19 +5,23 @@
 
 #include "Matrix3.h"
 
-namespace milk {
-	struct Vector2 {
+namespace milk
+{
+	struct Vector2
+	{
 		float x;
 		float y;
 
 		Vector2()
 			: x(0)
-			, y(0) {
+			, y(0)
+		{
 		}
 
 		Vector2(float x, float y)
 			: x(x)
-			, y(y) {
+			, y(y)
+		{
 		}
 
 		bool operator==(const Vector2& v);
@@ -33,63 +37,76 @@ namespace milk {
 		static const Vector2 zero();
 	};
 
-	inline bool operator==(const Vector2& v1, const Vector2& v2) {
+	inline bool operator==(const Vector2& v1, const Vector2& v2)
+	{
 		return v1.x == v2.x && v1.y == v2.y;
 	}
 
-	inline Vector2 operator+(const Vector2& v1, const Vector2& v2) {
+	inline Vector2 operator+(const Vector2& v1, const Vector2& v2)
+	{
 		return Vector2{ v1.x + v2.x, v1.y + v2.y };
 	}
 
-	inline Vector2 operator*(float s, const Vector2& v) {
+	inline Vector2 operator*(float s, const Vector2& v)
+	{
 		return Vector2{ v.x * s, v.y * s };
 	}
 
-	inline Vector2 operator/(float s, const Vector2& v) {
+	inline Vector2 operator/(float s, const Vector2& v)
+	{
 		return Vector2{ v.x / s, v.y / s };
 	}
 
-	inline bool Vector2::operator==(const Vector2& v) {
+	inline bool Vector2::operator==(const Vector2& v)
+	{
 		return x == v.x && y == v.y;
 	}
 
-	inline Vector2& Vector2::operator*=(float scalar) {
+	inline Vector2& Vector2::operator*=(float scalar)
+	{
 		x *= scalar;
 		y *= scalar;
 		return (*this);
 	}
 
-	inline Vector2 Vector2::operator/(float scalar) {
+	inline Vector2 Vector2::operator/(float scalar)
+	{
 		x /= scalar;
 		y /= scalar;
 		return (*this);
 	}
 
-	inline Vector2& Vector2::operator/=(float scalar) {
+	inline Vector2& Vector2::operator/=(float scalar)
+	{
 		x /= scalar;
 		y /= scalar;
 		return (*this);
 	}
 
-	inline Vector2& Vector2::operator+=(const Vector2& v) {
+	inline Vector2& Vector2::operator+=(const Vector2& v)
+	{
 		x += v.x;
 		y += v.y;
 		return (*this);
 	}
 
-	inline float Vector2::magnitude() {
+	inline float Vector2::magnitude()
+	{
 		return std::sqrt(x * x + y * y);
 	}
 
-	inline Vector2 Vector2::normalize() {
+	inline Vector2 Vector2::normalize()
+	{
 		return *this / magnitude();
 	}
 
-	inline Vector2 Vector2::transform(const Vector2& v, const Matrix3& m) {
+	inline Vector2 Vector2::transform(const Vector2& v, const Matrix3& m)
+	{
 		return Vector2{ (v.x * m.m11) + (v.y * m.m12) + m.m13, (v.x * m.m21) + (v.y * m.m22) + m.m23 };
 	}
 
-	inline const Vector2 Vector2::zero() {
+	inline const Vector2 Vector2::zero()
+	{
 		return Vector2{ 0.f, 0.f };
 	}
 }

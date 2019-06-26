@@ -4,7 +4,8 @@
 /*
 	The Locator's intended usage is for Lua modules.
 */
-namespace milk {
+namespace milk
+{
 	class Window;
 	class Mouse;
 	class Keyboard;
@@ -14,7 +15,8 @@ namespace milk {
 	class MusicCache;
 	class SoundCache;
 
-	struct Locator {
+	struct Locator
+	{
 		static Window* window;
 		static Mouse* mouse;
 		static Keyboard* keyboard;

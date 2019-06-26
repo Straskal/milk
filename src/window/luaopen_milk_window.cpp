@@ -8,13 +8,15 @@ extern "C" {
 #include "Window.h"
 #include "core/Locator.h"
 
-static int window_get_title(lua_State* L) {
+static int window_get_title(lua_State* L)
+{
 	const char* t = milk::Locator::window->title();
 	lua_pushstring(L, t);
 	return 1;
 }
 
-static int window_set_title(lua_State* L) {
+static int window_set_title(lua_State* L)
+{
 	if (lua_isstring(L, 1)) {
 		const char* val = lua_tostring(L, 1);
 		milk::Locator::window->title(val);
@@ -22,21 +24,24 @@ static int window_set_title(lua_State* L) {
 	return 0;
 }
 
-static int window_get_size(lua_State* L) {
+static int window_get_size(lua_State* L)
+{
 	std::tuple<int, int> sz = milk::Locator::window->size();
 	lua_pushinteger(L, std::get<0>(sz));
 	lua_pushinteger(L, std::get<1>(sz));
 	return 2;
 }
 
-static int window_set_size(lua_State* L) {
+static int window_set_size(lua_State* L)
+{
 	int w = luaL_checkinteger(L, 1);
 	int h = luaL_checkinteger(L, 2);
 	milk::Locator::window->size(w, h);
 	return 0;
 }
 
-static int window_set_fullscreen(lua_State* L) {
+static int window_set_fullscreen(lua_State* L)
+{
 	if (lua_isboolean(L, 1)) {
 		bool fs = lua_toboolean(L, 1);
 		milk::Locator::window->fullscreen(fs);
@@ -44,13 +49,15 @@ static int window_set_fullscreen(lua_State* L) {
 	return 0;
 }
 
-static int window_is_fullscreen(lua_State* L) {
+static int window_is_fullscreen(lua_State* L)
+{
 	bool fs = milk::Locator::window->fullscreen();
 	lua_pushboolean(L, fs);
 	return 1;
 }
 
-static int window_close(lua_State* L) {
+static int window_close(lua_State* L)
+{
 	milk::Locator::window->close();
 	return 0;
 }
@@ -66,7 +73,8 @@ static const luaL_Reg window_funcs[] = {
 	{ NULL, NULL }
 };
 
-int milk::luaopen_milk_window(lua_State* L) {
+int milk::luaopen_milk_window(lua_State* L)
+{
 	luaL_newlib(L, window_funcs);
 	return 1;
 }

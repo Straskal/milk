@@ -3,8 +3,10 @@
 
 #include <string>
 
-namespace milk {
-	struct TextureData {
+namespace milk
+{
+	struct TextureData
+	{
 		std::string path;
 		void* handle;
 		int refCount;
@@ -12,7 +14,8 @@ namespace milk {
 		int height;
 	};
 
-	struct Texture {
+	struct Texture
+	{
 		TextureData* data;
 	};
 }

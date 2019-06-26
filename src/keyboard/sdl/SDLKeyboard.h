@@ -5,8 +5,10 @@
 
 #include "SDL.h"
 
-namespace milk {
-	class SDLKeyboard : public Keyboard {
+namespace milk
+{
+	class SDLKeyboard : public Keyboard
+	{
 	public:
 		SDLKeyboard();
 

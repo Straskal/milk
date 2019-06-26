@@ -3,8 +3,10 @@
 
 #include <tuple>
 
-namespace milk {
-	class Window {
+namespace milk
+{
+	class Window
+	{
 	public:
 		virtual ~Window() = default;
 

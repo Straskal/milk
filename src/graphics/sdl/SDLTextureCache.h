@@ -8,8 +8,10 @@
 
 struct SDL_Renderer;
 
-namespace milk {
-	class SDLTextureCache : public TextureCache {
+namespace milk
+{
+	class SDLTextureCache : public TextureCache
+	{
 	public:
 		SDLTextureCache();
 

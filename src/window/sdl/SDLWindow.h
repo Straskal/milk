@@ -9,7 +9,8 @@ struct SDL_Window;
 
 namespace milk
 {
-	class SDLWindow : public Window {
+	class SDLWindow : public Window
+	{
 	public:
 		SDLWindow();
 

@@ -3,10 +3,12 @@
 
 #include <string>
 
-namespace milk {
+namespace milk
+{
 	struct TextureData;
 
-	class TextureCache {
+	class TextureCache
+	{
 	public:
 		virtual ~TextureCache() = default;
 
