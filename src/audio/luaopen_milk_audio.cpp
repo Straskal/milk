@@ -113,6 +113,18 @@ static int audio_new_sound(lua_State* L) {
 	return 2;
 }
 
+static int audio_get_master_volume(lua_State* L) {
+	float masterVolume = milk::Locator::audioPlayer->getMasterVolume();
+	lua_pushnumber(L, masterVolume);
+	return 1;
+}
+
+static int audio_set_master_volume(lua_State* L) {
+	float masterVolume = (float)luaL_checknumber(L, 1);
+	milk::Locator::audioPlayer->setMasterVolume(masterVolume);
+	return 0;
+}
+
 static int audio_play_sound(lua_State* L) {
 	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
 	milk::Locator::audioPlayer->playSound(sound);
@@ -164,6 +176,8 @@ static int audio_stop_music(lua_State* L) {
 }
 
 static const luaL_Reg audio_funcs[] = {
+	{ "get_master_volume", audio_get_master_volume},
+	{ "set_master_volume", audio_set_master_volume },
 	{ "new_sound", audio_new_sound },
 	{ "play_sound", audio_play_sound },
 	{ "stop_sound", audio_stop_sound },

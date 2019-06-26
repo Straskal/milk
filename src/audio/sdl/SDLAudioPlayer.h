@@ -8,8 +8,11 @@ namespace milk {
 	public:
 		bool init();
 		void free();
+		void setMasterVolume(float volume) override;
+		float getMasterVolume() const override;
 		void playSound(Sound* sound) override;
 		void stopSound(Sound* sound) override;
+		bool isSoundPlaying(Sound* sound) override;
 		void setSoundVolume(Sound* sound, float volume) override;
 		void playMusic(Music* music, int fadeTime) override;
 		void loopMusic(Music* music, int fadeTime) override;

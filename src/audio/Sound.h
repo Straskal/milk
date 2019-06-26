@@ -13,7 +13,7 @@ namespace milk {
 	struct Sound {
 		SoundData* data;
 		int channel;
-		double volume;
+		float volume;
 	};
 }
 
