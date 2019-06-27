@@ -131,7 +131,6 @@ void milk::SDLAudioPlayer::playSound(Sound* sound)
 	Mix_Volume(channelnum, sound->volume * (master_volume * MIX_MAX_VOLUME));
 	if (Mix_PlayChannel(channelnum, (Mix_Chunk*)sound->data->handle, NO_LOOP) == -1) {
 		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
-		return;
 	}
 }
 
