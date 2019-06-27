@@ -139,6 +139,11 @@ void milk::SDLAudioPlayer::stopSound(Sound* sound)
 	Mix_HaltChannel(sound->channel);
 }
 
+void milk::SDLAudioPlayer::playFafSound(Sound* sound)
+{
+
+}
+
 bool milk::SDLAudioPlayer::isSoundPlaying(Sound* sound)
 {
 	return sound->channel != INVALID_CHANNEL;
@@ -148,7 +153,7 @@ void milk::SDLAudioPlayer::setSoundVolume(Sound* sound, float volume)
 {
 	sound->volume = volume;
 	if (sound->channel != INVALID_CHANNEL) {
-		int v = (int)(sound->volume * master_volume);
+		int v = (int)(sound->volume * (master_volume * MIX_MAX_VOLUME));
 		channel_volume[sound->channel] = v;
 		Mix_Volume(sound->channel, v);
 	}

@@ -32,14 +32,6 @@ static int soundmeta_get_path(lua_State* L)
 	return 1;
 }
 
-static int soundmeta_get_ref_count(lua_State* L)
-{
-	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
-	int refCount = sound->data->refCount;
-	lua_pushinteger(L, refCount);
-	return 1;
-}
-
 static int soundmeta_get_volume(lua_State* L)
 {
 	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
@@ -59,7 +51,6 @@ static int soundmeta_set_volume(lua_State* L)
 static const luaL_Reg soundmeta_funcs[] = {
 	{ "__gc", soundmeta_gc },
 	{ "get_path", soundmeta_get_path },
-	{ "get_ref_count", soundmeta_get_ref_count },
 	{ "get_volume", soundmeta_get_volume },
 	{ "set_volume", soundmeta_set_volume },
 	{ NULL, NULL }
@@ -86,18 +77,9 @@ static int musicmeta_get_path(lua_State* L)
 	return 1;
 }
 
-static int musicmeta_get_ref_count(lua_State* L)
-{
-	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
-	int refCount = music->data->refCount;
-	lua_pushinteger(L, refCount);
-	return 1;
-}
-
 static const luaL_Reg musicmeta_funcs[] = {
 	{ "__gc", musicmeta_gc },
 	{ "get_path", musicmeta_get_path },
-	{ "get_ref_count", musicmeta_get_ref_count },
 	{ NULL, NULL }
 };
 

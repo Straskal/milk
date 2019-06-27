@@ -14,6 +14,7 @@ namespace milk
 		float getMasterVolume() const override;
 		void playSound(Sound* sound) override;
 		void stopSound(Sound* sound) override;
+		void playFafSound(Sound* sound) override;
 		bool isSoundPlaying(Sound* sound) override;
 		void setSoundVolume(Sound* sound, float volume) override;
 		void playMusic(Music* music, int fadeTime) override;
