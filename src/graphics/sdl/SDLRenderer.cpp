@@ -113,7 +113,7 @@ std::tuple<int, int> milk::SDLRenderer::resolution() const
 	return std::make_tuple(w, h);
 }
 
-void milk::SDLRenderer::resolution(int w, int h)
+void milk::SDLRenderer::resolution(const int w, const int h)
 {
 	SDL_RenderSetLogicalSize(m_handle, w, h);
 }

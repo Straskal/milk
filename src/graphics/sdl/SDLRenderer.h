@@ -24,7 +24,7 @@ namespace milk
 		void draw(const Image* image, const Rectangle* sourceRectangle, const RectangleF* destinationRectangle, u8 flipFlags) override;
 		void present() override;
 		std::tuple<int, int> resolution() const override;
-		void resolution(int w, int h) override;
+		void resolution(const int w, const int h) override;
 		SDL_Renderer* handle() const;
 		void free();
 

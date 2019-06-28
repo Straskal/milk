@@ -29,10 +29,10 @@ namespace milk
 		virtual void setDrawColor(const Color* color) = 0;
 		virtual void drawRectangle(const RectangleF* destinationRectangle) = 0;
 		virtual void drawRectangleFilled(const RectangleF* destinationRectangle) = 0;
-		virtual void draw(const Image* image, const Rectangle* sourceRectangle, const RectangleF* destinationRectangle, u8 flipFlags) = 0;
+		virtual void draw(const Image* image, const Rectangle* sourceRectangle, const RectangleF* destinationRectangle, const u8 flipFlags) = 0;
 		virtual void present() = 0;
 		virtual std::tuple<int, int> resolution() const = 0;
-		virtual void resolution(int w, int h) = 0;
+		virtual void resolution(const int w, const int h) = 0;
 	};
 }
 
