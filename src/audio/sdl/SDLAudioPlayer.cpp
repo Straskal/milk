@@ -169,7 +169,7 @@ void milk::SDLAudioPlayer::stopSound(Sound* sound, const float fadeTime)
 
 void milk::SDLAudioPlayer::setSoundVolume(Sound* sound, const float volume)
 {
-	sound->volume = std::min(std::max(volume, 0.f), 1.f);;
+	sound->volume = std::min(std::max(volume, 0.f), 1.f);
 
 	if (sound->channel != INVALID_CHANNEL) {
 		int v = (int)(sound->volume * (m_masterVolume * MIX_MAX_VOLUME));
@@ -232,7 +232,7 @@ void milk::SDLAudioPlayer::stopMusic(Music* music, const float fadeTime)
 
 void milk::SDLAudioPlayer::setMusicVolume(Music* music, const float volume)
 {
-	music->volume = std::min(std::max(volume, 0.f), 1.f);;
+	music->volume = std::min(std::max(volume, 0.f), 1.f);
 
 	if (music->state == AudioState::PLAYING) {
 		Mix_VolumeMusic((int)(music->volume * (m_masterVolume * MIX_MAX_VOLUME)));
