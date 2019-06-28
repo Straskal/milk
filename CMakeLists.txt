@@ -67,6 +67,7 @@ find_package(Lua53 REQUIRED)
 # audio
 set(MILK_SRC_AUDIO
 	src/audio/AudioPlayer.h
+	src/audio/AudioState.h
 	src/audio/Music.h
 	src/audio/MusicCache.h
 	src/audio/SoundCache.h

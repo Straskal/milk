@@ -2,25 +2,37 @@
 #define _SDL_AUDIO_PLAYER_H_
 
 #include "audio/AudioPlayer.h"
+#include "audio/AudioState.h"
 
 namespace milk
 {
 	class SDLAudioPlayer : public AudioPlayer
 	{
 	public:
+		SDLAudioPlayer();
+
 		bool init();
 		void free();
-		void setMasterVolume(float volume) override;
+
+		void setMasterVolume(const float volume) override;
 		float getMasterVolume() const override;
-		void playSound(Sound* sound) override;
-		void stopSound(Sound* sound) override;
-		void playFafSound(Sound* sound) override;
-		bool isSoundPlaying(Sound* sound) override;
-		void setSoundVolume(Sound* sound, float volume) override;
-		void playMusic(Music* music, int fadeTime) override;
-		void loopMusic(Music* music, int fadeTime) override;
-		void stopMusic(int fadeTime) override;
-		bool isMusicPlaying(const Music* music) const override;
+
+		void playSound(Sound* sound, const float fadeTime) override;
+		void loopSound(Sound* sound, const float fadeTime) override;
+		void pauseSound(Sound* sound) override;
+		void resumeSound(Sound* sound) override;
+		void stopSound(Sound* sound, const float fadeTime) override;
+		void setSoundVolume(Sound* sound, const float volume) override;
+
+		void playMusic(Music* music, const float fadeTime) override;
+		void loopMusic(Music* music, const float fadeTime) override;
+		void pauseMusic(Music* music) override;
+		void resumeMusic(Music* music) override;
+		void stopMusic(Music* music, const float fadeTime) override;
+		void setMusicVolume(Music* music, const float volume) override;
+
+	private:
+		float m_masterVolume;
 	};
 }
 

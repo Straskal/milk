@@ -21,42 +21,30 @@ static const int INVALID_CHANNEL = -1;
 static const int LOOP = -1;
 static const int NO_LOOP = 0;
 
-enum PlaybackType
-{
-	FIRE_AND_FORGET,
-	CONTROLLED
-};
-
-struct Channel
-{
-	PlaybackType type;
-	milk::Sound* sound;
-};
-
-static float master_volume = 1.f;
-
-static std::array<Channel, NUM_CHANNELS> channels;
+static std::array<milk::Sound*, NUM_CHANNELS> channels;
 static std::array<float, NUM_CHANNELS> channel_volume;
 static std::queue<int> free_channels;
 
 static milk::Music* current_music = nullptr;
-static float music_volume = 1.f;
 
-static void on_channel_finished(int cnum)
+static void on_channel_finished(int channelnum)
 {
-	if (channels[cnum].type == PlaybackType::CONTROLLED && channels[cnum].sound != nullptr) {
-		channels[cnum].sound->channel = INVALID_CHANNEL;
-	}
-	else if (channels[cnum].type == PlaybackType::FIRE_AND_FORGET) {
-		// TODO
-	}
-	channels[cnum].sound = nullptr;
-	free_channels.push(cnum);
+	milk::Sound* sound = channels[channelnum];
+	channels[channelnum] = nullptr;
+	sound->channel = INVALID_CHANNEL;
+	sound->state = milk::AudioState::STOPPED;
+	free_channels.push(channelnum);
 }
 
 static void on_music_finished()
 {
+	current_music->state = milk::AudioState::STOPPED;
 	current_music = nullptr;
+}
+
+milk::SDLAudioPlayer::SDLAudioPlayer()
+	: m_masterVolume{1.f}
+{
 }
 
 bool milk::SDLAudioPlayer::init()
@@ -79,8 +67,7 @@ bool milk::SDLAudioPlayer::init()
 
 	Mix_AllocateChannels(NUM_CHANNELS);
 	for (int i = 0; i < NUM_CHANNELS; ++i) {
-		channels[i].type = PlaybackType::CONTROLLED;
-		channels[i].sound = nullptr;
+		channels[i] = nullptr;
 		channel_volume[i] = 1.f;
 		free_channels.push(i);
 	}
@@ -97,96 +84,157 @@ void milk::SDLAudioPlayer::free()
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
-void milk::SDLAudioPlayer::setMasterVolume(float volume)
+void milk::SDLAudioPlayer::setMasterVolume(const float volume)
 {
-	master_volume = std::min(std::max(volume, 0.f), 1.f);
-	int v = (int)(master_volume * MIX_MAX_VOLUME);
+	m_masterVolume = std::min(std::max(volume, 0.f), 1.f);
+	int v = (int)(m_masterVolume * MIX_MAX_VOLUME);
 
 	for (int i = 0; i < NUM_CHANNELS; ++i) {
 		Mix_Volume(i, (int)(channel_volume[i] * v));
 	}
 
-	Mix_VolumeMusic((int)(music_volume * v));
+	if (current_music != nullptr) {
+		Mix_VolumeMusic((int)(current_music->volume * v));
+	}
 }
 
 float milk::SDLAudioPlayer::getMasterVolume() const
 {
-	return master_volume;
+	return m_masterVolume;
 }
 
-void milk::SDLAudioPlayer::playSound(Sound* sound)
+void milk::SDLAudioPlayer::playSound(Sound* sound, const float fadeTime)
 {
-	if (isSoundPlaying(sound)) {
-		stopSound(sound);
-	}
+	stopSound(sound, 0.f);
 
 	int channelnum = free_channels.front();
 	free_channels.pop();
-	sound->channel = channelnum;
 
-	channels[channelnum].sound = sound;
-	channels[channelnum].type = PlaybackType::CONTROLLED;
-	channel_volume[channelnum] = sound->volume;
-
-	Mix_Volume(channelnum, sound->volume * (master_volume * MIX_MAX_VOLUME));
-	if (Mix_PlayChannel(channelnum, (Mix_Chunk*)sound->data->handle, NO_LOOP) == -1) {
+	Mix_Volume(channelnum, sound->volume * (m_masterVolume * MIX_MAX_VOLUME));
+	if (Mix_FadeInChannel(channelnum, (Mix_Chunk*)sound->data->handle, NO_LOOP, (int)(fadeTime * 1000)) == -1) {
 		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
+		free_channels.push(channelnum);
+		return;
+	}
+
+	sound->channel = channelnum;
+	sound->state = AudioState::PLAYING;
+	channels[channelnum] = sound;
+	channel_volume[channelnum] = sound->volume;
+}
+
+void milk::SDLAudioPlayer::loopSound(Sound* sound, const float fadeTime)
+{
+	stopSound(sound, 0.f);
+
+	int channelnum = free_channels.front();
+	free_channels.pop();
+
+	Mix_Volume(channelnum, sound->volume * (m_masterVolume * MIX_MAX_VOLUME));
+	if (Mix_FadeInChannel(channelnum, (Mix_Chunk*)sound->data->handle, LOOP, (int)(fadeTime * 1000)) == -1) {
+		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
+		free_channels.push(channelnum);
+		return;
+	}
+
+	sound->channel = channelnum;
+	sound->state = AudioState::PLAYING;
+	channels[channelnum] = sound;
+	channel_volume[channelnum] = sound->volume;
+}
+
+void milk::SDLAudioPlayer::pauseSound(Sound* sound)
+{
+	if (sound->state == AudioState::PLAYING) {
+		sound->state = AudioState::PAUSED;
+		Mix_Pause(sound->channel);
 	}
 }
 
-void milk::SDLAudioPlayer::stopSound(Sound* sound)
+void milk::SDLAudioPlayer::resumeSound(Sound* sound)
 {
-	Mix_HaltChannel(sound->channel);
+	if (sound->state == AudioState::PAUSED) {
+		sound->state = AudioState::PLAYING;
+		Mix_Resume(sound->channel);
+	}
 }
 
-void milk::SDLAudioPlayer::playFafSound(Sound* sound)
+void milk::SDLAudioPlayer::stopSound(Sound* sound, const float fadeTime)
 {
-
+	if (sound->state != AudioState::STOPPED) {
+		sound->state = AudioState::STOPPED;
+		Mix_FadeOutChannel(sound->channel, (int)(fadeTime * 1000));
+	}
 }
 
-bool milk::SDLAudioPlayer::isSoundPlaying(Sound* sound)
+void milk::SDLAudioPlayer::setSoundVolume(Sound* sound, const float volume)
 {
-	return sound->channel != INVALID_CHANNEL;
-}
+	sound->volume = std::min(std::max(volume, 0.f), 1.f);;
 
-void milk::SDLAudioPlayer::setSoundVolume(Sound* sound, float volume)
-{
-	sound->volume = volume;
 	if (sound->channel != INVALID_CHANNEL) {
-		int v = (int)(sound->volume * (master_volume * MIX_MAX_VOLUME));
+		int v = (int)(sound->volume * (m_masterVolume * MIX_MAX_VOLUME));
 		channel_volume[sound->channel] = v;
 		Mix_Volume(sound->channel, v);
 	}
 }
 
-void milk::SDLAudioPlayer::playMusic(Music* music, int fadeTime)
+void milk::SDLAudioPlayer::playMusic(Music* music, const float fadeTime)
 {
-	stopMusic(0);
-	Mix_VolumeMusic(music_volume * (master_volume * MIX_MAX_VOLUME));
-	if (Mix_FadeInMusic((Mix_Music*)music->data->handle, NO_LOOP, fadeTime) == -1) {
+	Mix_HaltMusic();
+
+	Mix_VolumeMusic(music->volume * (m_masterVolume * MIX_MAX_VOLUME));
+	if (Mix_FadeInMusic((Mix_Music*)music->data->handle, NO_LOOP, (int)(fadeTime * 1000)) == -1) {
 		std::cout << "Mix_PlayMusic: " << Mix_GetError() << std::endl;
+		return;
 	}
+
+	music->state = AudioState::PLAYING;
 	current_music = music;
 }
 
-void milk::SDLAudioPlayer::loopMusic(Music* music, int fadeTime)
+void milk::SDLAudioPlayer::loopMusic(Music* music, const float fadeTime)
 {
-	stopMusic(0);
-	Mix_VolumeMusic(music_volume * (master_volume * MIX_MAX_VOLUME));
-	if (Mix_FadeInMusic((Mix_Music*)music->data->handle, LOOP, fadeTime) == -1) {
+	stopMusic(music, 0);
+
+	Mix_VolumeMusic(music->volume * (m_masterVolume * MIX_MAX_VOLUME));
+	if (Mix_FadeInMusic((Mix_Music*)music->data->handle, LOOP, (int)(fadeTime * 1000)) == -1) {
 		std::cout << "Mix_PlayMusic: " << Mix_GetError() << std::endl;
+		return;
 	}
+
+	music->state = AudioState::PLAYING;
 	current_music = music;
 }
 
-void milk::SDLAudioPlayer::stopMusic(int fadeTime)
+void milk::SDLAudioPlayer::pauseMusic(Music* music)
 {
-	if (Mix_PlayingMusic()) {
-		Mix_FadeOutMusic(fadeTime);
+	if (music->state == AudioState::PLAYING) {
+		music->state = AudioState::PAUSED;
+		Mix_PauseMusic();
 	}
 }
 
-bool milk::SDLAudioPlayer::isMusicPlaying(const Music* music) const
+void milk::SDLAudioPlayer::resumeMusic(Music* music)
 {
-	return music == current_music;
+	if (music->state == AudioState::PAUSED) {
+		music->state == AudioState::PLAYING;
+		Mix_PauseMusic();
+	}
+}
+
+void milk::SDLAudioPlayer::stopMusic(Music* music, const float fadeTime)
+{
+	if (music->state != AudioState::STOPPED) {
+		music->state = AudioState::STOPPED;
+		Mix_FadeOutMusic((int)(fadeTime * 1000));
+	}
+}
+
+void milk::SDLAudioPlayer::setMusicVolume(Music* music, const float volume)
+{
+	music->volume = std::min(std::max(volume, 0.f), 1.f);;
+
+	if (music->state == AudioState::PLAYING) {
+		Mix_VolumeMusic((int)(music->volume * (m_masterVolume * MIX_MAX_VOLUME)));
+	}
 }

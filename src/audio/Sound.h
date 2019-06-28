@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "AudioState.h"
+
 namespace milk
 {
 	struct SoundData
@@ -15,6 +17,7 @@ namespace milk
 	struct Sound
 	{
 		SoundData* data;
+		AudioState state;
 		int channel;
 		float volume;
 	};
