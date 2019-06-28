@@ -48,7 +48,7 @@ std::tuple<int, int> milk::SDLWindow::size() const
 	return std::make_tuple(w, h);
 }
 
-void milk::SDLWindow::size(int width, int height)
+void milk::SDLWindow::size(const int width, const int height)
 {
 	SDL_SetWindowSize(m_handle, width, height);
 	SDL_SetWindowPosition(m_handle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);

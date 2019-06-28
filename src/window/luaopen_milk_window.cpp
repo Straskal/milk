@@ -34,8 +34,8 @@ static int window_get_size(lua_State* L)
 
 static int window_set_size(lua_State* L)
 {
-	int w = luaL_checkinteger(L, 1);
-	int h = luaL_checkinteger(L, 2);
+	int w = (int)luaL_checkinteger(L, 1);
+	int h = (int)luaL_checkinteger(L, 2);
 	milk::Locator::window->size(w, h);
 	return 0;
 }
