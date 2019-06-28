@@ -100,15 +100,15 @@ set(MILK_SRC_DATA
 # graphics
 set(MILK_SRC_GRAPHICS
 	src/graphics/Color.h
+	src/graphics/Image.h
+	src/graphics/ImageCache.h
 	src/graphics/Renderer.h
-	src/graphics/Texture.h
-	src/graphics/TextureCache.h
 	src/graphics/luaopen_milk_graphics.cpp
 	src/graphics/luaopen_milk_graphics.h
+	src/graphics/sdl/SDLImageCache.cpp
+	src/graphics/sdl/SDLImageCache.h
 	src/graphics/sdl/SDLRenderer.cpp
 	src/graphics/sdl/SDLRenderer.h
-	src/graphics/sdl/SDLTextureCache.cpp
-	src/graphics/sdl/SDLTextureCache.h
 )
 
 # keyboard

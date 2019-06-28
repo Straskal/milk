@@ -21,7 +21,7 @@ namespace milk
 		void setDrawColor(const Color* color) override;
 		void drawRectangle(const RectangleF* destinationRectangle) override;
 		void drawRectangleFilled(const RectangleF* destinationRectangle) override;
-		void draw(const Texture* texture, const Rectangle* sourceRectangle, const RectangleF* destinationRectangle, u8 flipFlags) override;
+		void draw(const Image* image, const Rectangle* sourceRectangle, const RectangleF* destinationRectangle, u8 flipFlags) override;
 		void present() override;
 		std::tuple<int, int> resolution() const override;
 		void resolution(int w, int h) override;

@@ -19,7 +19,7 @@ extern "C" {
 #include "audio/sdl/SDLSoundCache.h"
 #include "graphics/Color.h"
 #include "graphics/sdl/SDLRenderer.h"
-#include "graphics/sdl/SDLTextureCache.h"
+#include "graphics/sdl/SDLImageCache.h"
 #include "keyboard/sdl/SDLKeyboard.h"
 #include "mouse/sdl/SDLMouse.h"
 #include "window/sdl/SDLWindow.h"
@@ -37,7 +37,7 @@ static milk::SDLWindow* window = nullptr;
 static milk::SDLRenderer* renderer = nullptr;
 static milk::SDLMouse* mouse = nullptr;
 static milk::SDLKeyboard* keyboard = nullptr;
-static milk::SDLTextureCache* texture_cache = nullptr;
+static milk::SDLImageCache* image_cache = nullptr;
 static milk::SDLAudioPlayer* audio_player = nullptr;
 static milk::SDLSoundCache* sound_cache = nullptr;
 static milk::SDLMusicCache* music_cache = nullptr;
@@ -66,7 +66,7 @@ static bool init()
 {
 	window = new milk::SDLWindow();
 	renderer = new milk::SDLRenderer();
-	texture_cache = new milk::SDLTextureCache();
+	image_cache = new milk::SDLImageCache();
 	audio_player = new milk::SDLAudioPlayer();
 	music_cache = new milk::SDLMusicCache();
 	sound_cache = new milk::SDLSoundCache();
@@ -75,7 +75,7 @@ static bool init()
 
 	return window->init() // SDL_Init
 		&& renderer->init(window->handle())
-		&& texture_cache->init(renderer->handle()) // IMG_Init
+		&& image_cache->init(renderer->handle()) // IMG_Init
 		&& audio_player->init(); // Mix_init
 }
 
@@ -84,7 +84,7 @@ static void register_locator()
 {
 	milk::Locator::window = window;
 	milk::Locator::renderer = renderer;
-	milk::Locator::textures = texture_cache;
+	milk::Locator::images = image_cache;
 	milk::Locator::audioPlayer = audio_player;
 	milk::Locator::sounds = sound_cache;
 	milk::Locator::music = music_cache;
@@ -173,7 +173,7 @@ static void deinit()
 	deinit_and_free_ptr(sound_cache);
 	deinit_and_free_ptr(music_cache);
 	deinit_and_free_ptr(audio_player);
-	deinit_and_free_ptr(texture_cache);
+	deinit_and_free_ptr(image_cache);
 	deinit_and_free_ptr(renderer);
 	deinit_and_free_ptr(window);
 }

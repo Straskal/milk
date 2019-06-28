@@ -6,68 +6,59 @@ extern "C" {
 }
 
 #include "Color.h"
+#include "Image.h"
+#include "ImageCache.h"
 #include "Renderer.h"
-#include "Texture.h"
-#include "TextureCache.h"
 #include "core/Locator.h"
 #include "core/luamlib.h"
 #include "math/Rectangle.h"
 
-static const char* TEXTURE_METATABLE = "milk.texture";
+static const char* IMAGE_METATABLE = "milk.image";
 
 static milk::Color draw_color = { 0xFF, 0xFF, 0xFF, 0xFF };
 static milk::Rectangle source_rect = { 0, 0, 0, 0 };
 static milk::RectangleF dest_rect = { 0, 0, 0, 0 };
 
-static int texturemeta_gc(lua_State* L)
+static int imagemeta_tostring(lua_State* L)
 {
-	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
-	milk::Locator::textures->dereference(texture->data);
-	return 0;
-}
-
-static int texturemeta_get_path(lua_State* L)
-{
-	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
-	const char* path = texture->data->path.c_str();
+	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	const char* path = image->data->path.c_str();
 	lua_pushstring(L, path);
 	return 1;
 }
 
-static int texturemeta_get_ref_count(lua_State* L)
+static int imagemeta_gc(lua_State* L)
 {
-	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
-	int refCount = texture->data->refCount;
-	lua_pushinteger(L, refCount);
-	return 1;
+	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	milk::Locator::images->dereference(image->data);
+	return 0;
 }
 
-static int texturemeta_get_size(lua_State* L)
+static int imagemeta_get_size(lua_State* L)
 {
-	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
-	lua_pushinteger(L, texture->data->width);
-	lua_pushinteger(L, texture->data->height);
+	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	lua_pushinteger(L, image->data->width);
+	lua_pushinteger(L, image->data->height);
 	return 2;
 }
 
-static const luaL_Reg texturemeta_funcs[] = {
-	{ "__gc", texturemeta_gc },
-	{ "get_path", texturemeta_get_path },
-	{ "get_ref_count", texturemeta_get_ref_count },
-	{ "get_size", texturemeta_get_size },
+static const luaL_Reg imagemeta_funcs[] = {
+	{ "__tostring", imagemeta_tostring },
+	{ "__gc", imagemeta_gc },
+	{ "get_size", imagemeta_get_size },
 	{ NULL, NULL }
 };
 
-static int graphics_new_texture(lua_State* L)
+static int graphics_new_image(lua_State* L)
 {
 	if (lua_isstring(L, 1)) {
 		const char* value = lua_tostring(L, 1);
-		milk::TextureData* textureData = milk::Locator::textures->load(value);
-		if (textureData != nullptr) {
-			milk::Texture* texture = (milk::Texture*)lua_newuserdata(L, sizeof(milk::Texture));
-			luaL_getmetatable(L, TEXTURE_METATABLE);
+		milk::ImageData* imageData = milk::Locator::images->load(value);
+		if (imageData != nullptr) {
+			milk::Image* image = (milk::Image*)lua_newuserdata(L, sizeof(milk::Image));
+			luaL_getmetatable(L, IMAGE_METATABLE);
 			lua_setmetatable(L, -2);
-			texture->data = textureData;
+			image->data = imageData;
 			lua_pushboolean(L, true);
 			return 2;
 		}
@@ -99,12 +90,12 @@ static int graphics_set_draw_color(lua_State* L)
 
 static int graphics_draw(lua_State* L)
 {
-	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
+	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
 	float x = (float)luaL_checknumber(L, 2);
 	float y = (float)luaL_checknumber(L, 3);
 	int flip = (int)luaL_optinteger(L, 4, milk::NO_FLIP);
 
-	milk::TextureData* data = texture->data;
+	milk::ImageData* data = image->data;
 	int w = data->width;
 	int h = data->height;
 
@@ -118,13 +109,13 @@ static int graphics_draw(lua_State* L)
 	dest_rect.w = (float)w;
 	dest_rect.h = (float)h;
 
-	milk::Locator::renderer->draw(texture, &source_rect, &dest_rect, (milk::u8)flip);
+	milk::Locator::renderer->draw(image, &source_rect, &dest_rect, (milk::u8)flip);
 	return 0;
 }
 
 static int graphics_drawx(lua_State* L)
 {
-	milk::Texture* texture = (milk::Texture*)luaL_checkudata(L, 1, TEXTURE_METATABLE);
+	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
 	float posx = (float)luaL_checknumber(L, 2);
 	float posy = (float)luaL_checknumber(L, 3);
 	int rectx = (int)luaL_checkinteger(L, 4);
@@ -144,7 +135,7 @@ static int graphics_drawx(lua_State* L)
 	dest_rect.w = (float)rectw * scale;
 	dest_rect.h = (float)recth * scale;
 
-	milk::Locator::renderer->draw(texture, &source_rect, &dest_rect, (milk::u8)flip);
+	milk::Locator::renderer->draw(image, &source_rect, &dest_rect, (milk::u8)flip);
 	return 0;
 }
 
@@ -171,7 +162,7 @@ static int graphics_draw_filled_rect(lua_State* L)
 }
 
 static const luaL_Reg graphics_funcs[] = {
-	{ "new_texture", graphics_new_texture },
+	{ "new_image", graphics_new_image },
 	{ "set_virtual_resolution", graphics_set_virtual_resolution },
 	{ "set_draw_color", graphics_set_draw_color },
 	{ "draw", graphics_draw },
@@ -189,7 +180,7 @@ static const milk::luaM_Enum flip_enum[] = {
 
 int milk::luaopen_milk_graphics(lua_State* L)
 {
-	luaM_createmetatable(L, TEXTURE_METATABLE, texturemeta_funcs);
+	luaM_createmetatable(L, IMAGE_METATABLE, imagemeta_funcs);
 	luaL_newlib(L, graphics_funcs);
 	luaM_setenumfield(L, -1, "flip_flags", flip_enum, sizeof(flip_enum) / sizeof(luaM_Enum));
 	return 1;

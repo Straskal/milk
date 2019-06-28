@@ -5,7 +5,7 @@
 #include "SDL.h"
 
 #include "graphics/Color.h"
-#include "graphics/Texture.h"
+#include "graphics/Image.h"
 #include "math/Rectangle.h"
 
 static const int FIRST_SUPPORTED_RENDERING_DRIVER = -1;
@@ -87,13 +87,13 @@ void milk::SDLRenderer::drawRectangleFilled(const RectangleF* destinationRectang
 }
 
 void milk::SDLRenderer::draw(
-	const milk::Texture* texture,
+	const milk::Image* image,
 	const milk::Rectangle* sourceRectangle,
 	const milk::RectangleF* destinationRectangle,
 	milk::u8 flipFlags
 )
 {
-	SDL_Texture* t = (SDL_Texture*)texture->data->handle;
+	SDL_Texture* t = (SDL_Texture*)image->data->handle;
 	SDL_SetTextureColorMod(t, m_drawColor.r, m_drawColor.g, m_drawColor.b);
 	SDL_SetTextureAlphaMod(t, m_drawColor.a);
 	milkrect_to_sdlrect(sourceRectangle, &m_sourceRect);

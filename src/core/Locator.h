@@ -10,7 +10,7 @@ namespace milk
 	class Mouse;
 	class Keyboard;
 	class Renderer;
-	class TextureCache;
+	class ImageCache;
 	class AudioPlayer;
 	class MusicCache;
 	class SoundCache;
@@ -21,7 +21,7 @@ namespace milk
 		static Mouse* mouse;
 		static Keyboard* keyboard;
 		static Renderer* renderer;
-		static TextureCache* textures;
+		static ImageCache* images;
 		static AudioPlayer* audioPlayer;
 		static MusicCache* music;
 		static SoundCache* sounds;
