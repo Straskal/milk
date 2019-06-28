@@ -173,7 +173,7 @@ static int musicmeta_get_state(lua_State* L)
 
 static int musicmeta_get_volume(lua_State* L)
 {
-	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
+	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, MUSIC_METATABLE);
 	float volume = sound->volume;
 	lua_pushnumber(L, volume);
 	return 1;
@@ -181,7 +181,7 @@ static int musicmeta_get_volume(lua_State* L)
 
 static int musicmeta_set_volume(lua_State* L)
 {
-	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
+	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, MUSIC_METATABLE);
 	float volume = (float)luaL_checknumber(L, 2);
 	milk::Locator::audioPlayer->setSoundVolume(sound, volume);
 	return 0;
@@ -190,14 +190,14 @@ static int musicmeta_set_volume(lua_State* L)
 static const luaL_Reg musicmeta_funcs[] = {
 	{ "__tostring", musicmeta_tostring },
 	{ "__gc", musicmeta_gc },
-	{ "play", soundmeta_play },
-	{ "loop", soundmeta_loop },
-	{ "pause", soundmeta_pause },
-	{ "resume", soundmeta_resume },
-	{ "stop", soundmeta_stop },
-	{ "get_state", soundmeta_get_state },
-	{ "get_volume", soundmeta_get_volume },
-	{ "set_volume", soundmeta_set_volume },
+	{ "play", musicmeta_play },
+	{ "loop", musicmeta_loop },
+	{ "pause", musicmeta_pause },
+	{ "resume", musicmeta_resume },
+	{ "stop", musicmeta_stop },
+	{ "get_state", musicmeta_get_state },
+	{ "get_volume", musicmeta_get_volume },
+	{ "set_volume", musicmeta_set_volume },
 	{ NULL, NULL }
 };
 
@@ -230,9 +230,11 @@ static int audio_new_music(lua_State* L)
 		milk::MusicData* musicData = milk::Locator::music->load(value);
 		if (musicData != nullptr) {
 			milk::Music* music = (milk::Music*)lua_newuserdata(L, sizeof(milk::Music));
+			music->data = musicData;
+			music->state = milk::AudioState::STOPPED;
+			music->volume = 1.0f;
 			luaL_getmetatable(L, MUSIC_METATABLE);
 			lua_setmetatable(L, -2);
-			music->data = musicData;
 			lua_pushboolean(L, true);
 			return 2;
 		}

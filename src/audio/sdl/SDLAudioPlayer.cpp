@@ -217,8 +217,8 @@ void milk::SDLAudioPlayer::pauseMusic(Music* music)
 void milk::SDLAudioPlayer::resumeMusic(Music* music)
 {
 	if (music->state == AudioState::PAUSED) {
-		music->state == AudioState::PLAYING;
-		Mix_PauseMusic();
+		music->state = AudioState::PLAYING;
+		Mix_ResumeMusic();
 	}
 }
 
