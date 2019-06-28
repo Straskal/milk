@@ -30,9 +30,9 @@ static milk::Music* current_music = nullptr;
 static void on_channel_finished(int channelnum)
 {
 	milk::Sound* sound = channels[channelnum];
-	channels[channelnum] = nullptr;
 	sound->channel = INVALID_CHANNEL;
 	sound->state = milk::AudioState::STOPPED;
+	channels[channelnum] = nullptr;
 	free_channels.push(channelnum);
 }
 
