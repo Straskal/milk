@@ -32,17 +32,17 @@ std::tuple<int, int> milk::SDLMouse::getPosition() const
 
 bool milk::SDLMouse::isButtonDown(MouseButtons button) const
 {
-	return m_currentState & SDL_BUTTON(button);
+	return m_currentState & SDL_BUTTON((int)button);
 }
 
 bool milk::SDLMouse::isButtonPressed(MouseButtons button) const
 {
-	return (m_currentState & SDL_BUTTON(button) && !(m_previousState & SDL_BUTTON(button)));
+	return (m_currentState & SDL_BUTTON((int)button) && !(m_previousState & SDL_BUTTON((int)button)));
 }
 
 bool milk::SDLMouse::isButtonReleased(MouseButtons button) const
 {
-	return !(m_currentState & SDL_BUTTON(button) && (m_previousState & SDL_BUTTON(button)));
+	return !(m_currentState & SDL_BUTTON((int)button) && (m_previousState & SDL_BUTTON((int)button)));
 }
 
 int milk::SDLMouse::getScroll() const

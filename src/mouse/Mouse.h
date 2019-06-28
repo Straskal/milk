@@ -5,11 +5,11 @@
 
 namespace milk
 {
-	enum MouseButtons
+	enum class MouseButtons
 	{
-		MOUSE_LEFT = 1,
-		MOUSE_MIDDLE,
-		MOUSE_RIGHT
+		LEFT = 1,
+		MIDDLE,
+		RIGHT
 	};
 
 	class Mouse

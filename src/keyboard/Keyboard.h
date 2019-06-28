@@ -4,9 +4,9 @@
 namespace milk
 {
 	// These have a 1:1 relationship with SDL_Scancodes
-	enum Keys
+	enum class Keys
 	{
-		UNKNOWN = 0,
+		UNKNOWN,
 		A = 4,
 		B = 5,
 		C = 6,

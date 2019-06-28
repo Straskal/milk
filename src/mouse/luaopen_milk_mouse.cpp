@@ -85,9 +85,9 @@ static const luaL_Reg mouse_funcs[] = {
 };
 
 static const milk::luaM_Enum buttons_enum[] = {
-	{ "LEFT", milk::MouseButtons::MOUSE_LEFT },
-	{ "MIDDLE", milk::MouseButtons::MOUSE_MIDDLE },
-	{ "RIGHT", milk::MouseButtons::MOUSE_RIGHT }
+	{ "LEFT", (int)milk::MouseButtons::LEFT },
+	{ "MIDDLE", (int)milk::MouseButtons::MIDDLE },
+	{ "RIGHT", (int)milk::MouseButtons::RIGHT }
 };
 
 int milk::luaopen_milk_mouse(lua_State* L)
