@@ -90,9 +90,9 @@ namespace milk
 	public:
 		virtual ~Keyboard() = default;
 
-		virtual bool isKeyDown(Keys keycode) = 0;
-		virtual bool isKeyPressed(Keys keycode) = 0;
-		virtual bool isKeyReleased(Keys keycode) = 0;
+		virtual bool isKeyDown(const Keys keycode) const = 0;
+		virtual bool isKeyPressed(const Keys keycode) const = 0;
+		virtual bool isKeyReleased(const Keys keycode) const = 0;
 	};
 }
 
