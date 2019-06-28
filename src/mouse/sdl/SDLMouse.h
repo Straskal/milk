@@ -17,9 +17,9 @@ namespace milk
 		void updateState();
 
 		std::tuple<int, int> getPosition() const override;
-		bool isButtonDown(MouseButtons button) const override;
-		bool isButtonPressed(MouseButtons button) const override;
-		bool isButtonReleased(MouseButtons button) const override;
+		bool isButtonDown(const MouseButtons button) const override;
+		bool isButtonPressed(const MouseButtons button) const override;
+		bool isButtonReleased(const MouseButtons button) const override;
 		int getScroll() const override;
 
 	private:

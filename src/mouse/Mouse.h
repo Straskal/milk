@@ -18,9 +18,9 @@ namespace milk
 		virtual ~Mouse() = default;
 
 		virtual std::tuple<int, int> getPosition() const = 0;
-		virtual bool isButtonDown(MouseButtons button) const = 0;
-		virtual bool isButtonPressed(MouseButtons button) const = 0;
-		virtual bool isButtonReleased(MouseButtons button) const = 0;
+		virtual bool isButtonDown(const MouseButtons button) const = 0;
+		virtual bool isButtonPressed(const MouseButtons button) const = 0;
+		virtual bool isButtonReleased(const MouseButtons button) const = 0;
 		virtual int getScroll() const = 0;
 	};
 }

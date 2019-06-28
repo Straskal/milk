@@ -30,17 +30,17 @@ std::tuple<int, int> milk::SDLMouse::getPosition() const
 	return std::make_tuple(m_x, m_y);
 }
 
-bool milk::SDLMouse::isButtonDown(MouseButtons button) const
+bool milk::SDLMouse::isButtonDown(const MouseButtons button) const
 {
 	return m_currentState & SDL_BUTTON((int)button);
 }
 
-bool milk::SDLMouse::isButtonPressed(MouseButtons button) const
+bool milk::SDLMouse::isButtonPressed(const MouseButtons button) const
 {
 	return (m_currentState & SDL_BUTTON((int)button) && !(m_previousState & SDL_BUTTON((int)button)));
 }
 
-bool milk::SDLMouse::isButtonReleased(MouseButtons button) const
+bool milk::SDLMouse::isButtonReleased(const MouseButtons button) const
 {
 	return !(m_currentState & SDL_BUTTON((int)button) && (m_previousState & SDL_BUTTON((int)button)));
 }
