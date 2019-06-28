@@ -2,7 +2,6 @@
 #define _SDL_AUDIO_PLAYER_H_
 
 #include "audio/AudioPlayer.h"
-#include "audio/AudioState.h"
 
 namespace milk
 {

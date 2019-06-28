@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "AudioState.h"
+#include "SampleState.h"
 
 namespace milk
 {
@@ -17,7 +17,7 @@ namespace milk
 	struct Music
 	{
 		MusicData* data;
-		AudioState state;
+		SampleState state;
 		float volume;
 	};
 }

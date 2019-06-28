@@ -209,7 +209,7 @@ static int audio_new_sound(lua_State* L)
 		if (soundData != nullptr) {
 			milk::Sound* sound = (milk::Sound*)lua_newuserdata(L, sizeof(milk::Sound));
 			sound->data = soundData;
-			sound->state = milk::AudioState::STOPPED;
+			sound->state = milk::SampleState::STOPPED;
 			sound->channel = -1;
 			sound->volume = 1.0f;
 			luaL_getmetatable(L, SOUND_METATABLE);
@@ -231,7 +231,7 @@ static int audio_new_music(lua_State* L)
 		if (musicData != nullptr) {
 			milk::Music* music = (milk::Music*)lua_newuserdata(L, sizeof(milk::Music));
 			music->data = musicData;
-			music->state = milk::AudioState::STOPPED;
+			music->state = milk::SampleState::STOPPED;
 			music->volume = 1.0f;
 			luaL_getmetatable(L, MUSIC_METATABLE);
 			lua_setmetatable(L, -2);
@@ -267,9 +267,9 @@ static const luaL_Reg audio_funcs[] = {
 };
 
 static const milk::luaM_Enum audio_states_enum[] = {
-	{ "PLAYING", (int)milk::AudioState::PLAYING },
-	{ "PAUSED", (int)milk::AudioState::PAUSED },
-	{ "STOPPED", (int)milk::AudioState::STOPPED }
+	{ "PLAYING", (int)milk::SampleState::PLAYING },
+	{ "PAUSED", (int)milk::SampleState::PAUSED },
+	{ "STOPPED", (int)milk::SampleState::STOPPED }
 };
 
 int milk::luaopen_milk_audio(lua_State* L)
