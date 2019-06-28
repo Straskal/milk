@@ -194,7 +194,7 @@ void milk::SDLAudioPlayer::playMusic(Music* music, const float fadeTime)
 
 void milk::SDLAudioPlayer::loopMusic(Music* music, const float fadeTime)
 {
-	stopMusic(music, 0);
+	Mix_HaltMusic();
 
 	Mix_VolumeMusic(music->volume * (m_masterVolume * MIX_MAX_VOLUME));
 	if (Mix_FadeInMusic((Mix_Music*)music->data->handle, LOOP, (int)(fadeTime * 1000)) == -1) {
