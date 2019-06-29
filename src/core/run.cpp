@@ -58,7 +58,6 @@ static int error_handler(lua_State* L)
 */
 static void print_runtime_error(const char* err)
 {
-	
 	window->minimize();
 	std::cout << "RUNTIME ERROR: " << err << std::endl << std::endl;
 	std::cout << "Press enter to continue execution..." << std::endl;
