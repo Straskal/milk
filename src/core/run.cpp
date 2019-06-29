@@ -53,9 +53,11 @@ static int error_handler(lua_State* L)
 
 static void print_runtime_error(const char* err)
 {
-	// Minimize window before displaying the error and locking the event loop.
-	// This basically avoids locking the game down, which is super frusterating when throwing an error when in fullscreen mode.
-	// This also makes it very convenient when an error is thrown because the game is moved out of the way of the console :)
+	/*
+		Minimize window before displaying the error and locking the event loop.
+		This basically avoids locking the game down, which is super frusterating when throwing an error when in fullscreen mode.
+		This also makes it very convenient when an error is thrown because the game is moved out of the way of the console :)
+	*/
 	window->minimize();
 	std::cout << "RUNTIME ERROR: " << err << std::endl << std::endl;
 	std::cout << "Press enter to continue execution..." << std::endl;
