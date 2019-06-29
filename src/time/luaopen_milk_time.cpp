@@ -34,7 +34,7 @@ static int time_set_scale(lua_State* L)
 static int time_get_delta(lua_State* L)
 {
 	milk::Time* time = milk::Locator::time;
-	double scaledDelta = time->delta * time->scale;
+	double scaledDelta = time->delta * (time->scale * 2.0);
 	lua_pushnumber(L, scaledDelta);
 	return 1;
 }

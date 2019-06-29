@@ -5,9 +5,9 @@ namespace milk
 {
 	struct Time
 	{
-		double total;
-		float scale;
-		double delta;
+		double total = 0.0;
+		float scale = 0.5;
+		double delta = 0.0;
 	};
 }
 

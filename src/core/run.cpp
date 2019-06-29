@@ -67,9 +67,7 @@ static void print_runtime_error(const char* err)
 static bool init()
 {
 	time = new milk::Time();
-	time->total = 0.0;
 	time->delta = TICK_RATE;
-	time->scale = 1.0;
 
 	window = new milk::SDLWindow();
 	renderer = new milk::SDLRenderer();
