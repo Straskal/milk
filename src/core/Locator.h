@@ -6,6 +6,7 @@
 */
 namespace milk
 {
+	struct Time;
 	class Window;
 	class Mouse;
 	class Keyboard;
@@ -17,6 +18,7 @@ namespace milk
 
 	struct Locator
 	{
+		static Time* time;
 		static Window* window;
 		static Mouse* mouse;
 		static Keyboard* keyboard;

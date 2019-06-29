@@ -22,6 +22,7 @@ extern "C" {
 #include "graphics/sdl/SDLImageCache.h"
 #include "keyboard/sdl/SDLKeyboard.h"
 #include "mouse/sdl/SDLMouse.h"
+#include "time/Time.h"
 #include "window/sdl/SDLWindow.h"
 
 #define free_ptr(x) delete x; x = nullptr
@@ -29,10 +30,11 @@ extern "C" {
 
 static const int MILK_SUCCESS = 0;
 static const int MILK_FAIL = 1;
-static const int MILLISECONDS_PER_FRAME = 1000 / 60; // = 16
 static const int ERROR_HANDLER_STACK_INDEX = 1;
 static const int CALLBACK_TABLE_STACK_INDEX = 2;
+static const double TICK_RATE = 1.0 / 60.0;
 
+static milk::Time* time = nullptr;
 static milk::SDLWindow* window = nullptr;
 static milk::SDLRenderer* renderer = nullptr;
 static milk::SDLMouse* mouse = nullptr;
@@ -64,6 +66,11 @@ static void print_runtime_error(const char* err)
 
 static bool init()
 {
+	time = new milk::Time();
+	time->total = 0.0;
+	time->delta = TICK_RATE;
+	time->scale = 1.0;
+
 	window = new milk::SDLWindow();
 	renderer = new milk::SDLRenderer();
 	image_cache = new milk::SDLImageCache();
@@ -73,15 +80,7 @@ static bool init()
 	mouse = new milk::SDLMouse();
 	keyboard = new milk::SDLKeyboard();
 
-	return window->init() // SDL_Init
-		&& renderer->init(window->handle())
-		&& image_cache->init(renderer->handle()) // IMG_Init
-		&& audio_player->init(); // Mix_init
-}
-
-// 'Register' systems with the service locator for lua modules
-static void register_locator()
-{
+	milk::Locator::time = time;
 	milk::Locator::window = window;
 	milk::Locator::renderer = renderer;
 	milk::Locator::images = image_cache;
@@ -90,6 +89,11 @@ static void register_locator()
 	milk::Locator::music = music_cache;
 	milk::Locator::mouse = mouse;
 	milk::Locator::keyboard = keyboard;
+
+	return window->init() // SDL_Init
+		&& renderer->init(window->handle())
+		&& image_cache->init(renderer->handle()) // IMG_Init
+		&& audio_player->init(); // Mix_init
 }
 
 static bool init_api_and_callbacks()
@@ -118,49 +122,68 @@ static bool init_api_and_callbacks()
 	return true;
 }
 
+/*
+	Run at a fixed timestep of 16 milliseconds.
+	This might be considered a 'naive' game loop, but for smaller 2D games, 
+	this should not be a problem unless the platform cannot meet the 60 FPS contract.
+
+	We still pass along the delta time to the tick callback, so if the game loop needs to change later,
+	we'll already be using it for time dependent calculations in our scripts.
+*/
 static void main_loop()
 {
 	window->show();
 
+	double accumulator = 0;
+	double currentTime = 0;
+	double lastTime = 0;
+
 	while (!window->shouldClose()) {
-		int frameStart = SDL_GetTicks();
+		lastTime = currentTime;
+		currentTime = SDL_GetTicks() / 1000.0;
+		double frameTime = currentTime - lastTime;
 
-		mouse->frameBegin();
+		// If we hit a breakpoint, then we don't want the next frame to be insane in the membrane.
+		if (frameTime > 1.0) {
+			frameTime = TICK_RATE;
+		}
 
-		SDL_Event event;
-		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT) {
-				window->close();
+		accumulator += frameTime;
+
+		while (accumulator >= TICK_RATE) {
+			mouse->frameBegin();
+
+			SDL_Event event;
+			while (SDL_PollEvent(&event)) {
+				if (event.type == SDL_QUIT) {
+					window->close();
+				}
+				mouse->handleEvent(&event);
 			}
-			mouse->handleEvent(&event);
-		}
 
-		mouse->updateState();
-		keyboard->updateState();
+			mouse->updateState();
+			keyboard->updateState();
+			
+			lua_getfield(lua, CALLBACK_TABLE_STACK_INDEX, "tick");
+			if (lua_pcall(lua, 0, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
+				const char* stacktrace = lua_tostring(lua, -1);
+				lua_pop(lua, 1); // Pop stacktrace from stack
+				print_runtime_error(stacktrace);
+			}
 
-		lua_getfield(lua, CALLBACK_TABLE_STACK_INDEX, "tick");
-		if (lua_pcall(lua, 0, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
-			const char* stacktrace = lua_tostring(lua, -1);
-			lua_pop(lua, 1); // Pop stacktrace from stack
-			print_runtime_error(stacktrace);
-		}
+			renderer->clear();
 
-		renderer->clear();
+			lua_getfield(lua, CALLBACK_TABLE_STACK_INDEX, "draw");
+			if (lua_pcall(lua, 0, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
+				const char* stacktrace = lua_tostring(lua, -1);
+				lua_pop(lua, 1); // Pop stacktrace from stack
+				print_runtime_error(stacktrace);
+			}
 
-		lua_getfield(lua, CALLBACK_TABLE_STACK_INDEX, "draw");
-		if (lua_pcall(lua, 0, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
-			const char* stacktrace = lua_tostring(lua, -1);
-			lua_pop(lua, 1); // Pop stacktrace from stack
-			print_runtime_error(stacktrace);
-		}
+			renderer->present();
 
-		renderer->present();
-
-		// As of right now, milk runs at a fixed timestep of 16 milliseconds.
-		// The only time that this becomes a problem is if the game can't run at 60 FPS.
-		Uint32 frameTime = SDL_GetTicks() - frameStart;
-		if (frameTime < MILLISECONDS_PER_FRAME) {
-			SDL_Delay((Uint32)(MILLISECONDS_PER_FRAME - frameTime));
+			time->total += TICK_RATE;
+			accumulator -= TICK_RATE;
 		}
 	}
 }
@@ -176,6 +199,17 @@ static void deinit()
 	deinit_and_free_ptr(image_cache);
 	deinit_and_free_ptr(renderer);
 	deinit_and_free_ptr(window);
+	free_ptr(time);
+
+	milk::Locator::time = nullptr;
+	milk::Locator::window = nullptr;
+	milk::Locator::renderer = nullptr;
+	milk::Locator::images = nullptr;
+	milk::Locator::audioPlayer = nullptr;
+	milk::Locator::sounds = nullptr;
+	milk::Locator::music = nullptr;
+	milk::Locator::mouse = nullptr;
+	milk::Locator::keyboard = nullptr;
 }
 
 int milk::run()
@@ -185,7 +219,6 @@ int milk::run()
 		deinit();
 		return MILK_FAIL;
 	}
-	register_locator();
 	if (!init_api_and_callbacks()) {
 		print_runtime_error("Error during script initialization!");
 		deinit();

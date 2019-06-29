@@ -136,6 +136,13 @@ set(MILK_SRC_MOUSE
 	src/mouse/sdl/SDLMouse.h
 )
 
+# time
+set(MILK_SRC_TIME
+	src/time/Time.h
+	src/time/luaopen_milk_time.cpp
+	src/time/luaopen_milk_time.h
+)
+
 # window
 set(MILK_SRC_WINDOW
 	src/window/Window.h	
@@ -153,6 +160,7 @@ set(MILK_SRC_FILES
 	${MILK_SRC_KEYBOARD}
 	${MILK_SRC_MATH}
 	${MILK_SRC_MOUSE}
+	${MILK_SRC_TIME}
 	${MILK_SRC_WINDOW}
 )
 

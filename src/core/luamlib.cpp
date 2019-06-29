@@ -4,6 +4,7 @@
 #include "graphics/luaopen_milk_graphics.h"
 #include "mouse/luaopen_milk_mouse.h"
 #include "keyboard/luaopen_milk_keyboard.h"
+#include "time/luaopen_milk_time.h"
 #include "window/luaopen_milk_window.h"
 
 static int correct_index(int index)
@@ -26,6 +27,7 @@ void milk::luaM_preloadpackage(lua_State* L, const char* name, lua_CFunction ope
 
 void milk::luaM_openlibs(lua_State* L)
 {
+	luaM_preloadpackage(L, "milk.time", luaopen_milk_time);
 	luaM_preloadpackage(L, "milk.window", luaopen_milk_window);
 	luaM_preloadpackage(L, "milk.mouse", luaopen_milk_mouse);
 	luaM_preloadpackage(L, "milk.keyboard", luaopen_milk_keyboard);

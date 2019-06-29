@@ -1,5 +1,6 @@
 #include "Locator.h"
 
+milk::Time* milk::Locator::time = nullptr;
 milk::Window* milk::Locator::window = nullptr;
 milk::Renderer* milk::Locator::renderer = nullptr;
 milk::Mouse* milk::Locator::mouse = nullptr;
