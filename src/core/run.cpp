@@ -135,23 +135,22 @@ static void main_loop()
 {
 	window->show();
 
-	double accumulator = TICK_RATE;
 	double currentTime = 0;
-	double lastTime = 0;
+	double acumulatedFrameTime = TICK_RATE;
 
 	while (!window->shouldClose()) {
-		lastTime = currentTime;
+		double lastFrameTime = currentTime;
 		currentTime = SDL_GetTicks() / 1000.0;
-		double frameTime = currentTime - lastTime;
+		double frameTime = currentTime - lastFrameTime;
 
 		// If we hit a breakpoint, then we don't want the next frame to be insane in the membrane.
 		if (frameTime > 1.0) {
 			frameTime = TICK_RATE;
 		}
 
-		accumulator += frameTime;
-
-		while (accumulator >= TICK_RATE) {
+		acumulatedFrameTime += frameTime;
+		
+		while (acumulatedFrameTime >= TICK_RATE) {
 			mouse->frameBegin();
 
 			SDL_Event event;
@@ -184,7 +183,7 @@ static void main_loop()
 			renderer->present();
 
 			time->total += TICK_RATE;
-			accumulator -= TICK_RATE;
+			acumulatedFrameTime -= TICK_RATE;
 		}
 	}
 }
