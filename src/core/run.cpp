@@ -134,7 +134,7 @@ static void main_loop()
 {
 	window->show();
 
-	double accumulator = 0;
+	double accumulator = TICK_RATE;
 	double currentTime = 0;
 	double lastTime = 0;
 
