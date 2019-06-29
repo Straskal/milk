@@ -109,15 +109,13 @@ void milk::SDLAudioPlayer::playSound(Sound* sound, const float fadeTime)
 	stopSound(sound, 0.f);
 
 	int channelnum = free_channels.front();
-	free_channels.pop();
-
 	Mix_Volume(channelnum, sound->volume * (m_masterVolume * MIX_MAX_VOLUME));
 	if (Mix_FadeInChannel(channelnum, (Mix_Chunk*)sound->data->handle, NO_LOOP, (int)(fadeTime * 1000)) == -1) {
 		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
-		free_channels.push(channelnum);
 		return;
 	}
 
+	free_channels.pop();
 	sound->channel = channelnum;
 	sound->state = SampleState::PLAYING;
 	channels[channelnum] = sound;
@@ -129,15 +127,13 @@ void milk::SDLAudioPlayer::loopSound(Sound* sound, const float fadeTime)
 	stopSound(sound, 0.f);
 
 	int channelnum = free_channels.front();
-	free_channels.pop();
-
 	Mix_Volume(channelnum, sound->volume * (m_masterVolume * MIX_MAX_VOLUME));
 	if (Mix_FadeInChannel(channelnum, (Mix_Chunk*)sound->data->handle, LOOP, (int)(fadeTime * 1000)) == -1) {
 		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
-		free_channels.push(channelnum);
 		return;
 	}
 
+	free_channels.pop();
 	sound->channel = channelnum;
 	sound->state = SampleState::PLAYING;
 	channels[channelnum] = sound;
