@@ -158,12 +158,7 @@ static void main_loop()
 	time->start();
 	window->show();
 
-	double lastFrameStart = 0.0;
-	double acumulatedFrameTime = 0.0;
-
 	while (!window->shouldClose()) {
-		const double SECONDS_PER_TICK = time->secondsPerTick();
-		
 		time->beginFrame();
 
 		while (time->overTargetTickRate()) {

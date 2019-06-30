@@ -89,7 +89,7 @@ namespace milk
 			m_accumulatedFrameTime += m_frameTime;
 		}
 
-		inline bool needsTick() const 
+		inline bool overTargetTickRate() const 
 		{
 			return m_accumulatedFrameTime >= secondsPerTick();
 		}
