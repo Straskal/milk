@@ -179,7 +179,9 @@ static void main_loop()
 
 			mouse->updateState();
 			keyboard->updateState();
+
 			safe_invoke_callback("tick");
+
 			renderer->clear();
 			safe_invoke_callback("draw");
 			renderer->present();
