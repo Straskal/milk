@@ -9,7 +9,7 @@ milk::SDLKeyboard::SDLKeyboard()
 	std::memset(m_currentState, 0, sizeof(Uint8) * SDL_NUM_SCANCODES);
 }
 
-void milk::SDLKeyboard::updateState()
+void milk::SDLKeyboard::tick()
 {
 	std::memcpy(m_previousState, m_currentState, sizeof(Uint8) * SDL_NUM_SCANCODES);
 	std::memcpy(m_currentState, SDL_GetKeyboardState(NULL), sizeof(Uint8) * SDL_NUM_SCANCODES);

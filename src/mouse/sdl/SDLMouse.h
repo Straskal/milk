@@ -12,9 +12,9 @@ namespace milk
 	public:
 		SDLMouse();
 
-		void frameBegin();
+		void reset();
 		void handleEvent(SDL_Event* e);
-		void updateState();
+		void tick();
 
 		std::tuple<int, int> getPosition() const override;
 		bool isButtonDown(const MouseButtons button) const override;

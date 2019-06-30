@@ -12,7 +12,7 @@ namespace milk
 	public:
 		SDLKeyboard();
 
-		void updateState();
+		void tick();
 
 		bool isKeyDown(const Keys keycode) const override;
 		bool isKeyPressed(const Keys keycode) const override;

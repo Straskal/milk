@@ -7,7 +7,7 @@ milk::SDLMouse::SDLMouse()
 	, m_y{ 0 }
 	, m_scroll{ 0 } {}
 
-void milk::SDLMouse::frameBegin()
+void milk::SDLMouse::reset()
 {
 	m_scroll = 0;
 }
@@ -19,7 +19,7 @@ void milk::SDLMouse::handleEvent(SDL_Event* e)
 	}
 }
 
-void milk::SDLMouse::updateState()
+void milk::SDLMouse::tick()
 {
 	m_previousState = m_currentState;
 	m_currentState = SDL_GetMouseState(&m_x, &m_y);

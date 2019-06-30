@@ -158,27 +158,16 @@ static void main_loop()
 	time->start();
 	window->show();
 
-	double currentTime = 0;
+	double lastFrameStart = 0.0;
 	double acumulatedFrameTime = 0.0;
 
 	while (!window->shouldClose()) {
-		// This could change while running the loop, so let's cache it.
 		const double SECONDS_PER_TICK = time->secondsPerTick();
+		
+		time->beginFrame();
 
-		double lastFrameTime = currentTime;
-		currentTime = time->total();
-		double frameTime = currentTime - lastFrameTime;
-
-		// If we hit a breakpoint, then we don't want the next frame to be insane in the membrane.
-		if (frameTime > 1.0) {
-			frameTime = SECONDS_PER_TICK;
-			time->resetFpsTimer();
-		}
-
-		acumulatedFrameTime += frameTime;
-
-		while (acumulatedFrameTime >= SECONDS_PER_TICK) {
-			mouse->frameBegin();
+		while (time->needsTick()) {
+			mouse->reset();
 
 			SDL_Event event;
 			while (SDL_PollEvent(&event)) {
@@ -188,8 +177,8 @@ static void main_loop()
 				mouse->handleEvent(&event);
 			}
 
-			mouse->updateState();
-			keyboard->updateState();
+			mouse->tick();
+			keyboard->tick();
 
 			safe_invoke_callback(TICK_CALLBACK);
 
@@ -198,7 +187,6 @@ static void main_loop()
 			renderer->present();
 
 			time->endFrame();
-			acumulatedFrameTime -= SECONDS_PER_TICK;
 		}
 	}
 

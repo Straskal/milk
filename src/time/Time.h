@@ -15,6 +15,9 @@ namespace milk
 			, m_fps{ 0.0 }
 			, m_frames{ 0 }
 			, m_scale{ 0.5f }
+			, m_frameStartTime{ 0.0 }
+			, m_frameTime{ 0.0 }
+			, m_accumulatedFrameTime{ 0.0 }
 		{
 		}
 
@@ -71,9 +74,30 @@ namespace milk
 			m_fpsTimer.start();
 		}
 
+		inline void beginFrame() 
+		{
+			const double t = total();
+			m_frameTime = t - m_frameStartTime;
+			m_frameStartTime = t;
+
+			// If we hit a breakpoint, then we don't want the next frame to be insane in the membrane.
+			if (m_frameTime > 1.0) {
+				m_frameTime = secondsPerTick();
+				resetFpsTimer();
+			}
+
+			m_accumulatedFrameTime += m_frameTime;
+		}
+
+		inline bool needsTick() const 
+		{
+			return m_accumulatedFrameTime >= secondsPerTick();
+		}
+
 		inline void endFrame() 
 		{
 			m_fps = m_frames++ / m_fpsTimer.getTime();
+			m_accumulatedFrameTime -= secondsPerTick();
 		}
 
 	private:
@@ -81,6 +105,10 @@ namespace milk
 		double m_fps;
 		int m_frames;
 		float m_scale;
+
+		double m_frameStartTime;
+		double m_frameTime;
+		double m_accumulatedFrameTime;
 
 		Timer m_gameTimer;
 		Timer m_fpsTimer;
