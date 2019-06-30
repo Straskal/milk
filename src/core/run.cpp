@@ -188,6 +188,7 @@ static void main_loop()
 			acumulatedFrameTime -= TICK_RATE;
 		}
 	}
+
 	safe_invoke_callback("stop");
 }
 
