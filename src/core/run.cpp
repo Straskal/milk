@@ -111,36 +111,39 @@ static bool init()
 	milk::Locator::mouse = mouse;
 	milk::Locator::keyboard = keyboard;
 
-	return window->init() // SDL_Init
+	// SDL_Init
+	if (window->init()
 		&& renderer->init(window->handle())
-		&& image_cache->init(renderer->handle()) // IMG_Init
-		&& audio_player->init(); // Mix_init
-}
+		// IMG_Init
+		&& image_cache->init(renderer->handle()) 
+		// Mix_init
+		&& audio_player->init()) {
+	
+		lua = luaL_newstate();
+		luaL_openlibs(lua);
 
-static bool init_api_and_callbacks()
-{
-	lua = luaL_newstate();
-	luaL_openlibs(lua);
+		// Open all milk libs
+		milk::luaM_openlibs(lua);
 
-	// Open all milk libs
-	milk::luaM_openlibs(lua);
+		// Our error handler is going to be #1 on the stack
+		lua_pushcfunction(lua, error_handler);
 
-	// Our error handler is going to be #1 on the stack
-	lua_pushcfunction(lua, error_handler);
+		if (luaL_loadfile(lua, "main.lua") != LUA_OK || lua_pcall(lua, 0, 1, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
+			const char* stacktrace = lua_tostring(lua, -1);
+			print_runtime_error(stacktrace);
+			return false;
+		}
 
-	if (luaL_loadfile(lua, "main.lua") != LUA_OK || lua_pcall(lua, 0, 1, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
-		const char* stacktrace = lua_tostring(lua, -1);
-		print_runtime_error(stacktrace);
-		return false;
+		// If main.lua fails or does not return a single table, then frig off.
+		if (!lua_istable(lua, -1)) {
+			print_runtime_error("main.lua must return a table containing callback functions.");
+			return false;
+		}
+
+		return true;
 	}
 
-	// If main.lua fails or does not return a single table, then frig off.
-	if (!lua_istable(lua, -1)) {
-		print_runtime_error("main.lua must return a table containing callback functions.");
-		return false;
-	}
-
-	return true;
+	return false;
 }
 
 /*
@@ -212,15 +215,6 @@ static void main_loop()
 static void deinit()
 {
 	lua_close(lua);
-	free_ptr(keyboard);
-	free_ptr(mouse);
-	deinit_and_free_ptr(sound_cache);
-	deinit_and_free_ptr(music_cache);
-	deinit_and_free_ptr(audio_player);
-	deinit_and_free_ptr(image_cache);
-	deinit_and_free_ptr(renderer);
-	deinit_and_free_ptr(window);
-	free_ptr(time);
 
 	milk::Locator::time = nullptr;
 	milk::Locator::window = nullptr;
@@ -231,17 +225,22 @@ static void deinit()
 	milk::Locator::music = nullptr;
 	milk::Locator::mouse = nullptr;
 	milk::Locator::keyboard = nullptr;
+
+	free_ptr(keyboard);
+	free_ptr(mouse);
+	deinit_and_free_ptr(sound_cache);
+	deinit_and_free_ptr(music_cache);
+	deinit_and_free_ptr(audio_player);
+	deinit_and_free_ptr(image_cache);
+	deinit_and_free_ptr(renderer);
+	deinit_and_free_ptr(window);
+	free_ptr(time);
 }
 
 int milk::run()
 {
 	if (!init()) {
 		print_runtime_error("Error during startup!");
-		deinit();
-		return MILK_FAIL;
-	}
-	if (!init_api_and_callbacks()) {
-		print_runtime_error("Error during script initialization!");
 		deinit();
 		return MILK_FAIL;
 	}
