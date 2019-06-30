@@ -166,7 +166,7 @@ static void main_loop()
 		
 		time->beginFrame();
 
-		while (time->needsTick()) {
+		while (time->overTargetTickRate()) {
 			mouse->reset();
 
 			SDL_Event event;
