@@ -50,7 +50,7 @@ namespace milk
 
 		inline double delta() const 
 		{
-			return secondsPerTick() * (m_scale * 2.f);
+			return secondsPerTick() * (m_scale * 2.0);
 		}
 
 		inline float scale() const
