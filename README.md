@@ -1,4 +1,4 @@
 # milk 🥛 
-#### a small framework-based 2d game engine that's in its early stages
+#### a small framework-based 2d game engine
 
 check out the [wiki](https://github.com/Straskal/milk/wiki)
