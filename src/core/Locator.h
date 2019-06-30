@@ -6,7 +6,7 @@
 */
 namespace milk
 {
-	struct Time;
+	class Time;
 	class Window;
 	class Mouse;
 	class Keyboard;

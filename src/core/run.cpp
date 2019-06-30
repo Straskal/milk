@@ -33,7 +33,6 @@ static const int MILK_SUCCESS = 0;
 static const int MILK_FAIL = 1;
 static const int ERROR_HANDLER_STACK_INDEX = 1;
 static const int CALLBACK_TABLE_STACK_INDEX = 2;
-static const double TICK_RATE = 1.0 / 60.0;
 
 static const char* START_CALLBACK = "start";
 static const char* TICK_CALLBACK = "tick";
@@ -90,8 +89,6 @@ static void safe_invoke_callback(const char* name)
 static bool init()
 {
 	time = new milk::Time();
-	time->delta = TICK_RATE;
-
 	window = new milk::SDLWindow();
 	renderer = new milk::SDLRenderer();
 	image_cache = new milk::SDLImageCache();
@@ -158,32 +155,29 @@ static void main_loop()
 {
 	safe_invoke_callback(START_CALLBACK);
 
+	time->start();
 	window->show();
 
-	milk::Timer gameTimer;
-	milk::Timer fpsTimer;
-	gameTimer.start();
-	fpsTimer.start();
-
-	int frames = 0;
 	double currentTime = 0;
-	double acumulatedFrameTime = TICK_RATE;
+	double acumulatedFrameTime = 0.0;
 
 	while (!window->shouldClose()) {
+		// This could change while running the loop, so let's cache it.
+		const double SECONDS_PER_TICK = time->secondsPerTick();
+
 		double lastFrameTime = currentTime;
-		currentTime = gameTimer.getTime();
+		currentTime = time->total();
 		double frameTime = currentTime - lastFrameTime;
 
 		// If we hit a breakpoint, then we don't want the next frame to be insane in the membrane.
 		if (frameTime > 1.0) {
-			frameTime = TICK_RATE;
-			frames = 0;
-			fpsTimer.start();
+			frameTime = SECONDS_PER_TICK;
+			time->resetFpsTimer();
 		}
 
 		acumulatedFrameTime += frameTime;
 
-		while (acumulatedFrameTime >= TICK_RATE) {
+		while (acumulatedFrameTime >= SECONDS_PER_TICK) {
 			mouse->frameBegin();
 
 			SDL_Event event;
@@ -203,9 +197,8 @@ static void main_loop()
 			safe_invoke_callback(DRAW_CALLBACK);
 			renderer->present();
 
-			time->fps = frames++ / fpsTimer.getTime();
-			time->total += TICK_RATE;
-			acumulatedFrameTime -= TICK_RATE;
+			time->endFrame();
+			acumulatedFrameTime -= SECONDS_PER_TICK;
 		}
 	}
 
