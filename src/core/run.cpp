@@ -144,12 +144,7 @@ static bool init()
 }
 
 /*
-	Run at a fixed timestep of 16 milliseconds.
-	This might be considered a 'naive' game loop, but for smaller 2D games,
-	this should not be a problem unless the platform cannot meet the 60 FPS contract.
-
-	We still pass along the delta time to the tick callback, so if the game loop needs to change later,
-	we'll already be using it for time dependent calculations in our scripts.
+	Run at a fixed timestep.
 */
 static void main_loop()
 {
