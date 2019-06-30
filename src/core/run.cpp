@@ -66,6 +66,21 @@ static void print_runtime_error(const char* err)
 	window->restore();
 }
 
+static void safe_invoke_callback(const char* name)
+{
+	if (lua_getfield(lua, CALLBACK_TABLE_STACK_INDEX, name) == LUA_TFUNCTION) {
+		lua_pushvalue(lua, CALLBACK_TABLE_STACK_INDEX);
+		if (lua_pcall(lua, 1, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
+			const char* stacktrace = lua_tostring(lua, -1);
+			lua_pop(lua, 1);
+			print_runtime_error(stacktrace);
+		}
+	}
+	else {
+		lua_pop(lua, 1);
+	}
+}
+
 static bool init()
 {
 	time = new milk::Time();
@@ -124,7 +139,7 @@ static bool init_api_and_callbacks()
 
 /*
 	Run at a fixed timestep of 16 milliseconds.
-	This might be considered a 'naive' game loop, but for smaller 2D games, 
+	This might be considered a 'naive' game loop, but for smaller 2D games,
 	this should not be a problem unless the platform cannot meet the 60 FPS contract.
 
 	We still pass along the delta time to the tick callback, so if the game loop needs to change later,
@@ -132,6 +147,8 @@ static bool init_api_and_callbacks()
 */
 static void main_loop()
 {
+	safe_invoke_callback("start");
+
 	window->show();
 
 	double currentTime = 0;
@@ -148,7 +165,7 @@ static void main_loop()
 		}
 
 		acumulatedFrameTime += frameTime;
-		
+
 		while (acumulatedFrameTime >= TICK_RATE) {
 			mouse->frameBegin();
 
@@ -162,29 +179,16 @@ static void main_loop()
 
 			mouse->updateState();
 			keyboard->updateState();
-			
-			lua_getfield(lua, CALLBACK_TABLE_STACK_INDEX, "tick");
-			if (lua_pcall(lua, 0, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
-				const char* stacktrace = lua_tostring(lua, -1);
-				lua_pop(lua, 1); // Pop stacktrace from stack
-				print_runtime_error(stacktrace);
-			}
-
+			safe_invoke_callback("tick");
 			renderer->clear();
-
-			lua_getfield(lua, CALLBACK_TABLE_STACK_INDEX, "draw");
-			if (lua_pcall(lua, 0, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
-				const char* stacktrace = lua_tostring(lua, -1);
-				lua_pop(lua, 1); // Pop stacktrace from stack
-				print_runtime_error(stacktrace);
-			}
-
+			safe_invoke_callback("draw");
 			renderer->present();
 
 			time->total += TICK_RATE;
 			acumulatedFrameTime -= TICK_RATE;
 		}
 	}
+	safe_invoke_callback("stop");
 }
 
 static void deinit()
