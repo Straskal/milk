@@ -44,7 +44,7 @@ milk::SDLRenderer::SDLRenderer()
 
 bool milk::SDLRenderer::init(SDL_Window* windowHandle)
 {
-	m_handle = SDL_CreateRenderer(windowHandle, FIRST_SUPPORTED_RENDERING_DRIVER, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	m_handle = SDL_CreateRenderer(windowHandle, FIRST_SUPPORTED_RENDERING_DRIVER, SDL_RENDERER_ACCELERATED);
 	if (m_handle == nullptr) {
 		std::cout << "Error creating SDL_Renderer: " << SDL_GetError() << std::endl;
 		return false;
@@ -59,6 +59,28 @@ bool milk::SDLRenderer::init(SDL_Window* windowHandle)
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, NEAREST_PIXEL_SAMPLING);
 	SDL_SetRenderDrawBlendMode(m_handle, SDL_BLENDMODE_BLEND);
 	return true;
+}
+
+void milk::SDLRenderer::free()
+{
+	SDL_DestroyRenderer(m_handle);
+}
+
+SDL_Renderer* milk::SDLRenderer::handle() const
+{
+	return m_handle;
+}
+
+std::tuple<int, int> milk::SDLRenderer::resolution() const
+{
+	int w, h;
+	SDL_RenderGetLogicalSize(m_handle, &w, &h);
+	return std::make_tuple(w, h);
+}
+
+void milk::SDLRenderer::resolution(const int w, const int h)
+{
+	SDL_RenderSetLogicalSize(m_handle, w, h);
 }
 
 void milk::SDLRenderer::clear()
@@ -104,26 +126,4 @@ void milk::SDLRenderer::draw(
 void milk::SDLRenderer::present()
 {
 	SDL_RenderPresent(m_handle);
-}
-
-std::tuple<int, int> milk::SDLRenderer::resolution() const
-{
-	int w, h;
-	SDL_RenderGetLogicalSize(m_handle, &w, &h);
-	return std::make_tuple(w, h);
-}
-
-void milk::SDLRenderer::resolution(const int w, const int h)
-{
-	SDL_RenderSetLogicalSize(m_handle, w, h);
-}
-
-SDL_Renderer* milk::SDLRenderer::handle() const
-{
-	return m_handle;
-}
-
-void milk::SDLRenderer::free()
-{
-	SDL_DestroyRenderer(m_handle);
 }
