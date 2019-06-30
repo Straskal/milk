@@ -17,6 +17,13 @@ static int time_get_total(lua_State* L)
 	return 1;
 }
 
+static int time_get_fps(lua_State* L)
+{
+	double fps = milk::Locator::time->fps;
+	lua_pushnumber(L, fps);
+	return 1;
+}
+
 static int time_get_scale(lua_State* L)
 {
 	double scale = milk::Locator::time->scale;
@@ -41,6 +48,7 @@ static int time_get_delta(lua_State* L)
 
 static const luaL_Reg time_funcs[] = {
 	{ "get_total", time_get_total },
+	{ "get_fps", time_get_fps },
 	{ "get_scale", time_get_scale },
 	{ "set_scale", time_set_scale },
 	{ "get_delta", time_get_delta },

@@ -23,6 +23,7 @@ extern "C" {
 #include "keyboard/sdl/SDLKeyboard.h"
 #include "mouse/sdl/SDLMouse.h"
 #include "time/Time.h"
+#include "time/Timer.h"
 #include "window/sdl/SDLWindow.h"
 
 #define free_ptr(x) delete x; x = nullptr
@@ -33,6 +34,11 @@ static const int MILK_FAIL = 1;
 static const int ERROR_HANDLER_STACK_INDEX = 1;
 static const int CALLBACK_TABLE_STACK_INDEX = 2;
 static const double TICK_RATE = 1.0 / 60.0;
+
+static const char* START_CALLBACK = "start";
+static const char* TICK_CALLBACK = "tick";
+static const char* DRAW_CALLBACK = "draw";
+static const char* STOP_CALLBACK = "stop";
 
 static milk::Time* time = nullptr;
 static milk::SDLWindow* window = nullptr;
@@ -147,21 +153,29 @@ static bool init_api_and_callbacks()
 */
 static void main_loop()
 {
-	safe_invoke_callback("start");
+	safe_invoke_callback(START_CALLBACK);
 
 	window->show();
 
+	milk::Timer gameTimer;
+	milk::Timer fpsTimer;
+	gameTimer.start();
+	fpsTimer.start();
+
+	int frames = 0;
 	double currentTime = 0;
 	double acumulatedFrameTime = TICK_RATE;
 
 	while (!window->shouldClose()) {
 		double lastFrameTime = currentTime;
-		currentTime = SDL_GetTicks() / 1000.0;
+		currentTime = gameTimer.getTime();
 		double frameTime = currentTime - lastFrameTime;
 
 		// If we hit a breakpoint, then we don't want the next frame to be insane in the membrane.
 		if (frameTime > 1.0) {
 			frameTime = TICK_RATE;
+			frames = 0;
+			fpsTimer.start();
 		}
 
 		acumulatedFrameTime += frameTime;
@@ -180,18 +194,19 @@ static void main_loop()
 			mouse->updateState();
 			keyboard->updateState();
 
-			safe_invoke_callback("tick");
+			safe_invoke_callback(TICK_CALLBACK);
 
 			renderer->clear();
-			safe_invoke_callback("draw");
+			safe_invoke_callback(DRAW_CALLBACK);
 			renderer->present();
 
+			time->fps = frames++ / fpsTimer.getTime();
 			time->total += TICK_RATE;
 			acumulatedFrameTime -= TICK_RATE;
 		}
 	}
 
-	safe_invoke_callback("stop");
+	safe_invoke_callback(STOP_CALLBACK);
 }
 
 static void deinit()

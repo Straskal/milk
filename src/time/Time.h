@@ -6,6 +6,7 @@ namespace milk
 	struct Time
 	{
 		double total = 0.0;
+		double fps = 0.0;
 		float scale = 0.5;
 		double delta = 0.0;
 	};

@@ -44,7 +44,7 @@ milk::SDLRenderer::SDLRenderer()
 
 bool milk::SDLRenderer::init(SDL_Window* windowHandle)
 {
-	m_handle = SDL_CreateRenderer(windowHandle, FIRST_SUPPORTED_RENDERING_DRIVER, SDL_RENDERER_ACCELERATED);
+	m_handle = SDL_CreateRenderer(windowHandle, FIRST_SUPPORTED_RENDERING_DRIVER, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (m_handle == nullptr) {
 		std::cout << "Error creating SDL_Renderer: " << SDL_GetError() << std::endl;
 		return false;
