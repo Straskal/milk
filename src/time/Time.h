@@ -39,7 +39,7 @@ namespace milk
 
 		inline void targetFps(const double target)
 		{
-			m_targetFps = std::min(std::max(target, 0.0), 60.0);
+			m_targetFps = std::min(std::max(target, 10.0), 60.0);
 			resetFpsTimer();
 		}
 
