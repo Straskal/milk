@@ -211,7 +211,6 @@ static void deinit()
 int milk::run()
 {
 	if (!init()) {
-		print_runtime_error("Error during startup!");
 		deinit();
 		return MILK_FAIL;
 	}
