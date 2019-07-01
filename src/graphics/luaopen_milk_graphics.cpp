@@ -8,10 +8,10 @@ extern "C" {
 #include "Color.h"
 #include "Image.h"
 #include "ImageCache.h"
+#include "Rectangle.h"
 #include "Renderer.h"
 #include "core/Locator.h"
 #include "core/luamlib.h"
-#include "math/Rectangle.h"
 
 static const char* IMAGE_METATABLE = "milk.image";
 

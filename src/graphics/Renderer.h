@@ -4,7 +4,6 @@
 #include <tuple>
 
 #include "data/int.h"
-#include "math/Vector2.h"
 
 namespace milk
 {

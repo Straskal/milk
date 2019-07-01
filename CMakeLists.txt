@@ -102,6 +102,7 @@ set(MILK_SRC_GRAPHICS
 	src/graphics/Color.h
 	src/graphics/Image.h
 	src/graphics/ImageCache.h
+	src/graphics/Rectangle.h
 	src/graphics/Renderer.h
 	src/graphics/luaopen_milk_graphics.cpp
 	src/graphics/luaopen_milk_graphics.h
@@ -118,13 +119,6 @@ set(MILK_SRC_KEYBOARD
 	src/keyboard/luaopen_milk_keyboard.h
 	src/keyboard/sdl/SDLKeyboard.cpp
 	src/keyboard/sdl/SDLKeyboard.h
-)
-
-# math
-set(MILK_SRC_MATH
-	src/math/Matrix3.h
-	src/math/Rectangle.h
-	src/math/Vector2.h
 )
 
 # mouse
@@ -159,7 +153,6 @@ set(MILK_SRC_FILES
 	${MILK_SRC_DATA}
 	${MILK_SRC_GRAPHICS}
 	${MILK_SRC_KEYBOARD}
-	${MILK_SRC_MATH}
 	${MILK_SRC_MOUSE}
 	${MILK_SRC_TIME}
 	${MILK_SRC_WINDOW}

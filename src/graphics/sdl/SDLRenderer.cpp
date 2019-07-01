@@ -6,7 +6,7 @@
 
 #include "graphics/Color.h"
 #include "graphics/Image.h"
-#include "math/Rectangle.h"
+#include "graphics/Rectangle.h"
 
 static const int FIRST_SUPPORTED_RENDERING_DRIVER = -1;
 static const char* BATCHING_ON = "1";
