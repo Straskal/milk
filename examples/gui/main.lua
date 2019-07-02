@@ -1,6 +1,5 @@
 local window = require("milk.window")
 local graphics = require("milk.graphics")
-
 local state_menu = require("res.state_menu")
 
 -- initialize game

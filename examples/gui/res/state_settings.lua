@@ -12,7 +12,7 @@ local STOP_MUSIC = { x = 256, y = 0, w = 64, h = 32 }
 local PLAY_SOUND = { x = 320, y = 0, w = 64, h = 32 }
 
 local state = {
-    menu_sheet = graphics.new_texture("res/menusheet.png"),
+    menu_sheet = graphics.new_image("res/menusheet.png"),
     sound = audio.new_sound("res/sound.wav"),
     music = audio.new_music("res/music.mp3")
 }
@@ -38,13 +38,13 @@ function state:draw(game)
         window.set_fullscreen(toggle)
     end
     if self.gui_layer:button(2, 400, 190, self.menu_sheet, PLAY_SOUND) then
-        audio.play_sound(self.sound)
+		self.sound:play()
     end
     if self.gui_layer:button(3, 500, 120, self.menu_sheet, PLAY_MUSIC) then
-        audio.loop_music(self.music, 1)
+		self.music:loop(1)
     end
     if self.gui_layer:button(4, 500, 190, self.menu_sheet, STOP_MUSIC) then
-        audio.stop_music()
+        self.music:stop(1)
     end
     self.gui_layer:end_frame()
 end
