@@ -22,8 +22,7 @@ extern "C" {
 #include "graphics/sdl/SDLImageCache.h"
 #include "keyboard/sdl/SDLKeyboard.h"
 #include "mouse/sdl/SDLMouse.h"
-#include "time/Time.h"
-#include "time/Timer.h"
+#include "time/sdl/SDLTime.h"
 #include "window/sdl/SDLWindow.h"
 
 #define free_ptr(x) delete x; x = nullptr
@@ -39,7 +38,7 @@ static const char* TICK_CALLBACK = "tick";
 static const char* DRAW_CALLBACK = "draw";
 static const char* STOP_CALLBACK = "stop";
 
-static milk::Time* time = nullptr;
+static milk::SDLTime* time = nullptr;
 static milk::SDLWindow* window = nullptr;
 static milk::SDLRenderer* renderer = nullptr;
 static milk::SDLMouse* mouse = nullptr;
@@ -88,7 +87,7 @@ static void safe_invoke_callback(const char* name)
 
 static bool init()
 {
-	time = new milk::Time();
+	time = new milk::SDLTime();
 	window = new milk::SDLWindow();
 	renderer = new milk::SDLRenderer();
 	image_cache = new milk::SDLImageCache();

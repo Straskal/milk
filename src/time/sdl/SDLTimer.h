@@ -1,14 +1,14 @@
-#ifndef _TIMER_H_
-#define _TIMER_H_
+#ifndef _SDL_TIMER_H_
+#define _SDL_TIMER_H_
 
 #include "SDL.h"
 
 namespace milk 
 {
-	class Timer
+	class SDLTimer
 	{
 	public:
-		Timer() 
+		SDLTimer()
 			: m_startTime{ 0.0 }
 			, m_pausedTime{ 0.0 }
 			, m_started{ false }
