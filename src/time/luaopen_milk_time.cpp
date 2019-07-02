@@ -54,7 +54,7 @@ static int time_get_scale(lua_State* L)
 
 static int time_set_scale(lua_State* L)
 {
-	float scale = (float)luaL_checknumber(L, 1);
+	double scale = (double)luaL_checknumber(L, 1);
 	milk::Locator::time->scale(scale);
 	return 1;
 }
