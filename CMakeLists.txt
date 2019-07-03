@@ -69,6 +69,7 @@ set(MILK_SRC_AUDIO
 	src/audio/AudioPlayer.h
 	src/audio/Music.h
 	src/audio/MusicCache.h
+	src/audio/SampleState.h
 	src/audio/SoundCache.h
 	src/audio/Sound.h
 	src/audio/luaopen_milk_audio.cpp
@@ -99,15 +100,16 @@ set(MILK_SRC_DATA
 # graphics
 set(MILK_SRC_GRAPHICS
 	src/graphics/Color.h
+	src/graphics/Image.h
+	src/graphics/ImageCache.h
+	src/graphics/Rectangle.h
 	src/graphics/Renderer.h
-	src/graphics/Texture.h
-	src/graphics/TextureCache.h
 	src/graphics/luaopen_milk_graphics.cpp
 	src/graphics/luaopen_milk_graphics.h
+	src/graphics/sdl/SDLImageCache.cpp
+	src/graphics/sdl/SDLImageCache.h
 	src/graphics/sdl/SDLRenderer.cpp
 	src/graphics/sdl/SDLRenderer.h
-	src/graphics/sdl/SDLTextureCache.cpp
-	src/graphics/sdl/SDLTextureCache.h
 )
 
 # keyboard
@@ -119,13 +121,6 @@ set(MILK_SRC_KEYBOARD
 	src/keyboard/sdl/SDLKeyboard.h
 )
 
-# math
-set(MILK_SRC_MATH
-	src/math/Matrix3.h
-	src/math/Rectangle.h
-	src/math/Vector2.h
-)
-
 # mouse
 set(MILK_SRC_MOUSE
 	src/mouse/Mouse.h
@@ -133,6 +128,16 @@ set(MILK_SRC_MOUSE
 	src/mouse/luaopen_milk_mouse.h
 	src/mouse/sdl/SDLMouse.cpp
 	src/mouse/sdl/SDLMouse.h
+)
+
+# time
+set(MILK_SRC_TIME
+	src/time/Time.h
+	src/time/luaopen_milk_time.cpp
+	src/time/luaopen_milk_time.h
+	src/time/sdl/SDLTime.cpp
+	src/time/sdl/SDLTime.h
+	src/time/sdl/SDLTimer.h
 )
 
 # window
@@ -150,8 +155,8 @@ set(MILK_SRC_FILES
 	${MILK_SRC_DATA}
 	${MILK_SRC_GRAPHICS}
 	${MILK_SRC_KEYBOARD}
-	${MILK_SRC_MATH}
 	${MILK_SRC_MOUSE}
+	${MILK_SRC_TIME}
 	${MILK_SRC_WINDOW}
 )
 
@@ -192,42 +197,6 @@ target_link_libraries(milklib
 add_executable(milk src/main.cpp)
 
 target_link_libraries(milk milklib)
-
-#---------------------------------------------------------------------------
-# add milk lib tests
-#---------------------------------------------------------------------------
-
-# download and unpack googletest at configure time
-configure_file(test/GTestDownload.txt googletest-download/CMakeLists.txt)
-
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-	RESULT_VARIABLE result
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download
-)
-
-if(result)
-	message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif()
-
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-	RESULT_VARIABLE result
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download
-)
-
-if(result)
-	message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif()
-
-# Prevent overriding the parent project's compiler/linker
-# settings on Windows
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-# Add googletest directly to our build. This defines
-# the gtest and gtest_main targets.
-add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-	${CMAKE_CURRENT_BINARY_DIR}/googletest-build
-	EXCLUDE_FROM_ALL
-)
 
 #---------------------------------------------------------------------------
 # post build step to copy dlls to executable output file

@@ -8,7 +8,7 @@ local SETTINGS = { x = 0, y = 0, w = 64, h = 32 }
 local QUIT = { x = 64, y = 0, w = 64, h = 32 }
 
 local state = {
-    menu_sheet = graphics.new_texture("res/menusheet.png")
+    menu_sheet = graphics.new_image("res/menusheet.png")
 }
 
 function state:enter(game)

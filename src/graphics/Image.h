@@ -1,10 +1,12 @@
-#ifndef _TEXTURE_H_
-#define _TEXTURE_H_
+#ifndef _IMAGE_H_
+#define _IMAGE_H_
 
 #include <string>
 
-namespace milk {
-	struct TextureData {
+namespace milk
+{
+	struct ImageData
+	{
 		std::string path;
 		void* handle;
 		int refCount;
@@ -12,8 +14,9 @@ namespace milk {
 		int height;
 	};
 
-	struct Texture {
-		TextureData* data;
+	struct Image
+	{
+		ImageData* data;
 	};
 }
 

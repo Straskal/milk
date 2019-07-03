@@ -1,10 +1,12 @@
 #ifndef _KEYBOARD_H_
 #define _KEYBOARD_H_
 
-namespace milk {
+namespace milk
+{
 	// These have a 1:1 relationship with SDL_Scancodes
-	enum Keys {
-		UNKNOWN = 0,
+	enum class Keys
+	{
+		UNKNOWN,
 		A = 4,
 		B = 5,
 		C = 6,
@@ -83,13 +85,14 @@ namespace milk {
 		MAX_KEYS
 	};
 
-	class Keyboard {
+	class Keyboard
+	{
 	public:
 		virtual ~Keyboard() = default;
 
-		virtual bool isKeyDown(Keys keycode) = 0;
-		virtual bool isKeyPressed(Keys keycode) = 0;
-		virtual bool isKeyReleased(Keys keycode) = 0;
+		virtual bool isKeyDown(const Keys keycode) const = 0;
+		virtual bool isKeyPressed(const Keys keycode) const = 0;
+		virtual bool isKeyReleased(const Keys keycode) const = 0;
 	};
 }
 

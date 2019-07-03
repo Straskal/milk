@@ -9,26 +9,31 @@
 struct SDL_Renderer;
 struct SDL_Window;
 
-namespace milk {
-	class SDLRenderer : public Renderer {
+namespace milk
+{
+	class SDLRenderer : public Renderer
+	{
 	public:
 		SDLRenderer();
 
 		bool init(SDL_Window* windowHandle);
-		void clear() override;
+		void free();
+		SDL_Renderer* handle() const;
+
+		void clear();
+		void present();
+
+		std::tuple<int, int> resolution() const override;
+		void resolution(const int w, const int h) override;
+
 		void setDrawColor(const Color* color) override;
 		void drawRectangle(const RectangleF* destinationRectangle) override;
 		void drawRectangleFilled(const RectangleF* destinationRectangle) override;
-		void draw(const Texture* texture, const Rectangle* sourceRectangle, const RectangleF* destinationRectangle, u8 flipFlags) override;
-		void present() override;
-		std::tuple<int, int> resolution() const override;
-		void resolution(int w, int h) override;
-		SDL_Renderer* handle() const;
-		void free();
+		void draw(const Image* image, const Rectangle* sourceRectangle, const RectangleF* destinationRectangle, u8 flipFlags) override;
 
 	private:
 		SDL_Renderer* m_handle;
-		
+
 		// These values are cached so we don't create them with every draw call
 		SDL_Color m_drawColor;
 		SDL_Rect m_sourceRect;

@@ -5,16 +5,18 @@
 
 #include "SDL.h"
 
-namespace milk {
-	class SDLKeyboard : public Keyboard {
+namespace milk
+{
+	class SDLKeyboard : public Keyboard
+	{
 	public:
 		SDLKeyboard();
 
-		void updateState();
+		void tick();
 
-		bool isKeyDown(Keys keycode) override;
-		bool isKeyPressed(Keys keycode) override;
-		bool isKeyReleased(Keys keycode) override;
+		bool isKeyDown(const Keys keycode) const override;
+		bool isKeyPressed(const Keys keycode) const override;
+		bool isKeyReleased(const Keys keycode) const override;
 
 	private:
 		Uint8 m_previousState[SDL_NUM_SCANCODES];

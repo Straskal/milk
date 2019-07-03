@@ -5,19 +5,21 @@
 
 #include "mouse/Mouse.h"
 
-namespace milk {
-	class SDLMouse : public Mouse {
+namespace milk
+{
+	class SDLMouse : public Mouse
+	{
 	public:
 		SDLMouse();
 
-		void frameBegin();
+		void reset();
 		void handleEvent(SDL_Event* e);
-		void updateState();
+		void tick();
 
 		std::tuple<int, int> getPosition() const override;
-		bool isButtonDown(MouseButtons button) const override;
-		bool isButtonPressed(MouseButtons button) const override;
-		bool isButtonReleased(MouseButtons button) const override;
+		bool isButtonDown(const MouseButtons button) const override;
+		bool isButtonPressed(const MouseButtons button) const override;
+		bool isButtonReleased(const MouseButtons button) const override;
 		int getScroll() const override;
 
 	private:

@@ -3,7 +3,8 @@
 
 struct lua_State;
 
-namespace milk {
+namespace milk
+{
 	int luaopen_milk_mouse(lua_State* L);
 }
 

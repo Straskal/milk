@@ -8,8 +8,10 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-namespace milk {
-	struct luaM_Enum {
+namespace milk
+{
+	struct luaM_Enum
+	{
 		const char* name;
 		int key;
 	};

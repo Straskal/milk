@@ -4,22 +4,26 @@
 /*
 	The Locator's intended usage is for Lua modules.
 */
-namespace milk {
+namespace milk
+{
+	class Time;
 	class Window;
 	class Mouse;
 	class Keyboard;
 	class Renderer;
-	class TextureCache;
+	class ImageCache;
 	class AudioPlayer;
 	class MusicCache;
 	class SoundCache;
 
-	struct Locator {
+	struct Locator
+	{
+		static Time* time;
 		static Window* window;
 		static Mouse* mouse;
 		static Keyboard* keyboard;
 		static Renderer* renderer;
-		static TextureCache* textures;
+		static ImageCache* images;
 		static AudioPlayer* audioPlayer;
 		static MusicCache* music;
 		static SoundCache* sounds;

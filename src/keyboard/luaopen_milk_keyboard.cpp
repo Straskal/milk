@@ -4,7 +4,8 @@
 #include "core/Locator.h"
 #include "core/luamlib.h"
 
-static int is_key_down(lua_State* L) {
+static int is_key_down(lua_State* L)
+{
 	int isnum;
 	int key = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
@@ -16,7 +17,8 @@ static int is_key_down(lua_State* L) {
 	return 1;
 }
 
-static int is_key_pressed(lua_State* L) {
+static int is_key_pressed(lua_State* L)
+{
 	int isnum;
 	int key = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
@@ -28,7 +30,8 @@ static int is_key_pressed(lua_State* L) {
 	return 1;
 }
 
-static int is_key_released(lua_State* L) {
+static int is_key_released(lua_State* L)
+{
 	int isnum;
 	int key = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
@@ -48,85 +51,86 @@ static const luaL_Reg keyboard_funcs[] = {
 };
 
 static const milk::luaM_Enum keys_enum[] = {
-	{ "A", milk::Keys::A },
-	{ "B", milk::Keys::B },
-	{ "C", milk::Keys::C },
-	{ "D", milk::Keys::D },
-	{ "E", milk::Keys::E },
-	{ "F", milk::Keys::F },
-	{ "G", milk::Keys::G },
-	{ "H", milk::Keys::H },
-	{ "I", milk::Keys::I },
-	{ "J", milk::Keys::J },
-	{ "K", milk::Keys::K },
-	{ "L", milk::Keys::L },
-	{ "M", milk::Keys::M },
-	{ "N", milk::Keys::N },
-	{ "O", milk::Keys::O },
-	{ "P", milk::Keys::P },
-	{ "Q", milk::Keys::Q },
-	{ "R", milk::Keys::R },
-	{ "S", milk::Keys::S },
-	{ "T", milk::Keys::T },
-	{ "U", milk::Keys::U },
-	{ "V", milk::Keys::V },
-	{ "W", milk::Keys::W },
-	{ "X", milk::Keys::X },
-	{ "Y", milk::Keys::Y },
-	{ "Z", milk::Keys::Z },
-	{ "NUM1", milk::Keys::NUM1 },
-	{ "NUM2", milk::Keys::NUM2 },
-	{ "NUM3", milk::Keys::NUM3 },
-	{ "NUM4", milk::Keys::NUM4 },
-	{ "NUM5", milk::Keys::NUM5 },
-	{ "NUM6", milk::Keys::NUM6 },
-	{ "NUM7", milk::Keys::NUM7 },
-	{ "NUM8", milk::Keys::NUM8 },
-	{ "NUM9", milk::Keys::NUM9 },
-	{ "NUM0", milk::Keys::NUM0 },
-	{ "RETURN", milk::Keys::RETURN },
-	{ "ESCAPE", milk::Keys::ESCAPE },
-	{ "BACKSPACE", milk::Keys::BACKSPACE },
-	{ "TAB", milk::Keys::TAB },
-	{ "SPACE", milk::Keys::SPACE },
-	{ "MINUS", milk::Keys::MINUS },
-	{ "EQUALS", milk::Keys::EQUALS },
-	{ "LEFTBRACKET", milk::Keys::LEFTBRACKET },
-	{ "RIGHTBRACKET", milk::Keys::RIGHTBRACKET },
-	{ "BACKSLASH", milk::Keys::BACKSLASH },
-	{ "SEMICOLON", milk::Keys::SEMICOLON },
-	{ "APOSTROPHE", milk::Keys::APOSTROPHE },
-	{ "TILDE", milk::Keys::GRAVE },
-	{ "COMMA", milk::Keys::COMMA },
-	{ "PERIOD", milk::Keys::PERIOD },
-	{ "SLASH", milk::Keys::SLASH },
-	{ "CAPSLOCK", milk::Keys::CAPSLOCK },
-	{ "F1", milk::Keys::F1 },
-	{ "F2", milk::Keys::F2 },
-	{ "F3", milk::Keys::F3 },
-	{ "F4", milk::Keys::F4 },
-	{ "F5", milk::Keys::F5 },
-	{ "F6", milk::Keys::F6 },
-	{ "F7", milk::Keys::F7 },
-	{ "F8", milk::Keys::F8 },
-	{ "F9", milk::Keys::F9 },
-	{ "F10", milk::Keys::F10 },
-	{ "F11", milk::Keys::F11 },
-	{ "F12", milk::Keys::F12 },
-	{ "DELETE", milk::Keys::DELETE },
-	{ "RIGHT", milk::Keys::RIGHT },
-	{ "LEFT", milk::Keys::LEFT },
-	{ "DOWN", milk::Keys::DOWN },
-	{ "UP", milk::Keys::UP },
-	{ "LCTRL", milk::Keys::LCTRL },
-	{ "LSHIFT", milk::Keys::LSHIFT },
-	{ "LALT", milk::Keys::LALT },
-	{ "RCTRL", milk::Keys::RCTRL },
-	{ "RSHIFT", milk::Keys::RSHIFT }
+	{ "A", (int)milk::Keys::A },
+	{ "B", (int)milk::Keys::B },
+	{ "C", (int)milk::Keys::C },
+	{ "D", (int)milk::Keys::D },
+	{ "E", (int)milk::Keys::E },
+	{ "F", (int)milk::Keys::F },
+	{ "G", (int)milk::Keys::G },
+	{ "H", (int)milk::Keys::H },
+	{ "I", (int)milk::Keys::I },
+	{ "J", (int)milk::Keys::J },
+	{ "K", (int)milk::Keys::K },
+	{ "L", (int)milk::Keys::L },
+	{ "M", (int)milk::Keys::M },
+	{ "N", (int)milk::Keys::N },
+	{ "O", (int)milk::Keys::O },
+	{ "P", (int)milk::Keys::P },
+	{ "Q", (int)milk::Keys::Q },
+	{ "R", (int)milk::Keys::R },
+	{ "S", (int)milk::Keys::S },
+	{ "T", (int)milk::Keys::T },
+	{ "U", (int)milk::Keys::U },
+	{ "V", (int)milk::Keys::V },
+	{ "W", (int)milk::Keys::W },
+	{ "X", (int)milk::Keys::X },
+	{ "Y", (int)milk::Keys::Y },
+	{ "Z", (int)milk::Keys::Z },
+	{ "NUM1", (int)milk::Keys::NUM1 },
+	{ "NUM2", (int)milk::Keys::NUM2 },
+	{ "NUM3", (int)milk::Keys::NUM3 },
+	{ "NUM4", (int)milk::Keys::NUM4 },
+	{ "NUM5", (int)milk::Keys::NUM5 },
+	{ "NUM6", (int)milk::Keys::NUM6 },
+	{ "NUM7", (int)milk::Keys::NUM7 },
+	{ "NUM8", (int)milk::Keys::NUM8 },
+	{ "NUM9", (int)milk::Keys::NUM9 },
+	{ "NUM0", (int)milk::Keys::NUM0 },
+	{ "RETURN", (int)milk::Keys::RETURN },
+	{ "ESCAPE", (int)milk::Keys::ESCAPE },
+	{ "BACKSPACE", (int)milk::Keys::BACKSPACE },
+	{ "TAB", (int)milk::Keys::TAB },
+	{ "SPACE", (int)milk::Keys::SPACE },
+	{ "MINUS", (int)milk::Keys::MINUS },
+	{ "EQUALS", (int)milk::Keys::EQUALS },
+	{ "LEFTBRACKET", (int)milk::Keys::LEFTBRACKET },
+	{ "RIGHTBRACKET", (int)milk::Keys::RIGHTBRACKET },
+	{ "BACKSLASH", (int)milk::Keys::BACKSLASH },
+	{ "SEMICOLON", (int)milk::Keys::SEMICOLON },
+	{ "APOSTROPHE", (int)milk::Keys::APOSTROPHE },
+	{ "TILDE", (int)milk::Keys::GRAVE },
+	{ "COMMA", (int)milk::Keys::COMMA },
+	{ "PERIOD", (int)milk::Keys::PERIOD },
+	{ "SLASH", (int)milk::Keys::SLASH },
+	{ "CAPSLOCK", (int)milk::Keys::CAPSLOCK },
+	{ "F1", (int)milk::Keys::F1 },
+	{ "F2", (int)milk::Keys::F2 },
+	{ "F3", (int)milk::Keys::F3 },
+	{ "F4", (int)milk::Keys::F4 },
+	{ "F5", (int)milk::Keys::F5 },
+	{ "F6", (int)milk::Keys::F6 },
+	{ "F7", (int)milk::Keys::F7 },
+	{ "F8", (int)milk::Keys::F8 },
+	{ "F9", (int)milk::Keys::F9 },
+	{ "F10", (int)milk::Keys::F10 },
+	{ "F11", (int)milk::Keys::F11 },
+	{ "F12", (int)milk::Keys::F12 },
+	{ "DELETE", (int)milk::Keys::DELETE },
+	{ "RIGHT", (int)milk::Keys::RIGHT },
+	{ "LEFT", (int)milk::Keys::LEFT },
+	{ "DOWN", (int)milk::Keys::DOWN },
+	{ "UP", (int)milk::Keys::UP },
+	{ "LCTRL", (int)milk::Keys::LCTRL },
+	{ "LSHIFT", (int)milk::Keys::LSHIFT },
+	{ "LALT", (int)milk::Keys::LALT },
+	{ "RCTRL", (int)milk::Keys::RCTRL },
+	{ "RSHIFT", (int)milk::Keys::RSHIFT }
 };
 
-int milk::luaopen_milk_keyboard(lua_State* L) {
+int milk::luaopen_milk_keyboard(lua_State* L)
+{
 	luaL_newlib(L, keyboard_funcs);
-	luaM_setenumfield(L, -1, "keys", keys_enum, sizeof(keys_enum)/sizeof(luaM_Enum));
+	luaM_setenumfield(L, -1, "keys", keys_enum, sizeof(keys_enum) / sizeof(luaM_Enum));
 	return 1;
 }

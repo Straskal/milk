@@ -3,15 +3,22 @@
 
 #include <string>
 
-namespace milk {
-	struct MusicData {
+#include "SampleState.h"
+
+namespace milk
+{
+	struct MusicData
+	{
 		std::string path;
 		void* handle;
 		int refCount;
 	};
 
-	struct Music {
+	struct Music
+	{
 		MusicData* data;
+		SampleState state;
+		float volume;
 	};
 }
 

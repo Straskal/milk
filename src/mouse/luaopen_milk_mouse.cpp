@@ -11,7 +11,8 @@ extern "C" {
 #include "graphics/Renderer.h"
 #include "window/Window.h"
 
-static int mouse_is_button_down(lua_State* L) {
+static int mouse_is_button_down(lua_State* L)
+{
 	int isnum;
 	int button = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
@@ -23,7 +24,8 @@ static int mouse_is_button_down(lua_State* L) {
 	return 1;
 }
 
-static int mouse_is_button_pressed(lua_State* L) {
+static int mouse_is_button_pressed(lua_State* L)
+{
 	int isnum;
 	int button = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
@@ -35,7 +37,8 @@ static int mouse_is_button_pressed(lua_State* L) {
 	return 1;
 }
 
-static int mouse_is_button_released(lua_State* L) {
+static int mouse_is_button_released(lua_State* L)
+{
 	int isnum;
 	int button = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
@@ -47,7 +50,8 @@ static int mouse_is_button_released(lua_State* L) {
 	return 1;
 }
 
-static int mouse_get_position(lua_State* L) {
+static int mouse_get_position(lua_State* L)
+{
 	// SDL's logical resolution filter only applies to events pumped through the event loop, not the real time state updates.
 	// This means that we have to handle it ourselves.
 	std::tuple<int, int> pos = milk::Locator::mouse->getPosition();
@@ -64,7 +68,8 @@ static int mouse_get_position(lua_State* L) {
 	return 2;
 }
 
-static int mouse_get_scroll(lua_State* L) {
+static int mouse_get_scroll(lua_State* L)
+{
 	int scroll = milk::Locator::mouse->getScroll();
 	lua_pushinteger(L, scroll);
 	return 1;
@@ -80,12 +85,13 @@ static const luaL_Reg mouse_funcs[] = {
 };
 
 static const milk::luaM_Enum buttons_enum[] = {
-	{ "LEFT", milk::MouseButtons::MOUSE_LEFT },
-	{ "MIDDLE", milk::MouseButtons::MOUSE_MIDDLE },
-	{ "RIGHT", milk::MouseButtons::MOUSE_RIGHT }
+	{ "LEFT", (int)milk::MouseButtons::LEFT },
+	{ "MIDDLE", (int)milk::MouseButtons::MIDDLE },
+	{ "RIGHT", (int)milk::MouseButtons::RIGHT }
 };
 
-int milk::luaopen_milk_mouse(lua_State* L) {
+int milk::luaopen_milk_mouse(lua_State* L)
+{
 	luaL_newlib(L, mouse_funcs);
 	luaM_setenumfield(L, -1, "buttons", buttons_enum, sizeof(buttons_enum) / sizeof(luaM_Enum));
 	return 1;

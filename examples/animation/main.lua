@@ -1,20 +1,21 @@
 local window = require("milk.window")
+local time = require("milk.time")
 local keyboard = require("milk.keyboard")
 local graphics = require("milk.graphics")
 local player = require("res.player")
 local keys = keyboard.keys
 
--- initialization
-window.set_title("Animation")
-window.set_size(1280, 720)
-graphics.set_virtual_resolution(640, 360)
-
 local game = {};
 
-game.player = player.new()
-game.player:init()
+function game:start()
+	window.set_title("Animation")
+	window.set_size(1280, 720)
+	graphics.set_virtual_resolution(640, 360)
 
-function game.tick()
+	self.player = player.new()
+end
+
+function game:tick()
 	if keyboard.is_key_released(keys.ESCAPE) then 
 		window.close() 
 	end
@@ -22,11 +23,12 @@ function game.tick()
 		local toggle = not window.is_fullscreen()
 		window.set_fullscreen(toggle) 
 	end
-	game.player:tick()
+
+	self.player:tick()
 end
 
-function game.draw()
-	game.player:draw()
+function game:draw()
+	self.player:draw()
 end
 
 return game
