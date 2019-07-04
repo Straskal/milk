@@ -9,10 +9,10 @@
 
 milk::MusicData* milk::SDLMusicCache::load(const char* path)
 {
-	auto found = m_music.find(path);
-	if (found != m_music.end()) {
-		++found->second->refCount;
-		return found->second;
+	std::unordered_map<std::string, MusicData*>::iterator loaded = m_music.find(path);
+	if (loaded != m_music.end()) {
+		++loaded->second->refCount;
+		return loaded->second;
 	}
 
 	Mix_Music* music = Mix_LoadMUS(path);

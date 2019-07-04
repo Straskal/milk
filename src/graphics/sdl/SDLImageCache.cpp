@@ -8,7 +8,7 @@
 #include "graphics/Image.h"
 
 milk::SDLImageCache::SDLImageCache()
-	: m_rendererHandle{ 0 }
+	: m_rendererHandle{ nullptr }
 {
 }
 

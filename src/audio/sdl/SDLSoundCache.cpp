@@ -9,10 +9,10 @@
 
 milk::SoundData* milk::SDLSoundCache::load(const char* path)
 {
-	auto found = m_sounds.find(path);
-	if (found != m_sounds.end()) {
-		++found->second->refCount;
-		return found->second;
+	std::unordered_map<std::string, SoundData*>::iterator loaded = m_sounds.find(path);
+	if (loaded != m_sounds.end()) {
+		++loaded->second->refCount;
+		return loaded->second;
 	}
 
 	Mix_Chunk* sample = Mix_LoadWAV(path);
