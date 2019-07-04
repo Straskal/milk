@@ -59,10 +59,10 @@ local new_layer = function()
         layers = layers - 1
     end
     
-    function layer:button(id, x, y, texture, src_rect)
+    function layer:button(id, x, y, image, src_rect)
         if not enabled(layer_id) then
             graphics.set_draw_color(table.unpack(style.button.disabled_color))
-            graphics.drawx(texture, x, y, src_rect.x, src_rect.y, src_rect.w, src_rect.h, 1, 0)
+            graphics.drawx(image, x, y, src_rect.x, src_rect.y, src_rect.w, src_rect.h, 1, 1, 0)
             return false
         end
         if is_mouse_hover(mousex, mousey, x, y, src_rect.w, src_rect.h) then
@@ -80,7 +80,7 @@ local new_layer = function()
         else
             graphics.set_draw_color(table.unpack(style.button.default_color))
         end
-        graphics.drawx(texture, x, y, src_rect.x, src_rect.y, src_rect.w, src_rect.h, 1, 0)
+        graphics.drawx(image, x, y, src_rect.x, src_rect.y, src_rect.w, src_rect.h, 1, 1, 0)
         -- if button is not down but control is hot and active then the user has clicked this button
         return not is_down and hot_id == id and active_id == id
     end
