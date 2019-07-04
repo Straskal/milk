@@ -5,19 +5,13 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-#include "Color.h"
 #include "Image.h"
 #include "ImageCache.h"
-#include "Rectangle.h"
 #include "Renderer.h"
 #include "core/Locator.h"
 #include "core/luamlib.h"
 
 static const char* IMAGE_METATABLE = "milk.image";
-
-static milk::Color draw_color = { 0xFF, 0xFF, 0xFF, 0xFF };
-static milk::Rectangle source_rect = { 0, 0, 0, 0 };
-static milk::RectangleF dest_rect = { 0, 0, 0, 0 };
 
 static int imagemeta_tostring(lua_State* L)
 {
@@ -79,12 +73,12 @@ static int graphics_set_virtual_resolution(lua_State* L)
 
 static int graphics_set_draw_color(lua_State* L)
 {
-	draw_color.r = (milk::u8)(luaL_checknumber(L, 1) * 255);
-	draw_color.b = (milk::u8)(luaL_checknumber(L, 2) * 255);
-	draw_color.g = (milk::u8)(luaL_checknumber(L, 3) * 255);
-	draw_color.a = (milk::u8)(luaL_checknumber(L, 4) * 255);
+	double r = (double)luaL_checknumber(L, 1);
+	double b = (double)luaL_checknumber(L, 2);
+	double g = (double)luaL_checknumber(L, 3);
+	double a = (double)luaL_checknumber(L, 4);
 
-	milk::Locator::renderer->setDrawColor(&draw_color);
+	milk::Locator::renderer->setDrawColor(r, g, b, a);
 	return 0;
 }
 
@@ -93,23 +87,8 @@ static int graphics_draw(lua_State* L)
 	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
 	float x = (float)luaL_checknumber(L, 2);
 	float y = (float)luaL_checknumber(L, 3);
-	int flip = (int)luaL_optinteger(L, 4, milk::NO_FLIP);
 
-	milk::ImageData* data = image->data;
-	int w = data->width;
-	int h = data->height;
-
-	source_rect.x = 0;
-	source_rect.y = 0;
-	source_rect.w = w;
-	source_rect.h = h;
-
-	dest_rect.x = x;
-	dest_rect.y = y;
-	dest_rect.w = (float)w;
-	dest_rect.h = (float)h;
-
-	milk::Locator::renderer->draw(image, &source_rect, &dest_rect, (milk::u8)flip);
+	milk::Locator::renderer->draw(image, x, y);
 	return 0;
 }
 
@@ -122,42 +101,33 @@ static int graphics_drawx(lua_State* L)
 	int recty = (int)luaL_checkinteger(L, 5);
 	int rectw = (int)luaL_checkinteger(L, 6);
 	int recth = (int)luaL_checkinteger(L, 7);
-	float scale = (float)luaL_checknumber(L, 8);
-	int flip = (int)luaL_optinteger(L, 9, milk::NO_FLIP);
+	float scalex = (float)luaL_checknumber(L, 8);
+	float scaley = (float)luaL_checknumber(L, 9);
+	double angle = (double)luaL_checknumber(L, 10);
 
-	source_rect.x = rectx;
-	source_rect.y = recty;
-	source_rect.w = rectw;
-	source_rect.h = recth;
-
-	dest_rect.x = posx;
-	dest_rect.y = posy;
-	dest_rect.w = (float)rectw * scale;
-	dest_rect.h = (float)recth * scale;
-
-	milk::Locator::renderer->draw(image, &source_rect, &dest_rect, (milk::u8)flip);
+	milk::Locator::renderer->draw(image, posx, posy, rectx, recty, rectw, recth, scalex, scaley, angle);
 	return 0;
 }
 
 static int graphics_draw_rect(lua_State* L)
 {
-	dest_rect.x = (float)luaL_checknumber(L, 1);
-	dest_rect.y = (float)luaL_checknumber(L, 2);
-	dest_rect.w = (float)luaL_checknumber(L, 3);
-	dest_rect.h = (float)luaL_checknumber(L, 4);
+	float x = (float)luaL_checknumber(L, 1);
+	float y = (float)luaL_checknumber(L, 2);
+	float w = (float)luaL_checknumber(L, 3);
+	float h = (float)luaL_checknumber(L, 4);
 
-	milk::Locator::renderer->drawRectangle(&dest_rect);
+	milk::Locator::renderer->drawRectangle(x, y, w, h);
 	return 0;
 }
 
 static int graphics_draw_filled_rect(lua_State* L)
 {
-	dest_rect.x = (float)luaL_checknumber(L, 1);
-	dest_rect.y = (float)luaL_checknumber(L, 2);
-	dest_rect.w = (float)luaL_checknumber(L, 3);
-	dest_rect.h = (float)luaL_checknumber(L, 4);
+	float x = (float)luaL_checknumber(L, 1);
+	float y = (float)luaL_checknumber(L, 2);
+	float w = (float)luaL_checknumber(L, 3);
+	float h = (float)luaL_checknumber(L, 4);
 
-	milk::Locator::renderer->drawRectangleFilled(&dest_rect);
+	milk::Locator::renderer->drawRectangleFilled(x, y, w, h);
 	return 0;
 }
 
@@ -172,16 +142,9 @@ static const luaL_Reg graphics_funcs[] = {
 	{ NULL, NULL }
 };
 
-static const milk::luaM_Enum flip_enum[] = {
-	{ "NONE", milk::FlipFlags::NO_FLIP },
-	{ "X", milk::FlipFlags::FLIP_X },
-	{ "Y", milk::FlipFlags::FLIP_Y }
-};
-
 int milk::luaopen_milk_graphics(lua_State* L)
 {
 	luaM_createmetatable(L, IMAGE_METATABLE, imagemeta_funcs);
 	luaL_newlib(L, graphics_funcs);
-	luaM_setenumfield(L, -1, "flip_flags", flip_enum, sizeof(flip_enum) / sizeof(luaM_Enum));
 	return 1;
 }

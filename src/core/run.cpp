@@ -17,7 +17,6 @@ extern "C" {
 #include "audio/sdl/SDLAudioPlayer.h"
 #include "audio/sdl/SDLMusicCache.h"
 #include "audio/sdl/SDLSoundCache.h"
-#include "graphics/Color.h"
 #include "graphics/sdl/SDLRenderer.h"
 #include "graphics/sdl/SDLImageCache.h"
 #include "keyboard/sdl/SDLKeyboard.h"

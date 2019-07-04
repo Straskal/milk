@@ -12,13 +12,6 @@ namespace milk
 	struct Rectangle;
 	struct RectangleF;
 
-	enum FlipFlags
-	{
-		NO_FLIP,
-		FLIP_X = 1 << 0,
-		FLIP_Y = 1 << 1
-	};
-
 	class Renderer
 	{
 	public:
@@ -27,10 +20,15 @@ namespace milk
 		virtual std::tuple<int, int> resolution() const = 0;
 		virtual void resolution(const int w, const int h) = 0;
 
-		virtual void setDrawColor(const Color* color) = 0;
-		virtual void drawRectangle(const RectangleF* destinationRectangle) = 0;
-		virtual void drawRectangleFilled(const RectangleF* destinationRectangle) = 0;
-		virtual void draw(const Image* image, const Rectangle* sourceRectangle, const RectangleF* destinationRectangle, const u8 flipFlags) = 0;
+		virtual void setDrawColor(const double r, const double g, const double b, const double a) = 0;
+		virtual void drawRectangle(const float x, const float y, const float w, const float h) = 0;
+		virtual void drawRectangleFilled(const float x, const float y, const float w, const float h) = 0;
+		virtual void draw(const Image* image, const float x, const float y) = 0;
+		virtual void draw(
+			const Image* image,
+			const float x, const float y,
+			const int srcx, const int srcy, const int srcw, const int srch,
+			const float scalex, const float scaley, const double angle) = 0;
 	};
 }
 

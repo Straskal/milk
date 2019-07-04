@@ -4,37 +4,11 @@
 
 #include "SDL.h"
 
-#include "graphics/Color.h"
 #include "graphics/Image.h"
-#include "graphics/Rectangle.h"
 
 static const int FIRST_SUPPORTED_RENDERING_DRIVER = -1;
 static const char* BATCHING_ON = "1";
 static const char* NEAREST_PIXEL_SAMPLING = "nearest";
-
-static void milkrect_to_sdlrect(const milk::Rectangle* milkrect, SDL_Rect* sdlrect)
-{
-	sdlrect->x = milkrect->x;
-	sdlrect->y = milkrect->y;
-	sdlrect->w = milkrect->w;
-	sdlrect->h = milkrect->h;
-}
-
-static void milkrectf_to_sdlrectf(const milk::RectangleF* milkrect, SDL_FRect* sdlrect)
-{
-	sdlrect->x = milkrect->x;
-	sdlrect->y = milkrect->y;
-	sdlrect->w = milkrect->w;
-	sdlrect->h = milkrect->h;
-}
-
-static void milkcolor_to_sdlcolor(const milk::Color* milkcolor, SDL_Color* sdlcolor)
-{
-	sdlcolor->r = milkcolor->r;
-	sdlcolor->b = milkcolor->b;
-	sdlcolor->g = milkcolor->g;
-	sdlcolor->a = milkcolor->a;
-}
 
 milk::SDLRenderer::SDLRenderer()
 	: m_handle{ nullptr }
@@ -90,37 +64,93 @@ void milk::SDLRenderer::clear()
 	SDL_SetRenderDrawColor(m_handle, m_drawColor.r, m_drawColor.b, m_drawColor.g, m_drawColor.a);
 }
 
-void milk::SDLRenderer::setDrawColor(const Color* color)
+void milk::SDLRenderer::setDrawColor(const double r, const double g, const double b, const double a)
 {
-	milkcolor_to_sdlcolor(color, &m_drawColor);
-	SDL_SetRenderDrawColor(m_handle, color->r, color->b, color->g, color->a);
+	m_drawColor.r = (Uint8)(r * 0xFF);
+	m_drawColor.g = (Uint8)(g * 0xFF);
+	m_drawColor.b = (Uint8)(b * 0xFF);
+	m_drawColor.a = (Uint8)(a * 0xFF);
+	SDL_SetRenderDrawColor(m_handle, m_drawColor.r, m_drawColor.b, m_drawColor.g, m_drawColor.a);
 }
 
-void milk::SDLRenderer::drawRectangle(const RectangleF* destinationRectangle)
+void milk::SDLRenderer::drawRectangle(const float x, const float y, const float w, const float h)
 {
-	milkrectf_to_sdlrectf(destinationRectangle, &m_destRect);
+	m_destRect.x = x;
+	m_destRect.y = y;
+	m_destRect.w = w;
+	m_destRect.h = h;
 	SDL_RenderDrawRectF(m_handle, &m_destRect);
 }
 
-void milk::SDLRenderer::drawRectangleFilled(const RectangleF* destinationRectangle)
+void milk::SDLRenderer::drawRectangleFilled(const float x, const float y, const float w, const float h)
 {
-	milkrectf_to_sdlrectf(destinationRectangle, &m_destRect);
+	m_destRect.x = x;
+	m_destRect.y = y;
+	m_destRect.w = w;
+	m_destRect.h = h;
 	SDL_RenderFillRectF(m_handle, &m_destRect);
 }
 
-void milk::SDLRenderer::draw(
-	const milk::Image* image,
-	const milk::Rectangle* sourceRectangle,
-	const milk::RectangleF* destinationRectangle,
-	milk::u8 flipFlags
-)
+void milk::SDLRenderer::draw(const Image* image, const float x, const float y)
 {
-	SDL_Texture* t = (SDL_Texture*)image->data->handle;
-	SDL_SetTextureColorMod(t, m_drawColor.r, m_drawColor.g, m_drawColor.b);
-	SDL_SetTextureAlphaMod(t, m_drawColor.a);
-	milkrect_to_sdlrect(sourceRectangle, &m_sourceRect);
-	milkrectf_to_sdlrectf(destinationRectangle, &m_destRect);
-	SDL_RenderCopyExF(m_handle, t, &m_sourceRect, &m_destRect, 0, nullptr, (SDL_RendererFlip)flipFlags);
+	SDL_Texture* texture = (SDL_Texture*)image->data->handle;
+	SDL_SetTextureColorMod(texture, m_drawColor.r, m_drawColor.g, m_drawColor.b);
+	SDL_SetTextureAlphaMod(texture, m_drawColor.a);
+
+	int w = image->data->width;
+	int h = image->data->height;
+
+	m_sourceRect.x = 0;
+	m_sourceRect.y = 0;
+	m_sourceRect.w = w;
+	m_sourceRect.h = h;
+
+	m_destRect.x = x;
+	m_destRect.y = y;
+	m_destRect.w = (float)w;
+	m_destRect.h = (float)h;
+
+	SDL_RenderCopyExF(m_handle, texture, &m_sourceRect, &m_destRect, 0, nullptr, SDL_FLIP_NONE);
+}
+
+void milk::SDLRenderer::draw(
+	const Image* image,
+	const float x, const float y,
+	const int srcx, const int srcy, const int srcw, const int srch,
+	const float scalex, const float scaley, const double angle)
+{
+	SDL_Texture* texture = (SDL_Texture*)image->data->handle;
+	SDL_SetTextureColorMod(texture, m_drawColor.r, m_drawColor.g, m_drawColor.b);
+	SDL_SetTextureAlphaMod(texture, m_drawColor.a);
+
+	m_sourceRect.x = srcx;
+	m_sourceRect.y = srcy;
+	m_sourceRect.w = srcw;
+	m_sourceRect.h = srch;
+
+	float sx = scalex;
+	float sy = scaley;
+	Uint8 flip = SDL_FLIP_NONE;
+
+	if (scalex < 0) {
+		flip |= SDL_FLIP_HORIZONTAL;
+		sx *= -1;
+	}
+	if (scaley < 0) {
+		flip |= SDL_FLIP_VERTICAL;
+		sy *= -1;
+	}
+
+	m_destRect.x = x;
+	m_destRect.y = y;
+	m_destRect.w = (float)srcw * sx;
+	m_destRect.h = (float)srch * sy;
+
+	SDL_FPoint center;
+	center.x = m_destRect.w * 0.5f;
+	center.y = m_destRect.h * 0.5f;
+
+	SDL_RenderCopyExF(m_handle, texture, &m_sourceRect, &m_destRect, angle, &center, (SDL_RendererFlip)flip);
 }
 
 void milk::SDLRenderer::present()
