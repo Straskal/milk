@@ -48,7 +48,7 @@ std::tuple<int, int> milk::SDLWindow::size() const
 	return std::make_tuple(w, h);
 }
 
-void milk::SDLWindow::size(const int width, const int height)
+void milk::SDLWindow::size(int width, int height)
 {
 	SDL_SetWindowSize(m_handle, width, height);
 	SDL_SetWindowPosition(m_handle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
@@ -59,7 +59,7 @@ bool milk::SDLWindow::fullscreen() const
 	return (SDL_GetWindowFlags(m_handle) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP;
 }
 
-void milk::SDLWindow::fullscreen(const bool toggle)
+void milk::SDLWindow::fullscreen(bool toggle)
 {
 	if (toggle != fullscreen()) {
 		if (toggle) {

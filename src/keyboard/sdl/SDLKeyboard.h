@@ -14,9 +14,9 @@ namespace milk
 
 		void tick();
 
-		bool isKeyDown(const Keys keycode) const override;
-		bool isKeyPressed(const Keys keycode) const override;
-		bool isKeyReleased(const Keys keycode) const override;
+		bool isKeyDown(Keys key) const override;
+		bool isKeyPressed(Keys key) const override;
+		bool isKeyReleased(Keys key) const override;
 
 	private:
 		Uint8 m_previousState[SDL_NUM_SCANCODES];

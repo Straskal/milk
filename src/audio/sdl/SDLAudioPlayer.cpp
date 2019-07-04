@@ -85,7 +85,7 @@ void milk::SDLAudioPlayer::free()
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
-void milk::SDLAudioPlayer::setMasterVolume(const float volume)
+void milk::SDLAudioPlayer::setMasterVolume(float volume)
 {
 	m_masterVolume = std::min(std::max(volume, 0.f), 1.f);
 	int v = (int)(m_masterVolume * MIX_MAX_VOLUME);
@@ -104,7 +104,7 @@ float milk::SDLAudioPlayer::getMasterVolume() const
 	return m_masterVolume;
 }
 
-void milk::SDLAudioPlayer::playSound(Sound* sound, const float fadeTime)
+void milk::SDLAudioPlayer::playSound(Sound* sound, float fadeTime)
 {
 	stopSound(sound, 0.f);
 
@@ -122,7 +122,7 @@ void milk::SDLAudioPlayer::playSound(Sound* sound, const float fadeTime)
 	channel_volume[channelnum] = sound->volume;
 }
 
-void milk::SDLAudioPlayer::loopSound(Sound* sound, const float fadeTime)
+void milk::SDLAudioPlayer::loopSound(Sound* sound, float fadeTime)
 {
 	stopSound(sound, 0.f);
 
@@ -156,7 +156,7 @@ void milk::SDLAudioPlayer::resumeSound(Sound* sound)
 	}
 }
 
-void milk::SDLAudioPlayer::stopSound(Sound* sound, const float fadeTime)
+void milk::SDLAudioPlayer::stopSound(Sound* sound, float fadeTime)
 {
 	if (sound->state != SampleState::STOPPED) {
 		sound->state = SampleState::STOPPED;
@@ -164,7 +164,7 @@ void milk::SDLAudioPlayer::stopSound(Sound* sound, const float fadeTime)
 	}
 }
 
-void milk::SDLAudioPlayer::setSoundVolume(Sound* sound, const float volume)
+void milk::SDLAudioPlayer::setSoundVolume(Sound* sound, float volume)
 {
 	sound->volume = std::min(std::max(volume, 0.f), 1.f);
 
@@ -175,7 +175,7 @@ void milk::SDLAudioPlayer::setSoundVolume(Sound* sound, const float volume)
 	}
 }
 
-void milk::SDLAudioPlayer::playMusic(Music* music, const float fadeTime)
+void milk::SDLAudioPlayer::playMusic(Music* music, float fadeTime)
 {
 	Mix_HaltMusic();
 
@@ -189,7 +189,7 @@ void milk::SDLAudioPlayer::playMusic(Music* music, const float fadeTime)
 	current_music = music;
 }
 
-void milk::SDLAudioPlayer::loopMusic(Music* music, const float fadeTime)
+void milk::SDLAudioPlayer::loopMusic(Music* music, float fadeTime)
 {
 	Mix_HaltMusic();
 
@@ -219,7 +219,7 @@ void milk::SDLAudioPlayer::resumeMusic(Music* music)
 	}
 }
 
-void milk::SDLAudioPlayer::stopMusic(Music* music, const float fadeTime)
+void milk::SDLAudioPlayer::stopMusic(Music* music, float fadeTime)
 {
 	if (music->state != SampleState::STOPPED) {
 		music->state = SampleState::STOPPED;
@@ -227,7 +227,7 @@ void milk::SDLAudioPlayer::stopMusic(Music* music, const float fadeTime)
 	}
 }
 
-void milk::SDLAudioPlayer::setMusicVolume(Music* music, const float volume)
+void milk::SDLAudioPlayer::setMusicVolume(Music* music, float volume)
 {
 	music->volume = std::min(std::max(volume, 0.f), 1.f);
 

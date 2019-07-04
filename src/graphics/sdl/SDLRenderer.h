@@ -23,25 +23,17 @@ namespace milk
 		void present();
 
 		std::tuple<int, int> resolution() const override;
-		void resolution(const int w, const int h) override;
+		void resolution(int w, int h) override;
 
-		void setDrawColor(const double r, const double g, const double b, const double a) override;
-		void drawRectangle(const float x, const float y, const float w, const float h) override;
-		void drawRectangleFilled(const float x, const float y, const float w, const float h) override;
-		void draw(const Image* image, const float x, const float y) override;
-		void draw(
-			const Image* image,
-			const float x, const float y,
-			const int srcx, const int srcy, const int srcw, const int srch,
-			const float scalex, const float scaley, const double angle) override;
+		void setDrawColor(double r, double g, double b, double a) override;
+		void drawRectangle(float x, float y, float w, float h) override;
+		void drawRectangleFilled(float x, float y, float w, float h) override;
+		void draw(const Image* image, float x, float y) override;
+		void draw(const Image* image, float x, float y, int srcx, int srcy, int srcw, int srch, float scx, float scy, double angle) override;
 
 	private:
 		SDL_Renderer* m_handle;
-
-		// These values are cached so we don't create them with every draw call
 		SDL_Color m_drawColor;
-		SDL_Rect m_sourceRect;
-		SDL_FRect m_destRect;
 	};
 }
 

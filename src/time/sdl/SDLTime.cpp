@@ -66,7 +66,7 @@ double milk::SDLTime::targetFps() const
 	return m_targetFps;
 }
 
-void milk::SDLTime::targetFps(const double target)
+void milk::SDLTime::targetFps(double target)
 {
 	m_targetFps = std::min(std::max(target, 10.0), 60.0);
 	resetFpsTimer();
@@ -87,7 +87,7 @@ double milk::SDLTime::scale() const
 	return m_scale;
 }
 
-void milk::SDLTime::scale(const double v)
+void milk::SDLTime::scale(double sc)
 {
-	m_scale = std::min(std::max(v, 0.0), 1.0);
+	m_scale = std::min(std::max(sc, 0.0), 1.0);
 }

@@ -18,9 +18,9 @@ namespace milk
 		const char* title() const override;
 		void title(const char* title) override;
 		std::tuple<int, int> size() const override;
-		void size(const int width, const int height) override;
+		void size(int width, int height) override;
 		bool fullscreen() const override;
-		void fullscreen(const bool toggle) override;
+		void fullscreen(bool toggle) override;
 		void minimize() override;
 		void restore() override;
 		void show();

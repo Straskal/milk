@@ -21,11 +21,11 @@ namespace milk
 
 		double total() const override;
 		double targetFps() const override;
-		void targetFps(const double target) override;
+		void targetFps(double target) override;
 		double fps() const override;
 		double delta() const override;
 		double scale() const override;
-		void scale(const double v) override;
+		void scale(double sc) override;
 
 	private:
 		int m_frames;
