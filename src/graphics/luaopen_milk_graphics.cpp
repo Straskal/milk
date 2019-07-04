@@ -50,9 +50,9 @@ static int graphics_new_image(lua_State* L)
 		milk::ImageData* imageData = milk::Locator::images->load(value);
 		if (imageData != nullptr) {
 			milk::Image* image = (milk::Image*)lua_newuserdata(L, sizeof(milk::Image));
+			image->data = imageData;
 			luaL_getmetatable(L, IMAGE_METATABLE);
 			lua_setmetatable(L, -2);
-			image->data = imageData;
 			lua_pushboolean(L, true);
 			return 2;
 		}
