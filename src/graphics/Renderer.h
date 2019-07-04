@@ -7,10 +7,7 @@
 
 namespace milk
 {
-	struct Color;
 	struct Image;
-	struct Rectangle;
-	struct RectangleF;
 
 	class Renderer
 	{
