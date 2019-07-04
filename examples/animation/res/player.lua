@@ -61,7 +61,7 @@ end
 
 function Player_mt:draw()
     local sx, sy, sw, sh = self.animator:tick()
-    graphics.drawx(self.image, self.x - 32, self.y - 32, sx, sy, sw, sh, self.scale * self.flippedx, self.scale, self.angle)
+    graphics.drawx(self.image, self.x - 32, self.y - 32, sx, sy, sw, sh, 1 * self.flippedx, 1, 0)
 end
 
 function player.new()
