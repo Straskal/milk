@@ -1,5 +1,6 @@
 #include "SDLRenderer.h"
 
+#include <algorithm>
 #include <iostream>
 
 #include "SDL.h"
@@ -66,10 +67,10 @@ void milk::SDLRenderer::clear()
 
 void milk::SDLRenderer::setDrawColor(const double r, const double g, const double b, const double a)
 {
-	m_drawColor.r = (Uint8)(r * 0xFF);
-	m_drawColor.g = (Uint8)(g * 0xFF);
-	m_drawColor.b = (Uint8)(b * 0xFF);
-	m_drawColor.a = (Uint8)(a * 0xFF);
+	m_drawColor.r = (Uint8)(std::min((int)(r * 0xFF), 0xFF));
+	m_drawColor.g = (Uint8)(std::min((int)(g * 0xFF), 0xFF));
+	m_drawColor.b = (Uint8)(std::min((int)(b * 0xFF), 0xFF));
+	m_drawColor.a = (Uint8)(std::min((int)(a * 0xFF), 0xFF));
 	SDL_SetRenderDrawColor(m_handle, m_drawColor.r, m_drawColor.b, m_drawColor.g, m_drawColor.a);
 }
 
@@ -128,15 +129,15 @@ void milk::SDLRenderer::draw(
 	m_sourceRect.w = srcw;
 	m_sourceRect.h = srch;
 
-	float sx = scalex;
-	float sy = scaley;
+	float sx = std::min(std::max(scalex, 0.f), 1.f);
+	float sy = std::min(std::max(scaley, 0.f), 1.f);
 	Uint8 flip = SDL_FLIP_NONE;
 
-	if (scalex < 0) {
+	if (sx < 0) {
 		flip |= SDL_FLIP_HORIZONTAL;
 		sx *= -1;
 	}
-	if (scaley < 0) {
+	if (sy < 0) {
 		flip |= SDL_FLIP_VERTICAL;
 		sy *= -1;
 	}
