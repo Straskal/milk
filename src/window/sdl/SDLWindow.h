@@ -17,6 +17,7 @@ namespace milk
 		bool init();
 		const char* title() const override;
 		void title(const char* title) override;
+		void icon(const char* filepath) override;
 		std::tuple<int, int> size() const override;
 		void size(int width, int height) override;
 		bool fullscreen() const override;

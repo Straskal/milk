@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "SDL.h"
+#include "SDL_image.h"
 
 static const int DEFAULT_WIDTH = 800;
 static const int DEFAULT_HEIGHT = 600;
@@ -39,6 +40,22 @@ const char* milk::SDLWindow::title() const
 void milk::SDLWindow::title(const char* title)
 {
 	SDL_SetWindowTitle(m_handle, title);
+}
+
+void milk::SDLWindow::icon(const char* filepath)
+{
+	/*
+		I am not in love with this solution. I'd really like for SDL_image to stay in the graphics portion of milk.
+		Unfortuantely, SDL_SetWindowIcon only acceps SDL_Surfaces, so the only alternate solution would be for milk::Images
+		to keep a reference to the SDL_Texture AND surface, but that's really unnecessary as this is the only need for it.
+	*/
+	SDL_Surface* icon = IMG_Load(filepath);
+	if (icon == nullptr) {
+		std::cout << "Error loading image: " << IMG_GetError() << std::endl;
+		return;
+	}
+	SDL_SetWindowIcon(m_handle, icon);
+	SDL_FreeSurface(icon);
 }
 
 std::tuple<int, int> milk::SDLWindow::size() const
