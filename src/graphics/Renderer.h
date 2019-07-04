@@ -3,8 +3,6 @@
 
 #include <tuple>
 
-#include "data/int.h"
-
 namespace milk
 {
 	struct Image;
