@@ -40,7 +40,7 @@ static const luaL_Reg imagemeta_funcs[] = {
 	{ "__tostring", imagemeta_tostring },
 	{ "__gc", imagemeta_gc },
 	{ "get_size", imagemeta_get_size },
-	{ NULL, NULL }
+	{ nullptr, nullptr }
 };
 
 static int graphics_new_image(lua_State* L)
@@ -139,7 +139,7 @@ static const luaL_Reg graphics_funcs[] = {
 	{ "drawx", graphics_drawx },
 	{ "draw_rect", graphics_draw_rect },
 	{ "draw_filled_rect", graphics_draw_filled_rect },
-	{ NULL, NULL }
+	{ nullptr, nullptr }
 };
 
 int milk::luaopen_milk_graphics(lua_State* L)

@@ -104,7 +104,7 @@ static const luaL_Reg soundmeta_funcs[] = {
 	{ "get_state", soundmeta_get_state },
 	{ "get_volume", soundmeta_get_volume },
 	{ "set_volume", soundmeta_set_volume },
-	{ NULL, NULL }
+	{ nullptr, nullptr }
 };
 
 static const char* MUSIC_METATABLE = "milk.music";
@@ -173,17 +173,17 @@ static int musicmeta_get_state(lua_State* L)
 
 static int musicmeta_get_volume(lua_State* L)
 {
-	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, MUSIC_METATABLE);
-	float volume = sound->volume;
+	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
+	float volume = music->volume;
 	lua_pushnumber(L, volume);
 	return 1;
 }
 
 static int musicmeta_set_volume(lua_State* L)
 {
-	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, MUSIC_METATABLE);
+	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
 	float volume = (float)luaL_checknumber(L, 2);
-	milk::Locator::audioPlayer->setSoundVolume(sound, volume);
+	milk::Locator::audioPlayer->setMusicVolume(music, volume);
 	return 0;
 }
 
@@ -198,7 +198,7 @@ static const luaL_Reg musicmeta_funcs[] = {
 	{ "get_state", musicmeta_get_state },
 	{ "get_volume", musicmeta_get_volume },
 	{ "set_volume", musicmeta_set_volume },
-	{ NULL, NULL }
+	{ nullptr, nullptr }
 };
 
 static int audio_new_sound(lua_State* L)
@@ -263,7 +263,7 @@ static const luaL_Reg audio_funcs[] = {
 	{ "new_music", audio_new_music },
 	{ "get_master_volume", audio_get_master_volume},
 	{ "set_master_volume", audio_set_master_volume },
-	{ NULL, NULL }
+	{ nullptr, nullptr }
 };
 
 static const milk::luaM_Enum audio_states_enum[] = {

@@ -47,7 +47,7 @@ static const luaL_Reg keyboard_funcs[] = {
 	{ "is_key_down", is_key_down },
 	{ "is_key_pressed", is_key_pressed },
 	{ "is_key_released", is_key_released },
-	{ NULL, NULL }
+	{ nullptr, nullptr }
 };
 
 static const milk::luaM_Enum keys_enum[] = {

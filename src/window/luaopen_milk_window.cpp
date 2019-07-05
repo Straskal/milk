@@ -81,7 +81,7 @@ static const luaL_Reg window_funcs[] = {
 	{ "set_fullscreen", window_set_fullscreen },
 	{ "is_fullscreen", window_is_fullscreen },
 	{ "close", window_close },
-	{ NULL, NULL }
+	{ nullptr, nullptr }
 };
 
 int milk::luaopen_milk_window(lua_State* L)

@@ -11,18 +11,11 @@ namespace milk
 		SDLTimer();
 
 		void start();
-		void stop();
-		void pause();
-		void resume();
 		double getTime() const;
-		bool started() const;
-		bool paused() const;
 
 	private:
 		double m_startTime;
-		double m_pausedTime;
 		bool m_started;
-		bool m_paused;
 	};
 }
 

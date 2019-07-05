@@ -81,7 +81,7 @@ static const luaL_Reg mouse_funcs[] = {
 	{ "is_button_released", mouse_is_button_released },
 	{ "get_position", mouse_get_position },
 	{ "get_scroll", mouse_get_scroll },
-	{ NULL, NULL }
+	{ nullptr, nullptr }
 };
 
 static const milk::luaM_Enum buttons_enum[] = {

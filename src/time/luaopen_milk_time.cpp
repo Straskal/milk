@@ -67,7 +67,7 @@ static const luaL_Reg time_funcs[] = {
 	{ "get_delta", time_get_delta },
 	{ "get_scale", time_get_scale },
 	{ "set_scale", time_set_scale },
-	{ NULL, NULL }
+	{ nullptr, nullptr }
 };
 
 int milk::luaopen_milk_time(lua_State* L)

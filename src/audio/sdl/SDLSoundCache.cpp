@@ -36,11 +36,10 @@ void milk::SDLSoundCache::dereference(SoundData* soundData)
 		m_sounds.erase(soundData->path);
 		Mix_FreeChunk((Mix_Chunk*)soundData->handle);
 		delete soundData;
-		soundData = nullptr;
 	}
 }
 
 void milk::SDLSoundCache::free()
 {
-	SDL_assert(m_sounds.size() == 0);
+	SDL_assert(m_sounds.empty());
 }

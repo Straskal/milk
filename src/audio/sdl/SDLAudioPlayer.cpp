@@ -28,13 +28,13 @@ static std::queue<int> free_channels;
 
 static milk::Music* current_music = nullptr;
 
-static void on_channel_finished(int channelnum)
+static void on_channel_finished(int channelNum)
 {
-	milk::Sound* sound = channels[channelnum];
+	milk::Sound* sound = channels[channelNum];
 	sound->channel = INVALID_CHANNEL;
 	sound->state = milk::SampleState::STOPPED;
-	channels[channelnum] = nullptr;
-	free_channels.push(channelnum);
+	channels[channelNum] = nullptr;
+	free_channels.push(channelNum);
 }
 
 static void on_music_finished()
@@ -108,36 +108,36 @@ void milk::SDLAudioPlayer::playSound(Sound* sound, float fadeTime)
 {
 	stopSound(sound, 0.f);
 
-	int channelnum = free_channels.front();
-	Mix_Volume(channelnum, (int)(sound->volume * (m_masterVolume * MIX_MAX_VOLUME)));
-	if (Mix_FadeInChannel(channelnum, (Mix_Chunk*)sound->data->handle, NO_LOOP, (int)(fadeTime * 1000)) == -1) {
+	int channelNum = free_channels.front();
+	Mix_Volume(channelNum, (int)(sound->volume * (m_masterVolume * MIX_MAX_VOLUME)));
+	if (Mix_FadeInChannel(channelNum, (Mix_Chunk*)sound->data->handle, NO_LOOP, (int)(fadeTime * 1000)) == -1) {
 		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
 		return;
 	}
 
 	free_channels.pop();
-	sound->channel = channelnum;
+	sound->channel = channelNum;
 	sound->state = SampleState::PLAYING;
-	channels[channelnum] = sound;
-	channel_volume[channelnum] = sound->volume;
+	channels[channelNum] = sound;
+	channel_volume[channelNum] = sound->volume;
 }
 
 void milk::SDLAudioPlayer::loopSound(Sound* sound, float fadeTime)
 {
 	stopSound(sound, 0.f);
 
-	int channelnum = free_channels.front();
-	Mix_Volume(channelnum, (int)(sound->volume * (m_masterVolume * MIX_MAX_VOLUME)));
-	if (Mix_FadeInChannel(channelnum, (Mix_Chunk*)sound->data->handle, LOOP, (int)(fadeTime * 1000)) == -1) {
+	int channelNum = free_channels.front();
+	Mix_Volume(channelNum, (int)(sound->volume * (m_masterVolume * MIX_MAX_VOLUME)));
+	if (Mix_FadeInChannel(channelNum, (Mix_Chunk*)sound->data->handle, LOOP, (int)(fadeTime * 1000)) == -1) {
 		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
 		return;
 	}
 
 	free_channels.pop();
-	sound->channel = channelnum;
+	sound->channel = channelNum;
 	sound->state = SampleState::PLAYING;
-	channels[channelnum] = sound;
-	channel_volume[channelnum] = sound->volume;
+	channels[channelNum] = sound;
+	channel_volume[channelNum] = sound->volume;
 }
 
 void milk::SDLAudioPlayer::pauseSound(Sound* sound)

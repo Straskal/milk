@@ -60,7 +60,7 @@ void milk::SDLRenderer::clear()
 {
 	SDL_SetRenderDrawColor(m_handle, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderClear(m_handle);
-	SDL_SetRenderDrawColor(m_handle, m_drawColor.r, m_drawColor.b, m_drawColor.g, m_drawColor.a);
+	SDL_SetRenderDrawColor(m_handle, m_drawColor.r, m_drawColor.g, m_drawColor.b, m_drawColor.a);
 }
 
 void milk::SDLRenderer::setDrawColor(double r, double g, double b, double a)
@@ -69,7 +69,7 @@ void milk::SDLRenderer::setDrawColor(double r, double g, double b, double a)
 	m_drawColor.g = (Uint8)(std::min((int)(g * 0xFF), 0xFF));
 	m_drawColor.b = (Uint8)(std::min((int)(b * 0xFF), 0xFF));
 	m_drawColor.a = (Uint8)(std::min((int)(a * 0xFF), 0xFF));
-	SDL_SetRenderDrawColor(m_handle, m_drawColor.r, m_drawColor.b, m_drawColor.g, m_drawColor.a);
+	SDL_SetRenderDrawColor(m_handle, m_drawColor.r, m_drawColor.g, m_drawColor.b, m_drawColor.a);
 }
 
 void milk::SDLRenderer::drawRectangle(float x, float y, float w, float h)
