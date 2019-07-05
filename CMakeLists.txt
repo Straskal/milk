@@ -4,11 +4,12 @@
 # Lua 5.3: https://www.lua.org/download.html which leads to https://sourceforge.net/projects/luabinaries/files/5.3.5/
 
 cmake_minimum_required(VERSION 3.6.3)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 project(milk)
 
-# we're a c++14 family
-set(CMAKE_CXX_STANDARD 14)
+# we're a c++11 family
+set(CMAKE_CXX_STANDARD 11)
 
 # set debug symbol = MILK_DEBUG
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DMILK_DEBUG")
@@ -25,10 +26,6 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 set(MILK_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
-set(MILKTESTS_SRC_DIR ${CMAKE_SOURCE_DIR}/test)
-set(MILK_LIBS_DIR ${CMAKE_SOURCE_DIR}/libs)
-
-include(CTest)
 
 #---------------------------------------------------------------------------
 # On windows, we have to point cmake to our third party dependencies.
@@ -37,10 +34,10 @@ include(CTest)
 if(WIN32)
 	if (MINGW)
 		# provide paths for minGW/minGW-w64 development libs
-		# set(SDL2_PATH ...)
-		# set(SDL2_IMAGE_PATH ...)
-		# set(SDL2_MIXER_PATH ...)
-		# set(ENV{LUA_DIR} ...)
+		set(SDL2_PATH C:/ExternalLibs/SDL2-devel-2.0.10-mingw/SDL2-2.0.10/i686-w64-mingw32)
+		set(SDL2_IMAGE_PATH C:/ExternalLibs/SDL2_image-devel-2.0.4-mingw/SDL2_image-2.0.4/i686-w64-mingw32)
+		set(SDL2_MIXER_PATH C:/ExternalLibs/SDL2_mixer-devel-2.0.4-mingw/SDL2_mixer-2.0.4/i686-w64-mingw32)
+		set(ENV{LUA_DIR} C:/ExternalLibs/Lua53mingw)
 	elseif (MSVC)
 		# provide paths for visual c++ development libs
 		# these are just the paths that I use. Feel free to change them in your environment.
@@ -135,6 +132,7 @@ set(MILK_SRC_TIME
 	src/time/luaopen_milk_time.h
 	src/time/sdl/SDLTime.cpp
 	src/time/sdl/SDLTime.h
+	src/time/sdl/SDLTimer.cpp
 	src/time/sdl/SDLTimer.h
 )
 
@@ -198,16 +196,21 @@ target_link_libraries(milk milklib)
 
 #---------------------------------------------------------------------------
 # post build step to copy dlls to executable output file
-# currently only set up for visual c++ x86 dlls on windows
 
-# assumes SDL2 2.0.9
+# assumes SDL2 2.0.10
 # assumes SDL2_image 2.0.4
 # assumes Lua 5.3.5
 #---------------------------------------------------------------------------
 
-if (WIN32)
+if(WIN32)
+	if (MINGW)
+		set(MILK_LIBS_DIR ${CMAKE_SOURCE_DIR}/libs/msvc-x86)
+	elseif (MSVC)
+		set(MILK_LIBS_DIR ${CMAKE_SOURCE_DIR}/libs/mingw-w64-i686)
+	endif()
+
 	add_custom_command(TARGET milk POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
+			COMMAND ${CMAKE_COMMAND} -E copy_directory
 			${MILK_LIBS_DIR}
 			$<TARGET_FILE_DIR:milk>)
 endif()

@@ -44,54 +44,10 @@ void milk::luaM_createmetatable(lua_State* L, const char* name, const luaL_Reg* 
 	lua_pop(L, 1); // Pop metatable off of stack
 }
 
-void milk::luaM_setstrfield(lua_State* L, int index, const char* key, const char* value)
-{
-	lua_pushstring(L, value);
-	lua_setfield(L, correct_index(index), key);
-}
-
-const char* milk::luaM_getstrfield(lua_State* L, int index, const char* key)
-{
-	lua_getfield(L, index, key);
-	const char* result = lua_tostring(L, -1);
-	lua_pop(L, 1);
-	return result;
-}
-
 void milk::luaM_setintfield(lua_State* L, int index, const char* key, int value)
 {
 	lua_pushinteger(L, value);
 	lua_setfield(L, correct_index(index), key);
-}
-
-int milk::luaM_getintfield(lua_State* L, int index, const char* key)
-{
-	lua_getfield(L, index, key);
-	int result = (int)luaL_checkinteger(L, -1);
-	lua_pop(L, 1);
-	return result;
-}
-
-void milk::luaM_setnumfield(lua_State* L, int index, const char* key, double value)
-{
-	lua_pushnumber(L, value);
-	lua_setfield(L, correct_index(index), key);
-}
-
-double milk::luaM_getnumfield(lua_State* L, int index, const char* key)
-{
-	lua_getfield(L, index, key);
-	double result = (double)luaL_checknumber(L, -1);
-	lua_pop(L, 1);
-	return result;
-}
-
-bool milk::luaM_getboolfield(lua_State* L, int index, const char* key)
-{
-	lua_getfield(L, index, key);
-	bool result = (bool)lua_toboolean(L, -1);
-	lua_pop(L, 1);
-	return result;
 }
 
 void milk::luaM_setenumfield(lua_State* L, int index, const char* name, const luaM_Enum* e, size_t size)

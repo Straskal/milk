@@ -36,11 +36,10 @@ void milk::SDLMusicCache::dereference(MusicData* musicData)
 		m_music.erase(musicData->path);
 		Mix_FreeMusic((Mix_Music*)musicData->handle);
 		delete musicData;
-		musicData = nullptr;
 	}
 }
 
 void milk::SDLMusicCache::free()
 {
-	SDL_assert(m_music.size() == 0);
+	SDL_assert(m_music.empty());
 }

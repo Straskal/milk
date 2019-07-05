@@ -19,8 +19,8 @@ namespace milk
 		bool isKeyReleased(Keys key) const override;
 
 	private:
-		Uint8 m_previousState[SDL_NUM_SCANCODES];
 		Uint8 m_currentState[SDL_NUM_SCANCODES];
+		Uint8 m_previousState[SDL_NUM_SCANCODES];
 	};
 }
 

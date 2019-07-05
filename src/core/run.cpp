@@ -56,7 +56,7 @@ static int error_handler(lua_State* L)
 
 /*
 	Minimize window before displaying the error and locking the event loop.
-	This basically avoids locking the game down, which is super frusterating when throwing an error when in fullscreen mode.
+	This basically avoids locking the game down, which is super frustrating when throwing an error when in fullscreen mode.
 	This also makes it very convenient when an error is thrown because the game is moved out of the way of the console :)
 */
 static void print_runtime_error(const char* err)
@@ -71,16 +71,15 @@ static void print_runtime_error(const char* err)
 
 static void safe_invoke_callback(const char* name)
 {
-	if (lua_getfield(lua, CALLBACK_TABLE_STACK_INDEX, name) == LUA_TFUNCTION) {
-		lua_pushvalue(lua, CALLBACK_TABLE_STACK_INDEX);
-		if (lua_pcall(lua, 1, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
-			const char* stacktrace = lua_tostring(lua, -1);
-			lua_pop(lua, 1);
-			print_runtime_error(stacktrace);
-		}
-	}
-	else {
+	if (lua_getfield(lua, CALLBACK_TABLE_STACK_INDEX, name) != LUA_TFUNCTION) {
 		lua_pop(lua, 1);
+		return;
+	}
+	lua_pushvalue(lua, CALLBACK_TABLE_STACK_INDEX);
+	if (lua_pcall(lua, 1, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
+		const char* stacktrace = lua_tostring(lua, -1);
+		lua_pop(lua, 1);
+		print_runtime_error(stacktrace);
 	}
 }
 

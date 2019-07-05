@@ -59,13 +59,12 @@ void milk::SDLImageCache::dereference(ImageData* imageData)
 	if (--imageData->refCount <= 0) {
 		m_images.erase(imageData->path);
 		SDL_DestroyTexture((SDL_Texture*)imageData->handle);
-		delete imageData; 
-		imageData = nullptr;
+		delete imageData;
 	}
 }
 
 void milk::SDLImageCache::free()
 {
-	SDL_assert(m_images.size() == 0);
+	SDL_assert(m_images.empty());
 	IMG_Quit();
 }

@@ -40,7 +40,7 @@ static const luaL_Reg imagemeta_funcs[] = {
 	{ "__tostring", imagemeta_tostring },
 	{ "__gc", imagemeta_gc },
 	{ "get_size", imagemeta_get_size },
-	{ NULL, NULL }
+	{ nullptr, nullptr }
 };
 
 static int graphics_new_image(lua_State* L)
@@ -74,8 +74,8 @@ static int graphics_set_virtual_resolution(lua_State* L)
 static int graphics_set_draw_color(lua_State* L)
 {
 	double r = (double)luaL_checknumber(L, 1);
-	double b = (double)luaL_checknumber(L, 2);
-	double g = (double)luaL_checknumber(L, 3);
+	double g = (double)luaL_checknumber(L, 2);
+	double b = (double)luaL_checknumber(L, 3);
 	double a = (double)luaL_checknumber(L, 4);
 
 	milk::Locator::renderer->setDrawColor(r, g, b, a);
@@ -139,7 +139,7 @@ static const luaL_Reg graphics_funcs[] = {
 	{ "drawx", graphics_drawx },
 	{ "draw_rect", graphics_draw_rect },
 	{ "draw_filled_rect", graphics_draw_filled_rect },
-	{ NULL, NULL }
+	{ nullptr, nullptr }
 };
 
 int milk::luaopen_milk_graphics(lua_State* L)

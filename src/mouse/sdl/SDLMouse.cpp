@@ -37,7 +37,7 @@ bool milk::SDLMouse::isButtonDown(MouseButtons button) const
 
 bool milk::SDLMouse::isButtonPressed(MouseButtons button) const
 {
-	return (m_currentState & SDL_BUTTON((int)button) && !(m_previousState & SDL_BUTTON((int)button)));
+	return m_currentState & SDL_BUTTON((int) button) && !(m_previousState & SDL_BUTTON((int) button));
 }
 
 bool milk::SDLMouse::isButtonReleased(MouseButtons button) const

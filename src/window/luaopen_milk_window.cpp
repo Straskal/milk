@@ -24,6 +24,15 @@ static int window_set_title(lua_State* L)
 	return 0;
 }
 
+static int window_set_icon(lua_State* L)
+{
+	if (lua_isstring(L, 1)) {
+		const char* iconfilepath = lua_tostring(L, 1);
+		milk::Locator::window->icon(iconfilepath);
+	}
+	return 0;
+}
+
 static int window_get_size(lua_State* L)
 {
 	std::tuple<int, int> sz = milk::Locator::window->size();
@@ -58,6 +67,7 @@ static int window_is_fullscreen(lua_State* L)
 
 static int window_close(lua_State* L)
 {
+    (void)(L);
 	milk::Locator::window->close();
 	return 0;
 }
@@ -65,12 +75,13 @@ static int window_close(lua_State* L)
 static const luaL_Reg window_funcs[] = {
 	{ "get_title", window_get_title },
 	{ "set_title", window_set_title },
+	{ "set_icon", window_set_icon },
 	{ "get_size", window_get_size },
 	{ "set_size", window_set_size },
 	{ "set_fullscreen", window_set_fullscreen },
 	{ "is_fullscreen", window_is_fullscreen },
 	{ "close", window_close },
-	{ NULL, NULL }
+	{ nullptr, nullptr }
 };
 
 int milk::luaopen_milk_window(lua_State* L)
