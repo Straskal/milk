@@ -5,3 +5,9 @@ cmake-build-debug/
 # visual studio
 .vs
 CMakeSettings.json
+
+# visual studio code
+.vscode
+
+# clion
+.idea

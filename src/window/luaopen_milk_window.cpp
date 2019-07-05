@@ -67,6 +67,7 @@ static int window_is_fullscreen(lua_State* L)
 
 static int window_close(lua_State* L)
 {
+    (void)(L);
 	milk::Locator::window->close();
 	return 0;
 }

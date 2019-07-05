@@ -109,7 +109,7 @@ void milk::SDLAudioPlayer::playSound(Sound* sound, float fadeTime)
 	stopSound(sound, 0.f);
 
 	int channelnum = free_channels.front();
-	Mix_Volume(channelnum, sound->volume * (m_masterVolume * MIX_MAX_VOLUME));
+	Mix_Volume(channelnum, (int)(sound->volume * (m_masterVolume * MIX_MAX_VOLUME)));
 	if (Mix_FadeInChannel(channelnum, (Mix_Chunk*)sound->data->handle, NO_LOOP, (int)(fadeTime * 1000)) == -1) {
 		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
 		return;
@@ -127,7 +127,7 @@ void milk::SDLAudioPlayer::loopSound(Sound* sound, float fadeTime)
 	stopSound(sound, 0.f);
 
 	int channelnum = free_channels.front();
-	Mix_Volume(channelnum, sound->volume * (m_masterVolume * MIX_MAX_VOLUME));
+	Mix_Volume(channelnum, (int)(sound->volume * (m_masterVolume * MIX_MAX_VOLUME)));
 	if (Mix_FadeInChannel(channelnum, (Mix_Chunk*)sound->data->handle, LOOP, (int)(fadeTime * 1000)) == -1) {
 		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
 		return;
@@ -169,9 +169,9 @@ void milk::SDLAudioPlayer::setSoundVolume(Sound* sound, float volume)
 	sound->volume = std::min(std::max(volume, 0.f), 1.f);
 
 	if (sound->channel != INVALID_CHANNEL) {
-		int v = (int)(sound->volume * (m_masterVolume * MIX_MAX_VOLUME));
+		float v = sound->volume * (m_masterVolume * MIX_MAX_VOLUME);
 		channel_volume[sound->channel] = v;
-		Mix_Volume(sound->channel, v);
+		Mix_Volume(sound->channel, (int)v);
 	}
 }
 
@@ -179,7 +179,7 @@ void milk::SDLAudioPlayer::playMusic(Music* music, float fadeTime)
 {
 	Mix_HaltMusic();
 
-	Mix_VolumeMusic(music->volume * (m_masterVolume * MIX_MAX_VOLUME));
+	Mix_VolumeMusic((int)(music->volume * (m_masterVolume * MIX_MAX_VOLUME)));
 	if (Mix_FadeInMusic((Mix_Music*)music->data->handle, NO_LOOP, (int)(fadeTime * 1000)) == -1) {
 		std::cout << "Mix_PlayMusic: " << Mix_GetError() << std::endl;
 		return;
@@ -193,7 +193,7 @@ void milk::SDLAudioPlayer::loopMusic(Music* music, float fadeTime)
 {
 	Mix_HaltMusic();
 
-	Mix_VolumeMusic(music->volume * (m_masterVolume * MIX_MAX_VOLUME));
+	Mix_VolumeMusic((int)(music->volume * (m_masterVolume * MIX_MAX_VOLUME)));
 	if (Mix_FadeInMusic((Mix_Music*)music->data->handle, LOOP, (int)(fadeTime * 1000)) == -1) {
 		std::cout << "Mix_PlayMusic: " << Mix_GetError() << std::endl;
 		return;
