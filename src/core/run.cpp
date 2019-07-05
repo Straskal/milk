@@ -56,7 +56,7 @@ static int error_handler(lua_State* L)
 
 /*
 	Minimize window before displaying the error and locking the event loop.
-	This basically avoids locking the game down, which is super frusterating when throwing an error when in fullscreen mode.
+	This basically avoids locking the game down, which is super frustrating when throwing an error when in fullscreen mode.
 	This also makes it very convenient when an error is thrown because the game is moved out of the way of the console :)
 */
 static void print_runtime_error(const char* err)
