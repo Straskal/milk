@@ -71,16 +71,15 @@ static void print_runtime_error(const char* err)
 
 static void safe_invoke_callback(const char* name)
 {
-	if (lua_getfield(lua, CALLBACK_TABLE_STACK_INDEX, name) == LUA_TFUNCTION) {
-		lua_pushvalue(lua, CALLBACK_TABLE_STACK_INDEX);
-		if (lua_pcall(lua, 1, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
-			const char* stacktrace = lua_tostring(lua, -1);
-			lua_pop(lua, 1);
-			print_runtime_error(stacktrace);
-		}
-	}
-	else {
+	if (lua_getfield(lua, CALLBACK_TABLE_STACK_INDEX, name) != LUA_TFUNCTION) {
 		lua_pop(lua, 1);
+		return;
+	}
+	lua_pushvalue(lua, CALLBACK_TABLE_STACK_INDEX);
+	if (lua_pcall(lua, 1, 0, ERROR_HANDLER_STACK_INDEX) != LUA_OK) {
+		const char* stacktrace = lua_tostring(lua, -1);
+		lua_pop(lua, 1);
+		print_runtime_error(stacktrace);
 	}
 }
 
