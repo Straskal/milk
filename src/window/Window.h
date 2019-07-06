@@ -5,8 +5,6 @@
 
 namespace milk
 {
-	class Texture;
-
 	class Window
 	{
 	public:
