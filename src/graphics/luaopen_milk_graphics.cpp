@@ -71,6 +71,17 @@ static int graphics_set_virtual_resolution(lua_State* L)
 	return 0;
 }
 
+static int graphics_get_virtual_resolution(lua_State* L)
+{
+	std::tuple<int, int> resolution = milk::Locator::renderer->resolution();
+	int w = std::get<0>(resolution);
+	int h = std::get<1>(resolution);
+
+	lua_pushinteger(L, w);
+	lua_pushinteger(L, h);
+	return 2;
+}
+
 static int graphics_set_draw_color(lua_State* L)
 {
 	double r = (double)luaL_checknumber(L, 1);
@@ -133,6 +144,7 @@ static int graphics_draw_filled_rect(lua_State* L)
 
 static const luaL_Reg graphics_funcs[] = {
 	{ "new_image", graphics_new_image },
+	{ "get_virtual_resolution", graphics_get_virtual_resolution },
 	{ "set_virtual_resolution", graphics_set_virtual_resolution },
 	{ "set_draw_color", graphics_set_draw_color },
 	{ "draw", graphics_draw },
