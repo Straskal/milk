@@ -203,9 +203,9 @@ target_link_libraries(milk milklib)
 #---------------------------------------------------------------------------
 
 if(WIN32)
-	if (MINGW)
+	if (MSVC)
 		set(MILK_LIBS_DIR ${CMAKE_SOURCE_DIR}/libs/msvc-x86)
-	elseif (MSVC)
+	elseif (MINGW)
 		set(MILK_LIBS_DIR ${CMAKE_SOURCE_DIR}/libs/mingw-w64-i686)
 	endif()
 
