@@ -1,5 +1,3 @@
-local time = require("milk.time")
-
 local animator = {}
 local Animator_mt = {}
 
@@ -23,8 +21,8 @@ function Animator_mt:set_animation(animation)
     end
 end
 
-function Animator_mt:tick()
-    self.time = self.time + time.get_delta()
+function Animator_mt:tick(dt)
+    self.time = self.time + dt
     if self.time - self.last_anim_time > self.seconds_per_frame then
         self.current_anim_frame = self.current_anim_frame + 1
         if self.current_anim_frame > #self.current_anim then

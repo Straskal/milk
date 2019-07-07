@@ -15,7 +15,7 @@ function game:start()
 	self.player = player.new()
 end
 
-function game:tick()
+function game:tick(dt)
 	if keyboard.is_key_released(keys.ESCAPE) then 
 		window.close() 
 	end
@@ -23,12 +23,19 @@ function game:tick()
 		local toggle = not window.is_fullscreen()
 		window.set_fullscreen(toggle) 
 	end
+  if keyboard.is_key_released(keys.Z) then 
+		time.delay(5)
+	end
 
-	self.player:tick()
+	self.player:tick(dt)
 end
 
-function game:draw()
-	self.player:draw()
+function game:draw(dt)
+	self.player:draw(dt)
+end
+
+function game:stop()
+  print("milk ith thopping!!!")
 end
 
 return game

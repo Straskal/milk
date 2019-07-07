@@ -1,6 +1,5 @@
 local graphics = require("milk.graphics")
 local keyboard = require("milk.keyboard")
-local time = require("milk.time")
 local animator = require("res.animator")
 local keys = keyboard.keys
 
@@ -32,9 +31,7 @@ function Player_mt:init()
     })
 end
 
-function Player_mt:tick()
-	local dt = time.get_delta()
-
+function Player_mt:tick(dt)
     self.vx = 0
     self.vy = 0
 
@@ -59,8 +56,8 @@ function Player_mt:tick()
     self.animator:set_animation(anim)
 end
 
-function Player_mt:draw()
-    local sx, sy, sw, sh = self.animator:tick()
+function Player_mt:draw(dt)
+    local sx, sy, sw, sh = self.animator:tick(dt)
     graphics.drawx(self.image, self.x - 32, self.y - 32, sx, sy, sw, sh, 1 * self.flippedx, 1, 0)
 end
 
