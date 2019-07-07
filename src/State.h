@@ -23,11 +23,8 @@ namespace milk
 		static bool initialized;
 
 		static Time* time;
-		static Window* window;
 		static Mouse* mouse;
 		static Keyboard* keyboard;
-		static Renderer* renderer;
-		static ImageCache* images;
 		static AudioPlayer* audioPlayer;
 		static MusicCache* music;
 		static SoundCache* sounds;

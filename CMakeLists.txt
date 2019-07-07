@@ -126,11 +126,10 @@ set(MILK_SRC_MOUSE
 
 # time
 set(MILK_SRC_TIME
-	src/time/Time.h
+	src/time/time.cpp
+	src/time/time.h
 	src/time/luaopen_milk_time.cpp
 	src/time/luaopen_milk_time.h
-	src/time/sdl/SDLTime.cpp
-	src/time/sdl/SDLTime.h
 )
 
 # window

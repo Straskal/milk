@@ -18,12 +18,10 @@ extern "C" {
 #include "audio/sdl/SDLSoundCache.h"
 #include "keyboard/sdl/SDLKeyboard.h"
 #include "mouse/sdl/SDLMouse.h"
-#include "time/sdl/SDLTime.h"
 
 #define free_ptr(x) delete x; x = nullptr
 #define deinit_and_free_ptr(x) x->free(); free_ptr(x)
 
-static milk::SDLTime* time = nullptr;
 static milk::SDLMouse* mouse = nullptr;
 static milk::SDLKeyboard* keyboard = nullptr;
 static milk::SDLAudioPlayer* audio_player = nullptr;
@@ -36,14 +34,12 @@ static int milk_init(lua_State* L)
 		return luaL_error(L, "milk has already been initialized!");
 	}
 
-	time = new milk::SDLTime();
 	audio_player = new milk::SDLAudioPlayer();
 	music_cache = new milk::SDLMusicCache();
 	sound_cache = new milk::SDLSoundCache();
 	mouse = new milk::SDLMouse();
 	keyboard = new milk::SDLKeyboard();
 
-	milk::State::time = time;
 	milk::State::audioPlayer = audio_player;
 	milk::State::sounds = sound_cache;
 	milk::State::music = music_cache;
@@ -54,7 +50,6 @@ static int milk_init(lua_State* L)
 		&& milk::graphics_init(milk::window_get_handle())
 		&& audio_player->init()) {
 
-		time->start();
 		milk::State::initialized = true;
 		return 0;
 	}
@@ -88,10 +83,6 @@ static int milk_quit(lua_State* L)
 		return luaL_error(L, "you cannot quit milk when it has not been initialized!");
 	}
 
-	milk::State::time = nullptr;
-	milk::State::window = nullptr;
-	milk::State::renderer = nullptr;
-	milk::State::images = nullptr;
 	milk::State::audioPlayer = nullptr;
 	milk::State::sounds = nullptr;
 	milk::State::music = nullptr;
@@ -106,7 +97,6 @@ static int milk_quit(lua_State* L)
 	deinit_and_free_ptr(audio_player);
 	milk::graphics_quit();
 	milk::window_quit();
-	free_ptr(time);
 
 	milk::State::initialized = false;
 	return 0;
