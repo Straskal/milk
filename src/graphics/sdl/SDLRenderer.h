@@ -19,17 +19,16 @@ namespace milk
 		void free();
 		SDL_Renderer* handle() const;
 
-		void clear();
-		void present();
-
 		std::tuple<int, int> resolution() const override;
 		void resolution(int w, int h) override;
 
+		void clear() override;
 		void setDrawColor(double r, double g, double b, double a) override;
 		void drawRectangle(float x, float y, float w, float h) override;
 		void drawRectangleFilled(float x, float y, float w, float h) override;
 		void draw(const Image* image, float x, float y) override;
 		void draw(const Image* image, float x, float y, int srcx, int srcy, int srcw, int srch, float scx, float scy, double angle) override;
+		void present() override;
 
 	private:
 		SDL_Renderer* m_handle;

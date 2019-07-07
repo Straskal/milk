@@ -6,47 +6,32 @@ extern "C" {
 }
 
 #include "Mouse.h"
-#include "core/Locator.h"
-#include "core/luamlib.h"
+#include "Locator.h"
+#include "luamlib.h"
 #include "graphics/Renderer.h"
 #include "window/Window.h"
 
 static int mouse_is_button_down(lua_State* L)
 {
-	int isnum;
-	int button = (int)lua_tointegerx(L, 1, &isnum);
-	if (isnum) {
-		bool down = milk::Locator::mouse->isButtonDown((milk::MouseButtons)button);
-		lua_pushboolean(L, down);
-		return 1;
-	}
-	lua_pushboolean(L, false);
+	milk::MouseButtons button = (milk::MouseButtons)luaL_checkinteger(L, 1);
+	bool down = milk::State::mouse->isButtonDown(button);
+	lua_pushboolean(L, down);
 	return 1;
 }
 
 static int mouse_is_button_pressed(lua_State* L)
 {
-	int isnum;
-	int button = (int)lua_tointegerx(L, 1, &isnum);
-	if (isnum) {
-		bool pressed = milk::Locator::mouse->isButtonPressed((milk::MouseButtons)button);
-		lua_pushboolean(L, pressed);
-		return 1;
-	}
-	lua_pushboolean(L, false);
+	milk::MouseButtons button = (milk::MouseButtons)luaL_checkinteger(L, 1);
+	bool down = milk::State::mouse->isButtonPressed(button);
+	lua_pushboolean(L, down);
 	return 1;
 }
 
 static int mouse_is_button_released(lua_State* L)
 {
-	int isnum;
-	int button = (int)lua_tointegerx(L, 1, &isnum);
-	if (isnum) {
-		bool released = milk::Locator::mouse->isButtonReleased((milk::MouseButtons)button);
-		lua_pushboolean(L, released);
-		return 1;
-	}
-	lua_pushboolean(L, false);
+	milk::MouseButtons button = (milk::MouseButtons)luaL_checkinteger(L, 1);
+	bool down = milk::State::mouse->isButtonReleased(button);
+	lua_pushboolean(L, down);
 	return 1;
 }
 
@@ -54,9 +39,9 @@ static int mouse_get_position(lua_State* L)
 {
 	// SDL's logical resolution filter only applies to events pumped through the event loop, not the real time state updates.
 	// This means that we have to handle it ourselves.
-	std::tuple<int, int> pos = milk::Locator::mouse->getPosition();
-	std::tuple<int, int> winsize = milk::Locator::window->size();
-	std::tuple<int, int> resolution = milk::Locator::renderer->resolution();
+	std::tuple<int, int> pos = milk::State::mouse->getPosition();
+	std::tuple<int, int> winsize = milk::State::window->size();
+	std::tuple<int, int> resolution = milk::State::renderer->resolution();
 
 	float normMousex = (float)std::get<0>(pos) / std::get<0>(winsize);
 	float normMouseY = (float)std::get<1>(pos) / std::get<1>(winsize);
@@ -70,7 +55,7 @@ static int mouse_get_position(lua_State* L)
 
 static int mouse_get_scroll(lua_State* L)
 {
-	int scroll = milk::Locator::mouse->getScroll();
+	int scroll = milk::State::mouse->getScroll();
 	lua_pushinteger(L, scroll);
 	return 1;
 }
@@ -90,9 +75,9 @@ static const milk::luaM_Enum buttons_enum[] = {
 	{ "RIGHT", (int)milk::MouseButtons::RIGHT }
 };
 
-int milk::luaopen_milk_mouse(lua_State* L)
+int luaopen_milk_mouse(lua_State* L)
 {
 	luaL_newlib(L, mouse_funcs);
-	luaM_setenumfield(L, -1, "buttons", buttons_enum, sizeof(buttons_enum) / sizeof(luaM_Enum));
+	luaM_setenumfield(L, -1, "buttons", buttons_enum, sizeof(buttons_enum));
 	return 1;
 }

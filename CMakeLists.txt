@@ -6,7 +6,7 @@
 cmake_minimum_required(VERSION 3.6.3)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-project(milk)
+project(libmilk)
 
 # we're a c++11 family
 set(CMAKE_CXX_STANDARD 11)
@@ -61,6 +61,17 @@ find_package(Lua53 REQUIRED)
 # milk lib
 #---------------------------------------------------------------------------
 
+# core
+set(MILK_SRC
+	src/Locator.cpp
+	src/Locator.h
+	src/luamlib.cpp
+	src/luamlib.h
+	src/milk_export.h
+	src/luaopen_milk.cpp
+	src/luaopen_milk.h
+)
+
 # audio
 set(MILK_SRC_AUDIO
 	src/audio/AudioPlayer.h
@@ -77,21 +88,6 @@ set(MILK_SRC_AUDIO
 	src/audio/sdl/SDLMusicCache.h
 	src/audio/sdl/SDLSoundCache.cpp
 	src/audio/sdl/SDLSoundCache.h
-)
-
-# core
-set(MILK_SRC_CORE
-	src/core/Locator.cpp
-	src/core/Locator.h
-	src/core/luamlib.cpp
-	src/core/luamlib.h
-	src/core/run.cpp
-	src/core/run.h
-)
-
-# data
-set(MILK_SRC_DATA
-	src/data/int.h
 )
 
 # graphics
@@ -132,8 +128,6 @@ set(MILK_SRC_TIME
 	src/time/luaopen_milk_time.h
 	src/time/sdl/SDLTime.cpp
 	src/time/sdl/SDLTime.h
-	src/time/sdl/SDLTimer.cpp
-	src/time/sdl/SDLTimer.h
 )
 
 # window
@@ -146,9 +140,9 @@ set(MILK_SRC_WINDOW
 )
 
 set(MILK_SRC_FILES
+	${MILK_SRC}
 	${MILK_SRC_AUDIO}
 	${MILK_SRC_CORE}
-	${MILK_SRC_DATA}
 	${MILK_SRC_GRAPHICS}
 	${MILK_SRC_KEYBOARD}
 	${MILK_SRC_MOUSE}
@@ -156,9 +150,9 @@ set(MILK_SRC_FILES
 	${MILK_SRC_WINDOW}
 )
 
-add_library(milklib STATIC ${MILK_SRC_FILES})
+add_library(milk SHARED ${MILK_SRC_FILES})
 
-target_include_directories(milklib
+target_include_directories(milk
 	PUBLIC
 		${SDL2_INCLUDE_DIR}
 		${SDL2_IMAGE_INCLUDE_DIRS}
@@ -168,7 +162,7 @@ target_include_directories(milklib
 )
 
 if (WIN32)
-	target_link_directories(milklib
+	target_link_directories(milk
 		PUBLIC
 			${SDL2_INCLUDE_DIR}
 			${SDL2_IMAGE_INCLUDE_DIRS}
@@ -178,21 +172,13 @@ if (WIN32)
 	)
 endif()
 
-target_link_libraries(milklib
+target_link_libraries(milk
 	PUBLIC
 		${SDL2_LIBRARY}
 		${SDL2_IMAGE_LIBRARIES}
 		${SDL2_MIXER_LIBRARIES}
 		${LUA53_LIBRARIES}
 )
-
-#---------------------------------------------------------------------------
-# milk exe
-#---------------------------------------------------------------------------
-
-add_executable(milk src/main.cpp)
-
-target_link_libraries(milk milklib)
 
 #---------------------------------------------------------------------------
 # post build step to copy dlls to executable output file

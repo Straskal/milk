@@ -78,6 +78,12 @@ bool milk::SDLAudioPlayer::init()
 	return true;
 }
 
+void milk::SDLAudioPlayer::stop()
+{
+	Mix_HaltChannel(-1);
+	Mix_HaltMusic();
+}
+
 void milk::SDLAudioPlayer::free()
 {
 	Mix_CloseAudio();

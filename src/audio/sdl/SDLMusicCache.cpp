@@ -41,5 +41,9 @@ void milk::SDLMusicCache::dereference(MusicData* musicData)
 
 void milk::SDLMusicCache::free()
 {
-	SDL_assert(m_music.empty());
+	for (auto itr : m_music) {
+		Mix_FreeMusic((Mix_Music*)itr.second->handle);
+		delete itr.second;
+	}
+	m_music.clear();
 }

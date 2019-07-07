@@ -15,24 +15,28 @@ static int correct_index(int index)
 	return index < 0 ? index - 1 : index;
 }
 
-void milk::luaM_preloadpackage(lua_State* L, const char* name, lua_CFunction openfunc)
+void milk::luaM_openlib(lua_State* L, const char* name, lua_CFunction openfunc)
 {
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "preload");
 	lua_pushcfunction(L, openfunc);
 	lua_setfield(L, -2, name);
-	// Pop the preload table and package table off of stack
-	lua_pop(L, 2);
+	lua_pop(L, 1); // Pop the preload table off of the stack
+	lua_getfield(L, -1, "loaded");
+	lua_pushcfunction(L, openfunc);
+	lua_pcall(L, 0, 1, 0);
+	lua_setfield(L, -1, name);
+	lua_pop(L, 2); // Pop the loaded table and package table off of stack
 }
 
 void milk::luaM_openlibs(lua_State* L)
 {
-	luaM_preloadpackage(L, "milk.time", luaopen_milk_time);
-	luaM_preloadpackage(L, "milk.window", luaopen_milk_window);
-	luaM_preloadpackage(L, "milk.mouse", luaopen_milk_mouse);
-	luaM_preloadpackage(L, "milk.keyboard", luaopen_milk_keyboard);
-	luaM_preloadpackage(L, "milk.graphics", luaopen_milk_graphics);
-	luaM_preloadpackage(L, "milk.audio", luaopen_milk_audio);
+	luaM_openlib(L, "milk.time", luaopen_milk_time);
+	luaM_openlib(L, "milk.window", luaopen_milk_window);
+	luaM_openlib(L, "milk.mouse", luaopen_milk_mouse);
+	luaM_openlib(L, "milk.keyboard", luaopen_milk_keyboard);
+	luaM_openlib(L, "milk.graphics", luaopen_milk_graphics);
+	luaM_openlib(L, "milk.audio", luaopen_milk_audio);
 }
 
 void milk::luaM_createmetatable(lua_State* L, const char* name, const luaL_Reg* funcs)
@@ -53,7 +57,8 @@ void milk::luaM_setintfield(lua_State* L, int index, const char* key, int value)
 void milk::luaM_setenumfield(lua_State* L, int index, const char* name, const luaM_Enum* e, size_t size)
 {
 	lua_newtable(L);
-	for (unsigned int i = 0; i < size; ++i) {
+	unsigned int sz = size / sizeof(luaM_Enum);
+	for (unsigned int i = 0; i < sz; ++i) {
 		luaM_setintfield(L, -1, e[i].name, e[i].key);
 	}
 	lua_setfield(L, correct_index(index), name);

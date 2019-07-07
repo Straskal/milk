@@ -1,15 +1,15 @@
 #include "luaopen_milk_keyboard.h"
 
 #include "Keyboard.h"
-#include "core/Locator.h"
-#include "core/luamlib.h"
+#include "Locator.h"
+#include "luamlib.h"
 
 static int is_key_down(lua_State* L)
 {
 	int isnum;
 	int key = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
-		bool down = milk::Locator::keyboard->isKeyDown((milk::Keys)key);
+		bool down = milk::State::keyboard->isKeyDown((milk::Keys)key);
 		lua_pushboolean(L, down);
 		return 1;
 	}
@@ -22,7 +22,7 @@ static int is_key_pressed(lua_State* L)
 	int isnum;
 	int key = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
-		bool pressed = milk::Locator::keyboard->isKeyPressed((milk::Keys)key);
+		bool pressed = milk::State::keyboard->isKeyPressed((milk::Keys)key);
 		lua_pushboolean(L, pressed);
 		return 1;
 	}
@@ -35,7 +35,7 @@ static int is_key_released(lua_State* L)
 	int isnum;
 	int key = (int)lua_tointegerx(L, 1, &isnum);
 	if (isnum) {
-		bool released = milk::Locator::keyboard->isKeyReleased((milk::Keys)key);
+		bool released = milk::State::keyboard->isKeyReleased((milk::Keys)key);
 		lua_pushboolean(L, released);
 		return 1;
 	}
@@ -128,9 +128,9 @@ static const milk::luaM_Enum keys_enum[] = {
 	{ "RSHIFT", (int)milk::Keys::RSHIFT }
 };
 
-int milk::luaopen_milk_keyboard(lua_State* L)
+int luaopen_milk_keyboard(lua_State* L)
 {
 	luaL_newlib(L, keyboard_funcs);
-	luaM_setenumfield(L, -1, "keys", keys_enum, sizeof(keys_enum) / sizeof(luaM_Enum));
+	luaM_setenumfield(L, -1, "keys", keys_enum, sizeof(keys_enum));
 	return 1;
 }

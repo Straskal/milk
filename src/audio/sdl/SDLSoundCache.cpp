@@ -41,5 +41,9 @@ void milk::SDLSoundCache::dereference(SoundData* soundData)
 
 void milk::SDLSoundCache::free()
 {
-	SDL_assert(m_sounds.empty());
+	for (auto itr : m_sounds) {
+		Mix_FreeChunk((Mix_Chunk*)itr.second->handle);
+		delete itr.second;
+	}
+	m_sounds.clear();
 }

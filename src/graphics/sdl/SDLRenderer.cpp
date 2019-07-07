@@ -58,9 +58,7 @@ void milk::SDLRenderer::resolution(int w, int h)
 
 void milk::SDLRenderer::clear()
 {
-	SDL_SetRenderDrawColor(m_handle, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderClear(m_handle);
-	SDL_SetRenderDrawColor(m_handle, m_drawColor.r, m_drawColor.g, m_drawColor.b, m_drawColor.a);
 }
 
 void milk::SDLRenderer::setDrawColor(double r, double g, double b, double a)

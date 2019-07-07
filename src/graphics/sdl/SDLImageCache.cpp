@@ -65,6 +65,10 @@ void milk::SDLImageCache::dereference(ImageData* imageData)
 
 void milk::SDLImageCache::free()
 {
-	SDL_assert(m_images.empty());
+	for (auto itr : m_images) {
+		SDL_DestroyTexture((SDL_Texture*)itr.second->handle);
+		delete itr.second;
+	}
+	m_images.clear();
 	IMG_Quit();
 }

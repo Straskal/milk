@@ -10,6 +10,7 @@ namespace milk
 	public:
 		virtual ~Window() = default;
 
+		virtual void show() = 0;
 		virtual const char* title() const = 0;
 		virtual void title(const char* title) = 0;
 		virtual void icon(const char* filepath) = 0;
@@ -20,6 +21,7 @@ namespace milk
 		virtual void minimize() = 0;
 		virtual void restore() = 0;
 		virtual void close() = 0;
+		virtual bool shouldClose() const = 0;
 	};
 }
 

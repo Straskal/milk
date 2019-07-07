@@ -11,6 +11,7 @@ namespace milk
 		SDLAudioPlayer();
 
 		bool init();
+		void stop();
 		void free();
 
 		void setMasterVolume(float volume) override;

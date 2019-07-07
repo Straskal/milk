@@ -2,7 +2,7 @@
 #define _LOCATOR_H_
 
 /*
-	The Locator's intended usage is for Lua modules.
+	The State's intended usage is for Lua modules.
 */
 namespace milk
 {
@@ -16,8 +16,9 @@ namespace milk
 	class MusicCache;
 	class SoundCache;
 
-	struct Locator
+	struct State
 	{
+		static bool initialized;
 		static Time* time;
 		static Window* window;
 		static Mouse* mouse;

@@ -15,6 +15,10 @@ namespace milk
 		SDLWindow();
 
 		bool init();
+		SDL_Window* handle() const;
+		void free();
+
+		void show() override;
 		const char* title() const override;
 		void title(const char* title) override;
 		void icon(const char* filepath) override;
@@ -24,11 +28,8 @@ namespace milk
 		void fullscreen(bool toggle) override;
 		void minimize() override;
 		void restore() override;
-		void show();
 		void close() override;
-		bool shouldClose() const;
-		SDL_Window* handle() const;
-		void free();
+		bool shouldClose() const override;
 
 	private:
 		SDL_Window* m_handle;
