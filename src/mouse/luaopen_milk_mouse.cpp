@@ -8,8 +8,9 @@ extern "C" {
 #include "Mouse.h"
 #include "luamlib.h"
 #include "State.h"
-#include "graphics/Renderer.h"
 #include "window/Window.h"
+
+#include "graphics/graphics.h"
 
 static int mouse_is_button_down(lua_State* L)
 {
@@ -35,13 +36,14 @@ static int mouse_is_button_released(lua_State* L)
 	return 1;
 }
 
+
 static int mouse_get_position(lua_State* L)
 {
 	// SDL's logical resolution filter only applies to events pumped through the event loop, not the real time state updates.
 	// This means that we have to handle it ourselves.
 	std::tuple<int, int> pos = milk::State::mouse->getPosition();
 	std::tuple<int, int> winsize = milk::State::window->size();
-	std::tuple<int, int> resolution = milk::State::renderer->resolution();
+	std::tuple<int, int> resolution = milk::graphics_resolution();
 
 	float normMousex = (float)std::get<0>(pos) / std::get<0>(winsize);
 	float normMouseY = (float)std::get<1>(pos) / std::get<1>(winsize);

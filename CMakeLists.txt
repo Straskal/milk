@@ -61,7 +61,7 @@ find_package(Lua53 REQUIRED)
 # milk lib
 #---------------------------------------------------------------------------
 
-# core
+# root
 set(MILK_SRC
 	src/luamlib.cpp
 	src/luamlib.h
@@ -90,17 +90,20 @@ set(MILK_SRC_AUDIO
 	src/audio/sdl/SDLSoundCache.h
 )
 
+# data
+set(MILK_SRC_DATA
+	src/data/uid.cpp
+	src/data/uid.h
+	src/data/int.h
+)
+
 # graphics
 set(MILK_SRC_GRAPHICS
+	src/graphics/graphics.cpp
+	src/graphics/graphics.h
 	src/graphics/Image.h
-	src/graphics/ImageCache.h
-	src/graphics/Renderer.h
 	src/graphics/luaopen_milk_graphics.cpp
 	src/graphics/luaopen_milk_graphics.h
-	src/graphics/sdl/SDLImageCache.cpp
-	src/graphics/sdl/SDLImageCache.h
-	src/graphics/sdl/SDLRenderer.cpp
-	src/graphics/sdl/SDLRenderer.h
 )
 
 # keyboard
@@ -142,6 +145,7 @@ set(MILK_SRC_WINDOW
 set(MILK_SRC_FILES
 	${MILK_SRC}
 	${MILK_SRC_AUDIO}
+	${MILK_SRC_DATA}
 	${MILK_SRC_CORE}
 	${MILK_SRC_GRAPHICS}
 	${MILK_SRC_KEYBOARD}

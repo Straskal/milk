@@ -1,6 +1,8 @@
 #ifndef _STATE_H_
 #define _STATE_H_
 
+#include "graphics/graphics.h"
+
 /*
 	The State's intended usage is for Lua modules.
 */

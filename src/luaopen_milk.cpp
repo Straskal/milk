@@ -13,8 +13,6 @@ extern "C" {
 #include "audio/sdl/SDLAudioPlayer.h"
 #include "audio/sdl/SDLMusicCache.h"
 #include "audio/sdl/SDLSoundCache.h"
-#include "graphics/sdl/SDLRenderer.h"
-#include "graphics/sdl/SDLImageCache.h"
 #include "keyboard/sdl/SDLKeyboard.h"
 #include "mouse/sdl/SDLMouse.h"
 #include "time/sdl/SDLTime.h"
@@ -25,10 +23,8 @@ extern "C" {
 
 static milk::SDLTime* time = nullptr;
 static milk::SDLWindow* window = nullptr;
-static milk::SDLRenderer* renderer = nullptr;
 static milk::SDLMouse* mouse = nullptr;
 static milk::SDLKeyboard* keyboard = nullptr;
-static milk::SDLImageCache* image_cache = nullptr;
 static milk::SDLAudioPlayer* audio_player = nullptr;
 static milk::SDLSoundCache* sound_cache = nullptr;
 static milk::SDLMusicCache* music_cache = nullptr;
@@ -41,8 +37,6 @@ static int milk_init(lua_State* L)
 
 	time = new milk::SDLTime();
 	window = new milk::SDLWindow();
-	renderer = new milk::SDLRenderer();
-	image_cache = new milk::SDLImageCache();
 	audio_player = new milk::SDLAudioPlayer();
 	music_cache = new milk::SDLMusicCache();
 	sound_cache = new milk::SDLSoundCache();
@@ -51,8 +45,6 @@ static int milk_init(lua_State* L)
 
 	milk::State::time = time;
 	milk::State::window = window;
-	milk::State::renderer = renderer;
-	milk::State::images = image_cache;
 	milk::State::audioPlayer = audio_player;
 	milk::State::sounds = sound_cache;
 	milk::State::music = music_cache;
@@ -60,8 +52,7 @@ static int milk_init(lua_State* L)
 	milk::State::keyboard = keyboard;
 
 	if (window->init()
-		&& renderer->init(window->handle())
-		&& image_cache->init(renderer->handle())
+		&& milk::graphics_init(window->handle())
 		&& audio_player->init()) {
 
 		time->start();
@@ -73,6 +64,8 @@ static int milk_init(lua_State* L)
 
 static int milk_poll(lua_State* L)
 {
+	(void)L;
+
 	mouse->reset();
 
 	SDL_Event event;
@@ -111,8 +104,7 @@ static int milk_quit(lua_State* L)
 	deinit_and_free_ptr(sound_cache);
 	deinit_and_free_ptr(music_cache);
 	deinit_and_free_ptr(audio_player);
-	deinit_and_free_ptr(image_cache);
-	deinit_and_free_ptr(renderer);
+	milk::graphics_quit();
 	deinit_and_free_ptr(window);
 	free_ptr(time);
 

@@ -6,35 +6,35 @@ extern "C" {
 }
 
 #include "Image.h"
-#include "ImageCache.h"
 #include "luamlib.h"
-#include "Renderer.h"
 #include "State.h"
+
+#include "graphics.h"
 
 static const char* IMAGE_METATABLE = "milk.image";
 
 static int imagemeta_tostring(lua_State* L)
 {
 	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
-	const char* path = image->data->path.c_str();
+	milk::ImageData* imageData = milk::graphics_get_imagedata(image->uid);
+	const char* path = imageData->path.c_str();
 	lua_pushstring(L, path);
 	return 1;
 }
 
 static int imagemeta_gc(lua_State* L)
 {
-	if (milk::State::initialized) {
-		milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
-		milk::State::images->dereference(image->data);
-	}
+	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	milk::graphics_dereference_imagedata(image->uid);
 	return 0;
 }
 
 static int imagemeta_get_size(lua_State* L)
 {
 	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
-	lua_pushinteger(L, image->data->width);
-	lua_pushinteger(L, image->data->height);
+	milk::ImageData* imageData = milk::graphics_get_imagedata(image->uid);
+	lua_pushinteger(L, imageData->width);
+	lua_pushinteger(L, imageData->height);
 	return 2;
 }
 
@@ -48,11 +48,11 @@ static const luaL_Reg imagemeta_funcs[] = {
 static int graphics_new_image(lua_State* L)
 {
 	if (lua_isstring(L, 1)) {
-		const char* value = lua_tostring(L, 1);
-		milk::ImageData* imageData = milk::State::images->load(value);
-		if (imageData != nullptr) {
+		const char* path = lua_tostring(L, 1);
+		milk::u32 imageData = milk::graphics_load_imagedata(path);
+		if (true) {
 			milk::Image* image = (milk::Image*)lua_newuserdata(L, sizeof(milk::Image));
-			image->data = imageData;
+			image->uid = imageData;
 			luaL_getmetatable(L, IMAGE_METATABLE);
 			lua_setmetatable(L, -2);
 			lua_pushboolean(L, true);
@@ -69,13 +69,13 @@ static int graphics_set_virtual_resolution(lua_State* L)
 	int w = (int)luaL_checkinteger(L, 1);
 	int h = (int)luaL_checkinteger(L, 2);
 
-	milk::State::renderer->resolution(w, h);
+	milk::graphics_resolution(w, h);
 	return 0;
 }
 
 static int graphics_get_virtual_resolution(lua_State* L)
 {
-	std::tuple<int, int> resolution = milk::State::renderer->resolution();
+	std::tuple<int, int> resolution = milk::graphics_resolution();
 	int w = std::get<0>(resolution);
 	int h = std::get<1>(resolution);
 
@@ -88,7 +88,7 @@ static int graphics_clear(lua_State* L)
 {
 	(void)L;
 
-	milk::State::renderer->clear();
+	milk::graphics_clear();
 	return 0;
 }
 
@@ -99,7 +99,7 @@ static int graphics_set_draw_color(lua_State* L)
 	double b = (double)luaL_checknumber(L, 3);
 	double a = (double)luaL_checknumber(L, 4);
 
-	milk::State::renderer->setDrawColor(r, g, b, a);
+	milk::graphics_draw_color(r, g, b, a);
 	return 0;
 }
 
@@ -110,7 +110,7 @@ static int graphics_draw_rect(lua_State* L)
 	float w = (float)luaL_checknumber(L, 3);
 	float h = (float)luaL_checknumber(L, 4);
 
-	milk::State::renderer->drawRectangle(x, y, w, h);
+	milk::graphics_draw_rectangle(x, y, w, h);
 	return 0;
 }
 
@@ -121,7 +121,7 @@ static int graphics_draw_filled_rect(lua_State* L)
 	float w = (float)luaL_checknumber(L, 3);
 	float h = (float)luaL_checknumber(L, 4);
 
-	milk::State::renderer->drawRectangleFilled(x, y, w, h);
+	milk::graphics_draw_rectangle_filled(x, y, w, h);
 	return 0;
 }
 
@@ -131,7 +131,7 @@ static int graphics_draw(lua_State* L)
 	float x = (float)luaL_checknumber(L, 2);
 	float y = (float)luaL_checknumber(L, 3);
 
-	milk::State::renderer->draw(image, x, y);
+	milk::graphics_draw(image, x, y);
 	return 0;
 }
 
@@ -148,7 +148,7 @@ static int graphics_drawx(lua_State* L)
 	float scaley = (float)luaL_checknumber(L, 9);
 	double angle = (double)luaL_checknumber(L, 10);
 
-	milk::State::renderer->draw(image, posx, posy, rectx, recty, rectw, recth, scalex, scaley, angle);
+	milk::graphics_draw(image, posx, posy, rectx, recty, rectw, recth, scalex, scaley, angle);
 	return 0;
 }
 
@@ -156,7 +156,7 @@ static int graphics_present(lua_State* L)
 {
 	(void)L;
 
-	milk::State::renderer->present();
+	milk::graphics_present();
 	return 0;
 }
 

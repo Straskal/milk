@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "data/int.h"
+
 namespace milk
 {
 	struct ImageData
@@ -16,7 +18,7 @@ namespace milk
 
 	struct Image
 	{
-		ImageData* data;
+		u32 uid;
 	};
 }
 
