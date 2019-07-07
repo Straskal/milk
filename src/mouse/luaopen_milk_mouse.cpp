@@ -43,7 +43,7 @@ static int mouse_get_position(lua_State* L)
 	// This means that we have to handle it ourselves.
 	std::tuple<int, int> pos = milk::State::mouse->getPosition();
 	std::tuple<int, int> winsize = milk::State::window->size();
-	std::tuple<int, int> resolution = milk::graphics_resolution();
+	std::tuple<int, int> resolution = milk::graphics_get_resolution();
 
 	float normMousex = (float)std::get<0>(pos) / std::get<0>(winsize);
 	float normMouseY = (float)std::get<1>(pos) / std::get<1>(winsize);

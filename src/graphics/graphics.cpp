@@ -65,14 +65,14 @@ void milk::graphics_quit()
 	SDL_DestroyRenderer(renderer_handle);
 }
 
-std::tuple<int, int> milk::graphics_resolution()
+std::tuple<int, int> milk::graphics_get_resolution()
 {
 	int w, h;
 	SDL_RenderGetLogicalSize(renderer_handle, &w, &h);
 	return std::make_tuple(w, h);
 }
 
-void milk::graphics_resolution(int w, int h)
+void milk::graphics_set_resolution(int w, int h)
 {
 	SDL_RenderSetLogicalSize(renderer_handle, w, h);
 }
@@ -135,7 +135,7 @@ void milk::graphics_clear()
 	SDL_RenderClear(renderer_handle);
 }
 
-void milk::graphics_draw_color(double r, double g, double b, double a)
+void milk::graphics_set_draw_color(double r, double g, double b, double a)
 {
 	SDL_SetRenderDrawColor(
 		renderer_handle, 
