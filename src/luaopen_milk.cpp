@@ -66,12 +66,9 @@ static int milk_init(lua_State* L)
 
 		time->start();
 		milk::State::initialized = true;
-		lua_pushboolean(L, true);
+		return 0;
 	}
-	else {
-		lua_pushboolean(L, false);
-	}
-	return 1;
+	return luaL_error(L, "could not start milk!");
 }
 
 static int milk_poll(lua_State* L)
