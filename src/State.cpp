@@ -1,6 +1,7 @@
 #include "State.h"
 
 bool milk::State::initialized = false;
+
 milk::Time* milk::State::time = nullptr;
 milk::Window* milk::State::window = nullptr;
 milk::Renderer* milk::State::renderer = nullptr;

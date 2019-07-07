@@ -19,6 +19,7 @@ namespace milk
 	struct State
 	{
 		static bool initialized;
+
 		static Time* time;
 		static Window* window;
 		static Mouse* mouse;
