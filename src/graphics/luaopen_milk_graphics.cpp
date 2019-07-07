@@ -8,6 +8,7 @@ extern "C" {
 #include "graphics.h"
 #include "image.h"
 #include "luamlib.h"
+#include "data/uid.h"
 
 static const char* IMAGE_METATABLE = "milk.image";
 
@@ -45,21 +46,17 @@ static const luaL_Reg imagemeta_funcs[] = {
 
 static int graphics_new_image(lua_State* L)
 {
-	if (lua_isstring(L, 1)) {
-		const char* path = lua_tostring(L, 1);
-		milk::u32 imageData = milk::graphics_load_imagedata(path);
-		if (true) {
-			milk::Image* image = (milk::Image*)lua_newuserdata(L, sizeof(milk::Image));
-			image->uid = imageData;
-			luaL_getmetatable(L, IMAGE_METATABLE);
-			lua_setmetatable(L, -2);
-			lua_pushboolean(L, true);
-			return 2;
-		}
+	const char* path = (const char*)luaL_checkstring(L, 1);
+	milk::u32 uid = milk::graphics_load_imagedata(path);
+	if (uid != milk::id::INVALID_ID) {
+		milk::Image* image = (milk::Image*)lua_newuserdata(L, sizeof(milk::Image));
+		image->uid = uid;
+		luaL_getmetatable(L, IMAGE_METATABLE);
+		lua_setmetatable(L, -2);
+		lua_pushboolean(L, true);
+		return 2;
 	}
-	lua_pushnil(L);
-	lua_pushboolean(L, false);
-	return 2;
+	return luaL_error(L, "could not load image file: %s", path);
 }
 
 static int graphics_set_virtual_resolution(lua_State* L)
@@ -82,7 +79,7 @@ static int graphics_get_virtual_resolution(lua_State* L)
 	return 2;
 }
 
-static int graphics_clear(lua_State* L) 
+static int graphics_clear(lua_State* L)
 {
 	(void)L;
 

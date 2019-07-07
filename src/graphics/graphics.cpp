@@ -18,13 +18,12 @@ static const char* NEAREST_PIXEL_SAMPLING = "nearest";
 static SDL_Renderer* renderer_handle = nullptr;
 
 /* Image cache info */
-static const milk::u32 GENERATION_BITS = 16;
-static const milk::u32 INDEX_BITS = 16;
-static const milk::u32 MAX_FREE = 1024;
+static const milk::u32 IMG_UID_GEN_BITS = 16;
+static const milk::u32 IMG_ID_IDX_BITS = 16;
+static const milk::u32 IMG_ID_MAX_FREE_IDX = 1024;
 static milk::UID image_uids;
 static std::unordered_map<std::string, milk::u32> images_by_path;
 static std::unordered_map<milk::u32, milk::ImageData*> images_by_id;
-
 
 bool milk::graphics_init(void* windowHandle)
 {
@@ -105,7 +104,7 @@ milk::u32 milk::graphics_load_imagedata(const char* path)
 	imageData->width = w;
 	imageData->height = h;
 
-	u32 id = id::make(&image_uids, 16, 1024);
+	u32 id = id::make(&image_uids, IMG_UID_GEN_BITS, IMG_ID_MAX_FREE_IDX);
 	images_by_path.insert(std::make_pair(path, id));
 	images_by_id.insert(std::make_pair(id, imageData));
 	return id;
@@ -113,7 +112,7 @@ milk::u32 milk::graphics_load_imagedata(const char* path)
 
 milk::ImageData* milk::graphics_get_imagedata(u32 id)
 {
-	return id::valid(&image_uids, 16, 16, id) ? images_by_id.at(id) : nullptr;
+	return id::valid(&image_uids, IMG_UID_GEN_BITS, IMG_ID_IDX_BITS, id) ? images_by_id.at(id) : nullptr;
 }
 
 void milk::graphics_dereference_imagedata(u32 id)
@@ -126,7 +125,7 @@ void milk::graphics_dereference_imagedata(u32 id)
 			SDL_DestroyTexture((SDL_Texture*)imageData->handle);
 			delete imageData;
 
-			id::recycle(&image_uids, 16, id);
+			id::recycle(&image_uids, IMG_UID_GEN_BITS, id);
 		}
 	}
 }
@@ -135,7 +134,6 @@ void milk::graphics_clear()
 {
 	SDL_RenderClear(renderer_handle);
 }
-
 
 void milk::graphics_draw_color(double r, double g, double b, double a)
 {
