@@ -10,19 +10,20 @@ extern "C" {
 #include "luamlib.h"
 #include "State.h"
 
+#include "graphics/graphics.h"
+#include "window/window.h"
+
 #include "audio/sdl/SDLAudioPlayer.h"
 #include "audio/sdl/SDLMusicCache.h"
 #include "audio/sdl/SDLSoundCache.h"
 #include "keyboard/sdl/SDLKeyboard.h"
 #include "mouse/sdl/SDLMouse.h"
 #include "time/sdl/SDLTime.h"
-#include "window/sdl/SDLWindow.h"
 
 #define free_ptr(x) delete x; x = nullptr
 #define deinit_and_free_ptr(x) x->free(); free_ptr(x)
 
 static milk::SDLTime* time = nullptr;
-static milk::SDLWindow* window = nullptr;
 static milk::SDLMouse* mouse = nullptr;
 static milk::SDLKeyboard* keyboard = nullptr;
 static milk::SDLAudioPlayer* audio_player = nullptr;
@@ -36,7 +37,6 @@ static int milk_init(lua_State* L)
 	}
 
 	time = new milk::SDLTime();
-	window = new milk::SDLWindow();
 	audio_player = new milk::SDLAudioPlayer();
 	music_cache = new milk::SDLMusicCache();
 	sound_cache = new milk::SDLSoundCache();
@@ -44,15 +44,14 @@ static int milk_init(lua_State* L)
 	keyboard = new milk::SDLKeyboard();
 
 	milk::State::time = time;
-	milk::State::window = window;
 	milk::State::audioPlayer = audio_player;
 	milk::State::sounds = sound_cache;
 	milk::State::music = music_cache;
 	milk::State::mouse = mouse;
 	milk::State::keyboard = keyboard;
 
-	if (window->init()
-		&& milk::graphics_init(window->handle())
+	if (milk::window_init()
+		&& milk::graphics_init(milk::window_get_handle())
 		&& audio_player->init()) {
 
 		time->start();
@@ -62,6 +61,7 @@ static int milk_init(lua_State* L)
 	return luaL_error(L, "could not start milk!");
 }
 
+// TODO MOVE TO WINDOW
 static int milk_poll(lua_State* L)
 {
 	(void)L;
@@ -71,7 +71,7 @@ static int milk_poll(lua_State* L)
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_QUIT) {
-			window->close();
+			milk::window_close();
 		}
 		mouse->handleEvent(&event);
 	}
@@ -105,7 +105,7 @@ static int milk_quit(lua_State* L)
 	deinit_and_free_ptr(music_cache);
 	deinit_and_free_ptr(audio_player);
 	milk::graphics_quit();
-	deinit_and_free_ptr(window);
+	milk::window_quit();
 	free_ptr(time);
 
 	milk::State::initialized = false;

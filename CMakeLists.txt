@@ -135,11 +135,10 @@ set(MILK_SRC_TIME
 
 # window
 set(MILK_SRC_WINDOW
-	src/window/Window.h	
+	src/window/window.cpp
+	src/window/window.h	
 	src/window/luaopen_milk_window.cpp
 	src/window/luaopen_milk_window.h
-	src/window/sdl/SDLWindow.cpp
-	src/window/sdl/SDLWindow.h
 )
 
 set(MILK_SRC_FILES
