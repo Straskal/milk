@@ -7,7 +7,7 @@
 #include "SDL.h"
 #include "SDL_image.h"
 
-#include "Image.h"
+#include "image.h"
 #include "data/uid.h"
 
 /* Renderer info */
@@ -17,9 +17,11 @@ static const char* NEAREST_PIXEL_SAMPLING = "nearest";
 
 static SDL_Renderer* renderer_handle = nullptr;
 
-
 /* Image cache info */
-static milk::UidData image_uids;
+static const milk::u32 GENERATION_BITS = 16;
+static const milk::u32 INDEX_BITS = 16;
+static const milk::u32 MAX_FREE = 1024;
+static milk::UID image_uids;
 static std::unordered_map<std::string, milk::u32> images_by_path;
 static std::unordered_map<milk::u32, milk::ImageData*> images_by_id;
 

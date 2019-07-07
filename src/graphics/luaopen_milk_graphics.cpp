@@ -5,11 +5,9 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-#include "Image.h"
-#include "luamlib.h"
-#include "State.h"
-
 #include "graphics.h"
+#include "image.h"
+#include "luamlib.h"
 
 static const char* IMAGE_METATABLE = "milk.image";
 

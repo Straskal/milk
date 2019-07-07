@@ -101,7 +101,7 @@ set(MILK_SRC_DATA
 set(MILK_SRC_GRAPHICS
 	src/graphics/graphics.cpp
 	src/graphics/graphics.h
-	src/graphics/Image.h
+	src/graphics/image.h
 	src/graphics/luaopen_milk_graphics.cpp
 	src/graphics/luaopen_milk_graphics.h
 )

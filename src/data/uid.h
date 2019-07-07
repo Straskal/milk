@@ -28,7 +28,7 @@
 */
 namespace milk
 {
-	struct UidData
+	struct UID
 	{
 		std::queue<u16> freeIndeces;
 		std::vector<u16> generations;
@@ -36,9 +36,9 @@ namespace milk
 
 	namespace id
 	{
-		u32 make(UidData* data, u32 GENERATION_BITS, int MAX_FREE_INDECES);
-		void recycle(UidData* data, u32 GENERATION_BITS, u32 id);
-		bool valid(const UidData* data, u32 GENERATION_BITS, u32 INDEX_BITS, u32 id);
+		u32 make(UID* data, u32 GENERATION_BITS, int MAX_FREE_INDECES);
+		void recycle(UID* data, u32 GENERATION_BITS, u32 id);
+		bool valid(const UID* data, u32 GENERATION_BITS, u32 INDEX_BITS, u32 id);
 	}
 }
 
