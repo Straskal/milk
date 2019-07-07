@@ -10,8 +10,8 @@ extern "C" {
 #include "MusicCache.h"
 #include "Sound.h"
 #include "SoundCache.h"
-#include "Locator.h"
 #include "luamlib.h"
+#include "State.h"
 
 static const char* SOUND_METATABLE = "milk.sound";
 

@@ -63,11 +63,11 @@ find_package(Lua53 REQUIRED)
 
 # core
 set(MILK_SRC
-	src/Locator.cpp
-	src/Locator.h
 	src/luamlib.cpp
 	src/luamlib.h
 	src/milk_export.h
+	src/State.cpp
+	src/State.h
 	src/luaopen_milk.cpp
 	src/luaopen_milk.h
 )

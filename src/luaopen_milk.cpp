@@ -7,8 +7,8 @@ extern "C" {
 
 #include "SDL.h"
 
-#include "Locator.h"
 #include "luamlib.h"
+#include "State.h"
 
 #include "audio/sdl/SDLAudioPlayer.h"
 #include "audio/sdl/SDLMusicCache.h"

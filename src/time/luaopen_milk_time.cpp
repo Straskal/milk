@@ -8,7 +8,7 @@ extern "C" {
 }
 
 #include "Time.h"
-#include "Locator.h"
+#include "State.h"
 
 static int time_get_total(lua_State* L)
 {

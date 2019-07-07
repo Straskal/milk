@@ -1,5 +1,5 @@
-#ifndef _LOCATOR_H_
-#define _LOCATOR_H_
+#ifndef _STATE_H_
+#define _STATE_H_
 
 /*
 	The State's intended usage is for Lua modules.

@@ -6,7 +6,7 @@ extern "C" {
 }
 
 #include "Window.h"
-#include "Locator.h"
+#include "State.h"
 
 static int window_show(lua_State* L)
 {

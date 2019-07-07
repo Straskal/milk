@@ -6,8 +6,8 @@ extern "C" {
 }
 
 #include "Mouse.h"
-#include "Locator.h"
 #include "luamlib.h"
+#include "State.h"
 #include "graphics/Renderer.h"
 #include "window/Window.h"
 

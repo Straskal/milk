@@ -1,8 +1,8 @@
 #include "luaopen_milk_keyboard.h"
 
 #include "Keyboard.h"
-#include "Locator.h"
 #include "luamlib.h"
+#include "State.h"
 
 static int is_key_down(lua_State* L)
 {
