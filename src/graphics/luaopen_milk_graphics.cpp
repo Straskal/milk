@@ -53,8 +53,7 @@ static int lua_graphics_new_image(lua_State* L)
 		image->uid = uid;
 		luaL_getmetatable(L, IMAGE_METATABLE);
 		lua_setmetatable(L, -2);
-		lua_pushboolean(L, true);
-		return 2;
+		return 1;
 	}
 	return luaL_error(L, "could not load image file: %s", path);
 }
