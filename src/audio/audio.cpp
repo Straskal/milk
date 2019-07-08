@@ -22,30 +22,18 @@ static const int NO_LOOP = 0;
 
 static float master_volume = 1.f;
 
-/* Sound */
+/* Samples */
 static std::array<milk::Sound*, NUM_CHANNELS> channels;
 static std::array<float, NUM_CHANNELS> channel_volume;
 static std::queue<int> free_channels;
-
-/* Sound Cache*/
-static const milk::u32 SND_UID_GEN_BITS = 16;
-static const milk::u32 SND_UID_IDX_BITS = 16;
-static const milk::u32 SND_UID_MAX_FREE_IDX = 1024;
-static milk::UID sound_uids;
-static std::unordered_map<std::string, milk::u32> sounds_by_path;
-static std::unordered_map<milk::u32, milk::SoundData*> sounds_by_id;
-
-/* Music */
 static milk::Music* current_music = nullptr;
 
-/* Music Cache*/
-static const milk::u32 MUS_UID_GEN_BITS = 16;
-static const milk::u32 MUS_UID_IDX_BITS = 16;
-static const milk::u32 MUS_UID_MAX_FREE_IDX = 1024;
-static milk::UID music_uids;
+/* Sample Caches */
+static milk::UIDData sample_uids;
+static std::unordered_map<std::string, milk::u32> sounds_by_path;
+static std::unordered_map<milk::u32, milk::SoundData*> sounds_by_id;
 static std::unordered_map<std::string, milk::u32> music_by_path;
 static std::unordered_map<milk::u32, milk::MusicData*> music_by_id;
-
 
 /* Private */
 static void on_channel_finished(int channelNum)
@@ -134,16 +122,16 @@ void milk::audio_quit()
 	Mix_HaltChannel(-1);
 	Mix_HaltMusic();
 
-	for (auto itr : sounds_by_id) {
-		id::recycle(&sound_uids, SND_UID_GEN_BITS, itr.first);
+	for (std::pair<u32, SoundData*> itr : sounds_by_id) {
+		uid_free(&sample_uids, itr.first);
 		Mix_FreeChunk((Mix_Chunk*)itr.second->handle);
 		delete itr.second;
 	}
 	sounds_by_id.clear();
 	sounds_by_path.clear();
 
-	for (auto itr : music_by_id) {
-		id::recycle(&music_uids, MUS_UID_GEN_BITS, itr.first);
+	for (std::pair<u32, MusicData*> itr : music_by_id) {
+		uid_free(&sample_uids, itr.first);
 		Mix_FreeMusic((Mix_Music*)itr.second->handle);
 		delete itr.second;
 	}
@@ -186,7 +174,7 @@ milk::u32 milk::audio_load_sounddata(const char* path)
 	Mix_Chunk* sample = Mix_LoadWAV(path);
 	if (!sample) {
 		std::cout << "Mix_LoadWAV: " << Mix_GetError() << std::endl;
-		return id::INVALID_ID;
+		return milk::INVALID_UID;
 	}
 
 	SoundData* soundData = new SoundData();
@@ -194,20 +182,20 @@ milk::u32 milk::audio_load_sounddata(const char* path)
 	soundData->handle = sample;
 	soundData->refCount = 1;
 
-	u32 id = id::make(&sound_uids, SND_UID_GEN_BITS, SND_UID_MAX_FREE_IDX);
-	sounds_by_path.insert(std::make_pair(path, id));
-	sounds_by_id.insert(std::make_pair(id, soundData));
-	return id;
+	u32 uid = uid_new(&sample_uids);
+	sounds_by_path.insert(std::make_pair(path, uid));
+	sounds_by_id.insert(std::make_pair(uid, soundData));
+	return uid;
 }
 
 milk::SoundData* milk::audio_get_sounddata(u32 id)
 {
-	return id::valid(&sound_uids, SND_UID_GEN_BITS, SND_UID_IDX_BITS, id) ? sounds_by_id.at(id) : nullptr;
+	return uid_alive(&sample_uids, id) ? sounds_by_id.at(id) : nullptr;
 }
 
 void milk::audio_dereference_sounddata(u32 id)
 {
-	if (id::valid(&sound_uids, SND_UID_GEN_BITS, SND_UID_IDX_BITS, id)) {
+	if (uid_alive(&sample_uids, id)) {
 		milk::SoundData* soundData = sounds_by_id.at(id);
 		if (--soundData->refCount <= 0) {
 			sounds_by_path.erase(soundData->path);
@@ -215,7 +203,7 @@ void milk::audio_dereference_sounddata(u32 id)
 			Mix_FreeChunk((Mix_Chunk*)soundData->handle);
 			delete soundData;
 
-			id::recycle(&sound_uids, SND_UID_GEN_BITS, id);
+			uid_free(&sample_uids, id);
 		}
 	}
 }
@@ -232,7 +220,7 @@ milk::u32 milk::audio_load_musicdata(const char* path)
 	Mix_Music* music = Mix_LoadMUS(path);
 	if (!music) {
 		std::cout << "Mix_LoadMUS: " << Mix_GetError() << std::endl;
-		return id::INVALID_ID;
+		return milk::INVALID_UID;
 	}
 
 	MusicData* musicData = new MusicData();
@@ -240,20 +228,20 @@ milk::u32 milk::audio_load_musicdata(const char* path)
 	musicData->handle = music;
 	musicData->refCount = 1;
 
-	u32 id = id::make(&music_uids, MUS_UID_GEN_BITS, MUS_UID_MAX_FREE_IDX);
-	music_by_path.insert(std::make_pair(path, id));
-	music_by_id.insert(std::make_pair(id, musicData));
-	return id;
+	u32 uid = uid_new(&sample_uids);
+	music_by_path.insert(std::make_pair(path, uid));
+	music_by_id.insert(std::make_pair(uid, musicData));
+	return uid;
 }
 
 milk::MusicData* milk::audio_get_musicdata(u32 id)
 {
-	return id::valid(&music_uids, MUS_UID_GEN_BITS, MUS_UID_IDX_BITS, id) ? music_by_id.at(id) : nullptr;
+	return uid_alive(&sample_uids, id) ? music_by_id.at(id) : nullptr;
 }
 
 void milk::audio_dereference_musicdata(u32 id)
 {
-	if (id::valid(&music_uids, MUS_UID_GEN_BITS, MUS_UID_IDX_BITS, id)) {
+	if (uid_alive(&sample_uids, id)) {
 		milk::MusicData* musicData = music_by_id.at(id);
 		if (--musicData->refCount <= 0) {
 			music_by_path.erase(musicData->path);
@@ -261,7 +249,7 @@ void milk::audio_dereference_musicdata(u32 id)
 			Mix_FreeMusic((Mix_Music*)musicData->handle);
 			delete musicData;
 
-			id::recycle(&music_uids, MUS_UID_GEN_BITS, id);
+			uid_free(&sample_uids, id);
 		}
 	}
 }

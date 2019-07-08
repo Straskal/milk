@@ -205,7 +205,7 @@ static int lua_audio_new_sound(lua_State* L)
 	if (lua_isstring(L, 1)) {
 		const char* path = lua_tostring(L, 1);
 		milk::u32 uid = milk::audio_load_sounddata(path);
-		if (uid != milk::id::INVALID_ID) {
+		if (uid != milk::INVALID_UID) {
 			milk::Sound* sound = (milk::Sound*)lua_newuserdata(L, sizeof(milk::Sound));
 			sound->uid = uid;
 			sound->state = milk::SampleState::STOPPED;
@@ -227,7 +227,7 @@ static int lua_audio_new_music(lua_State* L)
 	if (lua_isstring(L, 1)) {
 		const char* path = lua_tostring(L, 1);
 		milk::u32 uid = milk::audio_load_musicdata(path);
-		if (uid != milk::id::INVALID_ID) {
+		if (uid != milk::INVALID_UID) {
 			milk::Music* music = (milk::Music*)lua_newuserdata(L, sizeof(milk::Music));
 			music->uid = uid;
 			music->state = milk::SampleState::STOPPED;

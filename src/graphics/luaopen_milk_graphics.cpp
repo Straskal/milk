@@ -48,7 +48,7 @@ static int lua_graphics_new_image(lua_State* L)
 {
 	const char* path = (const char*)luaL_checkstring(L, 1);
 	milk::u32 uid = milk::graphics_load_imagedata(path);
-	if (uid != milk::id::INVALID_ID) {
+	if (uid != milk::INVALID_UID) {
 		milk::Image* image = (milk::Image*)lua_newuserdata(L, sizeof(milk::Image));
 		image->uid = uid;
 		luaL_getmetatable(L, IMAGE_METATABLE);

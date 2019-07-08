@@ -17,8 +17,8 @@ namespace milk
 	void graphics_set_resolution(int w, int h);
 
 	u32 graphics_load_imagedata(const char* path);
-	ImageData* graphics_get_imagedata(u32 id);
-	void graphics_dereference_imagedata(u32 id);
+	ImageData* graphics_get_imagedata(u32 uid);
+	void graphics_dereference_imagedata(u32 uid);
 
 	void graphics_clear();
 	void graphics_set_draw_color(double r, double g, double b, double a);
