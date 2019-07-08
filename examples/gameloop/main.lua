@@ -3,6 +3,7 @@ local window = require("milk.window")
 local time = require("milk.time")
 local graphics = require("milk.graphics")
 
+-- initialize milk and it's libraries
 milk.init()
 
 -- initialize
@@ -40,4 +41,5 @@ end
 
 -- shutdown
 
+-- this should always be the last line of code executed.
 milk.quit()
