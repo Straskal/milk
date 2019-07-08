@@ -11,14 +11,13 @@ local PLAY_MUSIC = { x = 192, y = 0, w = 64, h = 32 }
 local STOP_MUSIC = { x = 256, y = 0, w = 64, h = 32 }
 local PLAY_SOUND = { x = 320, y = 0, w = 64, h = 32 }
 
-local state = {
-    menu_sheet = graphics.new_image("res/menusheet.png"),
-    sound = audio.new_sound("res/sound.wav"),
-    music = audio.new_music("res/music.mp3")
-}
+local state = {}
 
 function state:enter(game)
     self.gui_layer = gui.new_layer()
+    self.menu_sheet = graphics.new_image("res/menusheet.png")
+    self.sound = audio.new_sound("res/sound.wav")
+    self.music = audio.new_music("res/music.mp3")
 end
 
 function state:exit(game)

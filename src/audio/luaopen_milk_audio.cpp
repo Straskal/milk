@@ -5,32 +5,30 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-#include "AudioPlayer.h"
 #include "Music.h"
-#include "MusicCache.h"
 #include "Sound.h"
-#include "SoundCache.h"
 #include "luamlib.h"
 #include "State.h"
+#include "audio.h"
+#include "data/uid.h"
 
 static const char* SOUND_METATABLE = "milk.sound";
 
 static int soundmeta_tostring(lua_State* L)
 {
 	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
-	const char* path = sound->data->path.c_str();
+	milk::SoundData* soundData = milk::audio_get_sounddata(sound->uid);
+	const char* path = soundData->path.c_str();
 	lua_pushstring(L, path);
 	return 1;
 }
 
 static int soundmeta_gc(lua_State* L)
 {
-	if (milk::State::initialized) {
-		milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
-		// We do NOT want to release a sound from memory while it is playing.
-		milk::State::audioPlayer->stopSound(sound, 0.f);
-		milk::State::sounds->dereference(sound->data);	
-	}
+	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
+	// We do NOT want to release a sound from memory while it is playing.
+	milk::audio_stop_sound(sound, 0.f);
+	milk::audio_dereference_sounddata(sound->uid);
 	return 0;
 }
 
@@ -38,7 +36,7 @@ static int soundmeta_play(lua_State* L)
 {
 	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
 	float fadeTime = (float)luaL_optnumber(L, 2, 0.f);
-	milk::State::audioPlayer->playSound(sound, fadeTime);
+	milk::audio_play_sound(sound, fadeTime);
 	return 1;
 }
 
@@ -46,21 +44,21 @@ static int soundmeta_loop(lua_State* L)
 {
 	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
 	float fadeTime = (float)luaL_optnumber(L, 2, 0.f);
-	milk::State::audioPlayer->loopSound(sound, fadeTime);
+	milk::audio_loop_sound(sound, fadeTime);
 	return 1;
 }
 
 static int soundmeta_pause(lua_State* L)
 {
 	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
-	milk::State::audioPlayer->pauseSound(sound);
+	milk::audio_pause_sound(sound);
 	return 1;
 }
 
 static int soundmeta_resume(lua_State* L)
 {
 	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
-	milk::State::audioPlayer->resumeSound(sound);
+	milk::audio_resume_sound(sound);
 	return 1;
 }
 
@@ -68,7 +66,7 @@ static int soundmeta_stop(lua_State* L)
 {
 	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
 	float fadeTime = (float)luaL_optnumber(L, 2, 0.f);
-	milk::State::audioPlayer->stopSound(sound, fadeTime);
+	milk::audio_stop_sound(sound, fadeTime);
 	return 1;
 }
 
@@ -91,7 +89,7 @@ static int soundmeta_set_volume(lua_State* L)
 {
 	milk::Sound* sound = (milk::Sound*)luaL_checkudata(L, 1, SOUND_METATABLE);
 	float volume = (float)luaL_checknumber(L, 2);
-	milk::State::audioPlayer->setSoundVolume(sound, volume);
+	milk::audio_set_sound_volume(sound, volume);
 	return 0;
 }
 
@@ -114,19 +112,18 @@ static const char* MUSIC_METATABLE = "milk.music";
 static int musicmeta_tostring(lua_State* L)
 {
 	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
-	const char* path = music->data->path.c_str();
+	milk::MusicData* musicData = milk::audio_get_musicdata(music->uid);
+	const char* path = musicData->path.c_str();
 	lua_pushstring(L, path);
 	return 1;
 }
 
 static int musicmeta_gc(lua_State* L)
 {
-	if (milk::State::initialized) {
-		milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
-		// We do NOT want to release music from memory while it is playing.
-		milk::State::audioPlayer->stopMusic(music, 0);
-		milk::State::music->dereference(music->data);	
-	}
+	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
+	// We do NOT want to release music from memory while it is playing.
+	milk::audio_stop_music(music, 0.f);
+	milk::audio_dereference_musicdata(music->uid);
 	return 0;
 }
 
@@ -134,7 +131,7 @@ static int musicmeta_play(lua_State* L)
 {
 	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
 	float fadeTime = (float)luaL_optnumber(L, 2, 0.f);
-	milk::State::audioPlayer->playMusic(music, fadeTime);
+	milk::audio_play_music(music, fadeTime);
 	return 1;
 }
 
@@ -142,21 +139,21 @@ static int musicmeta_loop(lua_State* L)
 {
 	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
 	float fadeTime = (float)luaL_optnumber(L, 2, 0.f);
-	milk::State::audioPlayer->loopMusic(music, fadeTime);
+	milk::audio_loop_music(music, fadeTime);
 	return 1;
 }
 
 static int musicmeta_pause(lua_State* L)
 {
 	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
-	milk::State::audioPlayer->pauseMusic(music);
+	milk::audio_pause_music(music);
 	return 1;
 }
 
 static int musicmeta_resume(lua_State* L)
 {
 	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
-	milk::State::audioPlayer->resumeMusic(music);
+	milk::audio_resume_music(music);
 	return 1;
 }
 
@@ -164,7 +161,7 @@ static int musicmeta_stop(lua_State* L)
 {
 	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
 	float fadeTime = (float)luaL_optnumber(L, 2, 0.f);
-	milk::State::audioPlayer->stopMusic(music, fadeTime);
+	milk::audio_stop_music(music, fadeTime);
 	return 1;
 }
 
@@ -187,7 +184,7 @@ static int musicmeta_set_volume(lua_State* L)
 {
 	milk::Music* music = (milk::Music*)luaL_checkudata(L, 1, MUSIC_METATABLE);
 	float volume = (float)luaL_checknumber(L, 2);
-	milk::State::audioPlayer->setMusicVolume(music, volume);
+	milk::audio_set_music_volume(music, volume);
 	return 0;
 }
 
@@ -208,11 +205,11 @@ static const luaL_Reg musicmeta_funcs[] = {
 static int audio_new_sound(lua_State* L)
 {
 	if (lua_isstring(L, 1)) {
-		const char* value = lua_tostring(L, 1);
-		milk::SoundData* soundData = milk::State::sounds->load(value);
-		if (soundData != nullptr) {
+		const char* path = lua_tostring(L, 1);
+		milk::u32 uid = milk::audio_load_sounddata(path);
+		if (uid != milk::id::INVALID_ID) {
 			milk::Sound* sound = (milk::Sound*)lua_newuserdata(L, sizeof(milk::Sound));
-			sound->data = soundData;
+			sound->uid = uid;
 			sound->state = milk::SampleState::STOPPED;
 			sound->channel = -1;
 			sound->volume = 1.0f;
@@ -230,11 +227,11 @@ static int audio_new_sound(lua_State* L)
 static int audio_new_music(lua_State* L)
 {
 	if (lua_isstring(L, 1)) {
-		const char* value = lua_tostring(L, 1);
-		milk::MusicData* musicData = milk::State::music->load(value);
-		if (musicData != nullptr) {
+		const char* path = lua_tostring(L, 1);
+		milk::u32 uid = milk::audio_load_musicdata(path);
+		if (uid != milk::id::INVALID_ID) {
 			milk::Music* music = (milk::Music*)lua_newuserdata(L, sizeof(milk::Music));
-			music->data = musicData;
+			music->uid = uid;
 			music->state = milk::SampleState::STOPPED;
 			music->volume = 1.0f;
 			luaL_getmetatable(L, MUSIC_METATABLE);
@@ -250,7 +247,7 @@ static int audio_new_music(lua_State* L)
 
 static int audio_get_master_volume(lua_State* L)
 {
-	float masterVolume = milk::State::audioPlayer->getMasterVolume();
+	float masterVolume = milk::audio_get_master_volume();
 	lua_pushnumber(L, masterVolume);
 	return 1;
 }
@@ -258,7 +255,7 @@ static int audio_get_master_volume(lua_State* L)
 static int audio_set_master_volume(lua_State* L)
 {
 	float masterVolume = (float)luaL_checknumber(L, 1);
-	milk::State::audioPlayer->setMasterVolume(masterVolume);
+	milk::audio_set_master_volume(masterVolume);
 	return 0;
 }
 

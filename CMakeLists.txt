@@ -74,20 +74,13 @@ set(MILK_SRC
 
 # audio
 set(MILK_SRC_AUDIO
-	src/audio/AudioPlayer.h
+	src/audio/audio.cpp
+	src/audio/audio.h
 	src/audio/Music.h
-	src/audio/MusicCache.h
 	src/audio/SampleState.h
-	src/audio/SoundCache.h
 	src/audio/Sound.h
 	src/audio/luaopen_milk_audio.cpp
 	src/audio/luaopen_milk_audio.h
-	src/audio/sdl/SDLAudioPlayer.cpp
-	src/audio/sdl/SDLAudioPlayer.h
-	src/audio/sdl/SDLMusicCache.cpp
-	src/audio/sdl/SDLMusicCache.h
-	src/audio/sdl/SDLSoundCache.cpp
-	src/audio/sdl/SDLSoundCache.h
 )
 
 # data

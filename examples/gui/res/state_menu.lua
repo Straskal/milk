@@ -7,12 +7,11 @@ local settings_state = require("res.state_settings")
 local SETTINGS = { x = 0, y = 0, w = 64, h = 32 }
 local QUIT = { x = 64, y = 0, w = 64, h = 32 }
 
-local state = {
-    menu_sheet = graphics.new_image("res/menusheet.png")
-}
+local state = {}
 
 function state:enter(game)
     self.gui_layer = gui.new_layer()
+    self.menu_sheet = graphics.new_image("res/menusheet.png")
 end
 
 function state:exit(game)

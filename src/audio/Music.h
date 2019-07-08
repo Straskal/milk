@@ -4,6 +4,7 @@
 #include <string>
 
 #include "SampleState.h"
+#include "data/int.h"
 
 namespace milk
 {
@@ -16,7 +17,7 @@ namespace milk
 
 	struct Music
 	{
-		MusicData* data;
+		u32 uid;
 		SampleState state;
 		float volume;
 	};

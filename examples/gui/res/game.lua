@@ -2,11 +2,6 @@ local window = require("milk.window")
 local graphics = require("milk.graphics")
 local state_menu = require("res.state_menu")
 
--- initialize game
-window.set_title("GUI")
-window.set_size(1280, 720)
-graphics.set_virtual_resolution(640, 360)
-
 local game = {
 	states = {}
 }
@@ -22,8 +17,14 @@ function game.pop_state()
 	table.remove(game.states)
 end
 
--- initial state
-game.push_state(state_menu)
+function game:start()
+	window.set_title("GUI")
+	window.set_size(1280, 720)
+	graphics.set_resolution(640, 360)
+
+	-- initial state
+	game.push_state(state_menu)
+end
 
 function game.tick()
 	-- only update the top state

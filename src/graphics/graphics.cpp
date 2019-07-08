@@ -19,8 +19,8 @@ static SDL_Renderer* renderer_handle = nullptr;
 
 /* Image cache info */
 static const milk::u32 IMG_UID_GEN_BITS = 16;
-static const milk::u32 IMG_ID_IDX_BITS = 16;
-static const milk::u32 IMG_ID_MAX_FREE_IDX = 1024;
+static const milk::u32 IMG_UID_IDX_BITS = 16;
+static const milk::u32 IMG_UID_MAX_FREE_IDX = 1024;
 static milk::UID image_uids;
 static std::unordered_map<std::string, milk::u32> images_by_path;
 static std::unordered_map<milk::u32, milk::ImageData*> images_by_id;
@@ -54,13 +54,13 @@ bool milk::graphics_init(void* windowHandle)
 void milk::graphics_quit()
 {
 	for (auto itr : images_by_id) {
-		u32 id = images_by_path.at(itr.second->path);
-		id::recycle(&image_uids, 16, id);
+		id::recycle(&image_uids, IMG_UID_GEN_BITS, itr.first);
 		SDL_DestroyTexture((SDL_Texture*)itr.second->handle);
 		delete itr.second;
 	}
-	images_by_path.clear();
 	images_by_id.clear();
+	images_by_path.clear();
+
 	IMG_Quit();
 	SDL_DestroyRenderer(renderer_handle);
 }
@@ -88,7 +88,7 @@ milk::u32 milk::graphics_load_imagedata(const char* path)
 	SDL_Surface* sdlsurface = IMG_Load(path);
 	if (sdlsurface == nullptr) {
 		std::cout << "Error loading image: " << IMG_GetError() << std::endl;
-		return 0;
+		return id::INVALID_ID;
 	}
 
 	SDL_Texture* sdltexture = SDL_CreateTextureFromSurface(renderer_handle, sdlsurface);
@@ -104,7 +104,7 @@ milk::u32 milk::graphics_load_imagedata(const char* path)
 	imageData->width = w;
 	imageData->height = h;
 
-	u32 id = id::make(&image_uids, IMG_UID_GEN_BITS, IMG_ID_MAX_FREE_IDX);
+	u32 id = id::make(&image_uids, IMG_UID_GEN_BITS, IMG_UID_MAX_FREE_IDX);
 	images_by_path.insert(std::make_pair(path, id));
 	images_by_id.insert(std::make_pair(id, imageData));
 	return id;
@@ -112,12 +112,12 @@ milk::u32 milk::graphics_load_imagedata(const char* path)
 
 milk::ImageData* milk::graphics_get_imagedata(u32 id)
 {
-	return id::valid(&image_uids, IMG_UID_GEN_BITS, IMG_ID_IDX_BITS, id) ? images_by_id.at(id) : nullptr;
+	return id::valid(&image_uids, IMG_UID_GEN_BITS, IMG_UID_IDX_BITS, id) ? images_by_id.at(id) : nullptr;
 }
 
 void milk::graphics_dereference_imagedata(u32 id)
 {
-	if (id::valid(&image_uids, 16, 16, id)) {
+	if (id::valid(&image_uids, IMG_UID_GEN_BITS, IMG_UID_IDX_BITS, id)) {
 		ImageData* imageData = images_by_id.at(id);
 		if (--imageData->refCount <= 0) {
 			images_by_path.erase(imageData->path);

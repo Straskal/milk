@@ -10,12 +10,10 @@ extern "C" {
 #include "luamlib.h"
 #include "State.h"
 
+#include "audio/audio.h"
 #include "graphics/graphics.h"
 #include "window/window.h"
 
-#include "audio/sdl/SDLAudioPlayer.h"
-#include "audio/sdl/SDLMusicCache.h"
-#include "audio/sdl/SDLSoundCache.h"
 #include "keyboard/sdl/SDLKeyboard.h"
 #include "mouse/sdl/SDLMouse.h"
 
@@ -24,39 +22,25 @@ extern "C" {
 
 static milk::SDLMouse* mouse = nullptr;
 static milk::SDLKeyboard* keyboard = nullptr;
-static milk::SDLAudioPlayer* audio_player = nullptr;
-static milk::SDLSoundCache* sound_cache = nullptr;
-static milk::SDLMusicCache* music_cache = nullptr;
 
 static int milk_init(lua_State* L)
 {
-	if (milk::State::initialized) {
-		return luaL_error(L, "milk has already been initialized!");
-	}
-
-	audio_player = new milk::SDLAudioPlayer();
-	music_cache = new milk::SDLMusicCache();
-	sound_cache = new milk::SDLSoundCache();
 	mouse = new milk::SDLMouse();
 	keyboard = new milk::SDLKeyboard();
 
-	milk::State::audioPlayer = audio_player;
-	milk::State::sounds = sound_cache;
-	milk::State::music = music_cache;
 	milk::State::mouse = mouse;
 	milk::State::keyboard = keyboard;
 
 	if (milk::window_init()
 		&& milk::graphics_init(milk::window_get_handle())
-		&& audio_player->init()) {
+		&& milk::audio_init()) {
 
-		milk::State::initialized = true;
 		return 0;
 	}
 	return luaL_error(L, "could not start milk!");
 }
 
-// TODO MOVE TO WINDOW
+// TODO: MOVE TO WINDOW
 static int milk_poll(lua_State* L)
 {
 	(void)L;
@@ -79,26 +63,14 @@ static int milk_poll(lua_State* L)
 
 static int milk_quit(lua_State* L)
 {
-	if (!milk::State::initialized) {
-		return luaL_error(L, "you cannot quit milk when it has not been initialized!");
-	}
-
-	milk::State::audioPlayer = nullptr;
-	milk::State::sounds = nullptr;
-	milk::State::music = nullptr;
 	milk::State::mouse = nullptr;
 	milk::State::keyboard = nullptr;
 
 	free_ptr(keyboard);
 	free_ptr(mouse);
-	audio_player->stop(); // Stop all sounds and music so we don't free any that are playing.
-	deinit_and_free_ptr(sound_cache);
-	deinit_and_free_ptr(music_cache);
-	deinit_and_free_ptr(audio_player);
+	milk::audio_quit();
 	milk::graphics_quit();
 	milk::window_quit();
-
-	milk::State::initialized = false;
 	return 0;
 }
 

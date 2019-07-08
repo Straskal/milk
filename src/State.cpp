@@ -1,5 +1,7 @@
 #include "State.h"
 
+#include "audio/audio.h"
+
 bool milk::State::initialized = false;
 
 milk::Time* milk::State::time = nullptr;
