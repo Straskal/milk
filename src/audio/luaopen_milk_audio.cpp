@@ -8,7 +8,7 @@ extern "C" {
 #include "audio.h"
 #include "luamlib.h"
 #include "sample.h"
-#include "data/uid.h"
+#include "uid.h"
 
 static const char* SOUND_METATABLE = "milk.sound";
 

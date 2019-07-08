@@ -8,7 +8,7 @@ extern "C" {
 #include "graphics.h"
 #include "image.h"
 #include "luamlib.h"
-#include "data/uid.h"
+#include "uid.h"
 
 static const char* IMAGE_METATABLE = "milk.image";
 

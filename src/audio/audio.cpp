@@ -10,7 +10,7 @@
 #include "SDL_mixer.h"
 
 #include "sample.h"
-#include "data/uid.h"
+#include "uid.h"
 
 /* Audio */
 static const int NUM_CHANNELS = 32;

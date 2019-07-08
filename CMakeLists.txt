@@ -63,11 +63,14 @@ find_package(Lua53 REQUIRED)
 
 # root
 set(MILK_SRC
+	src/int.h
 	src/luamlib.cpp
 	src/luamlib.h
 	src/milk_export.h
 	src/luaopen_milk.cpp
 	src/luaopen_milk.h
+	src/uid.cpp
+	src/uid.h
 )
 
 # audio
@@ -81,9 +84,6 @@ set(MILK_SRC_AUDIO
 
 # data
 set(MILK_SRC_DATA
-	src/data/uid.cpp
-	src/data/uid.h
-	src/data/int.h
 )
 
 # graphics

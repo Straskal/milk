@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "data/int.h"
+#include "int.h"
 
 namespace milk
 {

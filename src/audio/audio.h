@@ -1,7 +1,7 @@
 #ifndef _AUDIO_H_
 #define _AUDIO_H_
 
-#include "data/int.h"
+#include "int.h"
 
 namespace milk 
 {

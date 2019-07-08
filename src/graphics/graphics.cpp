@@ -8,7 +8,7 @@
 #include "SDL_image.h"
 
 #include "image.h"
-#include "data/uid.h"
+#include "uid.h"
 
 /* Renderer info */
 static const int FIRST_SUPPORTED_RENDERING_DRIVER = -1;

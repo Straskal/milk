@@ -3,7 +3,7 @@
 
 #include <tuple>
 
-#include "data/int.h"
+#include "int.h"
 
 namespace milk 
 {
