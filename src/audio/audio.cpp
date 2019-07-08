@@ -178,7 +178,8 @@ milk::u32 milk::audio_load_sounddata(const char* path)
 {
 	std::unordered_map<std::string, u32>::iterator loaded = sounds_by_path.find(path);
 	if (loaded != sounds_by_path.end()) {
-		++sounds_by_id.at(loaded->second)->refCount;
+		u32 id = loaded->second;
+		++sounds_by_id.at(id)->refCount;
 		return loaded->second;
 	}
 
@@ -221,7 +222,8 @@ milk::u32 milk::audio_load_musicdata(const char* path)
 {
 	std::unordered_map<std::string, u32>::iterator loaded = music_by_path.find(path);
 	if (loaded != music_by_path.end()) {
-		++sounds_by_id.at(loaded->second)->refCount;
+		u32 id = loaded->second;
+		++sounds_by_id.at(id)->refCount;
 		return loaded->second;
 	}
 
