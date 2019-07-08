@@ -213,7 +213,7 @@ milk::u32 milk::audio_load_musicdata(const char* path)
 	std::unordered_map<std::string, u32>::iterator loaded = music_by_path.find(path);
 	if (loaded != music_by_path.end()) {
 		u32 id = loaded->second;
-		++sounds_by_id.at(id)->refCount;
+		++music_by_id.at(id)->refCount;
 		return loaded->second;
 	}
 
