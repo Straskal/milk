@@ -107,6 +107,14 @@ void milk::audio_quit()
 	sounds_by_id.clear();
 	sounds_by_path.clear();
 
+	for (auto itr : music_by_id) {
+		id::recycle(&music_uids, MUS_UID_GEN_BITS, itr.first);
+		Mix_FreeMusic((Mix_Music*)itr.second->handle);
+		delete itr.second;
+	}
+	music_by_id.clear();
+	music_by_path.clear();
+
 	Mix_CloseAudio();
 	Mix_Quit();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
