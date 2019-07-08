@@ -182,8 +182,6 @@ void milk::graphics_draw(const Image* image, float x, float y, int srcx, int src
 	SDL_SetTextureColorMod(texture, r, g, b);
 	SDL_SetTextureAlphaMod(texture, a);
 
-	SDL_Rect src = { srcx, srcy, srcw, srch };
-
 	Uint8 flip = SDL_FLIP_NONE;
 	if (scx < 0) {
 		flip |= SDL_FLIP_HORIZONTAL;
@@ -194,6 +192,7 @@ void milk::graphics_draw(const Image* image, float x, float y, int srcx, int src
 		scy *= -1;
 	}
 
+	SDL_Rect src = { srcx, srcy, srcw, srch };
 	SDL_FRect dest = { x, y, (float)srcw * scx, (float)srch * scy };
 	SDL_FPoint center = { dest.w * 0.5f, dest.h * 0.5f };
 	SDL_RenderCopyExF(renderer_handle, texture, &src, &dest, angle, &center, (SDL_RendererFlip)flip);
