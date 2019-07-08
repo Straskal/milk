@@ -12,36 +12,36 @@ extern "C" {
 
 #include "graphics/graphics.h"
 
-static int mouse_is_button_down(lua_State* L)
+static int lua_mouse_is_button_down(lua_State* L)
 {
 	milk::MouseButtons button = (milk::MouseButtons)luaL_checkinteger(L, 1);
-	bool down = milk::State::mouse->isButtonDown(button);
+	bool down = milk::mouse_is_button_down(button);
 	lua_pushboolean(L, down);
 	return 1;
 }
 
-static int mouse_is_button_pressed(lua_State* L)
+static int lua_mouse_is_button_pressed(lua_State* L)
 {
 	milk::MouseButtons button = (milk::MouseButtons)luaL_checkinteger(L, 1);
-	bool down = milk::State::mouse->isButtonPressed(button);
-	lua_pushboolean(L, down);
+	bool pressed = milk::mouse_is_button_pressed(button);
+	lua_pushboolean(L, pressed);
 	return 1;
 }
 
-static int mouse_is_button_released(lua_State* L)
+static int lua_mouse_is_button_released(lua_State* L)
 {
 	milk::MouseButtons button = (milk::MouseButtons)luaL_checkinteger(L, 1);
-	bool down = milk::State::mouse->isButtonReleased(button);
-	lua_pushboolean(L, down);
+	bool released = milk::mouse_is_button_released(button);
+	lua_pushboolean(L, released);
 	return 1;
 }
 
 
-static int mouse_get_position(lua_State* L)
+static int lua_mouse_get_position(lua_State* L)
 {
 	// SDL's logical resolution filter only applies to events pumped through the event loop, not the real time state updates.
 	// This means that we have to handle it ourselves.
-	std::tuple<int, int> pos = milk::State::mouse->getPosition();
+	std::tuple<int, int> pos = milk::mouse_get_position();
 	std::tuple<int, int> winsize = milk::window_get_size();
 	std::tuple<int, int> resolution = milk::graphics_get_resolution();
 
@@ -55,23 +55,23 @@ static int mouse_get_position(lua_State* L)
 	return 2;
 }
 
-static int mouse_get_scroll(lua_State* L)
+static int lua_mouse_get_scroll(lua_State* L)
 {
-	int scroll = milk::State::mouse->getScroll();
+	int scroll = milk::mouse_get_scroll();
 	lua_pushinteger(L, scroll);
 	return 1;
 }
 
-static const luaL_Reg mouse_funcs[] = {
-	{ "is_button_down", mouse_is_button_down },
-	{ "is_button_pressed", mouse_is_button_pressed },
-	{ "is_button_released", mouse_is_button_released },
-	{ "get_position", mouse_get_position },
-	{ "get_scroll", mouse_get_scroll },
+static const luaL_Reg lua_mouse_funcs[] = {
+	{ "is_button_down", lua_mouse_is_button_down },
+	{ "is_button_pressed", lua_mouse_is_button_pressed },
+	{ "is_button_released", lua_mouse_is_button_released },
+	{ "get_position", lua_mouse_get_position },
+	{ "get_scroll", lua_mouse_get_scroll },
 	{ nullptr, nullptr }
 };
 
-static const milk::luaM_Enum buttons_enum[] = {
+static const milk::luaM_Enum lua_buttons_enum[] = {
 	{ "LEFT", (int)milk::MouseButtons::LEFT },
 	{ "MIDDLE", (int)milk::MouseButtons::MIDDLE },
 	{ "RIGHT", (int)milk::MouseButtons::RIGHT }
@@ -79,7 +79,7 @@ static const milk::luaM_Enum buttons_enum[] = {
 
 int luaopen_milk_mouse(lua_State* L)
 {
-	luaL_newlib(L, mouse_funcs);
-	luaM_setenumfield(L, -1, "buttons", buttons_enum, sizeof(buttons_enum));
+	luaL_newlib(L, lua_mouse_funcs);
+	luaM_setenumfield(L, -1, "buttons", lua_buttons_enum, sizeof(lua_buttons_enum));
 	return 1;
 }

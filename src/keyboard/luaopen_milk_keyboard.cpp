@@ -6,25 +6,25 @@
 
 static int lua_is_key_down(lua_State* L)
 {
-	int key = (int)luaL_checkinteger(L, 1);
-	bool down = milk::keyboard_is_key_down((milk::Keys)key);
+	milk::Keys key = (milk::Keys)luaL_checkinteger(L, 1);
+	bool down = milk::keyboard_is_key_down(key);
 	lua_pushboolean(L, down);
 	return 1;
 }
 
 static int lua_is_key_pressed(lua_State* L)
 {
-	int key = (int)luaL_checkinteger(L, 1);
-	bool down = milk::keyboard_is_key_pressed((milk::Keys)key);
-	lua_pushboolean(L, down);
+	milk::Keys key = (milk::Keys)luaL_checkinteger(L, 1);
+	bool pressed = milk::keyboard_is_key_pressed(key);
+	lua_pushboolean(L, pressed);
 	return 1;
 }
 
 static int lua_is_key_released(lua_State* L)
 {
-	int key = (int)luaL_checkinteger(L, 1);
-	bool down = milk::keyboard_is_key_released((milk::Keys)key);
-	lua_pushboolean(L, down);
+	milk::Keys key = (milk::Keys)luaL_checkinteger(L, 1);
+	bool released = milk::keyboard_is_key_released(key);
+	lua_pushboolean(L, released);
 	return 1;
 }
 

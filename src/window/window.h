@@ -10,6 +10,8 @@ namespace milk
 
 	void* window_get_handle();
 
+	void window_poll();
+
 	void window_show();
 	const char* window_get_title();
 	void window_set_title(const char* title);

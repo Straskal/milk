@@ -107,11 +107,10 @@ set(MILK_SRC_KEYBOARD
 
 # mouse
 set(MILK_SRC_MOUSE
-	src/mouse/Mouse.h
+	src/mouse/mouse.cpp
+	src/mouse/mouse.h
 	src/mouse/luaopen_milk_mouse.cpp
 	src/mouse/luaopen_milk_mouse.h
-	src/mouse/sdl/SDLMouse.cpp
-	src/mouse/sdl/SDLMouse.h
 )
 
 # time

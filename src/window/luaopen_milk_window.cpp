@@ -7,6 +7,13 @@ extern "C" {
 
 #include "window.h"
 
+static int lua_window_poll(lua_State* L)
+{
+	(void)(L);
+	milk::window_poll();
+	return 0;
+}
+
 static int lua_window_show(lua_State* L)
 {
 	(void)(L);
@@ -82,6 +89,7 @@ static int lua_window_should_close(lua_State* L)
 }
 
 static const luaL_Reg window_funcs[] = {
+	{ "poll", lua_window_poll },
 	{ "show", lua_window_show },
 	{ "get_title", lua_window_get_title },
 	{ "set_title", lua_window_set_title },

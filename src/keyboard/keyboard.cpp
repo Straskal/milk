@@ -8,7 +8,7 @@
 static Uint8 current_state[SDL_NUM_SCANCODES];
 static Uint8 previous_state[SDL_NUM_SCANCODES];
 
-bool milk::keyboard_update_state()
+void milk::keyboard_update_state()
 {
 	std::memcpy(previous_state, current_state, sizeof(Uint8) * SDL_NUM_SCANCODES);
 	std::memcpy(current_state, SDL_GetKeyboardState(nullptr), sizeof(Uint8) * SDL_NUM_SCANCODES);

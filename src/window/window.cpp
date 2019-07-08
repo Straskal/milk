@@ -5,6 +5,9 @@
 #include "SDL.h"
 #include "SDL_image.h"
 
+#include "keyboard/keyboard.h"
+#include "mouse/mouse.h"
+
 /* Window */
 static const int DEFAULT_WIDTH = 800;
 static const int DEFAULT_HEIGHT = 600;
@@ -44,6 +47,24 @@ void milk::window_quit()
 void* milk::window_get_handle()
 {
 	return window_handle;
+}
+
+void milk::window_poll()
+{
+	milk::mouse_reset_scroll();
+
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) {
+		if (event.type == SDL_QUIT) {
+			milk::window_close();
+		}
+		if (event.type == SDL_MOUSEWHEEL) {
+			milk::mouse_handle_wheel_event(&event);
+		}
+	}
+
+	milk::mouse_update_state();
+	milk::keyboard_update_state();
 }
 
 void milk::window_show()

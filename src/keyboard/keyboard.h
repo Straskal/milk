@@ -85,7 +85,7 @@ namespace milk
 		MAX_KEYS
 	};
 
-	bool keyboard_update_state();
+	void keyboard_update_state();
 
 	bool keyboard_is_key_down(Keys key);
 	bool keyboard_is_key_pressed(Keys key);
