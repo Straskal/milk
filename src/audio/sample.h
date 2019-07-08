@@ -23,8 +23,8 @@ namespace milk
 
 	struct Sound
 	{
-		SampleState state;
 		u32 uid;
+		SampleState state;
 		int channel;
 		float volume;
 	};
