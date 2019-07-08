@@ -202,45 +202,35 @@ static const luaL_Reg lua_musicmeta_funcs[] = {
 
 static int lua_audio_new_sound(lua_State* L)
 {
-	if (lua_isstring(L, 1)) {
-		const char* path = lua_tostring(L, 1);
-		milk::u32 uid = milk::audio_load_sounddata(path);
-		if (uid != milk::INVALID_UID) {
-			milk::Sound* sound = (milk::Sound*)lua_newuserdata(L, sizeof(milk::Sound));
-			sound->uid = uid;
-			sound->state = milk::SampleState::STOPPED;
-			sound->channel = -1;
-			sound->volume = 1.0f;
-			luaL_getmetatable(L, SOUND_METATABLE);
-			lua_setmetatable(L, -2);
-			lua_pushboolean(L, true);
-			return 2;
-		}
+	const char* path = (const char*)luaL_checkstring(L, 1);
+	milk::u32 uid = milk::audio_load_sounddata(path);
+	if (uid != milk::INVALID_UID) {
+		milk::Sound* sound = (milk::Sound*)lua_newuserdata(L, sizeof(milk::Sound));
+		sound->uid = uid;
+		sound->state = milk::SampleState::STOPPED;
+		sound->channel = -1;
+		sound->volume = 1.0f;
+		luaL_getmetatable(L, SOUND_METATABLE);
+		lua_setmetatable(L, -2);
+		return 1;
 	}
-	lua_pushnil(L);
-	lua_pushboolean(L, false);
-	return 2;
+	return luaL_error(L, "could not load sound file: %s", path);
 }
 
 static int lua_audio_new_music(lua_State* L)
 {
-	if (lua_isstring(L, 1)) {
-		const char* path = lua_tostring(L, 1);
-		milk::u32 uid = milk::audio_load_musicdata(path);
-		if (uid != milk::INVALID_UID) {
-			milk::Music* music = (milk::Music*)lua_newuserdata(L, sizeof(milk::Music));
-			music->uid = uid;
-			music->state = milk::SampleState::STOPPED;
-			music->volume = 1.0f;
-			luaL_getmetatable(L, MUSIC_METATABLE);
-			lua_setmetatable(L, -2);
-			lua_pushboolean(L, true);
-			return 2;
-		}
+	const char* path = (const char*)luaL_checkstring(L, 1);
+	milk::u32 uid = milk::audio_load_musicdata(path);
+	if (uid != milk::INVALID_UID) {
+		milk::Music* music = (milk::Music*)lua_newuserdata(L, sizeof(milk::Music));
+		music->uid = uid;
+		music->state = milk::SampleState::STOPPED;
+		music->volume = 1.0f;
+		luaL_getmetatable(L, MUSIC_METATABLE);
+		lua_setmetatable(L, -2);
+		return 1;
 	}
-	lua_pushnil(L);
-	lua_pushboolean(L, false);
-	return 2;
+	return luaL_error(L, "could not load music file: %s", path);
 }
 
 static int lua_audio_get_master_volume(lua_State* L)
