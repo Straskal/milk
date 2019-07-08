@@ -50,10 +50,10 @@ bool milk::graphics_init(void* windowHandle)
 
 void milk::graphics_quit()
 {
-	for (std::pair<u32, ImageData*> itr : images_by_uid) {
-		uid_free(&image_uids, itr.first);
-		SDL_DestroyTexture((SDL_Texture*)itr.second->handle);
-		delete itr.second;
+	for (std::pair<u32, ImageData*> pair : images_by_uid) {
+		uid_free(&image_uids, pair.first);
+		SDL_DestroyTexture((SDL_Texture*)pair.second->handle);
+		delete pair.second;
 	}
 	images_by_uid.clear();
 	images_by_path.clear();
