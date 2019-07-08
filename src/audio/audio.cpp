@@ -20,7 +20,7 @@ static const int INVALID_CHANNEL = -1;
 static const int LOOP = -1;
 static const int NO_LOOP = 0;
 
-float master_volume = 1.f;
+static float master_volume = 1.f;
 
 /* Sound */
 static std::array<milk::Sound*, NUM_CHANNELS> channels;
