@@ -15,7 +15,7 @@ local frame_start_time = 0
 local frame_time = 0
 local accumulated_frame_time = 0
 
--- run a fixed time step of SECONDS_PER_TICK
+-- run at fixed time step of SECONDS_PER_TICK
 while not window.should_close() do
     local t = time.get_total()
     frame_time = t - frame_start_time
