@@ -117,11 +117,12 @@ void milk::graphics_dereference_imagedata(u32 uid)
 	if (uid_alive(&image_uids, uid)) {
 		ImageData* imageData = images_by_uid.at(uid);
 		if (--imageData->refCount <= 0) {
-			uid_free(&image_uids, uid);
 			images_by_path.erase(imageData->path);
 			images_by_uid.erase(uid);
 			SDL_DestroyTexture((SDL_Texture*)imageData->handle);
 			delete imageData;
+
+			uid_free(&image_uids, uid);
 		}
 	}
 }
