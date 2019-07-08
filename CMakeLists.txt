@@ -99,11 +99,10 @@ set(MILK_SRC_GRAPHICS
 
 # keyboard
 set(MILK_SRC_KEYBOARD
-	src/keyboard/Keyboard.h
+	src/keyboard/keyboard.cpp
+	src/keyboard/keyboard.h
 	src/keyboard/luaopen_milk_keyboard.cpp
 	src/keyboard/luaopen_milk_keyboard.h
-	src/keyboard/sdl/SDLKeyboard.cpp
-	src/keyboard/sdl/SDLKeyboard.h
 )
 
 # mouse

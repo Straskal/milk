@@ -1,56 +1,41 @@
 #include "luaopen_milk_keyboard.h"
 
-#include "Keyboard.h"
+#include "keyboard.h"
 #include "luamlib.h"
 #include "State.h"
 
-static int is_key_down(lua_State* L)
+static int lua_is_key_down(lua_State* L)
 {
-	int isnum;
-	int key = (int)lua_tointegerx(L, 1, &isnum);
-	if (isnum) {
-		bool down = milk::State::keyboard->isKeyDown((milk::Keys)key);
-		lua_pushboolean(L, down);
-		return 1;
-	}
-	lua_pushboolean(L, false);
+	int key = (int)luaL_checkinteger(L, 1);
+	bool down = milk::keyboard_is_key_down((milk::Keys)key);
+	lua_pushboolean(L, down);
 	return 1;
 }
 
-static int is_key_pressed(lua_State* L)
+static int lua_is_key_pressed(lua_State* L)
 {
-	int isnum;
-	int key = (int)lua_tointegerx(L, 1, &isnum);
-	if (isnum) {
-		bool pressed = milk::State::keyboard->isKeyPressed((milk::Keys)key);
-		lua_pushboolean(L, pressed);
-		return 1;
-	}
-	lua_pushboolean(L, false);
+	int key = (int)luaL_checkinteger(L, 1);
+	bool down = milk::keyboard_is_key_pressed((milk::Keys)key);
+	lua_pushboolean(L, down);
 	return 1;
 }
 
-static int is_key_released(lua_State* L)
+static int lua_is_key_released(lua_State* L)
 {
-	int isnum;
-	int key = (int)lua_tointegerx(L, 1, &isnum);
-	if (isnum) {
-		bool released = milk::State::keyboard->isKeyReleased((milk::Keys)key);
-		lua_pushboolean(L, released);
-		return 1;
-	}
-	lua_pushboolean(L, false);
+	int key = (int)luaL_checkinteger(L, 1);
+	bool down = milk::keyboard_is_key_released((milk::Keys)key);
+	lua_pushboolean(L, down);
 	return 1;
 }
 
-static const luaL_Reg keyboard_funcs[] = {
-	{ "is_key_down", is_key_down },
-	{ "is_key_pressed", is_key_pressed },
-	{ "is_key_released", is_key_released },
+static const luaL_Reg lua_keyboard_funcs[] = {
+	{ "is_key_down", lua_is_key_down },
+	{ "is_key_pressed", lua_is_key_pressed },
+	{ "is_key_released", lua_is_key_released },
 	{ nullptr, nullptr }
 };
 
-static const milk::luaM_Enum keys_enum[] = {
+static const milk::luaM_Enum lua_keys_enum[] = {
 	{ "A", (int)milk::Keys::A },
 	{ "B", (int)milk::Keys::B },
 	{ "C", (int)milk::Keys::C },
@@ -130,7 +115,7 @@ static const milk::luaM_Enum keys_enum[] = {
 
 int luaopen_milk_keyboard(lua_State* L)
 {
-	luaL_newlib(L, keyboard_funcs);
-	luaM_setenumfield(L, -1, "keys", keys_enum, sizeof(keys_enum));
+	luaL_newlib(L, lua_keyboard_funcs);
+	luaM_setenumfield(L, -1, "keys", lua_keys_enum, sizeof(lua_keys_enum));
 	return 1;
 }

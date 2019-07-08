@@ -12,24 +12,21 @@ extern "C" {
 
 #include "audio/audio.h"
 #include "graphics/graphics.h"
+#include "keyboard/keyboard.h"
 #include "window/window.h"
 
-#include "keyboard/sdl/SDLKeyboard.h"
 #include "mouse/sdl/SDLMouse.h"
 
 #define free_ptr(x) delete x; x = nullptr
 #define deinit_and_free_ptr(x) x->free(); free_ptr(x)
 
 static milk::SDLMouse* mouse = nullptr;
-static milk::SDLKeyboard* keyboard = nullptr;
 
 static int milk_init(lua_State* L)
 {
 	mouse = new milk::SDLMouse();
-	keyboard = new milk::SDLKeyboard();
 
 	milk::State::mouse = mouse;
-	milk::State::keyboard = keyboard;
 
 	if (milk::window_init()
 		&& milk::graphics_init(milk::window_get_handle())
@@ -56,7 +53,7 @@ static int milk_poll(lua_State* L)
 	}
 
 	mouse->tick();
-	keyboard->tick();
+	milk::keyboard_update_state();
 	return 0;
 
 }
@@ -64,9 +61,7 @@ static int milk_poll(lua_State* L)
 static int milk_quit(lua_State* L)
 {
 	milk::State::mouse = nullptr;
-	milk::State::keyboard = nullptr;
 
-	free_ptr(keyboard);
 	free_ptr(mouse);
 	milk::audio_quit();
 	milk::graphics_quit();

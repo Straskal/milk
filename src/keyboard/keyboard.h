@@ -85,15 +85,11 @@ namespace milk
 		MAX_KEYS
 	};
 
-	class Keyboard
-	{
-	public:
-		virtual ~Keyboard() = default;
+	bool keyboard_update_state();
 
-		virtual bool isKeyDown(Keys key) const = 0;
-		virtual bool isKeyPressed(Keys key) const = 0;
-		virtual bool isKeyReleased(Keys key) const = 0;
-	};
+	bool keyboard_is_key_down(Keys key);
+	bool keyboard_is_key_pressed(Keys key);
+	bool keyboard_is_key_released(Keys key);
 }
 
 #endif
