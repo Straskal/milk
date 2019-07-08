@@ -2,17 +2,10 @@ local milk = require("milk")
 local window = require("milk.window")
 local time = require("milk.time")
 local graphics = require("milk.graphics")
-local game = require("res.game")
 
 milk.init()
 
-local start = game.start or function(game) end
-local tick = game.tick or function(game) end
-local draw = game.draw or function(game) end
-local stop = game.stop or function(game) end
-
 -- initialize
-start(game)
 
 window.show()
 
@@ -32,14 +25,12 @@ while not window.should_close() do
         window.poll()
 
         -- game logic
-        tick(game, SECONDS_PER_TICK)
 
         graphics.set_draw_color(0, 0, 0, 1)
         graphics.clear()
         graphics.set_draw_color(1, 1, 1, 1)
         
         -- draw logic
-        draw(game, SECONDS_PER_TICK)
         
         graphics.present()
         accumulated_frame_time = accumulated_frame_time - SECONDS_PER_TICK
@@ -47,6 +38,5 @@ while not window.should_close() do
 end
 
 -- shutdown
-stop(game)
 
 milk.quit()
