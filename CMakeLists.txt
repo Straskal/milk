@@ -76,9 +76,7 @@ set(MILK_SRC
 set(MILK_SRC_AUDIO
 	src/audio/audio.cpp
 	src/audio/audio.h
-	src/audio/Music.h
-	src/audio/SampleState.h
-	src/audio/Sound.h
+	src/audio/sample.h
 	src/audio/luaopen_milk_audio.cpp
 	src/audio/luaopen_milk_audio.h
 )

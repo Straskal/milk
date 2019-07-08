@@ -9,9 +9,7 @@
 #include "SDL.h"
 #include "SDL_mixer.h"
 
-#include "Music.h"
-#include "SampleState.h"
-#include "Sound.h"
+#include "sample.h"
 #include "data/uid.h"
 
 /* Audio */
@@ -48,7 +46,8 @@ static milk::UID music_uids;
 static std::unordered_map<std::string, milk::u32> music_by_path;
 static std::unordered_map<milk::u32, milk::MusicData*> music_by_id;
 
-/* SDL_mixer callbacks */
+
+/* Private */
 static void on_channel_finished(int channelNum)
 {
 	milk::Sound* sound = channels[channelNum];
@@ -64,6 +63,42 @@ static void on_music_finished()
 	current_music = nullptr;
 }
 
+static void play_sound(milk::Sound* sound, float fadeTime, int loop)
+{
+	audio_stop_sound(sound, 0.f);
+
+	int channelNum = free_channels.front();
+	Mix_Volume(channelNum, (int)(sound->volume * (master_volume * MIX_MAX_VOLUME)));
+	milk::SoundData* soundData = sounds_by_id.at(sound->uid);
+	if (Mix_FadeInChannel(channelNum, (Mix_Chunk*)soundData->handle, loop, (int)(fadeTime * 1000)) == -1) {
+		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
+		return;
+	}
+
+	free_channels.pop();
+	sound->channel = channelNum;
+	sound->state = milk::SampleState::PLAYING;
+	channels[channelNum] = sound;
+	channel_volume[channelNum] = sound->volume;
+}
+
+static void play_music(milk::Music* music, float fadeTime, int loop)
+{
+	Mix_HaltMusic();
+
+	Mix_VolumeMusic((int)(music->volume * (master_volume * MIX_MAX_VOLUME)));
+	milk::MusicData* musicData = music_by_id.at(music->uid);
+	if (Mix_FadeInMusic((Mix_Music*)musicData->handle, loop, (int)(fadeTime * 1000)) == -1) {
+		std::cout << "Mix_PlayMusic: " << Mix_GetError() << std::endl;
+		return;
+	}
+
+	music->state = milk::SampleState::PLAYING;
+	current_music = music;
+}
+
+
+/* Public */
 bool milk::audio_init()
 {
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
@@ -97,7 +132,7 @@ bool milk::audio_init()
 void milk::audio_quit()
 {
 	Mix_HaltChannel(-1);
-	Mix_HaltMusic();	
+	Mix_HaltMusic();
 
 	for (auto itr : sounds_by_id) {
 		id::recycle(&sound_uids, SND_UID_GEN_BITS, itr.first);
@@ -227,40 +262,12 @@ void milk::audio_dereference_musicdata(u32 id)
 
 void milk::audio_play_sound(Sound* sound, float fadeTime)
 {
-	audio_stop_sound(sound, 0.f);
-
-	int channelNum = free_channels.front();
-	Mix_Volume(channelNum, (int)(sound->volume * (master_volume * MIX_MAX_VOLUME)));
-	milk::SoundData* soundData = sounds_by_id.at(sound->uid);
-	if (Mix_FadeInChannel(channelNum, (Mix_Chunk*)soundData->handle, NO_LOOP, (int)(fadeTime * 1000)) == -1) {
-		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
-		return;
-	}
-
-	free_channels.pop();
-	sound->channel = channelNum;
-	sound->state = SampleState::PLAYING;
-	channels[channelNum] = sound;
-	channel_volume[channelNum] = sound->volume;
+	play_sound(sound, fadeTime, NO_LOOP);
 }
 
 void milk::audio_loop_sound(Sound* sound, float fadeTime)
 {
-	audio_stop_sound(sound, 0.f);
-
-	int channelNum = free_channels.front();
-	Mix_Volume(channelNum, (int)(sound->volume * (master_volume * MIX_MAX_VOLUME)));
-	milk::SoundData* soundData = sounds_by_id.at(sound->uid);
-	if (Mix_FadeInChannel(channelNum, (Mix_Chunk*)soundData->handle, LOOP, (int)(fadeTime * 1000)) == -1) {
-		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
-		return;
-	}
-
-	free_channels.pop();
-	sound->channel = channelNum;
-	sound->state = SampleState::PLAYING;
-	channels[channelNum] = sound;
-	channel_volume[channelNum] = sound->volume;
+	play_sound(sound, fadeTime, LOOP);
 }
 
 void milk::audio_pause_sound(Sound* sound)
@@ -300,32 +307,12 @@ void milk::audio_set_sound_volume(Sound* sound, float volume)
 
 void milk::audio_play_music(Music* music, float fadeTime)
 {
-	Mix_HaltMusic();
-
-	Mix_VolumeMusic((int)(music->volume * (master_volume * MIX_MAX_VOLUME)));
-	milk::MusicData* musicData = music_by_id.at(music->uid);
-	if (Mix_FadeInMusic((Mix_Music*)musicData->handle, NO_LOOP, (int)(fadeTime * 1000)) == -1) {
-		std::cout << "Mix_PlayMusic: " << Mix_GetError() << std::endl;
-		return;
-	}
-
-	music->state = SampleState::PLAYING;
-	current_music = music;
+	play_music(music, fadeTime, NO_LOOP);
 }
 
 void milk::audio_loop_music(Music* music, float fadeTime)
 {
-	Mix_HaltMusic();
-
-	Mix_VolumeMusic((int)(music->volume * (master_volume * MIX_MAX_VOLUME)));
-	milk::MusicData* musicData = music_by_id.at(music->uid);
-	if (Mix_FadeInMusic((Mix_Music*)musicData->handle, LOOP, (int)(fadeTime * 1000)) == -1) {
-		std::cout << "Mix_PlayMusic: " << Mix_GetError() << std::endl;
-		return;
-	}
-
-	music->state = SampleState::PLAYING;
-	current_music = music;
+	play_music(music, fadeTime, LOOP);
 }
 
 void milk::audio_pause_music(Music* music)
