@@ -8,8 +8,6 @@ extern "C" {
 #include "SDL.h"
 
 #include "luamlib.h"
-#include "State.h"
-
 #include "audio/audio.h"
 #include "graphics/graphics.h"
 #include "window/window.h"

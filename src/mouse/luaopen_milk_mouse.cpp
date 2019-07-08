@@ -7,7 +7,6 @@ extern "C" {
 
 #include "Mouse.h"
 #include "luamlib.h"
-#include "State.h"
 #include "window/window.h"
 
 #include "graphics/graphics.h"

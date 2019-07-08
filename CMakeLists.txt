@@ -66,8 +66,6 @@ set(MILK_SRC
 	src/luamlib.cpp
 	src/luamlib.h
 	src/milk_export.h
-	src/State.cpp
-	src/State.h
 	src/luaopen_milk.cpp
 	src/luaopen_milk.h
 )

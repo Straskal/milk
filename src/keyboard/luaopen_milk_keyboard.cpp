@@ -2,7 +2,6 @@
 
 #include "keyboard.h"
 #include "luamlib.h"
-#include "State.h"
 
 static int lua_is_key_down(lua_State* L)
 {
