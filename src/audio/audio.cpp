@@ -215,7 +215,7 @@ void milk::audio_dereference_sounddata(u32 id)
 			Mix_FreeChunk((Mix_Chunk*)soundData->handle);
 			delete soundData;
 
-			id::recycle(&music_uids, SND_UID_GEN_BITS, id);
+			id::recycle(&sound_uids, SND_UID_GEN_BITS, id);
 		}
 	}
 }
