@@ -11,7 +11,6 @@ local function run(test)
 
     milk.init()
 
-    -- start test
     start(test)
 
     window.show()
@@ -31,7 +30,6 @@ local function run(test)
         while accumulated_frame_time >= SECONDS_PER_TICK do
             window.poll()
     
-            -- game logic
             tick(test, SECONDS_PER_TICK)
     
             graphics.set_draw_color(0, 0, 0, 1)
