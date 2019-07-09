@@ -18,9 +18,10 @@ static const int MILK_SDL_WINDOW_NO_FLAG = 0;
 static SDL_Window* window_handle = nullptr;
 static bool should_close = false;
 
-
 bool milk::window_init()
 {
+	should_close = false;
+
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
 		std::cout << "Error initializing SDL_Video & SDL_Timer: " << SDL_GetError() << std::endl;
 		return false;
