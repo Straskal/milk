@@ -3,16 +3,25 @@ local tests = {
     DRAW_TEST = "tests/drawtest.lua"
 }
 
-local answer
+local function run_test(name, file)
+    print("=================================")
+    print("RUNNING " .. name)
+    print("=================================")
+    dofile(file)
+end
+
+local test_to_run
 repeat
+    print("TEST RUNNER")
+    print("=================================")
     io.write("Enter test name: ")
     io.flush()
-    answer = io.read()
-    if answer == "RUN_ALL" then
-        for _, testfile in pairs(tests) do
-            dofile(testfile)
+    test_to_run = io.read()
+    if test_to_run == "RUN_ALL" then
+        for test_name, test_file in pairs(tests) do
+            run_test(test_name, test_file)
         end
-    elseif tests[answer] then
-        dofile(tests[answer])
+    elseif tests[test_to_run] then
+        run_test(test_to_run, tests[test_to_run])
     end
-until answer == "STOP"
+until test_to_run == "STOP"

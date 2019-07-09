@@ -114,14 +114,14 @@ void milk::window_set_size(int width, int height)
 
 bool milk::window_get_is_fullscreen()
 {
-	return (SDL_GetWindowFlags(window_handle) & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN;
+	return (SDL_GetWindowFlags(window_handle) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP;
 }
 
 void milk::window_set_is_fullscreen(bool toggle)
 {
 	if (toggle != window_get_is_fullscreen()) {
 		if (toggle) {
-			SDL_SetWindowFullscreen(window_handle, SDL_WINDOW_FULLSCREEN);
+			SDL_SetWindowFullscreen(window_handle, SDL_WINDOW_FULLSCREEN_DESKTOP);
 		}
 		else {
 			SDL_SetWindowFullscreen(window_handle, MILK_SDL_WINDOW_NO_FLAG);
