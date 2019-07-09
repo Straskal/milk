@@ -2,6 +2,11 @@ local milk = require("milk")
 local window = require("milk.window")
 local time = require("milk.time")
 
+--[[
+    the window test proves the following:
+    - the window fullscreen toggle works
+	- window sizing works
+--]]
 milk.init()
 
 window.show()
