@@ -64,10 +64,4 @@ function test:tick()
     end
 end
 
-function test:draw()
-end
-
-function test:stop()
-end
-
 return test

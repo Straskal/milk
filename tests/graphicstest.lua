@@ -15,7 +15,7 @@ local test = {}
 
 function test:start()
     window.set_size(1280, 720)
-    window.set_fullscreen(true)
+    window.set_fullscreen(false)
     graphics.set_resolution(640, 360)
 
     self.image = graphics.new_image("tests/assets/milk.png")
@@ -27,6 +27,7 @@ end
 
 function test:tick(dt)
     if keyboard.is_key_released(keys.ESCAPE) then
+        print("escape pressed")
         window.close()
     end
     self.rotation = self.rotation + (50 * dt)
