@@ -39,7 +39,7 @@ bool milk::mouse_is_button_pressed(MouseButtons button)
 
 bool milk::mouse_is_button_released(MouseButtons button)
 {
-	return !(current_state & SDL_BUTTON((int)button) && (previous_state & SDL_BUTTON((int)button)));
+	return !(current_state & SDL_BUTTON((int)button)) && (previous_state & SDL_BUTTON((int)button));
 }
 
 int milk::mouse_get_scroll()
