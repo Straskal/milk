@@ -42,12 +42,10 @@ function test:draw()
 
     -- draw rect outline
     graphics.set_draw_color(1, 0, 0, 0.5)
-    local rect_pos = { x = (w * 0.3) - ((self.w * 0.5) * self.scale), y = (h * 0.5) - ((self.h * 0.5) * self.scale) }
     graphics.draw_rect( w * 0.1, h * 0.1, w * 0.4, h * 0.4)
 
     -- draw rect
     graphics.set_draw_color(1, 0, 0, 0.5)
-    local rect_pos = { x = (w * 0.3) - ((self.w * 0.5) * self.scale), y = (h * 0.5) - ((self.h * 0.5) * self.scale) }
     graphics.draw_filled_rect( w * 0.1, h * 0.5, w * 0.4, h * 0.4)
 
     -- draw spinning/scaling image
