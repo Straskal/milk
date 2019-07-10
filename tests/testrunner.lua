@@ -31,6 +31,11 @@ local function run(test)
     local frame_time = 0
     local accumulated_frame_time = 0
     
+    -- we most likely hit a breakpoint if a complete frame takes a whole second.
+    if accumulated_frame_time > 1 then
+        accumulated_frame_time = 1
+    end
+    
     while not window.should_close() do
         local t = time.get_total()
         frame_time = t - frame_start_time

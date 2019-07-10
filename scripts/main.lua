@@ -22,6 +22,11 @@ while not window.should_close() do
     frame_time = t - frame_start_time
     frame_start_time = t
     accumulated_frame_time = accumulated_frame_time + frame_time
+    
+    -- we most likely hit a breakpoint if a complete frame takes a whole second.
+    if accumulated_frame_time > 1 then
+        accumulated_frame_time = 1
+    end
 
     while accumulated_frame_time >= SECONDS_PER_TICK do
         window.poll()
