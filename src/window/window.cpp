@@ -71,6 +71,7 @@ void milk::window_poll()
 void milk::window_show()
 {
 	SDL_ShowWindow(window_handle);
+	SDL_RaiseWindow(window_handle);
 }
 
 const char* milk::window_get_title()
