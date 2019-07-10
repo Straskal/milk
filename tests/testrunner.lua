@@ -7,6 +7,7 @@ local graphics = require("milk.graphics")
 local tests = {
     WINDOW = "tests/windowtest.lua",
     GRAPHICS = "tests/graphicstest.lua",
+    MOUSE = "tests/mousetest.lua",
     KEYBOARD = "tests/keyboardtest.lua"
 }
 --------------------------------------------
