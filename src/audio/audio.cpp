@@ -57,8 +57,8 @@ static void play_sound(milk::sound* sound, float fadetime, int loop)
 
 	int channel_num = free_channels.front();
 	Mix_Volume(channel_num, (int)(sound->volume * (master_volume * MIX_MAX_VOLUME)));
-	milk::sound_data* soundData = sounds_by_id.at(sound->uid);
-	if (Mix_FadeInChannel(channel_num, (Mix_Chunk*)soundData->handle, loop, (int)(fadetime * 1000)) == -1) {
+	milk::sound_data* snddata = sounds_by_id.at(sound->uid);
+	if (Mix_FadeInChannel(channel_num, (Mix_Chunk*)snddata->handle, loop, (int)(fadetime * 1000)) == -1) {
 		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
 		return;
 	}
