@@ -7,7 +7,7 @@
 
 namespace milk
 {
-	enum class MouseButtons
+	enum class mouse_buttons
 	{
 		LEFT = 1,
 		MIDDLE,
@@ -19,9 +19,9 @@ namespace milk
 	void mouse_update_state();
 
 	std::tuple<int, int> mouse_get_position();
-	bool mouse_is_button_down(MouseButtons button);
-	bool mouse_is_button_pressed(MouseButtons button);
-	bool mouse_is_button_released(MouseButtons button);
+	bool mouse_is_button_down(mouse_buttons button);
+	bool mouse_is_button_pressed(mouse_buttons button);
+	bool mouse_is_button_released(mouse_buttons button);
 	int mouse_get_scroll();
 }
 

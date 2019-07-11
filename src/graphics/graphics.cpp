@@ -17,10 +17,10 @@ static const char* NEAREST_PIXEL_SAMPLING = "nearest";
 
 static SDL_Renderer* renderer_handle = nullptr;
 
-/* Image cache info */
-static milk::UIDData image_uids;
+/* image cache info */
+static milk::uid_data image_uids;
 static std::unordered_map<std::string, milk::u32> images_by_path;
-static std::unordered_map<milk::u32, milk::ImageData*> images_by_uid;
+static std::unordered_map<milk::u32, milk::image_data*> images_by_uid;
 
 bool milk::graphics_init(void* windowHandle)
 {
@@ -50,7 +50,7 @@ bool milk::graphics_init(void* windowHandle)
 
 void milk::graphics_quit()
 {
-	for (std::pair<u32, ImageData*> pair : images_by_uid) {
+	for (std::pair<u32, image_data*> pair : images_by_uid) {
 		uid_free(&image_uids, pair.first);
 		SDL_DestroyTexture((SDL_Texture*)pair.second->handle);
 		delete pair.second;
@@ -78,36 +78,36 @@ milk::u32 milk::graphics_load_imagedata(const char* path)
 {
 	std::unordered_map<std::string, u32>::iterator loaded = images_by_path.find(path);
 	if (loaded != images_by_path.end()) {
-		++images_by_uid.at(loaded->second)->refCount;
+		++images_by_uid.at(loaded->second)->ref_count;
 		return loaded->second;
 	}
 
-	SDL_Surface* sdlsurface = IMG_Load(path);
-	if (sdlsurface == nullptr) {
+	SDL_Surface* sdl_surface = IMG_Load(path);
+	if (sdl_surface == nullptr) {
 		std::cout << "Error loading image: " << IMG_GetError() << std::endl;
 		return milk::INVALID_UID;
 	}
 
-	SDL_Texture* sdltexture = SDL_CreateTextureFromSurface(renderer_handle, sdlsurface);
-	SDL_FreeSurface(sdlsurface);
+	SDL_Texture* sdl_texture = SDL_CreateTextureFromSurface(renderer_handle, sdl_surface);
+	SDL_FreeSurface(sdl_surface);
 
 	int w, h;
-	SDL_QueryTexture(sdltexture, nullptr, nullptr, &w, &h);
+	SDL_QueryTexture(sdl_texture, nullptr, nullptr, &w, &h);
 
-	ImageData* imageData = new ImageData();
-	imageData->path = path;
-	imageData->refCount = 1;
-	imageData->handle = sdltexture;
-	imageData->width = w;
-	imageData->height = h;
+	image_data* imgdata = new image_data();
+	imgdata->path = path;
+	imgdata->ref_count = 1;
+	imgdata->handle = sdl_texture;
+	imgdata->width = w;
+	imgdata->height = h;
 
 	u32 uid = uid_new(&image_uids);
 	images_by_path.insert(std::make_pair(path, uid));
-	images_by_uid.insert(std::make_pair(uid, imageData));
+	images_by_uid.insert(std::make_pair(uid, imgdata));
 	return uid;
 }
 
-milk::ImageData* milk::graphics_get_imagedata(u32 uid)
+milk::image_data* milk::graphics_get_imagedata(u32 uid)
 {
 	return uid_alive(&image_uids, uid) ? images_by_uid.at(uid) : nullptr;
 }
@@ -115,12 +115,12 @@ milk::ImageData* milk::graphics_get_imagedata(u32 uid)
 void milk::graphics_dereference_imagedata(u32 uid)
 {
 	if (uid_alive(&image_uids, uid)) {
-		ImageData* imageData = images_by_uid.at(uid);
-		if (--imageData->refCount <= 0) {
-			images_by_path.erase(imageData->path);
+		image_data* imgdata = images_by_uid.at(uid);
+		if (--imgdata->ref_count <= 0) {
+			images_by_path.erase(imgdata->path);
 			images_by_uid.erase(uid);
-			SDL_DestroyTexture((SDL_Texture*)imageData->handle);
-			delete imageData;
+			SDL_DestroyTexture((SDL_Texture*)imgdata->handle);
+			delete imgdata;
 
 			uid_free(&image_uids, uid);
 		}
@@ -155,28 +155,28 @@ void milk::graphics_draw_rectangle_filled(float x, float y, float w, float h)
 	SDL_RenderFillRectF(renderer_handle, &dest);
 }
 
-void milk::graphics_draw(const Image* image, float x, float y)
+void milk::graphics_draw(const image* image, float x, float y)
 {
-	ImageData* imageData = images_by_uid.at(image->uid);
-	SDL_Texture* texture = (SDL_Texture*)imageData->handle;
+	image_data* imgdata = images_by_uid.at(image->uid);
+	SDL_Texture* texture = (SDL_Texture*)imgdata->handle;
 
 	Uint8 r, g, b, a;
 	SDL_GetRenderDrawColor(renderer_handle, &r, &g, &b, &a);
 	SDL_SetTextureColorMod(texture, r, g, b);
 	SDL_SetTextureAlphaMod(texture, a);
 
-	int w = imageData->width;
-	int h = imageData->height;
+	int w = imgdata->width;
+	int h = imgdata->height;
 
 	SDL_Rect src = { 0, 0, w, h };
 	SDL_FRect dest = { x, y, (float)w, (float)h };
 	SDL_RenderCopyExF(renderer_handle, texture, &src, &dest, 0, nullptr, SDL_FLIP_NONE);
 }
 
-void milk::graphics_draw(const Image* image, float x, float y, int srcx, int srcy, int srcw, int srch, float scx, float scy, double angle)
+void milk::graphics_draw(const image* image, float x, float y, int srcx, int srcy, int srcw, int srch, float scx, float scy, double angle)
 {
-	ImageData* imageData = images_by_uid.at(image->uid);
-	SDL_Texture* texture = (SDL_Texture*)imageData->handle;
+	image_data* imgdata = images_by_uid.at(image->uid);
+	SDL_Texture* texture = (SDL_Texture*)imgdata->handle;
 
 	Uint8 r, g, b, a;
 	SDL_GetRenderDrawColor(renderer_handle, &r, &g, &b, &a);

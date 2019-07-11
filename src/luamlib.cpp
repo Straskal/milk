@@ -9,24 +9,26 @@
 
 static int correct_index(int index)
 {
-	// When setting a field on a table:
-	// If the index given if greater than zero, then we are working with an exact index.
-	// If the index is less than zero, we're workin with indeces relative to the top of the stack.
+	/*
+		When setting a field on a table:
+		If the index given if greater than zero, then we are working with an exact index.
+		If the index is less than zero, we're workin with indeces relative to the top of the stack.
+	*/
 	return index < 0 ? index - 1 : index;
 }
 
-void milk::luaM_openlib(lua_State* L, const char* name, lua_CFunction openfunc)
+static void luaM_openlib(lua_State* L, const char* name, lua_CFunction openfunc)
 {
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "preload");
 	lua_pushcfunction(L, openfunc);
 	lua_setfield(L, -2, name);
-	lua_pop(L, 1); // Pop the preload table off of the stack
+	lua_pop(L, 1); /* Pop the preload table off of the stack */
 	lua_getfield(L, -1, "loaded");
 	lua_pushcfunction(L, openfunc);
 	lua_pcall(L, 0, 1, 0);
 	lua_setfield(L, -1, name);
-	lua_pop(L, 2); // Pop the loaded table and package table off of stack
+	lua_pop(L, 2); /* Pop the loaded table and package table off of stack */
 }
 
 void milk::luaM_openlibs(lua_State* L)
@@ -45,7 +47,7 @@ void milk::luaM_createmetatable(lua_State* L, const char* name, const luaL_Reg* 
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
 	luaL_setfuncs(L, funcs, 0);
-	lua_pop(L, 1); // Pop metatable off of stack
+	lua_pop(L, 1); /* Pop metatable off of stack */
 }
 
 void milk::luaM_setintfield(lua_State* L, int index, const char* key, int value)

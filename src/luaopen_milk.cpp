@@ -16,10 +16,8 @@ static bool initialized = false;
 
 static int milk_init(lua_State* L)
 {
-	if (initialized) {
+	if (initialized)
 		return 0;
-	}
-
 	if (milk::window_init() && milk::graphics_init(milk::window_get_handle()) && milk::audio_init()) {
 		initialized = true;
 		return 0;
@@ -29,13 +27,12 @@ static int milk_init(lua_State* L)
 
 static int milk_quit(lua_State* L)
 {
-	if (initialized) {
-		milk::audio_quit();
-		milk::graphics_quit();
-		milk::window_quit();
-		initialized = false;
-	}
-	return 0;
+	if (!initialized)
+		return 0;
+	milk::audio_quit();
+	milk::graphics_quit();
+	milk::window_quit();
+	initialized = false;
 }
 
 static const luaL_Reg milk_funcs[] = {

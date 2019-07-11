@@ -16,7 +16,6 @@ namespace milk
 		int key;
 	};
 
-	void luaM_openlib(lua_State* L, const char* name, lua_CFunction openfunc);
 	void luaM_openlibs(lua_State* L);
 	void luaM_createmetatable(lua_State* L, const char* name, const luaL_Reg* funcs);
 	void luaM_setintfield(lua_State* L, int index, const char* key, int value);

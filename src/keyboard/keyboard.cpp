@@ -14,17 +14,17 @@ void milk::keyboard_update_state()
 	std::memcpy(current_state, SDL_GetKeyboardState(nullptr), sizeof(Uint8) * SDL_NUM_SCANCODES);
 }
 
-bool milk::keyboard_is_key_down(Keys key)
+bool milk::keyboard_is_key_down(keys key)
 {
 	return current_state[(SDL_Scancode)key];
 }
 
-bool milk::keyboard_is_key_pressed(Keys key)
+bool milk::keyboard_is_key_pressed(keys key)
 {
 	return current_state[(SDL_Scancode)key] && !previous_state[(SDL_Scancode)key];
 }
 
-bool milk::keyboard_is_key_released(Keys key)
+bool milk::keyboard_is_key_released(keys key)
 {
 	return !current_state[(SDL_Scancode)key] && previous_state[(SDL_Scancode)key];
 }

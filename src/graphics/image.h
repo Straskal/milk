@@ -7,16 +7,16 @@
 
 namespace milk
 {
-	struct ImageData
+	struct image_data
 	{
 		std::string path;
 		void* handle;
-		int refCount;
+		int ref_count;
 		int width;
 		int height;
 	};
 
-	struct Image
+	struct image
 	{
 		u32 uid;
 	};

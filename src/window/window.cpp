@@ -21,12 +21,10 @@ static bool should_close = false;
 bool milk::window_init()
 {
 	should_close = false;
-
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
 		std::cout << "Error initializing SDL_Video & SDL_Timer: " << SDL_GetError() << std::endl;
 		return false;
 	}
-
 	/*
 		We create a hidden window that must be explicitly shown via show()
 		This is done in order to give lua a chance to change the window settings before showing it.
@@ -52,9 +50,9 @@ void* milk::window_get_handle()
 
 void milk::window_poll()
 {
-	milk::mouse_reset_scroll();
-
 	SDL_Event event;
+
+	milk::mouse_reset_scroll();
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_QUIT) {
 			milk::window_close();

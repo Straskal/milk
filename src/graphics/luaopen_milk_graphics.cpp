@@ -14,26 +14,26 @@ static const char* IMAGE_METATABLE = "milk.image";
 
 static int lua_imagemeta_tostring(lua_State* L)
 {
-	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
-	milk::ImageData* imageData = milk::graphics_get_imagedata(image->uid);
-	const char* path = imageData->path.c_str();
+	milk::image* img = (milk::image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	milk::image_data* imgdata = milk::graphics_get_imagedata(img->uid);
+	const char* path = imgdata->path.c_str();
 	lua_pushstring(L, path);
 	return 1;
 }
 
 static int lua_imagemeta_gc(lua_State* L)
 {
-	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
-	milk::graphics_dereference_imagedata(image->uid);
+	milk::image* img = (milk::image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	milk::graphics_dereference_imagedata(img->uid);
 	return 0;
 }
 
 static int lua_imagemeta_get_size(lua_State* L)
 {
-	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
-	milk::ImageData* imageData = milk::graphics_get_imagedata(image->uid);
-	lua_pushinteger(L, imageData->width);
-	lua_pushinteger(L, imageData->height);
+	milk::image* img = (milk::image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	milk::image_data* imgdata = milk::graphics_get_imagedata(img->uid);
+	lua_pushinteger(L, imgdata->width);
+	lua_pushinteger(L, imgdata->height);
 	return 2;
 }
 
@@ -49,8 +49,8 @@ static int lua_graphics_new_image(lua_State* L)
 	const char* path = (const char*)luaL_checkstring(L, 1);
 	milk::u32 uid = milk::graphics_load_imagedata(path);
 	if (uid != milk::INVALID_UID) {
-		milk::Image* image = (milk::Image*)lua_newuserdata(L, sizeof(milk::Image));
-		image->uid = uid;
+		milk::image* img = (milk::image*)lua_newuserdata(L, sizeof(milk::image));
+		img->uid = uid;
 		luaL_getmetatable(L, IMAGE_METATABLE);
 		lua_setmetatable(L, -2);
 		return 1;
@@ -81,7 +81,6 @@ static int lua_graphics_get_resolution(lua_State* L)
 static int lua_graphics_clear(lua_State* L)
 {
 	(void)L;
-
 	milk::graphics_clear();
 	return 0;
 }
@@ -121,17 +120,17 @@ static int lua_graphics_draw_filled_rect(lua_State* L)
 
 static int lua_graphics_draw(lua_State* L)
 {
-	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	milk::image* img = (milk::image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
 	float x = (float)luaL_checknumber(L, 2);
 	float y = (float)luaL_checknumber(L, 3);
 
-	milk::graphics_draw(image, x, y);
+	milk::graphics_draw(img, x, y);
 	return 0;
 }
 
 static int lua_graphics_drawx(lua_State* L)
 {
-	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	milk::image* img = (milk::image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
 	float posx = (float)luaL_checknumber(L, 2);
 	float posy = (float)luaL_checknumber(L, 3);
 	int rectx = (int)luaL_checkinteger(L, 4);
@@ -142,14 +141,13 @@ static int lua_graphics_drawx(lua_State* L)
 	float scaley = (float)luaL_checknumber(L, 9);
 	double angle = (double)luaL_checknumber(L, 10);
 
-	milk::graphics_draw(image, posx, posy, rectx, recty, rectw, recth, scalex, scaley, angle);
+	milk::graphics_draw(img, posx, posy, rectx, recty, rectw, recth, scalex, scaley, angle);
 	return 0;
 }
 
 static int lua_graphics_present(lua_State* L)
 {
 	(void)L;
-
 	milk::graphics_present();
 	return 0;
 }

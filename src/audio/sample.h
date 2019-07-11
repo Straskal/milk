@@ -7,39 +7,39 @@
 
 namespace milk
 {
-	enum class SampleState
+	enum class sample_state
 	{
 		PLAYING,
 		PAUSED,
 		STOPPED
 	};
 
-	struct SoundData
+	struct sound_data
 	{
 		std::string path;
 		void* handle;
-		int refCount;
+		int ref_count;
 	};
 
-	struct Sound
+	struct sound
 	{
 		u32 uid;
-		SampleState state;
+		sample_state state;
 		int channel;
 		float volume;
 	};
 
-	struct MusicData
+	struct music_data
 	{
 		std::string path;
 		void* handle;
-		int refCount;
+		int ref_count;
 	};
 
-	struct Music
+	struct music
 	{
 		u32 uid;
-		SampleState state;
+		sample_state state;
 		float volume;
 	};
 }

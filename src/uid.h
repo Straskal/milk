@@ -12,8 +12,8 @@
 
 	Ids are represented by an unsigned 32 bit integer split up into two parts: index and generation.
 
-	Each time an index is "recycled", its generation is incremented by 1 and it is pushed into the freeIndeces queue.
-	A recycled index is only popped from freeIndeces when freeIndeces.size > MAX_FREE_INDECES.
+	Each time an index is "recycled", its generation is incremented by 1 and it is pushed into the free_indeces queue.
+	A recycled index is only popped from free_indeces when free_indeces.size > MAX_FREE_INDECES.
 
 	Max unique ids at one time is (2^INDEX_BITS)
 	An id will be reused only once it is destroyed (2^GENERATION_BITS * MAX_FREE_INDECES) times.
@@ -30,17 +30,17 @@ namespace milk
 {
 	static const u32 INVALID_UID = 0;
 
-	struct UIDData
+	struct uid_data
 	{
-		UIDData();
+		uid_data();
 
-		std::queue<u16> freeIndeces;
+		std::queue<u16> free_indeces;
 		std::vector<u16> generations;
 	};
 
-	u32 uid_new(UIDData* data);
-	void uid_free(UIDData* data, u32 id);
-	bool uid_alive(const UIDData* data, u32 id);
+	u32 uid_new(uid_data* data);
+	void uid_free(uid_data* data, u32 id);
+	bool uid_alive(const uid_data* data, u32 id);
 }
 
 #endif

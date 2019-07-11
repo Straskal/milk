@@ -4,7 +4,7 @@
 namespace milk
 {
 	// These have a 1:1 relationship with SDL_Scancodes
-	enum class Keys
+	enum class keys
 	{
 		UNKNOWN,
 		A = 4,
@@ -87,9 +87,9 @@ namespace milk
 
 	void keyboard_update_state();
 
-	bool keyboard_is_key_down(Keys key);
-	bool keyboard_is_key_pressed(Keys key);
-	bool keyboard_is_key_released(Keys key);
+	bool keyboard_is_key_down(keys key);
+	bool keyboard_is_key_pressed(keys key);
+	bool keyboard_is_key_released(keys key);
 }
 
 #endif
