@@ -148,13 +148,11 @@ void milk::audio_set_master_volume(float volume)
 	master_volume = std::min(std::max(volume, 0.f), 1.f);
 	int v = (int)(master_volume * MIX_MAX_VOLUME);
 
-	for (int i = 0; i < NUM_CHANNELS; ++i) {
+	for (int i = 0; i < NUM_CHANNELS; ++i)
 		Mix_Volume(i, (int)(channel_volume[i] * v));
-	}
 
-	if (current_music != nullptr) {
+	if (current_music != nullptr)
 		Mix_VolumeMusic((int)(current_music->volume * v));
-	}
 }
 
 float milk::audio_get_master_volume()
@@ -337,7 +335,6 @@ void milk::audio_set_music_volume(music* music, float volume)
 {
 	music->volume = std::min(std::max(volume, 0.f), 1.f);
 
-	if (music->state == sample_state::PLAYING) {
+	if (music->state == sample_state::PLAYING)
 		Mix_VolumeMusic((int)(music->volume * (master_volume * MIX_MAX_VOLUME)));
-	}
 }

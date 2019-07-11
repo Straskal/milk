@@ -54,12 +54,10 @@ void milk::window_poll()
 
 	milk::mouse_reset_scroll();
 	while (SDL_PollEvent(&event)) {
-		if (event.type == SDL_QUIT) {
+		if (event.type == SDL_QUIT)
 			milk::window_close();
-		}
-		if (event.type == SDL_MOUSEWHEEL) {
+		if (event.type == SDL_MOUSEWHEEL)
 			milk::mouse_handle_wheel_event(&event);
-		}
 	}
 
 	milk::mouse_update_state();
@@ -119,12 +117,10 @@ bool milk::window_get_is_fullscreen()
 void milk::window_set_is_fullscreen(bool toggle)
 {
 	if (toggle != window_get_is_fullscreen()) {
-		if (toggle) {
+		if (toggle)
 			SDL_SetWindowFullscreen(window_handle, SDL_WINDOW_FULLSCREEN_DESKTOP);
-		}
-		else {
+		else
 			SDL_SetWindowFullscreen(window_handle, MILK_SDL_WINDOW_NO_FLAG);
-		}
 	}
 }
 
