@@ -36,7 +36,6 @@ static int lua_mouse_is_button_released(lua_State* L)
 static int lua_mouse_get_position(lua_State* L)
 {
 	std::tuple<int, int> pos = milk::mouse_get_position();
-
 	lua_pushinteger(L, std::get<0>(pos));
 	lua_pushinteger(L, std::get<1>(pos));
 	return 2;
