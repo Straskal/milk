@@ -42,51 +42,51 @@ function test:draw()
 
     -- draw rect outline
     graphics.set_draw_color(1, 0, 0, 0.5)
-    graphics.draw_rect( w * 0.1, h * 0.1, w * 0.4, h * 0.4)
+    graphics.draw_rect(w * 0.1, h * 0.1, w * 0.4, h * 0.4)
 
     -- draw rect
     graphics.set_draw_color(1, 0, 0, 0.5)
-    graphics.draw_filled_rect( w * 0.1, h * 0.5, w * 0.4, h * 0.4)
+    graphics.draw_filled_rect(w * 0.1, h * 0.5, w * 0.4, h * 0.4)
 
     -- draw spinning/scaling image
-    graphics.set_draw_color(1, 1, 1, 1)  
-    local static_pos = { x = (w * 0.3) - ((self.w * 0.5) * self.scale), y = (h * 0.5) - ((self.h * 0.5) * self.scale) }    
+    graphics.set_draw_color(1, 1, 1, 1)
+    local static_pos = {x = (w * 0.3) - ((self.w * 0.5) * self.scale), y = (h * 0.5) - ((self.h * 0.5) * self.scale)}
     graphics.drawx(self.image, static_pos.x, static_pos.y, 0, 0, self.w, self.h, self.scale, self.scale, self.rotation)
 
     -- draw red image
-    graphics.set_draw_color(1, 0, 0, 1)    
-    local r_draw_pos = { x = (w * 0.6) - ((self.w * 0.5) * 0.5), y = (h * 0.2) - ((self.h * 0.5) * 0.5) }
+    graphics.set_draw_color(1, 0, 0, 1)
+    local r_draw_pos = {x = (w * 0.6) - ((self.w * 0.5) * 0.5), y = (h * 0.2) - ((self.h * 0.5) * 0.5)}
     graphics.drawx(self.image, r_draw_pos.x, r_draw_pos.y, 0, 0, self.w, self.h, 0.5, 0.5, 0)
 
     -- draw green image
-    graphics.set_draw_color(0, 1, 0, 1)    
-    local g_draw_pos = { x = (w * 0.6) - ((self.w * 0.5) * 0.5), y = (h * 0.5) - ((self.h * 0.5) * 0.5) }
+    graphics.set_draw_color(0, 1, 0, 1)
+    local g_draw_pos = {x = (w * 0.6) - ((self.w * 0.5) * 0.5), y = (h * 0.5) - ((self.h * 0.5) * 0.5)}
     graphics.drawx(self.image, g_draw_pos.x, g_draw_pos.y, 0, 0, self.w, self.h, 0.5, 0.5, 0)
 
     -- draw blue image
-    graphics.set_draw_color(0, 0, 1, 1)    
-    local b_draw_pos = { x = (w * 0.6) - ((self.w * 0.5) * 0.5), y = (h * 0.8) - ((self.h * 0.5) * 0.5) }
+    graphics.set_draw_color(0, 0, 1, 1)
+    local b_draw_pos = {x = (w * 0.6) - ((self.w * 0.5) * 0.5), y = (h * 0.8) - ((self.h * 0.5) * 0.5)}
     graphics.drawx(self.image, b_draw_pos.x, b_draw_pos.y, 0, 0, self.w, self.h, 0.5, 0.5, 0)
 
     -- draw alpha image 1
-    graphics.set_draw_color(1, 1, 1, 1)    
-    local a_draw_pos = { x = (w * 0.8) - ((self.w * 0.5) * 0.5), y = (h * 0.2) - ((self.h * 0.5) * 0.5) }
+    graphics.set_draw_color(1, 1, 1, 1)
+    local a_draw_pos = {x = (w * 0.8) - ((self.w * 0.5) * 0.5), y = (h * 0.2) - ((self.h * 0.5) * 0.5)}
     graphics.drawx(self.image, a_draw_pos.x, a_draw_pos.y, 0, 0, self.w, self.h, 0.5, 0.5, 0)
 
     -- draw alpha image 2
-    graphics.set_draw_color(1, 1, 1, 0.7)    
-    local a_draw_pos = { x = (w * 0.8) - ((self.w * 0.5) * 0.5), y = (h * 0.4) - ((self.h * 0.5) * 0.5) }
-    graphics.drawx(self.image, a_draw_pos.x, a_draw_pos.y, 0, 0, self.w, self.h, 0.5, 0.5, 0)
+    graphics.set_draw_color(1, 1, 1, 0.7)
+    local a_draw_pos1 = {x = (w * 0.8) - ((self.w * 0.5) * 0.5), y = (h * 0.4) - ((self.h * 0.5) * 0.5)}
+    graphics.drawx(self.image, a_draw_pos1.x, a_draw_pos1.y, 0, 0, self.w, self.h, 0.5, 0.5, 0)
 
     -- draw alpha image 3
-    graphics.set_draw_color(1, 1, 1, 0.4)    
-    local a_draw_pos = { x = (w * 0.8) - ((self.w * 0.5) * 0.5), y = (h * 0.6) - ((self.h * 0.5) * 0.5) }
-    graphics.drawx(self.image, a_draw_pos.x, a_draw_pos.y, 0, 0, self.w, self.h, 0.5, 0.5, 0)
+    graphics.set_draw_color(1, 1, 1, 0.4)
+    local a_draw_pos2 = {x = (w * 0.8) - ((self.w * 0.5) * 0.5), y = (h * 0.6) - ((self.h * 0.5) * 0.5)}
+    graphics.drawx(self.image, a_draw_pos2.x, a_draw_pos2.y, 0, 0, self.w, self.h, 0.5, 0.5, 0)
 
     -- draw alpha image 4
-    graphics.set_draw_color(1, 1, 1, 0.1)    
-    local a_draw_pos = { x = (w * 0.8) - ((self.w * 0.5) * 0.5), y = (h * 0.8) - ((self.h * 0.5) * 0.5) }
-    graphics.drawx(self.image, a_draw_pos.x, a_draw_pos.y, 0, 0, self.w, self.h, 0.5, 0.5, 0)
+    graphics.set_draw_color(1, 1, 1, 0.1)
+    local a_draw_pos3 = {x = (w * 0.8) - ((self.w * 0.5) * 0.5), y = (h * 0.8) - ((self.h * 0.5) * 0.5)}
+    graphics.drawx(self.image, a_draw_pos3.x, a_draw_pos3.y, 0, 0, self.w, self.h, 0.5, 0.5, 0)
 end
 
 return test

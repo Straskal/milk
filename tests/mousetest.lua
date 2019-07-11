@@ -10,11 +10,11 @@ local keys = keyboard.keys
 --]]
 local test = {}
 
-function test:start()
+function test.start()
     window.set_size(1280, 720)
 end
 
-function test:tick()
+function test.tick()
     -- down
     if keyboard.is_key_down(keys.LSHIFT) then
         if mouse.is_button_down(buttons.LEFT) then
