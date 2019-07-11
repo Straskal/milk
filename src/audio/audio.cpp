@@ -55,19 +55,19 @@ static void play_sound(milk::sound* sound, float fadetime, int loop)
 {
 	audio_stop_sound(sound, 0.f);
 
-	int channelNum = free_channels.front();
-	Mix_Volume(channelNum, (int)(sound->volume * (master_volume * MIX_MAX_VOLUME)));
+	int channel_num = free_channels.front();
+	Mix_Volume(channel_num, (int)(sound->volume * (master_volume * MIX_MAX_VOLUME)));
 	milk::sound_data* soundData = sounds_by_id.at(sound->uid);
-	if (Mix_FadeInChannel(channelNum, (Mix_Chunk*)soundData->handle, loop, (int)(fadetime * 1000)) == -1) {
+	if (Mix_FadeInChannel(channel_num, (Mix_Chunk*)soundData->handle, loop, (int)(fadetime * 1000)) == -1) {
 		std::cout << "Mix_PlayChannel: " << Mix_GetError() << std::endl;
 		return;
 	}
 
 	free_channels.pop();
-	sound->channel = channelNum;
+	sound->channel = channel_num;
 	sound->state = milk::sample_state::PLAYING;
-	channels[channelNum] = sound;
-	channel_volume[channelNum] = sound->volume;
+	channels[channel_num] = sound;
+	channel_volume[channel_num] = sound->volume;
 }
 
 static void play_music(milk::music* music, float fadetime, int loop)
@@ -75,8 +75,8 @@ static void play_music(milk::music* music, float fadetime, int loop)
 	Mix_HaltMusic();
 
 	Mix_VolumeMusic((int)(music->volume * (master_volume * MIX_MAX_VOLUME)));
-	milk::music_data* musicData = music_by_id.at(music->uid);
-	if (Mix_FadeInMusic((Mix_Music*)musicData->handle, loop, (int)(fadetime * 1000)) == -1) {
+	milk::music_data* musdata = music_by_id.at(music->uid);
+	if (Mix_FadeInMusic((Mix_Music*)musdata->handle, loop, (int)(fadetime * 1000)) == -1) {
 		std::cout << "Mix_PlayMusic: " << Mix_GetError() << std::endl;
 		return;
 	}
@@ -240,12 +240,12 @@ milk::music_data* milk::audio_get_musicdata(u32 id)
 void milk::audio_dereference_musicdata(u32 id)
 {
 	if (uid_alive(&sample_uids, id)) {
-		milk::music_data* musicData = music_by_id.at(id);
-		if (--musicData->ref_count <= 0) {
-			music_by_path.erase(musicData->path);
+		milk::music_data* musdata = music_by_id.at(id);
+		if (--musdata->ref_count <= 0) {
+			music_by_path.erase(musdata->path);
 			music_by_id.erase(id);
-			Mix_FreeMusic((Mix_Music*)musicData->handle);
-			delete musicData;
+			Mix_FreeMusic((Mix_Music*)musdata->handle);
+			delete musdata;
 
 			uid_free(&sample_uids, id);
 		}
