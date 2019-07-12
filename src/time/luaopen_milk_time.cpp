@@ -1,77 +1,34 @@
 #include "luaopen_milk_time.h"
 
-#include <algorithm>
-
 extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
 }
 
-#include "Time.h"
-#include "core/Locator.h"
+#include "time.h"
 
-static int time_get_total(lua_State* L)
+static int lua_time_get_total(lua_State* L)
 {
-	double total = milk::Locator::time->total();
+	double total = milk::time_get_total();
 	lua_pushnumber(L, total);
 	return 1;
 }
 
-static int time_get_target_fps(lua_State* L) 
+static int lua_time_delay(lua_State* L)
 {
-	double targetFps = milk::Locator::time->targetFps();
-	lua_pushnumber(L, targetFps);
-	return 1;
-}
-
-static int time_set_target_fps(lua_State* L)
-{
-	double targetFps = (double)luaL_checknumber(L, 1);
-	milk::Locator::time->targetFps(targetFps);
+	double seconds = (double)luaL_checknumber(L, 1);
+	milk::time_delay(seconds);
 	return 0;
 }
 
-static int time_get_fps(lua_State* L)
-{
-	double fps = milk::Locator::time->fps();
-	lua_pushnumber(L, fps);
-	return 1;
-}
-
-static int time_get_delta(lua_State* L)
-{
-	double delta = milk::Locator::time->delta();
-	lua_pushnumber(L, delta);
-	return 1;
-}
-
-static int time_get_scale(lua_State* L)
-{
-	double scale = milk::Locator::time->scale();
-	lua_pushnumber(L, scale);
-	return 1;
-}
-
-static int time_set_scale(lua_State* L)
-{
-	double scale = (double)luaL_checknumber(L, 1);
-	milk::Locator::time->scale(scale);
-	return 1;
-}
-
-static const luaL_Reg time_funcs[] = {
-	{ "get_total", time_get_total },
-	{ "get_target_fps", time_get_target_fps },
-	{ "set_target_fps", time_set_target_fps },
-	{ "get_fps", time_get_fps },
-	{ "get_delta", time_get_delta },
-	{ "get_scale", time_get_scale },
-	{ "set_scale", time_set_scale },
+static const luaL_Reg lua_time_funcs[] = {
+	{ "get_total", lua_time_get_total },
+	{ "delay", lua_time_delay },
 	{ nullptr, nullptr }
 };
 
-int milk::luaopen_milk_time(lua_State* L)
+int luaopen_milk_time(lua_State* L)
 {
-	luaL_newlib(L, time_funcs);
+	luaL_newlib(L, lua_time_funcs);
 	return 1;
 }

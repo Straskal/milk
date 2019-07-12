@@ -5,75 +5,71 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-#include "Image.h"
-#include "ImageCache.h"
-#include "Renderer.h"
-#include "core/Locator.h"
-#include "core/luamlib.h"
+#include "graphics.h"
+#include "image.h"
+#include "luamlib.h"
+#include "uid.h"
 
 static const char* IMAGE_METATABLE = "milk.image";
 
-static int imagemeta_tostring(lua_State* L)
+static int lua_imagemeta_tostring(lua_State* L)
 {
-	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
-	const char* path = image->data->path.c_str();
+	milk::image* img = (milk::image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	milk::image_data* imgdata = milk::graphics_get_imagedata(img->uid);
+	const char* path = imgdata->path.c_str();
 	lua_pushstring(L, path);
 	return 1;
 }
 
-static int imagemeta_gc(lua_State* L)
+static int lua_imagemeta_gc(lua_State* L)
 {
-	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
-	milk::Locator::images->dereference(image->data);
+	milk::image* img = (milk::image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	milk::graphics_dereference_imagedata(img->uid);
 	return 0;
 }
 
-static int imagemeta_get_size(lua_State* L)
+static int lua_imagemeta_get_size(lua_State* L)
 {
-	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
-	lua_pushinteger(L, image->data->width);
-	lua_pushinteger(L, image->data->height);
+	milk::image* img = (milk::image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	milk::image_data* imgdata = milk::graphics_get_imagedata(img->uid);
+	lua_pushinteger(L, imgdata->width);
+	lua_pushinteger(L, imgdata->height);
 	return 2;
 }
 
-static const luaL_Reg imagemeta_funcs[] = {
-	{ "__tostring", imagemeta_tostring },
-	{ "__gc", imagemeta_gc },
-	{ "get_size", imagemeta_get_size },
+static const luaL_Reg lua_imagemeta_funcs[] = {
+	{ "__tostring", lua_imagemeta_tostring },
+	{ "__gc", lua_imagemeta_gc },
+	{ "get_size", lua_imagemeta_get_size },
 	{ nullptr, nullptr }
 };
 
-static int graphics_new_image(lua_State* L)
+static int lua_graphics_new_image(lua_State* L)
 {
-	if (lua_isstring(L, 1)) {
-		const char* value = lua_tostring(L, 1);
-		milk::ImageData* imageData = milk::Locator::images->load(value);
-		if (imageData != nullptr) {
-			milk::Image* image = (milk::Image*)lua_newuserdata(L, sizeof(milk::Image));
-			image->data = imageData;
-			luaL_getmetatable(L, IMAGE_METATABLE);
-			lua_setmetatable(L, -2);
-			lua_pushboolean(L, true);
-			return 2;
-		}
+	const char* path = (const char*)luaL_checkstring(L, 1);
+	milk::u32 uid = milk::graphics_load_imagedata(path);
+	if (uid != milk::INVALID_UID) {
+		milk::image* img = (milk::image*)lua_newuserdata(L, sizeof(milk::image));
+		img->uid = uid;
+		luaL_getmetatable(L, IMAGE_METATABLE);
+		lua_setmetatable(L, -2);
+		return 1;
 	}
-	lua_pushnil(L);
-	lua_pushboolean(L, false);
-	return 2;
+	return luaL_error(L, "could not load image file: %s", path);
 }
 
-static int graphics_set_virtual_resolution(lua_State* L)
+static int lua_graphics_set_resolution(lua_State* L)
 {
 	int w = (int)luaL_checkinteger(L, 1);
 	int h = (int)luaL_checkinteger(L, 2);
 
-	milk::Locator::renderer->resolution(w, h);
+	milk::graphics_set_resolution(w, h);
 	return 0;
 }
 
-static int graphics_get_virtual_resolution(lua_State* L)
+static int lua_graphics_get_resolution(lua_State* L)
 {
-	std::tuple<int, int> resolution = milk::Locator::renderer->resolution();
+	std::tuple<int, int> resolution = milk::graphics_get_resolution();
 	int w = std::get<0>(resolution);
 	int h = std::get<1>(resolution);
 
@@ -82,30 +78,59 @@ static int graphics_get_virtual_resolution(lua_State* L)
 	return 2;
 }
 
-static int graphics_set_draw_color(lua_State* L)
+static int lua_graphics_clear(lua_State* L)
+{
+	(void)L;
+	milk::graphics_clear();
+	return 0;
+}
+
+static int lua_graphics_set_draw_color(lua_State* L)
 {
 	double r = (double)luaL_checknumber(L, 1);
 	double g = (double)luaL_checknumber(L, 2);
 	double b = (double)luaL_checknumber(L, 3);
 	double a = (double)luaL_checknumber(L, 4);
 
-	milk::Locator::renderer->setDrawColor(r, g, b, a);
+	milk::graphics_set_draw_color(r, g, b, a);
 	return 0;
 }
 
-static int graphics_draw(lua_State* L)
+static int lua_graphics_draw_rect(lua_State* L)
 {
-	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	float x = (float)luaL_checknumber(L, 1);
+	float y = (float)luaL_checknumber(L, 2);
+	float w = (float)luaL_checknumber(L, 3);
+	float h = (float)luaL_checknumber(L, 4);
+
+	milk::graphics_draw_rectangle(x, y, w, h);
+	return 0;
+}
+
+static int lua_graphics_draw_filled_rect(lua_State* L)
+{
+	float x = (float)luaL_checknumber(L, 1);
+	float y = (float)luaL_checknumber(L, 2);
+	float w = (float)luaL_checknumber(L, 3);
+	float h = (float)luaL_checknumber(L, 4);
+
+	milk::graphics_draw_rectangle_filled(x, y, w, h);
+	return 0;
+}
+
+static int lua_graphics_draw(lua_State* L)
+{
+	milk::image* img = (milk::image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
 	float x = (float)luaL_checknumber(L, 2);
 	float y = (float)luaL_checknumber(L, 3);
 
-	milk::Locator::renderer->draw(image, x, y);
+	milk::graphics_draw(img, x, y);
 	return 0;
 }
 
-static int graphics_drawx(lua_State* L)
+static int lua_graphics_drawx(lua_State* L)
 {
-	milk::Image* image = (milk::Image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
+	milk::image* img = (milk::image*)luaL_checkudata(L, 1, IMAGE_METATABLE);
 	float posx = (float)luaL_checknumber(L, 2);
 	float posy = (float)luaL_checknumber(L, 3);
 	int rectx = (int)luaL_checkinteger(L, 4);
@@ -116,47 +141,34 @@ static int graphics_drawx(lua_State* L)
 	float scaley = (float)luaL_checknumber(L, 9);
 	double angle = (double)luaL_checknumber(L, 10);
 
-	milk::Locator::renderer->draw(image, posx, posy, rectx, recty, rectw, recth, scalex, scaley, angle);
+	milk::graphics_draw(img, posx, posy, rectx, recty, rectw, recth, scalex, scaley, angle);
 	return 0;
 }
 
-static int graphics_draw_rect(lua_State* L)
+static int lua_graphics_present(lua_State* L)
 {
-	float x = (float)luaL_checknumber(L, 1);
-	float y = (float)luaL_checknumber(L, 2);
-	float w = (float)luaL_checknumber(L, 3);
-	float h = (float)luaL_checknumber(L, 4);
-
-	milk::Locator::renderer->drawRectangle(x, y, w, h);
-	return 0;
-}
-
-static int graphics_draw_filled_rect(lua_State* L)
-{
-	float x = (float)luaL_checknumber(L, 1);
-	float y = (float)luaL_checknumber(L, 2);
-	float w = (float)luaL_checknumber(L, 3);
-	float h = (float)luaL_checknumber(L, 4);
-
-	milk::Locator::renderer->drawRectangleFilled(x, y, w, h);
+	(void)L;
+	milk::graphics_present();
 	return 0;
 }
 
 static const luaL_Reg graphics_funcs[] = {
-	{ "new_image", graphics_new_image },
-	{ "get_virtual_resolution", graphics_get_virtual_resolution },
-	{ "set_virtual_resolution", graphics_set_virtual_resolution },
-	{ "set_draw_color", graphics_set_draw_color },
-	{ "draw", graphics_draw },
-	{ "drawx", graphics_drawx },
-	{ "draw_rect", graphics_draw_rect },
-	{ "draw_filled_rect", graphics_draw_filled_rect },
+	{ "new_image", lua_graphics_new_image },
+	{ "get_resolution", lua_graphics_get_resolution },
+	{ "set_resolution", lua_graphics_set_resolution },
+	{ "clear", lua_graphics_clear },
+	{ "set_draw_color", lua_graphics_set_draw_color },
+	{ "draw_rect", lua_graphics_draw_rect },
+	{ "draw_filled_rect", lua_graphics_draw_filled_rect },
+	{ "draw", lua_graphics_draw },
+	{ "drawx", lua_graphics_drawx },
+	{ "present", lua_graphics_present },
 	{ nullptr, nullptr }
 };
 
-int milk::luaopen_milk_graphics(lua_State* L)
+int luaopen_milk_graphics(lua_State* L)
 {
-	luaM_createmetatable(L, IMAGE_METATABLE, imagemeta_funcs);
+	milk::luaM_createmetatable(L, IMAGE_METATABLE, lua_imagemeta_funcs);
 	luaL_newlib(L, graphics_funcs);
 	return 1;
 }

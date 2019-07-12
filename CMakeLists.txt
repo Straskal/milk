@@ -6,7 +6,7 @@
 cmake_minimum_required(VERSION 3.6.3)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-project(milk)
+project(libmilk)
 
 # we're a c++11 family
 set(CMAKE_CXX_STANDARD 11)
@@ -61,94 +61,77 @@ find_package(Lua53 REQUIRED)
 # milk lib
 #---------------------------------------------------------------------------
 
-# audio
-set(MILK_SRC_AUDIO
-	src/audio/AudioPlayer.h
-	src/audio/Music.h
-	src/audio/MusicCache.h
-	src/audio/SampleState.h
-	src/audio/SoundCache.h
-	src/audio/Sound.h
-	src/audio/luaopen_milk_audio.cpp
-	src/audio/luaopen_milk_audio.h
-	src/audio/sdl/SDLAudioPlayer.cpp
-	src/audio/sdl/SDLAudioPlayer.h
-	src/audio/sdl/SDLMusicCache.cpp
-	src/audio/sdl/SDLMusicCache.h
-	src/audio/sdl/SDLSoundCache.cpp
-	src/audio/sdl/SDLSoundCache.h
+# root
+set(MILK_SRC
+	src/int.h
+	src/luamlib.cpp
+	src/luamlib.h
+	src/milk_export.h
+	src/luaopen_milk.cpp
+	src/luaopen_milk.h
+	src/uid.cpp
+	src/uid.h
 )
 
-# core
-set(MILK_SRC_CORE
-	src/core/Locator.cpp
-	src/core/Locator.h
-	src/core/luamlib.cpp
-	src/core/luamlib.h
-	src/core/run.cpp
-	src/core/run.h
+# audio
+set(MILK_SRC_AUDIO
+	src/audio/audio.cpp
+	src/audio/audio.h
+	src/audio/sample.h
+	src/audio/luaopen_milk_audio.cpp
+	src/audio/luaopen_milk_audio.h
 )
 
 # data
 set(MILK_SRC_DATA
-	src/data/int.h
 )
 
 # graphics
 set(MILK_SRC_GRAPHICS
-	src/graphics/Image.h
-	src/graphics/ImageCache.h
-	src/graphics/Renderer.h
+	src/graphics/graphics.cpp
+	src/graphics/graphics.h
+	src/graphics/image.h
 	src/graphics/luaopen_milk_graphics.cpp
 	src/graphics/luaopen_milk_graphics.h
-	src/graphics/sdl/SDLImageCache.cpp
-	src/graphics/sdl/SDLImageCache.h
-	src/graphics/sdl/SDLRenderer.cpp
-	src/graphics/sdl/SDLRenderer.h
 )
 
 # keyboard
 set(MILK_SRC_KEYBOARD
-	src/keyboard/Keyboard.h
+	src/keyboard/keyboard.cpp
+	src/keyboard/keyboard.h
 	src/keyboard/luaopen_milk_keyboard.cpp
 	src/keyboard/luaopen_milk_keyboard.h
-	src/keyboard/sdl/SDLKeyboard.cpp
-	src/keyboard/sdl/SDLKeyboard.h
 )
 
 # mouse
 set(MILK_SRC_MOUSE
-	src/mouse/Mouse.h
+	src/mouse/mouse.cpp
+	src/mouse/mouse.h
 	src/mouse/luaopen_milk_mouse.cpp
 	src/mouse/luaopen_milk_mouse.h
-	src/mouse/sdl/SDLMouse.cpp
-	src/mouse/sdl/SDLMouse.h
 )
 
 # time
 set(MILK_SRC_TIME
-	src/time/Time.h
+	src/time/time.cpp
+	src/time/time.h
 	src/time/luaopen_milk_time.cpp
 	src/time/luaopen_milk_time.h
-	src/time/sdl/SDLTime.cpp
-	src/time/sdl/SDLTime.h
-	src/time/sdl/SDLTimer.cpp
-	src/time/sdl/SDLTimer.h
 )
 
 # window
 set(MILK_SRC_WINDOW
-	src/window/Window.h	
+	src/window/window.cpp
+	src/window/window.h	
 	src/window/luaopen_milk_window.cpp
 	src/window/luaopen_milk_window.h
-	src/window/sdl/SDLWindow.cpp
-	src/window/sdl/SDLWindow.h
 )
 
 set(MILK_SRC_FILES
+	${MILK_SRC}
 	${MILK_SRC_AUDIO}
-	${MILK_SRC_CORE}
 	${MILK_SRC_DATA}
+	${MILK_SRC_CORE}
 	${MILK_SRC_GRAPHICS}
 	${MILK_SRC_KEYBOARD}
 	${MILK_SRC_MOUSE}
@@ -156,9 +139,9 @@ set(MILK_SRC_FILES
 	${MILK_SRC_WINDOW}
 )
 
-add_library(milklib STATIC ${MILK_SRC_FILES})
+add_library(milk SHARED ${MILK_SRC_FILES})
 
-target_include_directories(milklib
+target_include_directories(milk
 	PUBLIC
 		${SDL2_INCLUDE_DIR}
 		${SDL2_IMAGE_INCLUDE_DIRS}
@@ -168,7 +151,7 @@ target_include_directories(milklib
 )
 
 if (WIN32)
-	target_link_directories(milklib
+	target_link_directories(milk
 		PUBLIC
 			${SDL2_INCLUDE_DIR}
 			${SDL2_IMAGE_INCLUDE_DIRS}
@@ -178,21 +161,13 @@ if (WIN32)
 	)
 endif()
 
-target_link_libraries(milklib
+target_link_libraries(milk
 	PUBLIC
 		${SDL2_LIBRARY}
 		${SDL2_IMAGE_LIBRARIES}
 		${SDL2_MIXER_LIBRARIES}
 		${LUA53_LIBRARIES}
 )
-
-#---------------------------------------------------------------------------
-# milk exe
-#---------------------------------------------------------------------------
-
-add_executable(milk src/main.cpp)
-
-target_link_libraries(milk milklib)
 
 #---------------------------------------------------------------------------
 # post build step to copy dlls to executable output file
