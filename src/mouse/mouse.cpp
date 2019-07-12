@@ -3,11 +3,11 @@
 #include "window/window.h"
 #include "graphics/graphics.h"
 
-static Uint32 current_state;
-static Uint32 previous_state;
-static int x;
-static int y;
-static int scroll;
+static Uint32 current_state = 0;
+static Uint32 previous_state = 0;
+static int x = 0;
+static int y = 0;
+static int scroll = 0;
 
 void milk::mouse_reset_scroll()
 {

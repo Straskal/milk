@@ -9,11 +9,11 @@
 #include "mouse/mouse.h"
 
 /* Window */
-static const int DEFAULT_WIDTH = 800;
-static const int DEFAULT_HEIGHT = 600;
+#define DEFAULT_WIDTH 800
+#define DEFAULT_HEIGHT 600
 
 /* We define this bad boi here because SDL does not, and we don't want magic numbers chilling up in this boi, son. */
-static const int MILK_SDL_WINDOW_NO_FLAG = 0;
+#define MILK_SDL_WINDOW_NO_FLAG 0
 
 static SDL_Window* window_handle = nullptr;
 static bool should_close = false;

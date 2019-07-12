@@ -11,9 +11,9 @@
 #include "uid.h"
 
 /* Renderer info */
-static const int FIRST_SUPPORTED_RENDERING_DRIVER = -1;
-static const char* BATCHING_ON = "1";
-static const char* NEAREST_PIXEL_SAMPLING = "nearest";
+#define FIRST_SUPPORTED_RENDERING_DRIVER -1
+#define BATCHING_ON "1"
+#define NEAREST_PIXEL_SAMPLING "nearest"
 
 static SDL_Renderer* renderer_handle = nullptr;
 

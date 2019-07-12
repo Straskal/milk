@@ -13,12 +13,12 @@
 #include "uid.h"
 
 /* Audio */
-static const int NUM_CHANNELS = 32;
-static const int MIX_CHUNK_SIZE = 2048;
-static const int STEREO_CHANNELS = 2;
-static const int INVALID_CHANNEL = -1;
-static const int LOOP = -1;
-static const int NO_LOOP = 0;
+#define NUM_CHANNELS 32
+#define MIX_CHUNK_SIZE 2048
+#define STEREO_CHANNELS 2
+#define INVALID_CHANNEL -1
+#define LOOP -1
+#define NO_LOOP 0
 
 static float master_volume = 1.f;
 
@@ -150,7 +150,6 @@ void milk::audio_set_master_volume(float volume)
 
 	for (int i = 0; i < NUM_CHANNELS; ++i)
 		Mix_Volume(i, (int)(channel_volume[i] * v));
-
 	if (current_music != nullptr)
 		Mix_VolumeMusic((int)(current_music->volume * v));
 }
