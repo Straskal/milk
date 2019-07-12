@@ -35,7 +35,6 @@ static std::unordered_map<milk::u32, milk::sound_data*> sounds_by_id;
 static std::unordered_map<std::string, milk::u32> music_by_path;
 static std::unordered_map<milk::u32, milk::music_data*> music_by_id;
 
-/* Private */
 static void on_channel_finished(int channelnum)
 {
 	milk::sound* sound = channels[channelnum];
@@ -85,8 +84,6 @@ static void play_music(milk::music* music, float fadetime, int loop)
 	current_music = music;
 }
 
-
-/* Public */
 bool milk::audio_init()
 {
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
