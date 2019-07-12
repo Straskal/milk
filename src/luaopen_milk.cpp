@@ -27,12 +27,14 @@ static int milk_init(lua_State* L)
 
 static int milk_quit(lua_State* L)
 {
+	(void)L;
 	if (!initialized)
 		return 0;
 	milk::audio_quit();
 	milk::graphics_quit();
 	milk::window_quit();
 	initialized = false;
+	return 0;
 }
 
 static const luaL_Reg milk_funcs[] = {
