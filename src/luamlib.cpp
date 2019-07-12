@@ -60,8 +60,7 @@ void milk::luaM_setenumfield(lua_State* L, int index, const char* name, const lu
 {
 	lua_newtable(L);
 	unsigned int sz = size / sizeof(luaM_Enum);
-	for (unsigned int i = 0; i < sz; ++i) {
+	for (unsigned int i = 0; i < sz; ++i)
 		luaM_setintfield(L, -1, e[i].name, e[i].key);
-	}
 	lua_setfield(L, correct_index(index), name);
 }
