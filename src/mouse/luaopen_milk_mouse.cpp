@@ -5,7 +5,7 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-#include "Mouse.h"
+#include "mouse.h"
 #include "luamlib.h"
 
 static int lua_mouse_is_button_down(lua_State* L)

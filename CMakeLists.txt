@@ -16,7 +16,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DMILK_DEBUG")
 
 # give is warning hell, brother
 if (CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fPIC")
+	set(CMAKE_SHARED_LINKER_FLAGS_ "-pthread -lpthread")
 endif()
 if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
@@ -127,6 +128,22 @@ set(MILK_SRC_WINDOW
 	src/window/luaopen_milk_window.h
 )
 
+# joystick
+set(MILK_SRC_JOYSTICK
+	src/joystick/joystick.cpp
+	src/joystick/joystick.h
+	src/joystick/luaopen_milk_joystick.cpp
+	src/joystick/luaopen_milk_joystick.h
+)
+
+# controller
+set(MILK_SRC_CONTROLLER
+	src/controller/controller.cpp
+	src/controller/controller.h
+	src/controller/luaopen_milk_controller.cpp
+	src/controller/luaopen_milk_controller.h
+)
+
 set(MILK_SRC_FILES
 	${MILK_SRC}
 	${MILK_SRC_AUDIO}
@@ -137,6 +154,8 @@ set(MILK_SRC_FILES
 	${MILK_SRC_MOUSE}
 	${MILK_SRC_TIME}
 	${MILK_SRC_WINDOW}
+	${MILK_SRC_JOYSTICK}
+	${MILK_SRC_CONTROLLER}
 )
 
 add_library(milk SHARED ${MILK_SRC_FILES})
@@ -176,6 +195,7 @@ target_link_libraries(milk
 # assumes SDL2_image 2.0.4
 # assumes Lua 5.3.5
 #---------------------------------------------------------------------------
+set_target_properties(milk PROPERTIES PREFIX "")
 
 if(WIN32)
 	if (MSVC)
