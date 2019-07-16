@@ -8,7 +8,8 @@ local tests = {
     WINDOW = "tests/windowtest.lua",
     GRAPHICS = "tests/graphicstest.lua",
     MOUSE = "tests/mousetest.lua",
-    KEYBOARD = "tests/keyboardtest.lua"
+    KEYBOARD = "tests/keyboardtest.lua",
+    CONTROLLER = "tests/controllertest.lua"
 }
 --------------------------------------------
 --------------------------------------------

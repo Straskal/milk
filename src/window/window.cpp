@@ -7,6 +7,7 @@
 
 #include "keyboard/keyboard.h"
 #include "mouse/mouse.h"
+#include "controller/controller.h"
 
 /* Window */
 #define DEFAULT_WIDTH 800
@@ -62,6 +63,7 @@ void milk::window_poll()
 
 	milk::mouse_update_state();
 	milk::keyboard_update_state();
+	milk::controller_update_state();
 }
 
 void milk::window_show()

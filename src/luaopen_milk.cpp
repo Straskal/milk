@@ -11,6 +11,7 @@ extern "C" {
 #include "audio/audio.h"
 #include "graphics/graphics.h"
 #include "window/window.h"
+#include "controller/controller.h"
 
 static bool initialized = false;
 
@@ -18,7 +19,10 @@ static int milk_init(lua_State* L)
 {
 	if (initialized)
 		return 0;
-	if (milk::window_init() && milk::graphics_init(milk::window_get_handle()) && milk::audio_init()) {
+	if (milk::window_init()
+		&& milk::graphics_init(milk::window_get_handle())
+		&& milk::audio_init()
+		&& milk::controller_init()) {
 		initialized = true;
 		return 0;
 	}
