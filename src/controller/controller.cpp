@@ -72,22 +72,22 @@ void milk::controller_update_state()
 }
 
 
-float milk::controller_get_axis_value (SDL_GameControllerAxis axis)
+float milk::controller_get_axis_value (c_axis axis)
 {
-    return axes[axis];
+    return axes[(int)axis];
 }
 
-bool milk::controller_is_button_down(SDL_GameControllerButton button)
+bool milk::controller_is_button_down(c_button button)
 {
-	return current_state[button];
+	return current_state[(int)button];
 }
 
-bool milk::controller_is_button_pressed(SDL_GameControllerButton button)
+bool milk::controller_is_button_pressed(c_button button)
 {
-	return current_state[button] && !previous_state[button];
+	return current_state[(int)button] && !previous_state[(int)button];
 }
 
-bool milk::controller_is_button_released(SDL_GameControllerButton button)
+bool milk::controller_is_button_released(c_button button)
 {
 	return !current_state[(int)button] && previous_state[(int)button];
 }
