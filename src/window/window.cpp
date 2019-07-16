@@ -7,7 +7,6 @@
 
 #include "keyboard/keyboard.h"
 #include "mouse/mouse.h"
-#include "joystick/joystick.h"
 #include "controller/controller.h"
 
 /* Window */
@@ -60,10 +59,6 @@ void milk::window_poll()
 			milk::window_close();
 		if (event.type == SDL_MOUSEWHEEL)
 			milk::mouse_handle_wheel_event(&event);
-		if (event.type == SDL_JOYAXISMOTION)
-			milk::joystick_handle_axis_event(&event);
-		if (event.type == SDL_CONTROLLERAXISMOTION)
-			milk::controller_handle_axis_event();
 	}
 
 	milk::mouse_update_state();

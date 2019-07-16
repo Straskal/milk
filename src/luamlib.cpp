@@ -6,7 +6,6 @@
 #include "keyboard/luaopen_milk_keyboard.h"
 #include "time/luaopen_milk_time.h"
 #include "window/luaopen_milk_window.h"
-#include "joystick/luaopen_milk_joystick.h"
 #include "controller/luaopen_milk_controller.h"
 
 static int correct_index(int index)
@@ -41,7 +40,6 @@ void milk::luaM_openlibs(lua_State* L)
 	luaM_openlib(L, "milk.keyboard", luaopen_milk_keyboard);
 	luaM_openlib(L, "milk.graphics", luaopen_milk_graphics);
 	luaM_openlib(L, "milk.audio", luaopen_milk_audio);
-	luaM_openlib(L, "milk.joystick", luaopen_milk_joystick);
 	luaM_openlib(L, "milk.controller", luaopen_milk_controller);
 }
 

@@ -8,31 +8,11 @@ extern "C" {
 #include "controller.h"
 #include "luamlib.h"
 
-static int lua_controller_get_leftx(lua_State* L)
+static int lua_get_axis_value(lua_State* L)
 {
-	int x = milk::controller_get_leftx();
-	lua_pushinteger(L, x);
-	return 1;
-}
-
-static int lua_controller_get_lefty(lua_State* L)
-{
-	int y = milk::controller_get_lefty();
-	lua_pushinteger(L, y);
-	return 1;
-}
-
-static int lua_controller_get_rightx(lua_State* L)
-{
-	int x = milk::controller_get_rightx();
-	lua_pushinteger(L, x);
-	return 1;
-}
-
-static int lua_controller_get_righty(lua_State* L)
-{
-	int y = milk::controller_get_righty();
-	lua_pushinteger(L, y);
+	SDL_GameControllerAxis axis = (SDL_GameControllerAxis)luaL_checkinteger(L, 1);
+	float axis_value = milk::controller_get_axis_value(axis);
+	lua_pushnumber(L, axis_value);
 	return 1;
 }
 
@@ -61,10 +41,7 @@ static int lua_is_button_released(lua_State* L)
 }
 
 static const luaL_Reg lua_controller_funcs[] = {
-	{ "get_leftx", lua_controller_get_leftx },
-    { "get_lefty", lua_controller_get_lefty },
-    { "get_rightx", lua_controller_get_rightx },
-    { "get_righty", lua_controller_get_righty },
+	{"get_axis_value", lua_get_axis_value},
 	{ "is_button_down", lua_is_button_down },
 	{ "is_button_pressed", lua_is_button_pressed },
 	{ "is_button_released", lua_is_button_released },
@@ -77,7 +54,10 @@ static const milk::luaM_Enum lua_controller_enum[] = {
 	{"X", (int)SDL_CONTROLLER_BUTTON_X},
 	{"Y", (int)SDL_CONTROLLER_BUTTON_Y},
 	{"BACK", (int)SDL_CONTROLLER_BUTTON_BACK},
+	{"GUIDE", (int)SDL_CONTROLLER_BUTTON_GUIDE},
 	{"START", (int)SDL_CONTROLLER_BUTTON_START},
+	{"LEFT_STICK", (int)SDL_CONTROLLER_BUTTON_LEFTSTICK},
+	{"RIGHT_STICK", (int)SDL_CONTROLLER_BUTTON_RIGHTSTICK},
 	{"SHOULDER_LEFT", (int)SDL_CONTROLLER_BUTTON_LEFTSHOULDER},
 	{"SHOULDER_RIGHT", (int)SDL_CONTROLLER_BUTTON_RIGHTSHOULDER},
 	{"PAD_UP", (int)SDL_CONTROLLER_BUTTON_DPAD_UP},
@@ -86,9 +66,19 @@ static const milk::luaM_Enum lua_controller_enum[] = {
 	{"PAD_RIGHT", (int)SDL_CONTROLLER_BUTTON_DPAD_RIGHT}
 };
 
+static const milk::luaM_Enum lua_axes_enum[] = {
+	{"LEFT_X", (int)SDL_CONTROLLER_AXIS_LEFTX},
+	{"LEFT_Y", (int)SDL_CONTROLLER_AXIS_LEFTY},
+	{"RIGHT_X", (int)SDL_CONTROLLER_AXIS_RIGHTX},
+	{"RIGHT_Y", (int)SDL_CONTROLLER_AXIS_RIGHTY},
+	{"LEFT_TRIGGER", (int)SDL_CONTROLLER_AXIS_TRIGGERLEFT},
+	{"RIGHT_TRIGGER", (int)SDL_CONTROLLER_AXIS_TRIGGERRIGHT},
+};
+
 int luaopen_milk_controller(lua_State* L)
 {
 	luaL_newlib(L, lua_controller_funcs);
 	luaM_setenumfield(L, -1, "buttons", lua_controller_enum, sizeof(lua_controller_enum));
+	luaM_setenumfield(L, -1, "axes", lua_axes_enum, sizeof(lua_axes_enum));
 	return 1;
 }

@@ -128,14 +128,6 @@ set(MILK_SRC_WINDOW
 	src/window/luaopen_milk_window.h
 )
 
-# joystick
-set(MILK_SRC_JOYSTICK
-	src/joystick/joystick.cpp
-	src/joystick/joystick.h
-	src/joystick/luaopen_milk_joystick.cpp
-	src/joystick/luaopen_milk_joystick.h
-)
-
 # controller
 set(MILK_SRC_CONTROLLER
 	src/controller/controller.cpp
@@ -154,7 +146,6 @@ set(MILK_SRC_FILES
 	${MILK_SRC_MOUSE}
 	${MILK_SRC_TIME}
 	${MILK_SRC_WINDOW}
-	${MILK_SRC_JOYSTICK}
 	${MILK_SRC_CONTROLLER}
 )
 

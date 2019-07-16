@@ -2,7 +2,6 @@ local milk = require("milk")
 local window = require("milk.window")
 local time = require("milk.time")
 local graphics = require("milk.graphics")
-local joystick = require("milk.joystick")
 
 -- initialize milk and it's libraries
 milk.init()

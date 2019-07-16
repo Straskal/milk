@@ -6,131 +6,75 @@
 
 #include "SDL.h"
 
-const int CONTROLLER_JOYSTICK_DEAD_ZONE = 8000;
-SDL_GameController* controller = NULL;
-static int Lx;
-static int Ly;
-static int Rx;
-static int Ry;
+static float axes[SDL_CONTROLLER_AXIS_MAX];
+static bool current_state[SDL_CONTROLLER_BUTTON_MAX];
+static bool previous_state[SDL_CONTROLLER_BUTTON_MAX];
+SDL_GameController *controller = NULL;
 
 bool milk::controller_init() 
 {
-    if(SDL_Init(SDL_INIT_GAMECONTROLLER) < 0)
+    if (SDL_Init(SDL_INIT_GAMECONTROLLER) < 0)
     {
-        std::cout << "SDL_Init: Failed to initialize gamepad: " << SDL_GetError() << std::endl;
+        std::cout << "SDL_Init: Failed to initialize controller subsystem: " << SDL_GetError() << std::endl;
         return false;
     }
 
-    controller = SDL_GameControllerOpen(0);
+    if (SDL_IsGameController(0))
+    {
+        controller = SDL_GameControllerOpen(0);
+        if (!controller)
+        {
+            std::cout << "Could not open gamecontroller" << SDL_GetError() << std::endl;
+            return false;
+        }
+    }
     return true;
 }
 
 void milk::controller_close()
 {
-    SDL_GameControllerClose(controller);
+    if (controller)
+    {
+        SDL_GameControllerClose(controller);
+    }
+    else
+    {
+        std::cout << "Could not close gamecontroller" << SDL_GetError() << std::endl;
+    }
+    SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
     controller = NULL;
 }
 
-void milk::controller_handle_axis_event()
+float get_axis(SDL_GameControllerAxis axis)
 {
-    Lx = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX);
-    Ly = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);
-    Rx = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_RIGHTX);
-    Ry = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_RIGHTY);
+    float result = (float)SDL_GameControllerGetAxis(controller, axis) / 32767;
 
-    //X axis motion
-    //Left of dead zone
-    if( Lx < -CONTROLLER_JOYSTICK_DEAD_ZONE )
+    if (result < -1)
     {
-        Lx = -1;
-    }
-    //Right of dead zone
-    else if( Lx > CONTROLLER_JOYSTICK_DEAD_ZONE )
-    {
-        Lx =  1;
-    }
-    else
-    {
-        Lx = 0;
-    }
-    //Y axis motion
-    //Below of dead zone
-    if( Ly < -CONTROLLER_JOYSTICK_DEAD_ZONE )
-    {
-        Ly = -1;
-    }
-    //Above of dead zone
-    else if( Ly > CONTROLLER_JOYSTICK_DEAD_ZONE )
-    {
-        Ly =  1;
-    }
-    else
-    {
-        Ly = 0;
+        result = -1.0f;
     }
 
-    //X axis motion
-    //Left of dead zone
-    if( Rx < -CONTROLLER_JOYSTICK_DEAD_ZONE )
-    {
-        Rx = -1;
-    }
-    //Right of dead zone
-    else if( Rx > CONTROLLER_JOYSTICK_DEAD_ZONE )
-    {
-        Rx =  1;
-    }
-    else
-    {
-        Rx = 0;
-    }
-    //Y axis motion
-    //Below of dead zone
-    if( Ry < -CONTROLLER_JOYSTICK_DEAD_ZONE )
-    {
-        Ry = -1;
-    }
-    //Above of dead zone
-    else if( Ry > CONTROLLER_JOYSTICK_DEAD_ZONE )
-    {
-        Ry =  1;
-    }
-    else
-    {
-        Ry = 0;
-    }
+    return result;
 }
-
-int milk::controller_get_leftx()
-{
-    return Lx;
-}
-
-int milk::controller_get_lefty()
-{
-    return Ly;
-}
-
-int milk::controller_get_rightx()
-{
-    return Rx;
-}
-
-int milk::controller_get_righty()
-{
-    return Ry;
-}
-
-static bool current_state[15];
-static bool previous_state[15];
 
 void milk::controller_update_state()
 {
-    for (int i = 0; i < 15; i++)
+    for(int i = 0; i < SDL_CONTROLLER_AXIS_MAX; i++)
+    {
+        axes[i] = get_axis((SDL_GameControllerAxis)i);
+    }
+
+    for (int i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++)
     {
         previous_state[i] = current_state[i];
         current_state[i] = SDL_GameControllerGetButton(controller, (SDL_GameControllerButton)i);
     }
+}
+
+
+float milk::controller_get_axis_value (SDL_GameControllerAxis axis)
+{
+    return axes[axis];
 }
 
 bool milk::controller_is_button_down(SDL_GameControllerButton button)

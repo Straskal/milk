@@ -1,6 +1,7 @@
 local window = require("milk.window")
 local controller = require("milk.controller")
 local buttons = controller.buttons;
+local axes = controller.axes;
 
 local test = {}
 
@@ -10,31 +11,27 @@ end
 
 function test.tick()
     -- left joystick
-    if controller.get_leftx() == 1 then
-        print("Left stick - right")
+    if controller.get_axis_value(axes.LEFT_X) > 0.2 or controller.get_axis_value(axes.LEFT_X) < -0.2 then
+        print(controller.get_axis_value(axes.LEFT_X))
     end
-    if controller.get_leftx() == -1 then
-        print("Left stick - left")
-    end
-    if controller.get_lefty() == 1 then
-        print("Left stick - down")
-    end
-    if controller.get_lefty() == -1 then
-        print("left stick - up")
+    if controller.get_axis_value(axes.LEFT_Y) > 0.2 or controller.get_axis_value(axes.LEFT_Y) < -0.2 then
+        print(controller.get_axis_value(axes.LEFT_Y))
     end
 
     -- right joystick
-    if controller.get_rightx() == 1 then
-        print("Right stick - right")
+    if controller.get_axis_value(axes.RIGHT_X) > 0.2 or controller.get_axis_value(axes.RIGHT_X) < -0.2 then
+        print(controller.get_axis_value(axes.RIGHT_X))
     end
-    if controller.get_rightx() == -1 then
-        print("Right stick - left")
+    if controller.get_axis_value(axes.RIGHT_Y) > 0.2 or controller.get_axis_value(axes.RIGHT_Y) < -0.2 then
+        print(controller.get_axis_value(axes.RIGHT_Y))
     end
-    if controller.get_righty() == 1 then
-        print("Right stick - down")
+
+    -- triggers
+    if controller.get_axis_value(axes.LEFT_TRIGGER) > 0.2 then
+        print(controller.get_axis_value(axes.LEFT_TRIGGER))
     end
-    if controller.get_righty() == -1 then
-        print("Right stick - up")
+    if controller.get_axis_value(axes.RIGHT_TRIGGER) > 0.2 then
+        print(controller.get_axis_value(axes.RIGHT_TRIGGER))
     end
 
     --buttons
@@ -50,6 +47,27 @@ function test.tick()
     if controller.is_button_released(buttons.Y) then
         print("Y")
     end
+    if controller.is_button_released(buttons.BACK) then
+        print("BACK")
+    end
+    if controller.is_button_released(buttons.GUIDE) then
+        print("GUIDE")
+    end
+    if controller.is_button_released(buttons.START) then
+        print("START")
+    end
+    if controller.is_button_released(buttons.LEFT_STICK) then
+        print("LEFT_STICK")
+    end
+    if controller.is_button_released(buttons.RIGHT_STICK) then
+        print("RIGHT_STICK")
+    end
+    if controller.is_button_released(buttons.SHOULDER_LEFT) then
+        print("SHOULDER_LEFT")
+    end
+    if controller.is_button_released(buttons.SHOULDER_RIGHT) then
+        print("SHOULDER_RIGHT")
+    end
     if controller.is_button_released(buttons.PAD_UP) then
         print("PAD_UP")
     end
@@ -61,18 +79,6 @@ function test.tick()
     end
     if controller.is_button_released(buttons.PAD_RIGHT) then
         print("PAD_RIGHT")
-    end
-    if controller.is_button_released(buttons.BACK) then
-        print("BACK")
-    end
-    if controller.is_button_released(buttons.START) then
-        print("START")
-    end
-    if controller.is_button_released(buttons.SHOULDER_LEFT) then
-        print("SHOULDER_LEFT")
-    end
-    if controller.is_button_released(buttons.SHOULDER_RIGHT) then
-        print("SHOULDER_RIGHT")
     end
 end
 
