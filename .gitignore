@@ -4,8 +4,11 @@ cmake-build-release/
 cmake-build-debug/
 
 # visual studio
-.vs
+.vscode/*.*
 CMakeSettings.json
 
 # clion
 .idea
+
+# don't really need to check in the output
+milk.so
