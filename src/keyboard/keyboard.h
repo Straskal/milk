@@ -82,6 +82,7 @@ namespace milk
 		LALT = 226,
 		RCTRL = 228,
 		RSHIFT = 229,
+		RALT = 230,
 		MAX_KEYS
 	};
 

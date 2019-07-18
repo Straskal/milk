@@ -218,7 +218,7 @@ function test.tick()
         print("UP was hit")
     end
     if keyboard.is_key_released(keys.LCTRL) then
-        print("LECT CONTROL was hit")
+        print("LEFT CONTROL was hit")
     end
     if keyboard.is_key_released(keys.LSHIFT) then
         print("LEFT SHIFT was hit")
@@ -231,6 +231,9 @@ function test.tick()
     end
     if keyboard.is_key_released(keys.RSHIFT) then
         print("RIGHT SHIFT was hit")
+    end
+    if keyboard.is_key_released(keys.RALT) then
+        print("RIGHT ALT was hit")
     end
 end
 
