@@ -40,11 +40,20 @@ static int lua_is_button_released(lua_State* L)
 	return 1;
 }
 
+static int lua_rumble(lua_State* L)
+{
+	float intensity = luaL_checknumber(L, 1);
+	int duration = luaL_checkinteger(L, 2);
+	milk::rumble(intensity, duration);
+	return 1;
+}
+
 static const luaL_Reg lua_controller_funcs[] = {
 	{"get_axis_value", lua_get_axis_value},
-	{ "is_button_down", lua_is_button_down },
-	{ "is_button_pressed", lua_is_button_pressed },
-	{ "is_button_released", lua_is_button_released },
+	{"is_button_down", lua_is_button_down },
+	{"is_button_pressed", lua_is_button_pressed},
+	{"is_button_released", lua_is_button_released},
+	{"rumble", lua_rumble},
 	{ nullptr, nullptr }
 };
 

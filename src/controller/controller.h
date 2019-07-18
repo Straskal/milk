@@ -46,6 +46,9 @@ namespace milk {
     bool controller_is_button_down(c_button button);
     bool controller_is_button_pressed(c_button button);
     bool controller_is_button_released(c_button button);
+
+    //Rrrrrrrrrrrrumble
+    void rumble(float intensity, int duration);
 }
 
 #endif
