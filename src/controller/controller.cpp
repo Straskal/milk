@@ -45,7 +45,7 @@ void milk::controller_close()
     controller = NULL;
 }
 
-float get_axis(SDL_GameControllerAxis axis)
+static float get_axis(SDL_GameControllerAxis axis)
 {
     float result = (float)SDL_GameControllerGetAxis(controller, axis) / 32767;
 
@@ -70,7 +70,6 @@ void milk::controller_update_state()
         current_state[i] = SDL_GameControllerGetButton(controller, (SDL_GameControllerButton)i);
     }
 }
-
 
 float milk::controller_get_axis_value (c_axis axis)
 {
