@@ -217,6 +217,57 @@ function test.tick()
     if keyboard.is_key_released(keys.UP) then
         print("UP was hit")
     end
+    if keyboard.is_key_released(keys.NUMLOCK) then
+        print("NUMLOCK was hit")
+    end
+    if keyboard.is_key_released(keys.KPDIVIDE) then
+        print("KPDIVIDE was hit")
+    end
+    if keyboard.is_key_released(keys.KPMULTIPLY) then
+        print("KPMULTIPLY was hit")
+    end
+    if keyboard.is_key_released(keys.KPMINUS) then
+        print("KPMINUS was hit")
+    end
+    if keyboard.is_key_released(keys.KPPLUS) then
+        print("KPPLUS was hit")
+    end
+    if keyboard.is_key_released(keys.KPENTER) then
+        print("KPENTER was hit")
+    end
+    if keyboard.is_key_released(keys.KPNUM1) then
+        print("KPNUM1 was hit")
+    end
+    if keyboard.is_key_released(keys.KPNUM2) then
+        print("KPNUM2 was hit")
+    end
+    if keyboard.is_key_released(keys.KPNUM3) then
+        print("KPNUM3 was hit")
+    end
+    if keyboard.is_key_released(keys.KPNUM4) then
+        print("KPNUM4 was hit")
+    end
+    if keyboard.is_key_released(keys.KPNUM5) then
+        print("KPNUM5 was hit")
+    end
+    if keyboard.is_key_released(keys.KPNUM6) then
+        print("KPNUM6 was hit")
+    end
+    if keyboard.is_key_released(keys.KPNUM7) then
+        print("KPNUM7 was hit")
+    end
+    if keyboard.is_key_released(keys.KPNUM8) then
+        print("KPNUM8 was hit")
+    end
+    if keyboard.is_key_released(keys.KPNUM9) then
+        print("KPNUM9 was hit")
+    end
+    if keyboard.is_key_released(keys.KPNUM0) then
+        print("KPNUM0 was hit")
+    end
+    if keyboard.is_key_released(keys.KPPERIOD) then
+        print("KPPERIOD was hit")
+    end
     if keyboard.is_key_released(keys.LCTRL) then
         print("LEFT CONTROL was hit")
     end
