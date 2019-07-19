@@ -11,27 +11,27 @@ end
 
 function test.tick()
     -- left joystick
-    if controller.get_axis_value(axes.LEFT_X) > 0.2 or controller.get_axis_value(axes.LEFT_X) < -0.2 then
-        print(controller.get_axis_value(axes.LEFT_X))
+    if controller.get_axis(axes.LEFT_X) > 0.2 or controller.get_axis(axes.LEFT_X) < -0.2 then
+        print(controller.get_axis(axes.LEFT_X))
     end
-    if controller.get_axis_value(axes.LEFT_Y) > 0.2 or controller.get_axis_value(axes.LEFT_Y) < -0.2 then
-        print(controller.get_axis_value(axes.LEFT_Y))
+    if controller.get_axis(axes.LEFT_Y) > 0.2 or controller.get_axis(axes.LEFT_Y) < -0.2 then
+        print(controller.get_axis(axes.LEFT_Y))
     end
 
     -- right joystick
-    if controller.get_axis_value(axes.RIGHT_X) > 0.2 or controller.get_axis_value(axes.RIGHT_X) < -0.2 then
-        print(controller.get_axis_value(axes.RIGHT_X))
+    if controller.get_axis(axes.RIGHT_X) > 0.2 or controller.get_axis(axes.RIGHT_X) < -0.2 then
+        print(controller.get_axis(axes.RIGHT_X))
     end
-    if controller.get_axis_value(axes.RIGHT_Y) > 0.2 or controller.get_axis_value(axes.RIGHT_Y) < -0.2 then
-        print(controller.get_axis_value(axes.RIGHT_Y))
+    if controller.get_axis(axes.RIGHT_Y) > 0.2 or controller.get_axis(axes.RIGHT_Y) < -0.2 then
+        print(controller.get_axis(axes.RIGHT_Y))
     end
 
     -- triggers
-    if controller.get_axis_value(axes.LEFT_TRIGGER) > 0.2 then
-        print(controller.get_axis_value(axes.LEFT_TRIGGER))
+    if controller.get_axis(axes.LEFT_TRIGGER) > 0.2 then
+        print(controller.get_axis(axes.LEFT_TRIGGER))
     end
-    if controller.get_axis_value(axes.RIGHT_TRIGGER) > 0.2 then
-        print(controller.get_axis_value(axes.RIGHT_TRIGGER))
+    if controller.get_axis(axes.RIGHT_TRIGGER) > 0.2 then
+        print(controller.get_axis(axes.RIGHT_TRIGGER))
     end
 
     --buttons

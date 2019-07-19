@@ -9,7 +9,8 @@ local tests = {
     GRAPHICS = "tests/graphicstest.lua",
     MOUSE = "tests/mousetest.lua",
     KEYBOARD = "tests/keyboardtest.lua",
-    CONTROLLER = "tests/controllertest.lua"
+    CONTROLLER = "tests/controllertest.lua",
+    RUMBLE = "tests/rumbletest.lua"
 }
 --------------------------------------------
 --------------------------------------------

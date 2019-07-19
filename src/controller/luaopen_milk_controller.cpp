@@ -8,10 +8,10 @@ extern "C" {
 #include "controller.h"
 #include "luamlib.h"
 
-static int lua_get_axis_value(lua_State* L)
+static int lua_get_axis(lua_State* L)
 {
 	milk::c_axis axis = (milk::c_axis)luaL_checkinteger(L, 1);
-	float axis_value = milk::controller_get_axis_value(axis);
+	float axis_value = milk::controller_get_axis(axis);
 	lua_pushnumber(L, axis_value);
 	return 1;
 }
@@ -40,11 +40,27 @@ static int lua_is_button_released(lua_State* L)
 	return 1;
 }
 
+static int lua_rumble(lua_State* L)
+{
+	float intensity = luaL_checknumber(L, 1);
+	int duration = luaL_optinteger(L, 2, 0);
+	milk::rumble(intensity, duration);
+	return 1;
+}
+
+static int lua_stop_rumble(lua_State* L)
+{
+	milk::stop_rumble();
+	return 1;
+}
+
 static const luaL_Reg lua_controller_funcs[] = {
-	{"get_axis_value", lua_get_axis_value},
-	{ "is_button_down", lua_is_button_down },
-	{ "is_button_pressed", lua_is_button_pressed },
-	{ "is_button_released", lua_is_button_released },
+	{"get_axis", lua_get_axis},
+	{"is_button_down", lua_is_button_down },
+	{"is_button_pressed", lua_is_button_pressed},
+	{"is_button_released", lua_is_button_released},
+	{"rumble", lua_rumble},
+	{"stop_rumble", lua_stop_rumble},
 	{ nullptr, nullptr }
 };
 
