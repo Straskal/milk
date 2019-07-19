@@ -109,7 +109,8 @@ static const milk::luaM_Enum lua_keys_enum[] = {
 	{ "LSHIFT", (int)milk::keys::LSHIFT },
 	{ "LALT", (int)milk::keys::LALT },
 	{ "RCTRL", (int)milk::keys::RCTRL },
-	{ "RSHIFT", (int)milk::keys::RSHIFT }
+	{ "RSHIFT", (int)milk::keys::RSHIFT },
+	{ "RALT", (int)milk::keys::RALT }
 };
 
 int luaopen_milk_keyboard(lua_State* L)
