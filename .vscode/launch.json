@@ -2,8 +2,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      // run this commands to get linting and debugging
-      // ext install vscode-lua 
       "type": "lua",
       "request": "launch",
       "name": "Lua Launch",
@@ -16,8 +14,6 @@
       "stopOnEntry": false
     },
     {
-      // run this commands to get linting and debugging
-      // ext install vscode-lua 
       "type": "lua-local",
       "request": "launch",
       "name": "Launch Main",
@@ -27,8 +23,6 @@
       }
     },
     {
-      // run this commands to get linting and debugging
-      // ext install vscode-lua 
       "type": "lua-local",
       "request": "launch",
       "name": "Test",
