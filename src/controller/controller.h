@@ -40,7 +40,7 @@ namespace milk {
     void controller_update_state();
 
     //Axis functions
-    float controller_get_axis_value (c_axis axis);
+    float controller_get_axis (c_axis axis);
 
     //Button functions
     bool controller_is_button_down(c_button button);
@@ -49,6 +49,7 @@ namespace milk {
 
     //Rrrrrrrrrrrrumble
     void rumble(float intensity, int duration);
+    void stop_rumble();
 }
 
 #endif

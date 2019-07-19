@@ -23,6 +23,12 @@ function test.tick()
     if controller.is_button_released(buttons.X) then
         controller.rumble(0.25, 1600);
     end
+    if controller.is_button_released(buttons.PAD_UP) then
+        controller.rumble(0.25);
+    end
+    if controller.is_button_released(buttons.PAD_DOWN) then
+        controller.stop_rumble();
+    end
     
 end
 
