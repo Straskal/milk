@@ -10,7 +10,8 @@ local tests = {
     MOUSE = "tests/mousetest.lua",
     KEYBOARD = "tests/keyboardtest.lua",
     CONTROLLER = "tests/controllertest.lua",
-    RUMBLE = "tests/rumbletest.lua"
+    RUMBLE = "tests/rumbletest.lua",
+    LISTENERS = "tests/listenertest.lua"
 }
 --------------------------------------------
 --------------------------------------------
@@ -79,7 +80,7 @@ repeat
     print("=================================")
     io.write("Enter test name: ")
     io.flush()
-    test_to_run = io.read()
+    test_to_run = string.upper(io.read())
     if test_to_run == "RUN_ALL" then
         for test_name, test_file in pairs(tests) do
             run_test(test_name, test_file)

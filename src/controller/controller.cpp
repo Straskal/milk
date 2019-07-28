@@ -1,7 +1,7 @@
 #include "controller.h"
+#include "messenger/messenger.h"
 
 #include <iostream>
-#include <cstring>
 #include <vector>
 
 #include "SDL.h"
@@ -59,6 +59,17 @@ void milk::controller_close()
     
     SDL_QuitSubSystem(SDL_INIT_HAPTIC);
     SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
+}
+
+void milk::controller_on_connect(SDL_Event *event)
+{
+    controller_init();
+    milk::send_message((int)milk::listeners::CONTROLLER_CONNECT);
+}
+
+void milk::controller_on_disconnect(SDL_Event *event)
+{
+    milk::send_message((int)milk::listeners::CONTROLLER_DISCONNECT);
 }
 
 static float get_axis(SDL_GameControllerAxis axis)

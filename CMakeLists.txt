@@ -27,6 +27,7 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 set(MILK_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/..)
 
 #---------------------------------------------------------------------------
 # On windows, we have to point cmake to our third party dependencies.
@@ -136,6 +137,13 @@ set(MILK_SRC_CONTROLLER
 	src/controller/luaopen_milk_controller.h
 )
 
+set(MILK_SRC_MESSENGER
+	src/messenger/messenger.cpp
+	src/messenger/messenger.h
+	src/messenger/luaopen_milk_messenger.cpp
+	src/messenger/luaopen_milk_messenger.h
+)
+
 set(MILK_SRC_FILES
 	${MILK_SRC}
 	${MILK_SRC_AUDIO}
@@ -147,6 +155,7 @@ set(MILK_SRC_FILES
 	${MILK_SRC_TIME}
 	${MILK_SRC_WINDOW}
 	${MILK_SRC_CONTROLLER}
+	${MILK_SRC_MESSENGER}
 )
 
 add_library(milk SHARED ${MILK_SRC_FILES})

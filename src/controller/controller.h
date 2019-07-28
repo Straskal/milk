@@ -1,7 +1,10 @@
 #ifndef _CONTROLLER_H_
 #define _CONTROLLER_H_
 
-namespace milk {
+#include "SDL.h"
+
+namespace milk
+{
     enum class c_axis : int
     {
         INVALID = -1,
@@ -38,6 +41,8 @@ namespace milk {
     bool controller_init();
     void controller_close();
     void controller_update_state();
+    void controller_on_connect(SDL_Event *event);
+    void controller_on_disconnect(SDL_Event *event);
 
     //Axis functions
     float controller_get_axis (c_axis axis);

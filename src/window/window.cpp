@@ -59,6 +59,10 @@ void milk::window_poll()
 			milk::window_close();
 		if (event.type == SDL_MOUSEWHEEL)
 			milk::mouse_handle_wheel_event(&event);
+		if (event.type == SDL_CONTROLLERDEVICEADDED)
+            milk::controller_on_connect(&event);
+        if (event.type == SDL_CONTROLLERDEVICEREMOVED)
+            milk::controller_on_disconnect(&event);
 	}
 
 	milk::mouse_update_state();

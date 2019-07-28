@@ -35,8 +35,8 @@ static int milk_quit(lua_State* L)
 	if (initialized) {
 		milk::audio_quit();
 		milk::graphics_quit();
-		milk::window_quit();
 		milk::controller_close();
+		milk::window_quit();
 		initialized = false;
 	}
 	return 0;
