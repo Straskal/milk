@@ -10,6 +10,7 @@ extern "C" {
 #include "luamlib.h"
 #include "audio/audio.h"
 #include "graphics/graphics.h"
+#include "milk_graphics_chip.h"
 #include "window/window.h"
 
 static bool initialized = false;

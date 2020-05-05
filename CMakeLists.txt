@@ -8,8 +8,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 project(libmilk)
 
-# we're a c++11 family
-set(CMAKE_CXX_STANDARD 11)
+set(C_STANDARD 11)
 
 # set debug symbol = MILK_DEBUG
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DMILK_DEBUG")
@@ -35,15 +34,11 @@ if(WIN32)
 	if (MINGW)
 		# provide paths for minGW/minGW-w64 development libs
 		set(SDL2_PATH C:/ExternalLibs/SDL2-devel-2.0.10-mingw/SDL2-2.0.10/i686-w64-mingw32)
-		set(SDL2_IMAGE_PATH C:/ExternalLibs/SDL2_image-devel-2.0.4-mingw/SDL2_image-2.0.4/i686-w64-mingw32)
-		set(SDL2_MIXER_PATH C:/ExternalLibs/SDL2_mixer-devel-2.0.4-mingw/SDL2_mixer-2.0.4/i686-w64-mingw32)
 		set(ENV{LUA_DIR} C:/ExternalLibs/Lua53mingw)
 	elseif (MSVC)
 		# provide paths for visual c++ development libs
 		# these are just the paths that I use. Feel free to change them in your environment.
 		set(SDL2_PATH C:/ExternalLibs/SDL2-2.0.10)
-		set(SDL2_IMAGE_PATH C:/ExternalLibs/SDL2_image-2.0.4)
-		set(SDL2_MIXER_PATH C:/ExternalLibs/SDL2_mixer-2.0.4)
 		set(ENV{LUA_DIR} C:/ExternalLibs/lua53)
 	endif()
 endif()
@@ -53,99 +48,26 @@ endif()
 #---------------------------------------------------------------------------
 
 find_package(SDL2 2.0.10 EXACT REQUIRED)
-find_package(SDL2_image 2.0.4 EXACT REQUIRED)
-find_package(SDL2_mixer 2.0.4 EXACT REQUIRED)
-find_package(Lua53 REQUIRED)
 
 #---------------------------------------------------------------------------
 # milk lib
 #---------------------------------------------------------------------------
 
-# root
-set(MILK_SRC
-	src/int.h
-	src/luamlib.cpp
-	src/luamlib.h
-	src/milk_export.h
-	src/luaopen_milk.cpp
-	src/luaopen_milk.h
-	src/uid.cpp
-	src/uid.h
-)
-
-# audio
-set(MILK_SRC_AUDIO
-	src/audio/audio.cpp
-	src/audio/audio.h
-	src/audio/sample.h
-	src/audio/luaopen_milk_audio.cpp
-	src/audio/luaopen_milk_audio.h
-)
-
-# data
-set(MILK_SRC_DATA
-)
-
-# graphics
-set(MILK_SRC_GRAPHICS
-	src/graphics/graphics.cpp
-	src/graphics/graphics.h
-	src/graphics/image.h
-	src/graphics/luaopen_milk_graphics.cpp
-	src/graphics/luaopen_milk_graphics.h
-)
-
-# keyboard
-set(MILK_SRC_KEYBOARD
-	src/keyboard/keyboard.cpp
-	src/keyboard/keyboard.h
-	src/keyboard/luaopen_milk_keyboard.cpp
-	src/keyboard/luaopen_milk_keyboard.h
-)
-
-# mouse
-set(MILK_SRC_MOUSE
-	src/mouse/mouse.cpp
-	src/mouse/mouse.h
-	src/mouse/luaopen_milk_mouse.cpp
-	src/mouse/luaopen_milk_mouse.h
-)
-
-# time
-set(MILK_SRC_TIME
-	src/time/time.cpp
-	src/time/time.h
-	src/time/luaopen_milk_time.cpp
-	src/time/luaopen_milk_time.h
-)
-
-# window
-set(MILK_SRC_WINDOW
-	src/window/window.cpp
-	src/window/window.h	
-	src/window/luaopen_milk_window.cpp
-	src/window/luaopen_milk_window.h
-)
-
 set(MILK_SRC_FILES
-	${MILK_SRC}
-	${MILK_SRC_AUDIO}
-	${MILK_SRC_DATA}
-	${MILK_SRC_CORE}
-	${MILK_SRC_GRAPHICS}
-	${MILK_SRC_KEYBOARD}
-	${MILK_SRC_MOUSE}
-	${MILK_SRC_TIME}
-	${MILK_SRC_WINDOW}
+	src/main.c
+	src/milk.c
+	src/milk.h
+	src/milk_api.c
+	src/milk_api.h
+	src/sprite.c
+	src/sprite.h
 )
 
-add_library(milk SHARED ${MILK_SRC_FILES})
+add_executable(milk ${MILK_SRC_FILES})
 
 target_include_directories(milk
 	PUBLIC
 		${SDL2_INCLUDE_DIR}
-		${SDL2_IMAGE_INCLUDE_DIRS}
-		${SDL2_MIXER_INCLUDE_DIRS}
 		${LUA53_INCLUDE_DIR}
 		${MILK_SRC_DIR}
 )
@@ -154,8 +76,6 @@ if (WIN32)
 	target_link_directories(milk
 		PUBLIC
 			${SDL2_INCLUDE_DIR}
-			${SDL2_IMAGE_INCLUDE_DIRS}
-			${SDL2_MIXER_INCLUDE_DIRS}
 			${LUA53_INCLUDE_DIR}
 			${MILK_SRC_DIR}
 	)
@@ -164,13 +84,11 @@ endif()
 target_link_libraries(milk
 	PUBLIC
 		${SDL2_LIBRARY}
-		${SDL2_IMAGE_LIBRARIES}
-		${SDL2_MIXER_LIBRARIES}
 		${LUA53_LIBRARIES}
 )
 
 #---------------------------------------------------------------------------
-# post build step to copy dlls to executable output file
+# post build step to copy dlls to output file
 
 # assumes SDL2 2.0.10
 # assumes SDL2_image 2.0.4

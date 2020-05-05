@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+typedef uint_fast32_t uint32;
+
 namespace milk
 {
 	using i8 = int_fast8_t;
