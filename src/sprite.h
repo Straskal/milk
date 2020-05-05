@@ -3,6 +3,7 @@
 
 #include "milk.h"
 
+void SpriteEditorUpdate(MilkMachine* milk);
 void SpriteEditorDraw(MilkMachine* milk);
 
 #endif

@@ -74,6 +74,7 @@ typedef struct
 	Code code;
 
 	void(*update)();
+	void(*draw)();
 } MilkMachine;
 
 MilkMachine* MilkInit();
@@ -83,5 +84,6 @@ void MilkDraw(MilkMachine* milk);
 void MilkClear(VRAM* vram, int idx);
 void MilkDrawPixel(VRAM* vram, char idx, int x, int y);
 void MilkDrawRect(VRAM* vram, char idx, int x, int y, int w, int h);
+void MilkDrawRectLines(VRAM* vram, char idx, int x, int y, int w, int h);
 
 #endif

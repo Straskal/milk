@@ -1,32 +1,39 @@
 #include "sprite.h"
 
+#define PALETTE_WIDTH 32
+#define PALETTE_COLOR_SIZE (PALETTE_WIDTH / 4)
+#define PALETTE_START_XPOS (MILK_FRAMEBUF_WIDTH - PALETTE_WIDTH - 12)
+
 static void DrawPalette(MilkMachine* milk)
 {
-	const int palettePixels = 32;
-	const int colorPixels = palettePixels / 4;
+	int i;
+	int curx = PALETTE_START_XPOS;
+	int cury = 16;
 	ColorRGB* palette = &milk->memory.vram.palette;
 
-	int curx = 64;
-	int cury = 16;
-	int i;
-	for (i = 0; i < 4; i++) 
+	for (i = 0; i < MILK_PALETTE_SIZE; i++)
 	{
-		MilkDrawRect(&milk->memory.vram, i, curx + (colorPixels * i), cury + (colorPixels * i), colorPixels, colorPixels);
-
-		if (i % 4 == 0) 
+		MilkDrawRect(&milk->memory.vram, i, curx, cury, PALETTE_COLOR_SIZE, PALETTE_COLOR_SIZE);
+		if ((i + 1) % 4 == 0)
 		{
-			curx = 0;
-			cury++;
+			curx = PALETTE_START_XPOS;
+			cury += PALETTE_COLOR_SIZE;
 		}
-		else 
+		else
 		{
-			curx++;
+			curx += PALETTE_COLOR_SIZE;
 		}
 	}
+
+	MilkDrawRectLines(&milk->memory.vram, 7, PALETTE_START_XPOS - 1, 15, 33, 33);
+}
+
+void SpriteEditorUpdate(MilkMachine* milk)
+{
 }
 
 void SpriteEditorDraw(MilkMachine* milk)
 {
-	MilkClear(milk, 0);
+	MilkClear(milk, 1);
 	DrawPalette(milk);
 }
