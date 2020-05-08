@@ -1,5 +1,6 @@
 #include "sprite.h"
 #include <stdio.h>
+#include <math.h>
 
 #define PALETTE_SIZE 64
 #define PALETTE_COLOR_SIZE (PALETTE_SIZE / 4)
@@ -35,12 +36,10 @@ static void DetectPaletteSelection(MilkMachine* milk)
 	{
 		uint32_t msx = input.msx;
 		uint32_t msy = input.msy;
-		if (msx > PALETTE_START_XPOS
-			&& msx < PALETTE_START_XPOS + PALETTE_SIZE
-			&& msy > PALETTE_START_YPOS
-			&& msy < PALETTE_START_YPOS + PALETTE_SIZE)
+
+		if (msx > PALETTE_START_XPOS && msx < PALETTE_START_XPOS + PALETTE_SIZE && msy > PALETTE_START_YPOS && msy < PALETTE_START_YPOS + PALETTE_SIZE)
 		{
-			printf("palette clicked");
+			
 		}
 	}
 }
