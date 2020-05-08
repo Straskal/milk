@@ -1,14 +1,16 @@
 #include "milk.h"
 #include "sprite.h"
+#include "milk_api.h"
+
 #include <stdio.h>
 
-#define PACKED_COLOR(col) (col.r << 24 | (col.g << 16) | (col.b << 8) | 0x00)
-#define HEX_2_COLOR(h) ((ColorRGB){((h >> 16)), ((h >> 8)), ((h)) })
 #define COORD_2_FRAMEBUF_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x)
 
 /* Initialize the color palette with default colors. PICO-8 */
 static void InitializePalette(VRAM* vram)
 {
+	#define HEX_2_COLOR(h) ((ColorRGB){((h >> 16)), ((h >> 8)), ((h)) })
+
 	vram->palette[0] = HEX_2_COLOR(0x000000);
 	vram->palette[1] = HEX_2_COLOR(0x1d2b53);
 	vram->palette[2] = HEX_2_COLOR(0x7e2553);
@@ -25,6 +27,8 @@ static void InitializePalette(VRAM* vram)
 	vram->palette[13] = HEX_2_COLOR(0x83769c);
 	vram->palette[14] = HEX_2_COLOR(0xff77a8);
 	vram->palette[15] = HEX_2_COLOR(0xffccaa);
+
+	#undef HEX_2_COLOR
 }
 
 /* Default game update method. */
@@ -33,7 +37,7 @@ static void GameUpdate(MilkMachine* milk)
 	MilkInvokeCodeUpdate(&milk->code);
 }
 
-/* Default game update method. */
+/* Default game draw method. */
 static void GameDraw(MilkMachine* milk)
 {
 	MilkInvokeCodeDraw(&milk->code);
@@ -76,66 +80,64 @@ void MilkDraw(MilkMachine* milk)
 
 void MilkClear(VRAM* vram, int idx)
 {
-	uint32_t packed = PACKED_COLOR(vram->palette[idx]);
 	int i;
 	for (i = 0; i < MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT; i++) 
 	{
-		vram->framebuffer[i] = packed;
+		vram->framebuffer[i] = vram->palette[idx];
 	}
 }
 
 /*=============================================================*/
 
-static void InternalMilkDrawPixel(VRAM* vram, uint32_t packed, int x, int y) 
+static void InternalMilkDrawPixel(VRAM* vram, ColorRGB color, int x, int y)
 {
-	vram->framebuffer[COORD_2_FRAMEBUF_POS(x, y)] = packed;
+	vram->framebuffer[COORD_2_FRAMEBUF_POS(x, y)] = color;
 }
 
-void MilkDrawPixel(VRAM* vram, char idx, int x, int y)
+void MilkDrawPixel(VRAM* vram, ColorRGB color, int x, int y)
 {
-	InternalMilkDrawPixel(vram, PACKED_COLOR(vram->palette[idx]), x, y);
+	InternalMilkDrawPixel(vram, color, x, y);
 }
 
 /*=============================================================*/
 
 void MilkDrawRect(VRAM* vram, char idx, int x, int y, int w, int h)
 {
-	uint32_t packed = PACKED_COLOR(vram->palette[idx]);
 	int i, j;
+	ColorRGB color = vram->palette[idx];
 	for (i = x; i < x + w && i < MILK_FRAMEBUF_WIDTH; i++) 
 	{
 		for (j = y; j < y + h && j < MILK_FRAMEBUF_HEIGHT; j++)
 		{
-			InternalMilkDrawPixel(vram, packed, i, j);
+			InternalMilkDrawPixel(vram, color, i, j);
 		}
 	}
 }
 
 /*=============================================================*/
 
-static void HorizontalLine(VRAM* vram, uint32_t packed, int x, int y, int w) 
+static void HorizontalLine(VRAM* vram, ColorRGB color, int x, int y, int w) 
 {
 	int i;
 	for (i = x; i <= x + w && i < MILK_FRAMEBUF_WIDTH; i++)
 	{
-		InternalMilkDrawPixel(vram, packed, i, y);
+		InternalMilkDrawPixel(vram, color, i, y);
 	}
 }
 
-static void VerticalLine(VRAM* vram, uint32_t packed, int x, int y, int h)
+static void VerticalLine(VRAM* vram, ColorRGB color, int x, int y, int h)
 {
 	int i;
 	for (i = y; i <= y + h && i < MILK_FRAMEBUF_WIDTH; i++)
 	{
-		InternalMilkDrawPixel(vram, packed, x, i);
+		InternalMilkDrawPixel(vram, color, x, i);
 	}
 }
 
 void MilkDrawRectLines(VRAM* vram, char idx, int x, int y, int w, int h)
 {
-	uint32_t packed = PACKED_COLOR(vram->palette[idx]);
-	HorizontalLine(vram, packed, x, y, w);
-	HorizontalLine(vram, packed, x, y + h, w);
-	VerticalLine(vram, packed, x, y, h);
-	VerticalLine(vram, packed, x + w, y, h);
+	HorizontalLine(vram, vram->palette[idx], x, y, w);
+	HorizontalLine(vram, vram->palette[idx], x, y + h, w);
+	VerticalLine(vram, vram->palette[idx], x, y, h);
+	VerticalLine(vram, vram->palette[idx], x + w, y, h);
 }

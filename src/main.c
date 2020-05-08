@@ -2,6 +2,19 @@
 #include "SDL.h"
 #include <stdio.h>
 
+static void FlipFramebuffer(uint32_t* frontbuffer, ColorRGB* backbuffer, size_t len)
+{
+	#define PACKED_COLOR(col) (col.r << 24 | (col.g << 16) | (col.b << 8) | 0x00)
+	ColorRGB* itr = backbuffer;
+	ColorRGB* end = &backbuffer[len - 1];
+	while (itr != end) 
+	{
+		ColorRGB col = *(itr++);
+		*(frontbuffer++) = PACKED_COLOR(col);
+	}
+	#undef PACKED_COLOR
+}
+
 int main(int argc, char* argv[])
 {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
@@ -41,35 +54,47 @@ int main(int argc, char* argv[])
 	SDL_RenderSetLogicalSize(renderer, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
 
 	int running = MILK_TRUE;
+	uint32_t* frontBuffer = (uint32_t*)calloc(MILK_FRAMEBUF_SIZE, sizeof(uint32_t));
 	while (running)
 	{
 		Uint32 frameStartTicks = SDL_GetTicks();
+
+		milk->input.msdownp = milk->input.msdown;
+		milk->input.msdown = 0;
+
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-			if (event.type == SDL_QUIT)
-				running = MILK_FALSE;
-
-			if (event.type == SDL_MOUSEMOTION) 
+			switch (event.type) 
 			{
+			case SDL_QUIT:
+				running = MILK_FALSE;
+				break;
+			case SDL_MOUSEMOTION:
 				milk->input.msx = event.motion.x;
 				milk->input.msy = event.motion.y;
-			}
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				if (event.button.button == SDL_BUTTON_LEFT)
+				{
+					milk->input.msdown = 1;
+				}
+				break;
+			}	
 		}
 
 		MilkUpdate(milk);
 		MilkDraw(milk);
-
-		SDL_UpdateTexture(texture, NULL, (void*)&milk->memory.vram.framebuffer, MILK_FRAMEBUF_PITCH);
+		FlipFramebuffer(frontBuffer, milk->memory.vram.framebuffer, MILK_FRAMEBUF_SIZE);
+		SDL_UpdateTexture(texture, NULL, (void*)frontBuffer, MILK_FRAMEBUF_PITCH);
 		SDL_RenderCopy(renderer, texture, NULL, NULL);
 		SDL_RenderPresent(renderer);
-
 		Uint32 ticks = SDL_GetTicks() - frameStartTicks;
 		if (ticks < MILK_FRAMERATE) SDL_Delay(MILK_FRAMERATE - ticks);
 	}
 
+	free(frontBuffer);
 	MilkFree(milk);
-
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);

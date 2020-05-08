@@ -21,7 +21,8 @@ static int l_pset (lua_State* L)
 	MilkMachine* mk = (MilkMachine*)lua_touserdata(L, -1);
 	int x = lua_tointeger(L, 1);
 	int y = lua_tointeger(L, 2);
-	int color = lua_tointeger(L, 3);
+	int idx = lua_tointeger(L, 3);
+	ColorRGB color = mk->memory.vram.palette[idx];
 	MilkDrawPixel(&mk->memory.vram, color, x, y);
 	return 0;
 }
