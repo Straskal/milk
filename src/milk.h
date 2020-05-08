@@ -20,6 +20,7 @@
 #define MILK_VRAM_BYTES ((MILK_PALETTE_SIZE * sizeof(ColorRGB)) + MILK_FRAMEBUF_SIZE * MILK_FRAMEBUF_BPP)
 #define MILK_MEMORY_BYTES (MILK_VRAM_BYTES)
 
+#define MILK_BOOL int
 #define MILK_TRUE 1
 #define MILK_FALSE 0
 
@@ -62,8 +63,8 @@ typedef struct
 {
 	uint32_t msx;
 	uint32_t msy;
-	int msdown;
-	int msdownp;
+	MILK_BOOL msdown;
+	MILK_BOOL msdownp;
 } Input;
 
 typedef struct

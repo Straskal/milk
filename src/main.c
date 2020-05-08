@@ -2,6 +2,8 @@
 #include "SDL.h"
 #include <stdio.h>
 
+#define FIRST_AVAILABLE_RENDERER -1
+
 static void FlipFramebuffer(uint32_t* frontbuffer, ColorRGB* backbuffer, size_t len)
 {
 	#define PACKED_COLOR(col) (col.r << 24 | (col.g << 16) | (col.b << 8) | 0x00)
@@ -23,22 +25,44 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	SDL_Window* window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MILK_WINDOW_WIDTH, MILK_WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
+	SDL_Window* window = SDL_CreateWindow(
+		"milk",
+		SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_CENTERED,
+		MILK_WINDOW_WIDTH,
+		MILK_WINDOW_HEIGHT,
+		SDL_WINDOW_RESIZABLE
+	);
+
 	if (window == NULL) 
 	{
 		printf("Error creating SDL window: %s", SDL_GetError());
 		return 0;
 	}
 
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	SDL_Renderer* renderer = SDL_CreateRenderer(
+		window,
+		FIRST_AVAILABLE_RENDERER,
+		SDL_RENDERER_ACCELERATED
+	);
+
 	if (renderer == NULL)
 	{
 		printf("Error creating SDL renderer: %s", SDL_GetError());
 		return 0;
 	}
 
-	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
-	if (texture == NULL)
+	SDL_Texture* frontBufferTexture = SDL_CreateTexture(
+		renderer,
+		SDL_PIXELFORMAT_RGBA8888,
+		SDL_TEXTUREACCESS_STATIC,
+		MILK_FRAMEBUF_WIDTH,
+		MILK_FRAMEBUF_HEIGHT
+	);
+
+	uint32_t* frontBufferData = (uint32_t*)calloc(MILK_FRAMEBUF_SIZE, sizeof(uint32_t));
+
+	if (frontBufferTexture == NULL)
 	{
 		printf("Error creating SDL texture: %s", SDL_GetError());
 		return 0;
@@ -54,7 +78,6 @@ int main(int argc, char* argv[])
 	SDL_RenderSetLogicalSize(renderer, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
 
 	int running = MILK_TRUE;
-	uint32_t* frontBuffer = (uint32_t*)calloc(MILK_FRAMEBUF_SIZE, sizeof(uint32_t));
 	while (running)
 	{
 		Uint32 frameStartTicks = SDL_GetTicks();
@@ -67,35 +90,35 @@ int main(int argc, char* argv[])
 		{
 			switch (event.type) 
 			{
-			case SDL_QUIT:
-				running = MILK_FALSE;
-				break;
-			case SDL_MOUSEMOTION:
-				milk->input.msx = event.motion.x;
-				milk->input.msy = event.motion.y;
-				break;
-			case SDL_MOUSEBUTTONDOWN:
-				if (event.button.button == SDL_BUTTON_LEFT)
-				{
-					milk->input.msdown = 1;
-				}
-				break;
+				case SDL_QUIT:
+					running = MILK_FALSE;
+					break;
+				case SDL_MOUSEMOTION:
+					milk->input.msx = event.motion.x;
+					milk->input.msy = event.motion.y;
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					if (event.button.button == SDL_BUTTON_LEFT)
+					{
+						milk->input.msdown = 1;
+					}
+					break;
 			}	
 		}
 
 		MilkUpdate(milk);
 		MilkDraw(milk);
-		FlipFramebuffer(frontBuffer, milk->memory.vram.framebuffer, MILK_FRAMEBUF_SIZE);
-		SDL_UpdateTexture(texture, NULL, (void*)frontBuffer, MILK_FRAMEBUF_PITCH);
-		SDL_RenderCopy(renderer, texture, NULL, NULL);
+		FlipFramebuffer(frontBufferData, milk->memory.vram.framebuffer, MILK_FRAMEBUF_SIZE);
+		SDL_UpdateTexture(frontBufferTexture, NULL, (void*)frontBufferData, MILK_FRAMEBUF_PITCH);
+		SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
 		SDL_RenderPresent(renderer);
 		Uint32 ticks = SDL_GetTicks() - frameStartTicks;
 		if (ticks < MILK_FRAMERATE) SDL_Delay(MILK_FRAMERATE - ticks);
 	}
 
-	free(frontBuffer);
+	free(frontBufferData);
 	MilkFree(milk);
-	SDL_DestroyTexture(texture);
+	SDL_DestroyTexture(frontBufferTexture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
