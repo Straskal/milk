@@ -1,4 +1,5 @@
 #include "milk.h"
+#include "milk_bmp.h"
 #include "SDL.h"
 #include <memory.h>
 #include <stdio.h>

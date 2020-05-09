@@ -21,7 +21,7 @@ static int l_pset(lua_State *L)
 	int x = lua_tointeger(L, 1);
 	int y = lua_tointeger(L, 2);
 	int hex = lua_tointeger(L, 3);
-	milk_pixelset(&mk->video, hex, x, y);
+	milk_pixel_set(&mk->video, hex, x, y);
 	return 0;
 }
 
