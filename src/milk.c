@@ -7,7 +7,6 @@
 #define COORD_2_FRAMEBUF_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x)
 #define HEX_2_COLOR(h) ((ColorRGB){((h >> 16)), ((h >> 8)), ((h)) })
 
-
 Milk *milk_init()
 {
 	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
@@ -26,16 +25,22 @@ void milk_update(Milk *milk)
 	milk_invoke_update(&milk->code);
 }
 
+void __reset_draw_state(Video *video)
+{
+	video->colorkey = HEX_2_COLOR(0x000000);
+}
+
 void milk_draw(Milk *milk)
 {
+	__reset_draw_state(&milk->video);
 	milk_invoke_draw(&milk->code);
-	milk_spr(&milk->video, 0, 10, 10);
 }
 
 void milk_clear(Video *video, int hex)
 {
 	int i;
 	ColorRGB color = HEX_2_COLOR(hex);
+
 	for (i = 0; i < MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT; i++)
 	{
 		video->framebuffer[i] = color;
@@ -98,6 +103,7 @@ void milk_rectfill(Video *video, int hex, int x, int y, int w, int h)
 	__framebuf_cull_xywh(&i, &j, &w, &h);
 
 	ColorRGB color = HEX_2_COLOR(hex);
+
 	for (i = x; i < x + w; i++)
 	{
 		for (j = y; j < y + h; j++)
@@ -142,12 +148,18 @@ void milk_rect(Video *vram, int hex, int x, int y, int w, int h)
 static void __blit(Video *video, ColorRGB* pixels, int x, int y)
 {
 	int i, j, k, l;
+
 	for (i = x, k = 0; i < x + MILK_SPR_SQRSIZE; i++, k++)
 	{
 		for (j = y, l = 0; j < y + MILK_SPR_SQRSIZE; j++, l++)
 		{
 			if (i < MILK_FRAMEBUF_WIDTH && j < MILK_FRAMEBUF_HEIGHT)
-				__pixel_set(video, &pixels[MILK_SPRSHEET_SQRSIZE * l + k], i, j);
+			{
+				ColorRGB *col = &pixels[MILK_SPRSHEET_SQRSIZE * l + k];
+
+				if (!__color_eq(col, &video->colorkey))
+					__pixel_set(video, col, i, j);
+			}
 		}
 	}
 }

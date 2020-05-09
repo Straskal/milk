@@ -51,6 +51,17 @@ static int l_rect(lua_State *L)
 	return 0;
 }
 
+static int l_spr(lua_State *L)
+{
+	lua_getglobal(L, "__mk");
+	Milk *mk = (Milk *)lua_touserdata(L, -1);
+	int idx = lua_tointeger(L, 1);
+	int x = lua_tointeger(L, 2);
+	int y = lua_tointeger(L, 3);
+	milk_spr(&mk->video, idx, x, y);
+	return 0;
+}
+
 static void __push_api_func(lua_State *L, const char *name, int(*api_func)(lua_State *))
 {
 	lua_pushcfunction(L, api_func);
@@ -63,6 +74,7 @@ static void __push_api(lua_State *L)
 	__push_api_func(L, "pset", l_pset);
 	__push_api_func(L, "rectfill", l_rectfill);
 	__push_api_func(L, "rect", l_rect);
+	__push_api_func(L, "spr", l_spr);
 }
 
 void milk_load_code(Milk *milk)
