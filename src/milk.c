@@ -1,10 +1,9 @@
 #include "milk.h"
 #include "milk_api.h"
-
 #include <stdio.h>
 
 #define COORD_2_FRAMEBUF_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x)
-#define HEX_2_COLOR(h) ((ColorRGB){((h >> 1)), ((h >> 8)), ((h)) })
+#define HEX_2_COLOR(h) ((ColorRGB){((h >> 16)), ((h >> 8)), ((h)) })
 
 Milk* milk_init()
 {
@@ -28,12 +27,13 @@ void milk_draw(Milk* milk)
 	milk_invoke_code_draw(&milk->code);
 }
 
-void milk_clear(Video* vram, int idx)
+void milk_clear(Video* vram, int hex)
 {
 	int i;
+	ColorRGB color = HEX_2_COLOR(hex);
 	for (i = 0; i < MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT; i++) 
 	{
-		vram->framebuffer[i] = HEX_2_COLOR(idx);
+		vram->framebuffer[i] = color;
 	}
 }
 
@@ -63,18 +63,20 @@ void milk_rectfill(Video* vram, int idx, int x, int y, int w, int h)
 static void __horizontal_line(Video* vram, ColorRGB *color, int x, int y, int w) 
 {
 	int i;
-	for (i = x; i <= x + w && i < MILK_FRAMEBUF_WIDTH; i++)
+	for (i = x; i <= x + w; i++)
 	{
-		__pixelset(vram, color, i, y);
+		if (i < MILK_FRAMEBUF_WIDTH)
+			__pixelset(vram, color, i, y);
 	}
 }
 
 static void __vertical_line(Video* vram, ColorRGB *color, int x, int y, int h)
 {
 	int i;
-	for (i = y; i <= y + h && i < MILK_FRAMEBUF_WIDTH; i++)
+	for (i = y; i <= y + h; i++)
 	{
-		__pixelset(vram, color, x, i);
+		if (i < MILK_FRAMEBUF_WIDTH)
+			__pixelset(vram, color, x, i);
 	}
 }
 

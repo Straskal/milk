@@ -21,9 +21,9 @@
 
 typedef struct ColorRGB
 {
-	char r;
-	char g;
-	char b;
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
 } ColorRGB;
 
 typedef struct Video
@@ -44,7 +44,7 @@ typedef struct Code
 	void* state;
 } Code;
 
-typedef struct MilkMachine
+typedef struct Milk
 {
 	Input input;
 	Video video;
