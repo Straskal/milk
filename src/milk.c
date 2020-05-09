@@ -147,18 +147,19 @@ void milk_rect(Video *vram, int hex, int x, int y, int w, int h)
 
 static void __blit(Video *video, ColorRGB* pixels, int x, int y)
 {
-	int i, j, k, l;
+	int framebufx, framebufy;
+	int spritex, spritey;
 
-	for (i = x, k = 0; i < x + MILK_SPR_SQRSIZE; i++, k++)
+	for (framebufx = x, spritex = 0; framebufx < x + MILK_SPR_SQRSIZE; framebufx++, spritex++)
 	{
-		for (j = y, l = 0; j < y + MILK_SPR_SQRSIZE; j++, l++)
+		for (framebufy = y, spritey = 0; framebufy < y + MILK_SPR_SQRSIZE; framebufy++, spritey++)
 		{
-			if (i < MILK_FRAMEBUF_WIDTH && j < MILK_FRAMEBUF_HEIGHT)
+			if (framebufx < MILK_FRAMEBUF_WIDTH && framebufy < MILK_FRAMEBUF_HEIGHT)
 			{
-				ColorRGB *col = &pixels[MILK_SPRSHEET_SQRSIZE * l + k];
+				ColorRGB *col = &pixels[MILK_SPRSHEET_SQRSIZE * spritey + spritex];
 
 				if (!__color_eq(col, &video->colorkey))
-					__pixel_set(video, col, i, j);
+					__pixel_set(video, col, framebufx, framebufy);
 			}
 		}
 	}
