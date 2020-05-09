@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	MilkMachine* milk = MilkInit();
+	MilkMachine* milk = milk_init();
 	if (milk == NULL) 
 	{
 		printf("Error initializing milk. I know - an error message would have been useful...");
@@ -106,9 +106,9 @@ int main(int argc, char* argv[])
 			}	
 		}
 
-		MilkUpdate(milk);
-		MilkDraw(milk);
-		FlipFramebuffer(frontBufferData, milk->memory.vram.framebuffer, MILK_FRAMEBUF_SIZE);
+		milk_update(milk);
+		milk_draw(milk);
+		FlipFramebuffer(frontBufferData, milk->video.framebuffer, MILK_FRAMEBUF_SIZE);
 		SDL_UpdateTexture(frontBufferTexture, NULL, (void*)frontBufferData, MILK_FRAMEBUF_PITCH);
 		SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
 		SDL_RenderPresent(renderer);
@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
 	}
 
 	free(frontBufferData);
-	MilkFree(milk);
+	milk_free(milk);
 	SDL_DestroyTexture(frontBufferTexture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);

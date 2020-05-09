@@ -1,17 +1,16 @@
 #include "milk_api.h"
-
-#include <stdio.h>
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
 #include "milk.h"
+#include <stdio.h>
 
 static int l_clrs(lua_State* L) 
 {
 	lua_getglobal(L, "__mk");
 	MilkMachine* mk = (MilkMachine*)lua_touserdata(L, -1);
 	int col = lua_tointeger(L, 1); 
-	MilkClear(&mk->memory.vram, col);
+	milk_clear(&mk->memory.vram, col);
 	return 0;
 }
 
@@ -23,7 +22,7 @@ static int l_pset (lua_State* L)
 	int y = lua_tointeger(L, 2);
 	int idx = lua_tointeger(L, 3);
 	ColorRGB color = mk->memory.vram.palette[idx];
-	MilkDrawPixel(&mk->memory.vram, color, x, y);
+	milk_pixelset(&mk->memory.vram, color, x, y);
 	return 0;
 }
 
@@ -39,7 +38,7 @@ static void PushAPI(lua_State* L)
 	PushAPIFunction(L, "pset", l_pset);
 }
 
-void MilkLoadCode(MilkMachine* milk)
+void milk_load_code(MilkMachine* milk)
 {
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
@@ -53,14 +52,14 @@ void MilkLoadCode(MilkMachine* milk)
 	milk->code.state = (void*)L;
 }
 
-void MilkInvokeCodeUpdate(Code* code)
+void milk_invoke_code_upd(Code* code)
 {
 	lua_State* L = (lua_State*)code->state;
 	lua_getglobal(L, "mk_update");
 	lua_pcall(L, 0, 0, 0);
 }
 
-void MilkInvokeCodeDraw(Code* code)
+void milk_invoke_code_draw(Code* code)
 {
 	lua_State* L = (lua_State*)code->state;
 	lua_getglobal(L, "mk_draw");

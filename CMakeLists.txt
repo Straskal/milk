@@ -1,6 +1,5 @@
 # You must download dependencies. If on Windows, then you have to manually set paths to dependencies. See line 20
 # SDL2: https://www.libsdl.org/download-2.0.php
-# SDL2_image: https://www.libsdl.org/projects/SDL_image/
 # Lua 5.3: https://www.lua.org/download.html which leads to https://sourceforge.net/projects/luabinaries/files/5.3.5/
 
 cmake_minimum_required(VERSION 3.6.3)
@@ -11,19 +10,18 @@ project(libmilk)
 set(C_STANDARD 11)
 
 # set debug symbol = MILK_DEBUG
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DMILK_DEBUG")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DMILK_DEBUG")
 
 # give is warning hell, brother
 if (CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 endif()
 if (MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
 endif()
 
 # set the ~/cmake module path for project
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-
 set(MILK_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 
 #---------------------------------------------------------------------------
@@ -59,8 +57,6 @@ set(MILK_SRC_FILES
 	src/milk.h
 	src/milk_api.c
 	src/milk_api.h
-	src/sprite.c
-	src/sprite.h
 )
 
 add_executable(milk ${MILK_SRC_FILES})
@@ -91,7 +87,6 @@ target_link_libraries(milk
 # post build step to copy dlls to output file
 
 # assumes SDL2 2.0.10
-# assumes SDL2_image 2.0.4
 # assumes Lua 5.3.5
 #---------------------------------------------------------------------------
 
