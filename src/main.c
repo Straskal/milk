@@ -5,7 +5,10 @@
 #include <stdio.h>
 
 #define FIRST_AVAILABLE_RENDERER -1
+#define MILK_FRAMEBUF_OUT_BPP 4
+#define MILK_FRAMEBUF_PITCH (MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_OUT_BPP)
 
+/* HMM: milk should output the appropriate frame buffer. Not a huge deal right now because we don't need this level of control client side. */
 static void __flip_framebuffer(uint32_t* frontbuffer, ColorRGB* backbuffer, size_t len)
 {
 	#define PACKED_COLOR(col) (col.r << 24 | (col.g << 16) | (col.b << 8) | 0x00)

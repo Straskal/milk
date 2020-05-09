@@ -7,6 +7,7 @@
 #define COORD_2_FRAMEBUF_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x)
 #define HEX_2_COLOR(h) ((ColorRGB){((h >> 16)), ((h >> 8)), ((h)) })
 
+
 Milk *milk_init()
 {
 	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
@@ -45,26 +46,35 @@ static void __framebuf_cull_xy(int *x, int *y)
 {
 	if (x != NULL)
 	{
-		if (x < 0) x = 0;
-		else if (x > MILK_FRAMEBUF_WIDTH) x = MILK_FRAMEBUF_WIDTH;
+		if (x < 0)
+			x = 0;
+		else if (x > MILK_FRAMEBUF_WIDTH)
+			x = MILK_FRAMEBUF_WIDTH;
 	}
 	if (y != NULL)
 	{
-		if (y < 0) y = 0;
-		else if (y > MILK_FRAMEBUF_HEIGHT) y = MILK_FRAMEBUF_HEIGHT;
+		if (y < 0)
+			y = 0;
+		else if (y > MILK_FRAMEBUF_HEIGHT)
+			y = MILK_FRAMEBUF_HEIGHT;
 	}
 }
 
 static void __framebuf_cull_xywh(int *x, int *y, int *w, int *h)
 {
 	__framebuf_cull_xy(x, y);
+
 	int right = *x + *w;
 	int bottom = *y + *h;
 	int clamped_r = right;
 	int clamped_b = bottom;
+
 	__framebuf_cull_xy(&clamped_r, &clamped_b);
-	if (clamped_r != right) *w -= (right - clamped_r);
-	if (clamped_b != bottom) *h -= (bottom - clamped_b);
+
+	if (clamped_r != right)
+		*w -= (right - clamped_r);
+	if (clamped_b != bottom)
+		*h -= (bottom - clamped_b);
 }
 
 static int __color_eq(ColorRGB *col1, ColorRGB *col2)
@@ -86,6 +96,7 @@ void milk_rectfill(Video *video, int hex, int x, int y, int w, int h)
 {
 	int i = x, j = y;
 	__framebuf_cull_xywh(&i, &j, &w, &h);
+
 	ColorRGB color = HEX_2_COLOR(hex);
 	for (i = x; i < x + w; i++)
 	{
@@ -131,19 +142,22 @@ void milk_rect(Video *vram, int hex, int x, int y, int w, int h)
 static void __blit(Video *video, ColorRGB* pixels, int x, int y)
 {
 	int i, j, k, l;
-	for (i = x, k = 0; i < x + MILK_SPR_SIZE; i++, k++)
+	for (i = x, k = 0; i < x + MILK_SPR_SQRSIZE; i++, k++)
 	{
-		for (j = y, l = 0; j < y + MILK_SPR_SIZE; j++, l++)
+		for (j = y, l = 0; j < y + MILK_SPR_SQRSIZE; j++, l++)
 		{
 			if (i < MILK_FRAMEBUF_WIDTH && j < MILK_FRAMEBUF_HEIGHT)
-				__pixel_set(video, &pixels[MILK_SPRSHEET_SIZE * l + k], i, j);
+				__pixel_set(video, &pixels[MILK_SPRSHEET_SQRSIZE * l + k], i, j);
 		}
 	}
 }
 
 void milk_spr(Video *video, int idx, int x, int y)
 {
-	if (idx < 0) return;
-	if (idx > MILK_SPRSHEET_SIZE) return;
-	__blit(video, &video->spritesheet[idx * MILK_SPR_SIZE], x, y);
+	if (idx < 0)
+		return;
+	if (idx > MILK_SPRSHEET_SQRSIZE)
+		return;
+
+	__blit(video, &video->spritesheet[idx * MILK_SPR_SQRSIZE], x, y);
 }
