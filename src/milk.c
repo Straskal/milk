@@ -19,12 +19,12 @@ void milk_free(Milk* milk)
 
 void milk_update(Milk* milk)
 {
-	milk_invoke_code_upd(&milk->code);
+	milk_invoke_update(&milk->code);
 }
 
 void milk_draw(Milk* milk)
 {
-	milk_invoke_code_draw(&milk->code);
+	milk_invoke_draw(&milk->code);
 }
 
 void milk_clear(Video* vram, int hex)
