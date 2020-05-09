@@ -51,14 +51,14 @@ void milk_load_code(Milk *milk)
 	milk->code.state = (void *)L;
 }
 
-void milk_invoke_code_upd(Code *code)
+void milk_invoke_update(Code *code)
 {
 	lua_State *L = (lua_State *)code->state;
 	lua_getglobal(L, "_update");
 	lua_pcall(L, 0, 0, 0);
 }
 
-void milk_invoke_code_draw(Code *code)
+void milk_invoke_draw(Code *code)
 {
 	lua_State *L = (lua_State *)code->state;
 	lua_getglobal(L, "_draw");
