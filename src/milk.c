@@ -4,39 +4,29 @@
 #include <stdio.h>
 
 #define COORD_2_FRAMEBUF_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x)
-#define HEX_2_COLOR(h) ((ColorRGB){((h >> 16)), ((h >> 8)), ((h)) })
+#define HEX_2_COLOR(h) ((ColorRGB){((h >> 1)), ((h >> 8)), ((h)) })
 
-/*=============================================================*/
-
-MilkMachine* milk_init()
+Milk* milk_init()
 {
-	MilkMachine* milk = (MilkMachine*)calloc(1, sizeof(MilkMachine));
+	Milk* milk = (Milk*)calloc(1, sizeof(Milk));
 	milk_load_code(milk);
 	return milk;
 }
 
-/*=============================================================*/
-
-void milk_free(MilkMachine* milk)
+void milk_free(Milk* milk)
 {
 	free(milk);
 }
 
-/*=============================================================*/
-
-void milk_update(MilkMachine* milk)
+void milk_update(Milk* milk)
 {
-	milk_invoke_code_upd(milk);
+	milk_invoke_code_upd(&milk->code);
 }
 
-/*=============================================================*/
-
-void milk_draw(MilkMachine* milk)
+void milk_draw(Milk* milk)
 {
-	milk_invoke_code_draw(milk);
+	milk_invoke_code_draw(&milk->code);
 }
-
-/*=============================================================*/
 
 void milk_clear(Video* vram, int idx)
 {
@@ -47,21 +37,17 @@ void milk_clear(Video* vram, int idx)
 	}
 }
 
-/*=============================================================*/
-
-static void InternalMilkDrawPixel(Video* vram, ColorRGB color, int x, int y)
+static void __pixelset(Video* vram, ColorRGB* color, int x, int y)
 {
-	vram->framebuffer[COORD_2_FRAMEBUF_POS(x, y)] = color;
+	vram->framebuffer[COORD_2_FRAMEBUF_POS(x, y)] = *color;
 }
 
-void milk_pixelset(Video* vram, ColorRGB color, int x, int y)
+void milk_pixelset(Video* vram, int hex, int x, int y)
 {
-	InternalMilkDrawPixel(vram, color, x, y);
+	__pixelset(vram, hex, x, y);
 }
 
-/*=============================================================*/
-
-void milk_rectfill(Video* vram, char idx, int x, int y, int w, int h)
+void milk_rectfill(Video* vram, int idx, int x, int y, int w, int h)
 {
 	int i, j;
 	ColorRGB color = HEX_2_COLOR(idx);
@@ -69,36 +55,34 @@ void milk_rectfill(Video* vram, char idx, int x, int y, int w, int h)
 	{
 		for (j = y; j < y + h && j < MILK_FRAMEBUF_HEIGHT; j++)
 		{
-			InternalMilkDrawPixel(vram, color, i, j);
+			__pixelset(vram, &color, i, j);
 		}
 	}
 }
 
-/*=============================================================*/
-
-static void HorizontalLine(Video* vram, ColorRGB color, int x, int y, int w) 
+static void __horizontal_line(Video* vram, ColorRGB *color, int x, int y, int w) 
 {
 	int i;
 	for (i = x; i <= x + w && i < MILK_FRAMEBUF_WIDTH; i++)
 	{
-		InternalMilkDrawPixel(vram, color, i, y);
+		__pixelset(vram, color, i, y);
 	}
 }
 
-static void VerticalLine(Video* vram, ColorRGB color, int x, int y, int h)
+static void __vertical_line(Video* vram, ColorRGB *color, int x, int y, int h)
 {
 	int i;
 	for (i = y; i <= y + h && i < MILK_FRAMEBUF_WIDTH; i++)
 	{
-		InternalMilkDrawPixel(vram, color, x, i);
+		__pixelset(vram, color, x, i);
 	}
 }
 
-void milk_rect(Video* vram, char idx, int x, int y, int w, int h)
+void milk_rect(Video* vram, int idx, int x, int y, int w, int h)
 {
 	ColorRGB color = HEX_2_COLOR(idx);
-	HorizontalLine(vram, color, x, y, w);
-	HorizontalLine(vram, color, x, y + h, w);
-	VerticalLine(vram, color, x, y, h);
-	VerticalLine(vram, color, x + w, y, h);
+	__horizontal_line(vram, &color, x, y, w);
+	__horizontal_line(vram, &color, x, y + h, w);
+	__vertical_line(vram, &color, x, y, h);
+	__vertical_line(vram, &color, x + w, y, h);
 }

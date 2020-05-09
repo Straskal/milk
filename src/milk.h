@@ -19,19 +19,19 @@
 #define MILK_TRUE 1
 #define MILK_FALSE 0
 
-typedef struct
+typedef struct ColorRGB
 {
 	char r;
 	char g;
 	char b;
 } ColorRGB;
 
-typedef struct
+typedef struct Video
 {
 	ColorRGB framebuffer[MILK_FRAMEBUF_SIZE];
 } Video;
 
-typedef struct
+typedef struct Input
 {
 	uint32_t msx;
 	uint32_t msy;
@@ -39,28 +39,25 @@ typedef struct
 	MILK_BOOL msdownp;
 } Input;
 
-typedef struct
+typedef struct Code
 {
 	void* state;
 } Code;
 
-typedef struct
+typedef struct MilkMachine
 {
 	Input input;
 	Video video;
 	Code code;
+} Milk;
 
-	void(*update)();
-	void(*draw)();
-} MilkMachine;
-
-MilkMachine* milk_init();
-void milk_free(MilkMachine* milk);
-void milk_update(MilkMachine* milk);
-void milk_draw(MilkMachine* milk);
+Milk* milk_init();
+void milk_free(Milk* milk);
+void milk_update(Milk* milk);
+void milk_draw(Milk* milk);
 void milk_clear(Video* vram, int idx);
-void milk_pixelset(Video* vram, ColorRGB color, int x, int y);
-void milk_rectfill(Video* vram, char idx, int x, int y, int w, int h);
-void milk_rect(Video* vram, char idx, int x, int y, int w, int h);
+void milk_pixelset(Video* vram, int hex, int x, int y);
+void milk_rectfill(Video* vram, int hex, int x, int y, int w, int h);
+void milk_rect(Video* vram, int hex, int x, int y, int w, int h);
 
 #endif

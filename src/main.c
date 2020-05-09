@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	MilkMachine* milk = milk_init();
+	Milk* milk = milk_init();
 	if (milk == NULL) 
 	{
 		printf("Error initializing milk. I know - an error message would have been useful...");
