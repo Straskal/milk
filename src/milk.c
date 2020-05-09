@@ -47,10 +47,10 @@ void milk_pixelset(Video *video, int hex, int x, int y)
 	__pixelset(video, hex, x, y);
 }
 
-void milk_rectfill(Video *video, int idx, int x, int y, int w, int h)
+void milk_rectfill(Video *video, int hex, int x, int y, int w, int h)
 {
 	int i, j;
-	ColorRGB color = HEX_2_COLOR(idx);
+	ColorRGB color = HEX_2_COLOR(hex);
 	for (i = x; i < x + w; i++)
 	{
 		for (j = y; j < y + h; j++)
@@ -81,9 +81,9 @@ static void __vertical_line(Video *video, ColorRGB *color, int x, int y, int h)
 	}
 }
 
-void milk_rect(Video *vram, int idx, int x, int y, int w, int h)
+void milk_rect(Video *vram, int hex, int x, int y, int w, int h)
 {
-	ColorRGB color = HEX_2_COLOR(idx);
+	ColorRGB color = HEX_2_COLOR(hex);
 	__horizontal_line(vram, &color, x, y, w);
 	__horizontal_line(vram, &color, x, y + h, w);
 	__vertical_line(vram, &color, x, y, h);

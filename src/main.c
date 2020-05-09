@@ -1,10 +1,11 @@
 #include "milk.h"
 #include "SDL.h"
+#include <memory.h>
 #include <stdio.h>
 
 #define FIRST_AVAILABLE_RENDERER -1
 
-static void FlipFramebuffer(uint32_t* frontbuffer, ColorRGB* backbuffer, size_t len)
+static void __flip_framebuffer(uint32_t* frontbuffer, ColorRGB* backbuffer, size_t len)
 {
 	#define PACKED_COLOR(col) (col.r << 24 | (col.g << 16) | (col.b << 8) | 0x00)
 	ColorRGB* itr = backbuffer;
@@ -108,10 +109,11 @@ int main(int argc, char* argv[])
 
 		milk_update(milk);
 		milk_draw(milk);
-		FlipFramebuffer(frontBufferData, milk->video.framebuffer, MILK_FRAMEBUF_AREA);
+		__flip_framebuffer(frontBufferData, milk->video.framebuffer, MILK_FRAMEBUF_AREA);
 		SDL_UpdateTexture(frontBufferTexture, NULL, (void*)frontBufferData, MILK_FRAMEBUF_PITCH);
 		SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
 		SDL_RenderPresent(renderer);
+
 		Uint32 ticks = SDL_GetTicks() - frameStartTicks;
 		if (ticks < MILK_FRAMERATE) SDL_Delay(MILK_FRAMERATE - ticks);
 	}

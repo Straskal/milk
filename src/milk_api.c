@@ -20,8 +20,34 @@ static int l_pset(lua_State *L)
 	Milk *mk = (Milk *)lua_touserdata(L, -1);
 	int x = lua_tointeger(L, 1);
 	int y = lua_tointeger(L, 2);
-	int idx = lua_tointeger(L, 3);
-	milk_pixelset(&mk->video, idx, x, y);
+	int hex = lua_tointeger(L, 3);
+	milk_pixelset(&mk->video, hex, x, y);
+	return 0;
+}
+
+static int l_rectfill(lua_State *L)
+{
+	lua_getglobal(L, "__mk");
+	Milk *mk = (Milk *)lua_touserdata(L, -1);
+	int x = lua_tointeger(L, 1);
+	int y = lua_tointeger(L, 2);
+	int w = lua_tointeger(L, 3);
+	int h = lua_tointeger(L, 4);
+	int hex = lua_tointeger(L, 5);
+	milk_rectfill(&mk->video, hex, x, y, w, h);
+	return 0;
+}
+
+static int l_rect(lua_State *L)
+{
+	lua_getglobal(L, "__mk");
+	Milk *mk = (Milk *)lua_touserdata(L, -1);
+	int x = lua_tointeger(L, 1);
+	int y = lua_tointeger(L, 2);
+	int w = lua_tointeger(L, 3);
+	int h = lua_tointeger(L, 4);
+	int hex = lua_tointeger(L, 5);
+	milk_rect(&mk->video, hex, x, y, w, h);
 	return 0;
 }
 
@@ -35,6 +61,8 @@ static void __push_api(lua_State *L)
 {
 	__push_api_func(L, "clrs", l_clrs);
 	__push_api_func(L, "pset", l_pset);
+	__push_api_func(L, "rectfill", l_rectfill);
+	__push_api_func(L, "rect", l_rect);
 }
 
 void milk_load_code(Milk *milk)

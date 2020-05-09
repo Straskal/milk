@@ -15,7 +15,6 @@
 #define MILK_TRUE 1
 #define MILK_FALSE 0
 
-/* 3 channel color */
 typedef struct ColorRGB
 {
 	uint8_t r;
@@ -38,7 +37,7 @@ typedef struct Input
 
 typedef struct Code
 {
-	void *state;
+	void* state;
 } Code;
 
 typedef struct Milk
@@ -48,13 +47,13 @@ typedef struct Milk
 	Code code;
 } Milk;
 
-Milk *milk_init();
-void milk_free(Milk *milk);
-void milk_update(Milk *milk);
-void milk_draw(Milk *milk);
-void milk_clear(Video *video, int idx);
-void milk_pixelset(Video *video, int hex, int x, int y);
-void milk_rectfill(Video *video, int hex, int x, int y, int w, int h);
-void milk_rect(Video *video, int hex, int x, int y, int w, int h);
+Milk* milk_init();
+void milk_free(Milk* milk);
+void milk_update(Milk* milk);
+void milk_draw(Milk* milk);
+void milk_clear(Video* video, int idx);
+void milk_pixelset(Video*video, int hex, int x, int y);
+void milk_rectfill(Video*video, int hex, int x, int y, int w, int h);
+void milk_rect(Video* video, int hex, int x, int y, int w, int h);
 
 #endif
