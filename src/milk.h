@@ -13,6 +13,8 @@
 #define MILK_SPRSHEET_AREA MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE
 #define MILK_SPR_SQRSIZE 16 /* Each sprite is considered to be 16x16 px */
 
+#define MILK_SPR_FILENAME "sprsheet.bmp"
+
 #define MILK_BOOL int
 #define MILK_TRUE 1
 #define MILK_FALSE 0
@@ -37,7 +39,7 @@ typedef struct Video
 {
 	ColorRGB framebuffer[MILK_FRAMEBUF_AREA];
 	ColorRGB spritesheet[MILK_SPRSHEET_AREA];
-	ColorRGB colorkey;
+	ColorRGB colorKey;
 } Video;
 
 /*
@@ -46,10 +48,10 @@ typedef struct Video
  */
 typedef struct Input
 {
-	uint32_t msx;
-	uint32_t msy;
-	MILK_BOOL msdown;
-	MILK_BOOL msdownp;
+	uint32_t mouseX;
+	uint32_t mouseY;
+	MILK_BOOL mouseDown;
+	MILK_BOOL mouseDownPrevious;
 } Input;
 
 /*
@@ -71,46 +73,48 @@ typedef struct Milk
 /*
  * Initialize milk, loading all of it's content.
  */
-Milk *milk_init();
+Milk *milkInit();
 
 /*
  * Free milk and all of it's content.
  */
-void milk_free(Milk *milk);
+void milkFree(Milk *milk);
 
 /*
  * Update milk's current state.
  */
-void milk_update(Milk *milk);
+void milkUpdate(Milk *milk);
 
 /*
  * Draw milk's current state.
  */
-void milk_draw(Milk *milk);
+void milkDraw(Milk *milk);
 
 /*
  * Clear milk's framebuffer to the specified color.
  */
-void milk_clear(Video *video, int idx);
+void milkClear(Video *video, int idx);
 
 /*
  * Set the framebuffer's pixel at the given coordinates.
  */
-void milk_pixel_set(Video *video, int hex, int x, int y);
+void milkPixelSet(Video *video, int hex, int x, int y);
 
 /*
  * Draw a solid rectangle to the framebuffer at the given coordinates.
  */
-void milk_rectfill(Video *video, int hex, int x, int y, int w, int h);
+void milkRectFill(Video *video, int hex, int x, int y, int w, int h);
 
 /*
  * Draw a rectangle to the framebuffer at the given coordinates.
  */
-void milk_rect(Video *video, int hex, int x, int y, int w, int h);
+void milkRect(Video *video, int hex, int x, int y, int w, int h);
 
 /*
  * Draw a sprite to the framebuffer at the given coordinates.
+ *
+ * - I'll have a milk sprite with my milk steak please.
  */
-void milk_spr(Video *video, int idx, int x, int y);
+void milkSprite(Video *video, int idx, int x, int y);
 
 #endif

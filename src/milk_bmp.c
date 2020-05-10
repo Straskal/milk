@@ -1,7 +1,7 @@
 #include "milk_bmp.h"
 #include "SDL.h"
 
-void milk_load_bmp(Milk *milk, char *filename)
+void milkLoadBmp(Milk *milk, char *filename)
 {
 	SDL_Surface *bmp = SDL_LoadBMP(filename);
 	int bpp = bmp->format->BytesPerPixel;
