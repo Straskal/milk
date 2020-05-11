@@ -89,6 +89,8 @@ int main(int argc, char *argv[])
 
 		milk->input.mouseDownPrevious = milk->input.mouseDown;
 		milk->input.mouseDown = 0;
+		milk->input.gamepad.previousButtonState = milk->input.gamepad.buttonState;
+		milk->input.gamepad.buttonState = 0;
 
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
@@ -111,6 +113,17 @@ int main(int argc, char *argv[])
 			}
 		}
 
+		Gamepad *gamepad = &milk->input.gamepad;
+		const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
+		if (keyboardState[SDL_SCANCODE_UP]) gamepad->buttonState |= UP;
+		if (keyboardState[SDL_SCANCODE_DOWN]) gamepad->buttonState |= DOWN;
+		if (keyboardState[SDL_SCANCODE_LEFT]) gamepad->buttonState |= LEFT;
+		if (keyboardState[SDL_SCANCODE_RIGHT]) gamepad->buttonState |= RIGHT;
+		if (keyboardState[SDL_SCANCODE_Z]) gamepad->buttonState |= A;
+		if (keyboardState[SDL_SCANCODE_X]) gamepad->buttonState |= B;
+		if (keyboardState[SDL_SCANCODE_C]) gamepad->buttonState |= X;
+		if (keyboardState[SDL_SCANCODE_V]) gamepad->buttonState |= Y;
+
 		milkUpdate(milk);
 		milkDraw(milk);
 		_flipFramebuffer(frontBufferData, milk->video.framebuffer, MILK_FRAMEBUF_AREA);
@@ -128,5 +141,5 @@ int main(int argc, char *argv[])
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
-	return 1;
+	return 0;
 }

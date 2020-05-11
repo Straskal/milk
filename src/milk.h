@@ -12,7 +12,6 @@
 #define MILK_SPRSHEET_SQRSIZE 256
 #define MILK_SPRSHEET_AREA MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE
 #define MILK_SPR_SQRSIZE 16 /* Each sprite is considered to be 16x16 px */
-
 #define MILK_SPR_FILENAME "sprsheet.bmp"
 
 #define MILK_BOOL int
@@ -42,16 +41,31 @@ typedef struct Video
 	ColorRGB colorKey;
 } Video;
 
-/*
- * All of milk's input.
- * - holds current and previous state of mouse, keyboard, and gamepads.
- */
+typedef enum ButtonState
+{
+  UP    = 1 << 0,
+  DOWN  = 1 << 1,
+  LEFT  = 1 << 2,
+  RIGHT = 1 << 3,
+  A     = 1 << 4,
+  B     = 1 << 5,
+  X     = 1 << 6,
+  Y     = 1 << 7
+} ButtonState;
+
+typedef struct Gamepad
+{
+  ButtonState buttonState;
+  ButtonState previousButtonState;
+} Gamepad;
+
 typedef struct Input
 {
 	uint32_t mouseX;
 	uint32_t mouseY;
 	MILK_BOOL mouseDown;
 	MILK_BOOL mouseDownPrevious;
+  Gamepad gamepad;
 } Input;
 
 /*
@@ -116,5 +130,7 @@ void milkRect(Video *video, int hex, int x, int y, int w, int h);
  * - I'll have a milk sprite with my milk steak please.
  */
 void milkSprite(Video *video, int idx, int x, int y);
+
+int milkButton(Input *input, ButtonState button);
 
 #endif

@@ -10,7 +10,7 @@
 Milk *milkInit()
 {
 	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
-	milkLoadBmp(milk, MILK_SPR_FILENAME);
+	milkLoadSpritesheet(milk, MILK_SPR_FILENAME);
 	milkLoadScripts(milk);
 	return milk;
 }
@@ -173,4 +173,9 @@ void milkSprite(Video *video, int idx, int x, int y)
 		return;
 
 	_blit(video, &video->spritesheet[idx * MILK_SPR_SQRSIZE], x, y);
+}
+
+int milkButton(Input *input, ButtonState button)
+{
+	return (input->gamepad.buttonState & button) == button;
 }

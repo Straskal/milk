@@ -3,6 +3,6 @@
 
 #include "milk.h"
 
-void milkLoadBmp(Milk *milk, char *filename);
+void milkLoadSpritesheet(Milk *milk, char *filename);
 
 #endif

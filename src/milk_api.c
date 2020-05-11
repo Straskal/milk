@@ -3,6 +3,7 @@
 #include "lualib.h"
 #include "lauxlib.h"
 #include "milk.h"
+#include <math.h>
 #include <stdio.h>
 
 static int l_clrs(lua_State *L)
@@ -56,10 +57,20 @@ static int l_spr(lua_State *L)
 	lua_getglobal(L, "__mk");
 	Milk *mk = (Milk *)lua_touserdata(L, -1);
 	int idx = lua_tointeger(L, 1);
-	int x = lua_tointeger(L, 2);
-	int y = lua_tointeger(L, 3);
-	milkSprite(&mk->video, idx, x, y);
+	double x = lua_tonumber(L, 2);
+	double y = lua_tonumber(L, 3);
+	milkSprite(&mk->video, idx, floor(x), floor(y));
 	return 0;
+}
+
+static int l_btn(lua_State *L)
+{
+	lua_getglobal(L, "__mk");
+	Milk *mk = (Milk *)lua_touserdata(L, -1);
+	int button = lua_tointeger(L, 1);
+	int isDown = milkButton(&mk->input, 1 << button);
+	lua_pushboolean(L, isDown);
+	return 1;
 }
 
 static void _pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_State *))
@@ -75,6 +86,7 @@ static void _pushApi(lua_State *L)
 	_pushApiFunction(L, "rectfill", l_rectfill);
 	_pushApiFunction(L, "rect", l_rect);
 	_pushApiFunction(L, "spr", l_spr);
+	_pushApiFunction(L, "btn", l_btn);
 }
 
 void milkLoadScripts(Milk *milk)
