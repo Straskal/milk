@@ -4,5 +4,6 @@
 #include "milk.h"
 
 void milkLoadSpritesheet(Milk *milk, char *filename);
+void milkLoadFont(Milk *milk, char *filename);
 
 #endif

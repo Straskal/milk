@@ -13,6 +13,11 @@
 #define MILK_SPRSHEET_AREA MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE
 #define MILK_SPR_SQRSIZE 16 /* Each sprite is considered to be 16x16 px */
 #define MILK_SPR_FILENAME "sprsheet.bmp"
+#define MILK_FONT_FILENAME "font.bmp"
+#define MILK_FONT_WIDTH 128
+#define MILK_FONT_HEIGHT 48
+#define MILK_FONT_AREA MILK_FONT_WIDTH * MILK_FONT_HEIGHT
+#define MILK_CHAR_SQRSIZE 8
 
 #define MILK_BOOL int
 #define MILK_TRUE 1
@@ -38,6 +43,7 @@ typedef struct Video
 {
 	ColorRGB framebuffer[MILK_FRAMEBUF_AREA];
 	ColorRGB spritesheet[MILK_SPRSHEET_AREA];
+    ColorRGB font[MILK_FONT_AREA];
 	ColorRGB colorKey;
 } Video;
 
@@ -132,5 +138,7 @@ void milkRect(Video *video, int hex, int x, int y, int w, int h);
 void milkSprite(Video *video, int idx, int x, int y);
 
 int milkButton(Input *input, ButtonState button);
+
+void milkSpriteFont(Video *video, const char *str, int x, int y);
 
 #endif

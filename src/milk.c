@@ -1,6 +1,7 @@
 #include "milk.h"
 #include "milk_api.h"
 #include "milk_bmp.h"
+#include <math.h>
 #include <memory.h>
 #include <stdio.h>
 
@@ -11,6 +12,7 @@ Milk *milkInit()
 {
 	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
 	milkLoadSpritesheet(milk, MILK_SPR_FILENAME);
+	milkLoadFont(milk, MILK_FONT_FILENAME);
 	milkLoadScripts(milk);
 	return milk;
 }
@@ -178,4 +180,44 @@ void milkSprite(Video *video, int idx, int x, int y)
 int milkButton(Input *input, ButtonState button)
 {
 	return (input->gamepad.buttonState & button) == button;
+}
+
+static void _drawCharacter(Video *video, char character, int x, int y)
+{
+	/* Only accept ASCII characters. */
+	if ((character & 0xff80) == 0)
+	{
+		int charIndex = (character - 32); /* bitmap font pixel array starts at ASCII character 32 (SPACE) */
+		int row = floor(charIndex / 16);
+		int col = floor(charIndex % 16);
+		int posy = row * (int)(MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE);
+		int posx = col * MILK_CHAR_SQRSIZE;;
+		ColorRGB *pixels = &video->font[(posy + posx)];
+		int currFramebufX, currFramebufY, currFontX, currFontY;
+
+		for (currFramebufX = x, currFontX = 0; currFramebufX < x + MILK_CHAR_SQRSIZE; currFramebufX++, currFontX++)
+		{
+			for (currFramebufY = y, currFontY = 0; currFramebufY < y + MILK_CHAR_SQRSIZE; currFramebufY++, currFontY++)
+			{
+				if (currFramebufX < MILK_FRAMEBUF_WIDTH && currFramebufY < MILK_FRAMEBUF_HEIGHT)
+				{
+					ColorRGB *col = &pixels[MILK_FONT_WIDTH * currFontY + currFontX];
+
+					if (!_colorEqual(col, &video->colorKey))
+						_pixelSet(video, col, currFramebufX, currFramebufY);
+				}
+			}
+		}
+	}
+}
+
+void milkSpriteFont(Video *video, const char *str, int x, int y)
+{
+	char *strItr = str;
+
+	while (*strItr)
+	{
+		_drawCharacter(video, *(strItr++), x, y);
+		x += MILK_CHAR_SQRSIZE;
+	}
 }

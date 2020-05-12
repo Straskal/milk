@@ -73,6 +73,17 @@ static int l_btn(lua_State *L)
 	return 1;
 }
 
+static int l_sprfont(lua_State *L)
+{
+	lua_getglobal(L, "__mk");
+	Milk *mk = (Milk *)lua_touserdata(L, -1);
+	const char *str = lua_tostring(L, 1);
+	double x = lua_tonumber(L, 2);
+	double y = lua_tonumber(L, 3);
+	milkSpriteFont(&mk->video, str, floor(x), floor(y));
+	return 1;
+}
+
 static void _pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_State *))
 {
 	lua_pushcfunction(L, api_func);
@@ -87,6 +98,7 @@ static void _pushApi(lua_State *L)
 	_pushApiFunction(L, "rect", l_rect);
 	_pushApiFunction(L, "spr", l_spr);
 	_pushApiFunction(L, "btn", l_btn);
+	_pushApiFunction(L, "sprfont", l_sprfont);
 }
 
 void milkLoadScripts(Milk *milk)

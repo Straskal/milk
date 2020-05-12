@@ -1,7 +1,7 @@
 #include "milk_bmp.h"
 #include "SDL.h"
 
-void milkLoadSpritesheet(Milk *milk, char *filename)
+static void _loadBmp(ColorRGB *pixels, char *filename)
 {
 	SDL_Surface *bmp = SDL_LoadBMP(filename);
 	int bpp = bmp->format->BytesPerPixel;
@@ -12,7 +12,7 @@ void milkLoadSpritesheet(Milk *milk, char *filename)
 	uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
 	uint8_t *itr = bmpPixels;
 	uint8_t *end = &bmpPixels[len];
-	ColorRGB *pixelitr = &milk->video.spritesheet;
+	ColorRGB *pixelitr = pixels;
 	while (itr != end)
 	{
 		pixelitr->b = *(itr++);
@@ -21,4 +21,14 @@ void milkLoadSpritesheet(Milk *milk, char *filename)
 		pixelitr++;
 	}
 	SDL_FreeSurface(bmp);
+}
+
+void milkLoadSpritesheet(Milk *milk, char *filename)
+{
+	_loadBmp(milk->video.spritesheet, filename);
+}
+
+void milkLoadFont(Milk *milk, char *filename)
+{
+	_loadBmp(milk->video.font, filename);
 }
