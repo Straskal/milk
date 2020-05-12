@@ -145,7 +145,7 @@ void milkRect(Video *vram, int hex, int x, int y, int w, int h)
 	_verticalLine(vram, &color, x + w, y, h);
 }
 
-static void _blit(Video *video, ColorRGB* pixels, int x, int y)
+static void _blit(Video *video, ColorRGB *pixels, int x, int y)
 {
 	int framebufx, framebufy;
 	int spritex, spritey;

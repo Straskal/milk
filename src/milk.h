@@ -43,20 +43,20 @@ typedef struct Video
 
 typedef enum ButtonState
 {
-  UP    = 1 << 0,
-  DOWN  = 1 << 1,
-  LEFT  = 1 << 2,
-  RIGHT = 1 << 3,
-  A     = 1 << 4,
-  B     = 1 << 5,
-  X     = 1 << 6,
-  Y     = 1 << 7
+	UP = 1 << 0,
+	DOWN = 1 << 1,
+	LEFT = 1 << 2,
+	RIGHT = 1 << 3,
+	A = 1 << 4,
+	B = 1 << 5,
+	X = 1 << 6,
+	Y = 1 << 7
 } ButtonState;
 
 typedef struct Gamepad
 {
-  ButtonState buttonState;
-  ButtonState previousButtonState;
+	ButtonState buttonState;
+	ButtonState previousButtonState;
 } Gamepad;
 
 typedef struct Input
@@ -65,7 +65,7 @@ typedef struct Input
 	uint32_t mouseY;
 	MILK_BOOL mouseDown;
 	MILK_BOOL mouseDownPrevious;
-  Gamepad gamepad;
+	Gamepad gamepad;
 } Input;
 
 /*

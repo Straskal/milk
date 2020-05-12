@@ -3,8 +3,8 @@
 
 #include "milk.h"
 
-void milkLoadScripts(Milk* code);
-void milkInvokeUpdate(Code* code);
-void milkInvokeDraw(Code* code);
+void milkLoadScripts(Milk *code);
+void milkInvokeUpdate(Code *code);
+void milkInvokeDraw(Code *code);
 
 #endif
