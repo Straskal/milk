@@ -79,9 +79,10 @@ static void _framebufferCullXYWH(int *x, int *y, int *w, int *h)
 	_framebufferCullXY(&clampedRight, &clampedBottom);
 
 	if (clampedRight != right)
-		*w -= (right - clampedRight);
+		*w -= right - clampedRight;
+
 	if (clampedBottom != bottom)
-		*h -= (bottom - clampedBottom);
+		*h -= bottom - clampedBottom;
 }
 
 static int _colorEqual(ColorRGB *col1, ColorRGB *col2)
@@ -96,12 +97,14 @@ static void _pixelSet(Video *video, ColorRGB *color, int x, int y)
 
 void milkPixelSet(Video *video, int hex, int x, int y)
 {
-	_pixelSet(video, hex, x, y);
+	ColorRGB color = HEX_2_COLOR(hex);
+	_pixelSet(video, &color, x, y);
 }
 
 void milkRectFill(Video *video, int hex, int x, int y, int w, int h)
 {
 	int i = x, j = y;
+
 	_framebufferCullXYWH(&i, &j, &w, &h);
 
 	ColorRGB color = HEX_2_COLOR(hex);
@@ -119,6 +122,7 @@ void milkRectFill(Video *video, int hex, int x, int y, int w, int h)
 static void _horizontalLine(Video *video, ColorRGB *color, int x, int y, int w)
 {
 	int i;
+
 	for (i = x; i <= x + w; i++)
 	{
 		if (i < MILK_FRAMEBUF_WIDTH)
@@ -129,6 +133,7 @@ static void _horizontalLine(Video *video, ColorRGB *color, int x, int y, int w)
 static void _verticalLine(Video *video, ColorRGB *color, int x, int y, int h)
 {
 	int i;
+
 	for (i = y; i <= y + h; i++)
 	{
 		if (i < MILK_FRAMEBUF_WIDTH)
@@ -147,22 +152,21 @@ void milkRect(Video *vram, int hex, int x, int y, int w, int h)
 	_verticalLine(vram, &color, x + w, y, h);
 }
 
-static void _blit(Video *video, ColorRGB *pixels, int x, int y)
+static void _blitRect(Video *video, ColorRGB *pixels, int x, int y, int w, int h, int pitch)
 {
-	int framebufx, framebufy;
-	int spritex, spritey;
+	int framebufferX;
+	int framebufferY;
+	int pixelX;
+	int pixelY;
 
-	for (framebufx = x, spritex = 0; framebufx < x + MILK_SPR_SQRSIZE; framebufx++, spritex++)
+	for (framebufferY = y, pixelY = 0; framebufferY < y + h; framebufferY++, pixelY++)
 	{
-		for (framebufy = y, spritey = 0; framebufy < y + MILK_SPR_SQRSIZE; framebufy++, spritey++)
+		for (framebufferX = x, pixelX = 0; framebufferX < x + w; framebufferX++, pixelX++)
 		{
-			if (framebufx < MILK_FRAMEBUF_WIDTH && framebufy < MILK_FRAMEBUF_HEIGHT)
-			{
-				ColorRGB *col = &pixels[MILK_SPRSHEET_SQRSIZE * spritey + spritex];
+			ColorRGB *col = &pixels[pitch * pixelY + pixelX];
 
-				if (!_colorEqual(col, &video->colorKey))
-					_pixelSet(video, col, framebufx, framebufy);
-			}
+			if (!_colorEqual(col, &video->colorKey))
+				_pixelSet(video, col, framebufferX, framebufferY);
 		}
 	}
 }
@@ -171,10 +175,11 @@ void milkSprite(Video *video, int idx, int x, int y)
 {
 	if (idx < 0)
 		return;
+
 	if (idx > MILK_SPRSHEET_SQRSIZE)
 		return;
 
-	_blit(video, &video->spritesheet[idx * MILK_SPR_SQRSIZE], x, y);
+	_blitRect(video, &video->spritesheet[idx * MILK_SPR_SQRSIZE], x, y, MILK_SPR_SQRSIZE, MILK_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE);
 }
 
 int milkButton(Input *input, ButtonState button)
@@ -182,42 +187,30 @@ int milkButton(Input *input, ButtonState button)
 	return (input->gamepad.buttonState & button) == button;
 }
 
+static int _isAscii(char character)
+{
+	return (character & 0xff80) == 0;
+}
+
 static void _drawCharacter(Video *video, char character, int x, int y)
 {
-	/* Only accept ASCII characters. */
-	if ((character & 0xff80) == 0)
-	{
-		int charIndex = (character - 32); /* bitmap font pixel array starts at ASCII character 32 (SPACE) */
-		int row = floor(charIndex / 16);
-		int col = floor(charIndex % 16);
-		int posy = row * (int)(MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE);
-		int posx = col * MILK_CHAR_SQRSIZE;;
-		ColorRGB *pixels = &video->font[(posy + posx)];
-		int currFramebufX, currFramebufY, currFontX, currFontY;
+	if (!_isAscii(character))
+		character = '?';
 
-		for (currFramebufX = x, currFontX = 0; currFramebufX < x + MILK_CHAR_SQRSIZE; currFramebufX++, currFontX++)
-		{
-			for (currFramebufY = y, currFontY = 0; currFramebufY < y + MILK_CHAR_SQRSIZE; currFramebufY++, currFontY++)
-			{
-				if (currFramebufX < MILK_FRAMEBUF_WIDTH && currFramebufY < MILK_FRAMEBUF_HEIGHT)
-				{
-					ColorRGB *col = &pixels[MILK_FONT_WIDTH * currFontY + currFontX];
+	/* bitmap font starts at ASCII character 32 (SPACE) */
+	int row = floor((character - 32) / 16);
+	int col = floor((character - 32) % 16);
+	ColorRGB *pixels = &video->font[(row * MILK_FONT_PITCH + col * MILK_CHAR_SQRSIZE)];
 
-					if (!_colorEqual(col, &video->colorKey))
-						_pixelSet(video, col, currFramebufX, currFramebufY);
-				}
-			}
-		}
-	}
+	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH);
 }
 
 void milkSpriteFont(Video *video, const char *str, int x, int y)
 {
-	char *strItr = str;
-
-	while (*strItr)
+	char *currentChar = str;
+	while (*currentChar)
 	{
-		_drawCharacter(video, *(strItr++), x, y);
+		_drawCharacter(video, *(currentChar++), x, y);
 		x += MILK_CHAR_SQRSIZE;
 	}
 }
