@@ -27,6 +27,11 @@ void milkUpdate(Milk *milk)
 	milkInvokeUpdate(&milk->code);
 }
 
+int milkButton(Input *input, uint8_t button)
+{
+	return (input->gamepad.buttonState & button) == button;
+}
+
 static void _resetDrawState(Video *video)
 {
 	video->colorKey = HEX_2_COLOR(0x000000);
@@ -58,6 +63,7 @@ static void _framebufferCullXY(int *x, int *y)
 		else if (x > MILK_FRAMEBUF_WIDTH)
 			x = MILK_FRAMEBUF_WIDTH;
 	}
+
 	if (y != NULL)
 	{
 		if (y < 0)
@@ -95,13 +101,13 @@ static void _pixelSet(Video *video, ColorRGB *color, int x, int y)
 	video->framebuffer[COORD_2_FRAMEBUF_POS(x, y)] = *color;
 }
 
-void milkPixelSet(Video *video, int hex, int x, int y)
+void milkPixelSet(Video *video, int x, int y, int hex)
 {
 	ColorRGB color = HEX_2_COLOR(hex);
 	_pixelSet(video, &color, x, y);
 }
 
-void milkRectFill(Video *video, int hex, int x, int y, int w, int h)
+void milkRectFill(Video *video, int x, int y, int w, int h, int hex)
 {
 	int i = x, j = y;
 
@@ -141,7 +147,7 @@ static void _verticalLine(Video *video, ColorRGB *color, int x, int y, int h)
 	}
 }
 
-void milkRect(Video *vram, int hex, int x, int y, int w, int h)
+void milkRect(Video *vram, int x, int y, int w, int h, int hex)
 {
 	ColorRGB color = HEX_2_COLOR(hex);
 
@@ -179,12 +185,11 @@ void milkSprite(Video *video, int idx, int x, int y)
 	if (idx > MILK_SPRSHEET_SQRSIZE)
 		return;
 
-	_blitRect(video, &video->spritesheet[idx * MILK_SPR_SQRSIZE], x, y, MILK_SPR_SQRSIZE, MILK_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE);
-}
+	int row = floor(idx / 16);
+	int col = floor(idx % 16);
+	ColorRGB *pixels = &video->spritesheet[row * MILK_SPRSHEET_SQRSIZE * MILK_SPR_SQRSIZE + col * MILK_SPR_SQRSIZE];
 
-int milkButton(Input *input, ButtonState button)
-{
-	return (input->gamepad.buttonState & button) == button;
+	_blitRect(video, pixels, x, y, MILK_SPR_SQRSIZE, MILK_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE);
 }
 
 static int _isAscii(char character)

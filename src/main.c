@@ -115,14 +115,14 @@ int main(int argc, char *argv[])
 
 		Gamepad *gamepad = &milk->input.gamepad;
 		const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
-		if (keyboardState[SDL_SCANCODE_UP]) gamepad->buttonState |= UP;
-		if (keyboardState[SDL_SCANCODE_DOWN]) gamepad->buttonState |= DOWN;
-		if (keyboardState[SDL_SCANCODE_LEFT]) gamepad->buttonState |= LEFT;
-		if (keyboardState[SDL_SCANCODE_RIGHT]) gamepad->buttonState |= RIGHT;
-		if (keyboardState[SDL_SCANCODE_Z]) gamepad->buttonState |= A;
-		if (keyboardState[SDL_SCANCODE_X]) gamepad->buttonState |= B;
-		if (keyboardState[SDL_SCANCODE_C]) gamepad->buttonState |= X;
-		if (keyboardState[SDL_SCANCODE_V]) gamepad->buttonState |= Y;
+		if (keyboardState[SDL_SCANCODE_UP]) gamepad->buttonState |= BTN_UP;
+		if (keyboardState[SDL_SCANCODE_DOWN]) gamepad->buttonState |= BTN_DOWN;
+		if (keyboardState[SDL_SCANCODE_LEFT]) gamepad->buttonState |= BTN_LEFT;
+		if (keyboardState[SDL_SCANCODE_RIGHT]) gamepad->buttonState |= BTN_RIGHT;
+		if (keyboardState[SDL_SCANCODE_Z]) gamepad->buttonState |= BTN_A;
+		if (keyboardState[SDL_SCANCODE_X]) gamepad->buttonState |= BTN_B;
+		if (keyboardState[SDL_SCANCODE_C]) gamepad->buttonState |= BTN_X;
+		if (keyboardState[SDL_SCANCODE_V]) gamepad->buttonState |= BTN_Y;
 
 		milkUpdate(milk);
 		milkDraw(milk);

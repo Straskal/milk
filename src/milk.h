@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define MILK_FRAMERATE (1000 / 30) /* Fixed 30 FPS */
+#define MILK_FRAMERATE (1000.0f / 30.0f) /* Fixed 30 FPS */
 #define MILK_FRAMEBUF_WIDTH 256
 #define MILK_FRAMEBUF_HEIGHT 224
 #define MILK_FRAMEBUF_AREA (MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT)
@@ -50,20 +50,20 @@ typedef struct Video
 
 typedef enum ButtonState
 {
-	UP = 1 << 0,
-	DOWN = 1 << 1,
-	LEFT = 1 << 2,
-	RIGHT = 1 << 3,
-	A = 1 << 4,
-	B = 1 << 5,
-	X = 1 << 6,
-	Y = 1 << 7
+	BTN_UP      = 1 << 0,
+	BTN_DOWN    = 1 << 1,
+	BTN_LEFT    = 1 << 2,
+	BTN_RIGHT   = 1 << 3,
+	BTN_A       = 1 << 4,
+	BTN_B       = 1 << 5,
+	BTN_X       = 1 << 6,
+	BTN_Y       = 1 << 7
 } ButtonState;
 
 typedef struct Gamepad
 {
-	ButtonState buttonState;
-	ButtonState previousButtonState;
+	uint8_t buttonState;
+    uint8_t previousButtonState;
 } Gamepad;
 
 typedef struct Input
@@ -107,6 +107,11 @@ void milkFree(Milk *milk);
 void milkUpdate(Milk *milk);
 
 /*
+ * Returns true if the given button is down.
+ */
+int milkButton(Input *input, uint8_t button);
+
+/*
  * Draw milk's current state.
  */
 void milkDraw(Milk *milk);
@@ -119,17 +124,17 @@ void milkClear(Video *video, int idx);
 /*
  * Set the framebuffer's pixel at the given coordinates.
  */
-void milkPixelSet(Video *video, int hex, int x, int y);
+void milkPixelSet(Video *video, int x, int y, int hex);
 
 /*
  * Draw a solid rectangle to the framebuffer at the given coordinates.
  */
-void milkRectFill(Video *video, int hex, int x, int y, int w, int h);
+void milkRectFill(Video *video, int x, int y, int w, int h, int hex);
 
 /*
  * Draw a rectangle to the framebuffer at the given coordinates.
  */
-void milkRect(Video *video, int hex, int x, int y, int w, int h);
+void milkRect(Video *video, int x, int y, int w, int h, int hex);
 
 /*
  * Draw a sprite to the framebuffer at the given coordinates.
@@ -138,8 +143,9 @@ void milkRect(Video *video, int hex, int x, int y, int w, int h);
  */
 void milkSprite(Video *video, int idx, int x, int y);
 
-int milkButton(Input *input, ButtonState button);
-
+/*
+ * Draw the text to the framebuffer at the given coordinates.
+ */
 void milkSpriteFont(Video *video, const char *str, int x, int y);
 
 #endif

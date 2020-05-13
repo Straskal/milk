@@ -6,81 +6,81 @@
 #include <math.h>
 #include <stdio.h>
 
+static Milk *_getGlobalMilk(lua_State *L)
+{
+	lua_getglobal(L, "__milk");
+	return (Milk *)lua_touserdata(L, -1);
+}
+
 static int l_clrs(lua_State *L)
 {
-	lua_getglobal(L, "__mk");
-	Milk *mk = (Milk *)lua_touserdata(L, -1);
-	int col = lua_tointeger(L, 1);
-	milkClear(&mk->video, col);
+	Milk *milk = _getGlobalMilk(L);
+	milkClear(&milk->video, lua_tointeger(L, 1));
 	return 0;
 }
 
 static int l_pset(lua_State *L)
 {
-	lua_getglobal(L, "__mk");
-	Milk *mk = (Milk *)lua_touserdata(L, -1);
-	int x = lua_tointeger(L, 1);
-	int y = lua_tointeger(L, 2);
-	int hex = lua_tointeger(L, 3);
-	milkPixelSet(&mk->video, hex, x, y);
+	Milk *milk = _getGlobalMilk(L);
+	milkPixelSet(&milk->video,
+		lua_tointeger(L, 1),
+		lua_tointeger(L, 2),
+		lua_tointeger(L, 3)
+	);
 	return 0;
 }
 
 static int l_rectfill(lua_State *L)
 {
-	lua_getglobal(L, "__mk");
-	Milk *mk = (Milk *)lua_touserdata(L, -1);
-	int x = lua_tointeger(L, 1);
-	int y = lua_tointeger(L, 2);
-	int w = lua_tointeger(L, 3);
-	int h = lua_tointeger(L, 4);
-	int hex = lua_tointeger(L, 5);
-	milkRectFill(&mk->video, hex, x, y, w, h);
+	Milk *milk = _getGlobalMilk(L);
+	milkRectFill(&milk->video,
+		lua_tointeger(L, 1),
+		lua_tointeger(L, 2),
+		lua_tointeger(L, 3),
+		lua_tointeger(L, 4),
+		lua_tointeger(L, 5)
+	);
 	return 0;
 }
 
 static int l_rect(lua_State *L)
 {
-	lua_getglobal(L, "__mk");
-	Milk *mk = (Milk *)lua_touserdata(L, -1);
-	int x = lua_tointeger(L, 1);
-	int y = lua_tointeger(L, 2);
-	int w = lua_tointeger(L, 3);
-	int h = lua_tointeger(L, 4);
-	int hex = lua_tointeger(L, 5);
-	milkRect(&mk->video, hex, x, y, w, h);
+	Milk *milk = _getGlobalMilk(L);
+	milkRect(&milk->video,
+		lua_tointeger(L, 1),
+		lua_tointeger(L, 2),
+		lua_tointeger(L, 3),
+		lua_tointeger(L, 4),
+		lua_tointeger(L, 5));
 	return 0;
 }
 
 static int l_spr(lua_State *L)
 {
-	lua_getglobal(L, "__mk");
-	Milk *mk = (Milk *)lua_touserdata(L, -1);
-	int idx = lua_tointeger(L, 1);
-	double x = lua_tonumber(L, 2);
-	double y = lua_tonumber(L, 3);
-	milkSprite(&mk->video, idx, floor(x), floor(y));
+	Milk *milk = _getGlobalMilk(L);
+	milkSprite(&milk->video,
+		lua_tointeger(L, 1),
+		floor(lua_tointeger(L, 2)),
+		floor(lua_tointeger(L, 3))
+	);
 	return 0;
 }
 
 static int l_btn(lua_State *L)
 {
-	lua_getglobal(L, "__mk");
-	Milk *mk = (Milk *)lua_touserdata(L, -1);
-	int button = lua_tointeger(L, 1);
-	int isDown = milkButton(&mk->input, 1 << button);
-	lua_pushboolean(L, isDown);
+	Milk *milk = _getGlobalMilk(L);
+	lua_pushboolean(L,
+		milkButton(&milk->input, 1 << lua_tointeger(L, 1)));
 	return 1;
 }
 
 static int l_sprfont(lua_State *L)
 {
-	lua_getglobal(L, "__mk");
-	Milk *mk = (Milk *)lua_touserdata(L, -1);
-	const char *str = lua_tostring(L, 1);
-	double x = lua_tonumber(L, 2);
-	double y = lua_tonumber(L, 3);
-	milkSpriteFont(&mk->video, str, floor(x), floor(y));
+	Milk *milk = _getGlobalMilk(L);
+	milkSpriteFont(&milk->video,
+		lua_tostring(L, 1),
+		floor(lua_tointeger(L, 2)),
+		floor(lua_tointeger(L, 3)));
 	return 1;
 }
 
@@ -110,7 +110,7 @@ void milkLoadScripts(Milk *milk)
 		printf("%s\n", lua_tostring(L, -1));
 	}
 	lua_pushlightuserdata(L, (void *)milk);
-	lua_setglobal(L, "__mk");
+	lua_setglobal(L, "__milk");
 	_pushApi(L);
 	milk->code.state = (void *)L;
 }
