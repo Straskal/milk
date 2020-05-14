@@ -104,6 +104,7 @@ static void _pixelSet(Video *video, ColorRGB *color, int x, int y)
 void milkPixelSet(Video *video, int x, int y, int hex)
 {
 	ColorRGB color = HEX_2_COLOR(hex);
+
 	_pixelSet(video, &color, x, y);
 }
 
@@ -115,9 +116,9 @@ void milkRectFill(Video *video, int x, int y, int w, int h, int hex)
 
 	ColorRGB color = HEX_2_COLOR(hex);
 
-	for (i = x; i < x + w; i++)
+	for (j = y; j < y + h; j++)
 	{
-		for (j = y; j < y + h; j++)
+		for (i = x; i < x + w; i++)
 		{
 			if (i < MILK_FRAMEBUF_WIDTH && j < MILK_FRAMEBUF_HEIGHT)
 				_pixelSet(video, &color, i, j);
@@ -210,9 +211,10 @@ static void _drawCharacter(Video *video, char character, int x, int y)
 	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH);
 }
 
-void milkSpriteFont(Video *video, const char *str, int x, int y)
+void milkSpriteFont(Video *video, int x, int y, const char *str)
 {
 	char *currentChar = str;
+
 	while (*currentChar)
 	{
 		_drawCharacter(video, *(currentChar++), x, y);

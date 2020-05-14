@@ -11,7 +11,7 @@
 /* HMM: milk should output the appropriate frame buffer. Not a huge deal right now because we don't need this level of control client side. */
 static void _flipFramebuffer(uint32_t *frontbuffer, ColorRGB *backbuffer, size_t len)
 {
-#define PACKED_COLOR(col) (col.r << 24 | (col.g << 16) | (col.b << 8) | 0x00)
+	#define PACKED_COLOR(col) (col.r << 24 | (col.g << 16) | (col.b << 8) | 0x00)
 	ColorRGB *itr = backbuffer;
 	ColorRGB *end = &backbuffer[len - 1];
 	while (itr != end)
@@ -19,7 +19,7 @@ static void _flipFramebuffer(uint32_t *frontbuffer, ColorRGB *backbuffer, size_t
 		ColorRGB col = *(itr++);
 		*(frontbuffer++) = PACKED_COLOR(col);
 	}
-#undef PACKED_COLOR
+	#undef PACKED_COLOR
 }
 
 int main(int argc, char *argv[])

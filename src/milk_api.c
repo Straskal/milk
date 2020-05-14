@@ -23,8 +23,8 @@ static int l_pset(lua_State *L)
 {
 	Milk *milk = _getGlobalMilk(L);
 	milkPixelSet(&milk->video,
-		lua_tointeger(L, 1),
-		lua_tointeger(L, 2),
+		floor(lua_tonumber(L, 1)),
+		floor(lua_tonumber(L, 2)),
 		lua_tointeger(L, 3)
 	);
 	return 0;
@@ -34,8 +34,8 @@ static int l_rectfill(lua_State *L)
 {
 	Milk *milk = _getGlobalMilk(L);
 	milkRectFill(&milk->video,
-		lua_tointeger(L, 1),
-		lua_tointeger(L, 2),
+		floor(lua_tonumber(L, 1)),
+		floor(lua_tonumber(L, 2)),
 		lua_tointeger(L, 3),
 		lua_tointeger(L, 4),
 		lua_tointeger(L, 5)
@@ -47,11 +47,12 @@ static int l_rect(lua_State *L)
 {
 	Milk *milk = _getGlobalMilk(L);
 	milkRect(&milk->video,
-		lua_tointeger(L, 1),
-		lua_tointeger(L, 2),
+		floor(lua_tonumber(L, 1)),
+		floor(lua_tonumber(L, 2)),
 		lua_tointeger(L, 3),
 		lua_tointeger(L, 4),
-		lua_tointeger(L, 5));
+		lua_tointeger(L, 5)
+	);
 	return 0;
 }
 
@@ -60,8 +61,8 @@ static int l_spr(lua_State *L)
 	Milk *milk = _getGlobalMilk(L);
 	milkSprite(&milk->video,
 		lua_tointeger(L, 1),
-		floor(lua_tointeger(L, 2)),
-		floor(lua_tointeger(L, 3))
+		floor(lua_tonumber(L, 2)),
+		floor(lua_tonumber(L, 3))
 	);
 	return 0;
 }
@@ -70,17 +71,20 @@ static int l_btn(lua_State *L)
 {
 	Milk *milk = _getGlobalMilk(L);
 	lua_pushboolean(L,
-		milkButton(&milk->input, 1 << lua_tointeger(L, 1)));
+		milkButton(&milk->input, 1 << lua_tointeger(L, 1))
+	);
 	return 1;
 }
 
 static int l_sprfont(lua_State *L)
 {
 	Milk *milk = _getGlobalMilk(L);
-	milkSpriteFont(&milk->video,
-		lua_tostring(L, 1),
-		floor(lua_tointeger(L, 2)),
-		floor(lua_tointeger(L, 3)));
+	milkSpriteFont(
+		&milk->video,
+		floor(lua_tonumber(L, 1)),
+		floor(lua_tonumber(L, 2)),
+		lua_tostring(L, 3)
+	);
 	return 1;
 }
 
@@ -119,12 +123,12 @@ void milkInvokeUpdate(Code *code)
 {
 	lua_State *L = (lua_State *)code->state;
 	lua_getglobal(L, "_update");
-	lua_pcall(L, 0, 0, 0);
+	lua_call(L, 0, 0, 0);
 }
 
 void milkInvokeDraw(Code *code)
 {
 	lua_State *L = (lua_State *)code->state;
 	lua_getglobal(L, "_draw");
-	lua_pcall(L, 0, 0, 0);
+	lua_call(L, 0, 0, 0);
 }

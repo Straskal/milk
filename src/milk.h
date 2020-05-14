@@ -146,6 +146,6 @@ void milkSprite(Video *video, int idx, int x, int y);
 /*
  * Draw the text to the framebuffer at the given coordinates.
  */
-void milkSpriteFont(Video *video, const char *str, int x, int y);
+void milkSpriteFont(Video *video, int x, int y, const char *str);
 
 #endif
