@@ -1,10 +1,10 @@
 gTicks = 0;
 
 gPlayer = {
-	xPos 	= 10,
-	yPos 	= 10,
-	speed 	= 1,
-	sprite 	= 0,
+	xPos 		= 10,
+	yPos 		= 10,
+	speed 		= 0.4,
+	sprite 		= 0,
 }
 
 function _update()
@@ -29,8 +29,11 @@ function _update()
 end
 
 function _draw()
-	clrs(0x008751);
-	spr(gPlayer.sprite, gPlayer.xPos, gPlayer.yPos);
-	sprfont("Hey! You! C'mere!", 10, 40)
+	clrs(0);
+	spr(gPlayer.sprite, gPlayer.xPos, gPlayer.yPos)
+	sprfont(10, 40, "Hey! You! C'mere!")
+	rect(50, 50, 50, 50, 0xff0000)
+	rectfill(100, 100, 50, 50, 0xff0000)
+
 	gTicks = gTicks + 1
 end
