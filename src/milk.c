@@ -6,8 +6,6 @@
 #include <stdio.h>
 
 #define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x)
-#define HEX_2_COLOR(h) ((ColorRGB){((h >> 16)), ((h >> 8)), ((h)) })
-
 
 Milk *milkInit()
 {
