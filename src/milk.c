@@ -54,37 +54,19 @@ static void _framebufferCullXY(int *x, int *y)
 {
 	if (x != NULL)
 	{
-		if (x < 0)
-			x = 0;
-		else if (x > MILK_FRAMEBUF_WIDTH)
-			x = MILK_FRAMEBUF_WIDTH;
+		if (*x < 0)
+			*x = 0;
+		else if (*x > MILK_FRAMEBUF_WIDTH)
+			*x = MILK_FRAMEBUF_WIDTH;
 	}
 
 	if (y != NULL)
 	{
-		if (y < 0)
-			y = 0;
-		else if (y > MILK_FRAMEBUF_HEIGHT)
-			y = MILK_FRAMEBUF_HEIGHT;
+		if (*y < 0)
+			*y = 0;
+		else if (*y > MILK_FRAMEBUF_HEIGHT)
+			*y = MILK_FRAMEBUF_HEIGHT;
 	}
-}
-
-static void _framebufferCullXYWH(int *x, int *y, int *w, int *h)
-{
-	_framebufferCullXY(x, y);
-
-	int right = *x + *w;
-	int bottom = *y + *h;
-	int clampedRight = right;
-	int clampedBottom = bottom; /* ouch! */
-
-	_framebufferCullXY(&clampedRight, &clampedBottom);
-
-	if (clampedRight != right)
-		*w -= right - clampedRight;
-
-	if (clampedBottom != bottom)
-		*h -= bottom - clampedBottom;
 }
 
 void milkPixelSet(Video *video, int x, int y, Color32 hex)
