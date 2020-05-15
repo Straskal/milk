@@ -7,19 +7,18 @@
 #define FIRST_AVAILABLE_RENDERER -1
 #define MILK_FRAMEBUF_OUT_BPP 4
 #define MILK_FRAMEBUF_PITCH (MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_OUT_BPP)
+#define SHIFT_ALPHA(c) (c << 8)
 
 /* HMM: milk should output the appropriate frame buffer. Not a huge deal right now because we don't need this level of control client side. */
-static void _flipFramebuffer(uint32_t *frontbuffer, ColorRGB *backbuffer, size_t len)
+static void _flipFramebuffer(uint32_t *frontbuffer, Color32 *backbuffer, size_t len)
 {
-	#define PACKED_COLOR(col) (col.r << 24 | (col.g << 16) | (col.b << 8) | 0x00)
-	ColorRGB *itr = backbuffer;
-	ColorRGB *end = &backbuffer[len - 1];
+	Color32 *itr = backbuffer;
+	Color32 *end = &backbuffer[len - 1];
+
 	while (itr != end)
 	{
-		ColorRGB col = *(itr++);
-		*(frontbuffer++) = PACKED_COLOR(col);
+		*(frontbuffer++) = (uint32_t)SHIFT_ALPHA(*(itr++));
 	}
-	#undef PACKED_COLOR
 }
 
 int main(int argc, char *argv[])
@@ -131,8 +130,8 @@ int main(int argc, char *argv[])
 		SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
 		SDL_RenderPresent(renderer);
 
-		Uint32 ticks = SDL_GetTicks() - frameStartTicks;
-		if (ticks < MILK_FRAMERATE) SDL_Delay(MILK_FRAMERATE - ticks);
+		Uint32 elapsedTicks = SDL_GetTicks() - frameStartTicks;
+		if (elapsedTicks < MILK_FRAMERATE) SDL_Delay(MILK_FRAMERATE - elapsedTicks);
 	}
 
 	free(frontBufferData);

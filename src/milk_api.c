@@ -15,7 +15,7 @@ static Milk *_getGlobalMilk(lua_State *L)
 static int l_clrs(lua_State *L)
 {
 	Milk *milk = _getGlobalMilk(L);
-	milkClear(&milk->video, lua_tointeger(L, 1));
+	milkClear(&milk->video, (Color32)lua_tointeger(L, 1));
 	return 0;
 }
 

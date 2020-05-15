@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define MILK_FRAMERATE (1000.0f / 30.0f) /* Fixed 30 FPS */
+#define MILK_FRAMERATE (1000.0f / 60.0f) /* Fixed 30 FPS */
 #define MILK_FRAMEBUF_WIDTH 256
 #define MILK_FRAMEBUF_HEIGHT 224
 #define MILK_FRAMEBUF_AREA (MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT)
@@ -24,15 +24,14 @@
 #define MILK_TRUE 1
 #define MILK_FALSE 0
 
+#define PX_RED(p) (p >> 24)
+#define PX_GREEN(p) (p >> 16)
+#define PX_BLUE(p) (p >> 8)
+
 /*
- * Milk supports 3 channel, 24 bit colors.
+ * Milk supports 3 channel, 24 bit color pixels.
  */
-typedef struct ColorRGB
-{
-	uint8_t r;
-	uint8_t g;
-	uint8_t b;
-} ColorRGB;
+typedef uint32_t Color32;
 
 /*
  * Essentially VRAM.
@@ -42,10 +41,10 @@ typedef struct ColorRGB
  */
 typedef struct Video
 {
-	ColorRGB framebuffer[MILK_FRAMEBUF_AREA];
-	ColorRGB spritesheet[MILK_SPRSHEET_AREA];
-    ColorRGB font[MILK_FONT_AREA];
-	ColorRGB colorKey;
+    Color32 framebuffer[MILK_FRAMEBUF_AREA];
+    Color32 spritesheet[MILK_SPRSHEET_AREA];
+    Color32 font[MILK_FONT_AREA];
+    Color32 colorKey;
 } Video;
 
 typedef enum ButtonState
@@ -119,22 +118,22 @@ void milkDraw(Milk *milk);
 /*
  * Clear milk's framebuffer to the specified color.
  */
-void milkClear(Video *video, int idx);
+void milkClear(Video *video, Color32 idx);
 
 /*
  * Set the framebuffer's pixel at the given coordinates.
  */
-void milkPixelSet(Video *video, int x, int y, int hex);
+void milkPixelSet(Video *video, int x, int y, Color32 hex);
 
 /*
  * Draw a solid rectangle to the framebuffer at the given coordinates.
  */
-void milkRectFill(Video *video, int x, int y, int w, int h, int hex);
+void milkRectFill(Video *video, int x, int y, int w, int h, Color32 hex);
 
 /*
  * Draw a rectangle to the framebuffer at the given coordinates.
  */
-void milkRect(Video *video, int x, int y, int w, int h, int hex);
+void milkRect(Video *video, int x, int y, int w, int h, Color32 hex);
 
 /*
  * Draw a sprite to the framebuffer at the given coordinates.
@@ -142,6 +141,11 @@ void milkRect(Video *video, int x, int y, int w, int h, int hex);
  * - I'll have a milk sprite with my milk steak please.
  */
 void milkSprite(Video *video, int idx, int x, int y);
+
+/*
+ * Draw a scaled sprite to the framebuffer at the given coordinates.
+ */
+void milkScaledSprite(Video *video, int idx, int x, int y, float scale);
 
 /*
  * Draw the text to the framebuffer at the given coordinates.
