@@ -24,20 +24,19 @@
 #define MILK_TRUE 1
 #define MILK_FALSE 0
 
-#define PX_RED(p) (p >> 24)
-#define PX_GREEN(p) (p >> 16)
-#define PX_BLUE(p) (p >> 8)
-
 /*
  * Milk supports 3 channel, 24 bit color pixels.
  */
 typedef uint32_t Color32;
 
+#define COLOR_R(c) (c >> 24)
+#define COLOR_G(c) (c >> 16)
+#define COLOR_B(c) (c >> 8)
+
 /*
- * Essentially VRAM.
  * - The framebuffer is what we actively draw to, and display at the end of each frame.
- * - The sprite sheet is a single 256x256 px image buffer.
- * - The color key is the current color to consider as transparent.
+ * - The sprite sheet is a single image px buffer.
+ * - When blitting sprites or fonts, any pixels matching the color key will not be drawn.
  */
 typedef struct Video
 {
@@ -47,7 +46,7 @@ typedef struct Video
     Color32 colorKey;
 } Video;
 
-typedef enum ButtonState
+enum
 {
 	BTN_UP      = 1 << 0,
 	BTN_DOWN    = 1 << 1,
@@ -57,7 +56,7 @@ typedef enum ButtonState
 	BTN_B       = 1 << 5,
 	BTN_X       = 1 << 6,
 	BTN_Y       = 1 << 7
-} ButtonState;
+};
 
 typedef struct Gamepad
 {

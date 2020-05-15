@@ -136,9 +136,9 @@ void milkRect(Video *vram, int x, int y, int w, int h, Color32 hex)
 	_framebufferCullXY(&right, &bottom);
 
 	_horizontalLine(vram, hex, x, y, w);
-	_horizontalLine(vram, hex, x, y + h, w);
+	_horizontalLine(vram, hex, x, bottom, w);
 	_verticalLine(vram, hex, x, y, h);
-	_verticalLine(vram, hex, x + w, y, h);
+	_verticalLine(vram, hex, right, y, h);
 }
 
 static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch)
