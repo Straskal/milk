@@ -165,7 +165,7 @@ void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale)
 	if (idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
 		return;
 
-	int numColumns = MILK_SPRSHEET_SPR_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
+	int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
 	int row = floor(idx / numColumns);
 	int col = floor(idx % numColumns);
 	Color32 *pixels = &video->spritesheet[row * MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE + col * MILK_SPRSHEET_SPR_SQRSIZE];
