@@ -180,12 +180,7 @@ void milkRect(Video *video, int x, int y, int w, int h, Color32 color);
  *
  * - I'll have a milk sprite with my milk steak please.
  */
-void milkSprite(Video *video, int idx, int x, int y);
-
-/*
- * Draw a scaled sprite to the framebuffer at the given coordinates.
- */
-void milkScaledSprite(Video *video, int idx, int x, int y, float scale);
+void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale);
 
 /*
  * Draw the text to the framebuffer at the given coordinates.

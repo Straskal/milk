@@ -59,19 +59,16 @@ void milkPixelSet(Video *video, int x, int y, Color32 color)
 
 void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
 {
-	int right = x + w;
-	int bottom = y + h;
-
-	for (int j = y; j < bottom; j++)
+	for (int j = y; j < y + h; j++)
 	{
-		for (int i = x; i < right; i++)
+		for (int i = x; i < x + w; i++)
 		{
 			milkPixelSet(video, i, j, color);
 		}
 	}
 }
 
-static void _horizontalLine(Video *video, Color32 color, int x, int y, int w)
+static void _horizontalLine(Video *video, int x, int y, int w, Color32 color)
 {
 	for (int i = x; i <= x + w; i++)
 	{
@@ -79,7 +76,7 @@ static void _horizontalLine(Video *video, Color32 color, int x, int y, int w)
 	}
 }
 
-static void _verticalLine(Video *video, Color32 color, int x, int y, int h)
+static void _verticalLine(Video *video, int x, int y, int h, Color32 color)
 {
 	for (int i = y; i <= y + h; i++)
 	{
@@ -89,60 +86,56 @@ static void _verticalLine(Video *video, Color32 color, int x, int y, int h)
 
 void milkRect(Video *vram, int x, int y, int w, int h, Color32 color)
 {
-	int right = x + w;
-	int bottom = y + h;
-
-	_horizontalLine(vram, color, x, y, w);
-	_horizontalLine(vram, color, x, bottom, w);
-	_verticalLine(vram, color, x, y, h);
-	_verticalLine(vram, color, right, y, h);
+	_horizontalLine(vram, x, y, w, color);
+	_horizontalLine(vram, x, y + h, w, color);
+	_verticalLine(vram, x, y, h, color);
+	_verticalLine(vram, x + w, y, h, color);
 }
 
-static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch)
+static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale)
 {
-	int framebufferX, framebufferY, pixelX, pixelY;
+	int xPixel;
+	int yPixel;
+	int xFramebuffer;
+	int yFramebuffer;
 
-	for (framebufferY = y, pixelY = 0; framebufferY < y + h; framebufferY++, pixelY++)
+	if (scale == 1.0f)
 	{
-		for (framebufferX = x, pixelX = 0; framebufferX < x + w; framebufferX++, pixelX++)
+		for (yFramebuffer = y, yPixel = 0; yFramebuffer < y + h; yFramebuffer++, yPixel++)
 		{
-			Color32 col = pixels[pixelY * pitch + pixelX];
+			for (xFramebuffer = x, xPixel = 0; xFramebuffer < x + w; xFramebuffer++, xPixel++)
+			{
+				Color32 col = pixels[yPixel * pitch + xPixel];
 
-			if (col != video->colorKey)
-				milkPixelSet(video, framebufferX, framebufferY, col);
+				if (col != video->colorKey)
+					milkPixelSet(video, xFramebuffer, yFramebuffer, col);
+			}
+		}
+	}
+	else
+	{
+		float scaledWidth = w * scale;
+		float scaledHeight = h * scale;
+		int xRatio = (int)((w << 16) / scaledWidth) + 1;
+		int yRatio = (int)((h << 16) / scaledHeight) + 1;
+
+		for (yFramebuffer = y, yPixel = 0; yFramebuffer < y + scaledHeight; yFramebuffer++, yPixel++)
+		{
+			for (xFramebuffer = x, xPixel = 0; xFramebuffer < x + scaledWidth; xFramebuffer++, xPixel++)
+			{
+				int xNearest = (xPixel * xRatio) >> 16;
+				int yNearest = (yPixel * yRatio) >> 16;
+
+				Color32 col = pixels[yNearest * pitch + xNearest];
+
+				if (col != video->colorKey)
+					milkPixelSet(video, xFramebuffer, yFramebuffer, col);
+			}
 		}
 	}
 }
 
-static void _blitRectNearestNeighbor(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale)
-{
-	int framebufferX, framebufferY, pixelX, pixelY, nnPixelX, nnPixelY;
-	float scaledWidth = w * scale;
-	float scaledHeight = h * scale;
-	int xRatio = (int)((w << 16) / scaledWidth) + 1;
-	int yRatio = (int)((h << 16) / scaledHeight) + 1;
-
-	for (framebufferY = y, pixelX = 0; framebufferY < y + scaledWidth; pixelX++, framebufferY++)
-	{
-		for (framebufferX = x, pixelY = 0; framebufferX < x + scaledWidth; pixelY++, framebufferX++)
-		{
-			nnPixelX = (pixelY * xRatio) >> 16;
-			nnPixelY = (pixelX * yRatio) >> 16;
-
-			Color32 col = pixels[nnPixelY * pitch + nnPixelX];
-
-			if (col == video->colorKey)
-				milkPixelSet(video, framebufferX, framebufferY, col);
-		}
-	}
-}
-
-void milkSprite(Video *video, int idx, int x, int y)
-{
-	milkScaledSprite(video, idx, x, y, 1.0f);
-}
-
-void milkScaledSprite(Video *video, int idx, int x, int y, float scale)
+void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale)
 {
 	if (idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
 		return;
@@ -150,11 +143,8 @@ void milkScaledSprite(Video *video, int idx, int x, int y, float scale)
 	int row = floor(idx / 16);
 	int col = floor(idx % 16);
 	Color32 *pixels = &video->spritesheet[row * MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE + col * MILK_SPRSHEET_SPR_SQRSIZE];
-	
-	if (scale == 1.0f)
-		_blitRect(video, pixels, x, y, MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE);
-	else
-		_blitRectNearestNeighbor(video, pixels, x, y, MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE, scale);
+
+	_blitRect(video, pixels, x, y, MILK_SPRSHEET_SPR_SQRSIZE * w, MILK_SPRSHEET_SPR_SQRSIZE * h, MILK_SPRSHEET_SQRSIZE, scale);
 }
 
 static int _isAscii(char character)
@@ -172,7 +162,7 @@ static void _drawCharacter(Video *video, char character, int x, int y)
 	int col = floor((character - 32) % 16);
 	Color32 *pixels = &video->font[(row * MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE + col * MILK_CHAR_SQRSIZE)];
 
-	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH);
+	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, 1.0f);
 }
 
 void milkSpriteFont(Video *video, int x, int y, const char *str)
@@ -182,6 +172,7 @@ void milkSpriteFont(Video *video, int x, int y, const char *str)
 	while (*currentChar)
 	{
 		_drawCharacter(video, *(currentChar++), x, y);
+
 		x += MILK_CHAR_SQRSIZE;
 	}
 }

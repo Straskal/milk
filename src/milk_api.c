@@ -1,15 +1,18 @@
 #include "milk_api.h"
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
 #include "milk.h"
+
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
 #include <math.h>
 #include <stdio.h>
 
 static Milk *_getGlobalMilk(lua_State *L)
 {
 	lua_getglobal(L, "__milk");
-	return (Milk *)lua_touserdata(L, -1);
+	Milk* milk = (Milk *)lua_touserdata(L, -1);
+	lua_pop(L, 1);
+	return milk;
 }
 
 static int l_clrs(lua_State *L)
@@ -62,7 +65,10 @@ static int l_spr(lua_State *L)
 	milkSprite(&milk->video,
 		(int)lua_tointeger(L, 1),
 		(int)floor(lua_tonumber(L, 2)),
-		(int)floor(lua_tonumber(L, 3))
+		(int)floor(lua_tonumber(L, 3)),
+		(int)luaL_optinteger(L, 4, 1),
+		(int)luaL_optinteger(L, 5, 1),
+		(float)luaL_optnumber(L, 6, 1.0)
 	);
 	return 0;
 }
