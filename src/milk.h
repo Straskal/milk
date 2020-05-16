@@ -73,6 +73,14 @@ typedef uint32_t Color32;
 #define COLOR_G(c) (c >> 16)
 #define COLOR_B(c) (c >> 8)
 
+typedef struct Rect
+{
+    int top;
+    int bottom;
+    int left;
+    int right;
+} Rect;
+
 /*
  * - The framebuffer is what we actively draw to, and display at the end of each frame.
  * - The sprite sheet is a single image px buffer.
@@ -85,6 +93,7 @@ typedef struct Video
     Color32 spritesheet[MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE];
     Color32 font[MILK_FONT_WIDTH * MILK_FONT_HEIGHT];
     Color32 colorKey;
+    Rect clipRect;
 } Video;
 
 enum
@@ -151,6 +160,11 @@ void milkUpdate(Milk *milk);
 void milkDraw(Milk *milk);
 
 /*
+ * Set milks clipping rectangle.
+*/
+void milkClipRect(Video *video, int x, int y, int w, int h);
+
+/*
  * Returns true if the given button is down.
  */
 int milkButton(Input *input, uint8_t button);
@@ -185,6 +199,6 @@ void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale);
 /*
  * Draw the text to the framebuffer at the given coordinates.
  */
-void milkSpriteFont(Video *video, int x, int y, const char *str);
+void milkSpriteFont(Video *video, int x, int y, const char *str, float scale);
 
 #endif

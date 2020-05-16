@@ -15,6 +15,15 @@ static Milk *_getGlobalMilk(lua_State *L)
 	return milk;
 }
 
+static int l_btn(lua_State *L)
+{
+	Milk *milk = _getGlobalMilk(L);
+	lua_pushboolean(L,
+		milkButton(&milk->input, (uint8_t)(1 << lua_tointeger(L, 1)))
+	);
+	return 1;
+}
+
 static int l_clrs(lua_State *L)
 {
 	Milk *milk = _getGlobalMilk(L);
@@ -73,15 +82,6 @@ static int l_spr(lua_State *L)
 	return 0;
 }
 
-static int l_btn(lua_State *L)
-{
-	Milk *milk = _getGlobalMilk(L);
-	lua_pushboolean(L,
-		milkButton(&milk->input, (uint8_t)(1 << lua_tointeger(L, 1)))
-	);
-	return 1;
-}
-
 static int l_sprfont(lua_State *L)
 {
 	Milk *milk = _getGlobalMilk(L);
@@ -89,7 +89,8 @@ static int l_sprfont(lua_State *L)
 		&milk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
-		lua_tostring(L, 3)
+		lua_tostring(L, 3),
+		(float)luaL_optnumber(L, 4, 1.0)
 	);
 	return 1;
 }
@@ -123,6 +124,8 @@ void milkLoadScripts(Milk *milk)
 	lua_setglobal(L, "__milk");
 	_pushApi(L);
 	milk->code.state = (void *)L;
+	lua_getglobal(L, "_init");
+	lua_call(L, 0, 0);
 }
 
 void milkInvokeUpdate(Code *code)

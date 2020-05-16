@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 #define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x)
-#define FRAMEBUFFER_CAN_SET(x, y) (0 < x && x < MILK_FRAMEBUF_WIDTH && 0 < y && y < MILK_FRAMEBUF_HEIGHT)
+#define NOT_CLIPPED(clip, x, y) (clip.left < x && x < clip.right && clip.top < y && y < clip.bottom)
 
 Milk *milkInit()
 {
@@ -30,12 +30,25 @@ void milkUpdate(Milk *milk)
 static void _resetDrawState(Video *video)
 {
 	video->colorKey = 0;
+
+	video->clipRect.top = 0;
+	video->clipRect.bottom = MILK_FRAMEBUF_HEIGHT;
+	video->clipRect.right = MILK_FRAMEBUF_WIDTH;
+	video->clipRect.left = 0;
 }
 
 void milkDraw(Milk *milk)
 {
 	_resetDrawState(&milk->video);
 	milkInvokeDraw(&milk->code);
+}
+
+void milkClipRect(Video *video, int x, int y, int w, int h)
+{
+	video->clipRect.left = x;
+	video->clipRect.right = x + w;
+	video->clipRect.top = y;
+	video->clipRect.bottom = y + h;
 }
 
 int milkButton(Input *input, uint8_t button)
@@ -53,7 +66,7 @@ void milkClear(Video *video, Color32 color)
 
 void milkPixelSet(Video *video, int x, int y, Color32 color)
 {
-	if (FRAMEBUFFER_CAN_SET(x, y))
+	if (NOT_CLIPPED(video->clipRect, x, y))
 		video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
@@ -84,12 +97,12 @@ static void _verticalLine(Video *video, int x, int y, int h, Color32 color)
 	}
 }
 
-void milkRect(Video *vram, int x, int y, int w, int h, Color32 color)
+void milkRect(Video *video, int x, int y, int w, int h, Color32 color)
 {
-	_horizontalLine(vram, x, y, w, color);
-	_horizontalLine(vram, x, y + h, w, color);
-	_verticalLine(vram, x, y, h, color);
-	_verticalLine(vram, x + w, y, h, color);
+	_horizontalLine(video, x, y, w, color);
+	_horizontalLine(video, x, y + h, w, color);
+	_verticalLine(video, x, y, h, color);
+	_verticalLine(video, x + w, y, h, color);
 }
 
 static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale)
@@ -152,7 +165,7 @@ static int _isAscii(char character)
 	return (character & 0xff80) == 0;
 }
 
-static void _drawCharacter(Video *video, char character, int x, int y)
+static void _drawCharacter(Video *video, int x, int y, char character, float scale)
 {
 	if (!_isAscii(character))
 		character = '?';
@@ -162,17 +175,17 @@ static void _drawCharacter(Video *video, char character, int x, int y)
 	int col = floor((character - 32) % 16);
 	Color32 *pixels = &video->font[(row * MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE + col * MILK_CHAR_SQRSIZE)];
 
-	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, 1.0f);
+	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale);
 }
 
-void milkSpriteFont(Video *video, int x, int y, const char *str)
+void milkSpriteFont(Video *video, int x, int y, const char *str, float scale)
 {
 	char *currentChar = str;
 
 	while (*currentChar)
 	{
-		_drawCharacter(video, *(currentChar++), x, y);
+		_drawCharacter(video, x, y, *(currentChar++), scale);
 
-		x += MILK_CHAR_SQRSIZE;
+		x += MILK_CHAR_SQRSIZE * scale;
 	}
 }
