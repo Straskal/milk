@@ -192,14 +192,26 @@ static void _drawCharacter(Video *video, int x, int y, char character, float sca
 	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale);
 }
 
+int _isNewline(char *characters)
+{
+	return *characters == '\n';
+}
+
 void milkSpriteFont(Video *video, int x, int y, const char *str, float scale)
 {
 	char *currentChar = str;
+	int xCurrent = x;
+	int yCurrent = y;
 
 	while (*currentChar)
 	{
-		_drawCharacter(video, x, y, *(currentChar++), scale);
+		while (_isNewline(currentChar))
+		{
+			xCurrent = x;
+			yCurrent += MILK_CHAR_SQRSIZE * scale;
+			currentChar++;
+		}
 
-		x += MILK_CHAR_SQRSIZE * scale;
+		_drawCharacter(video, (xCurrent += MILK_CHAR_SQRSIZE * scale), yCurrent, *(currentChar++), scale);
 	}
 }
