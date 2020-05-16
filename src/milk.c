@@ -6,11 +6,12 @@
 #include <stdio.h>
 
 #define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x)
+#define FRAMEBUFFER_CAN_SET(x, y) (0 < x && x < MILK_FRAMEBUF_WIDTH && 0 < y && y < MILK_FRAMEBUF_HEIGHT)
 
 Milk *milkInit()
 {
 	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
-	milkLoadSpritesheet(&milk->video.spritesheet, MILK_SPR_FILENAME);
+	milkLoadSpritesheet(&milk->video.spritesheet, MILK_SPRSHEET_FILENAME);
 	milkLoadFont(&milk->video.font, MILK_FONT_FILENAME);
 	milkLoadScripts(milk);
 	return milk;
@@ -26,11 +27,6 @@ void milkUpdate(Milk *milk)
 	milkInvokeUpdate(&milk->code);
 }
 
-int milkButton(Input *input, uint8_t button)
-{
-	return (input->gamepad.buttonState & button) == button;
-}
-
 static void _resetDrawState(Video *video)
 {
 	video->colorKey = 0;
@@ -42,51 +38,35 @@ void milkDraw(Milk *milk)
 	milkInvokeDraw(&milk->code);
 }
 
-void milkClear(Video *video, Color32 hex)
+int milkButton(Input *input, uint8_t button)
+{
+	return (input->gamepad.buttonState & button) == button;
+}
+
+void milkClear(Video *video, Color32 color)
 {
 	for (int i = 0; i < MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT; i++)
 	{
-		video->framebuffer[i] = hex;
+		video->framebuffer[i] = color;
 	}
 }
 
-static void _framebufferCullXY(int *x, int *y)
+void milkPixelSet(Video *video, int x, int y, Color32 color)
 {
-	if (x != NULL)
-	{
-		if (*x < 0)
-			*x = 0;
-		else if (*x > MILK_FRAMEBUF_WIDTH)
-			*x = MILK_FRAMEBUF_WIDTH;
-	}
-
-	if (y != NULL)
-	{
-		if (*y < 0)
-			*y = 0;
-		else if (*y > MILK_FRAMEBUF_HEIGHT)
-			*y = MILK_FRAMEBUF_HEIGHT;
-	}
+	if (FRAMEBUFFER_CAN_SET(x, y))
+		video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
-void milkPixelSet(Video *video, int x, int y, Color32 hex)
-{
-	video->framebuffer[FRAMEBUFFER_POS(x, y)] = hex;
-}
-
-void milkRectFill(Video *video, int x, int y, int w, int h, Color32 hex)
+void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
 {
 	int right = x + w;
 	int bottom = y + h;
-
-	_framebufferCullXY(&x, &y);
-	_framebufferCullXY(&right, &bottom);
 
 	for (int j = y; j < bottom; j++)
 	{
 		for (int i = x; i < right; i++)
 		{
-			video->framebuffer[FRAMEBUFFER_POS(i, j)] = hex;
+			milkPixelSet(video, i, j, color);
 		}
 	}
 }
@@ -95,7 +75,7 @@ static void _horizontalLine(Video *video, Color32 color, int x, int y, int w)
 {
 	for (int i = x; i <= x + w; i++)
 	{
-		video->framebuffer[FRAMEBUFFER_POS(i, y)] = color;
+		milkPixelSet(video, i, y, color);
 	}
 }
 
@@ -103,22 +83,19 @@ static void _verticalLine(Video *video, Color32 color, int x, int y, int h)
 {
 	for (int i = y; i <= y + h; i++)
 	{
-		video->framebuffer[FRAMEBUFFER_POS(x, i)] = color;
+		milkPixelSet(video, x, i, color);
 	}
 }
 
-void milkRect(Video *vram, int x, int y, int w, int h, Color32 hex)
+void milkRect(Video *vram, int x, int y, int w, int h, Color32 color)
 {
 	int right = x + w;
 	int bottom = y + h;
 
-	_framebufferCullXY(&x, &y);
-	_framebufferCullXY(&right, &bottom);
-
-	_horizontalLine(vram, hex, x, y, w);
-	_horizontalLine(vram, hex, x, bottom, w);
-	_verticalLine(vram, hex, x, y, h);
-	_verticalLine(vram, hex, right, y, h);
+	_horizontalLine(vram, color, x, y, w);
+	_horizontalLine(vram, color, x, bottom, w);
+	_verticalLine(vram, color, x, y, h);
+	_verticalLine(vram, color, right, y, h);
 }
 
 static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch)
@@ -132,14 +109,14 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 			Color32 col = pixels[pixelY * pitch + pixelX];
 
 			if (col != video->colorKey)
-				video->framebuffer[FRAMEBUFFER_POS(framebufferX, framebufferY)] = col;
+				milkPixelSet(video, framebufferX, framebufferY, col);
 		}
 	}
 }
 
 static void _blitRectNearestNeighbor(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale)
 {
-	int framebufferX, framebufferY, pixelX, pixelY, pixelX2, pixelY2;
+	int framebufferX, framebufferY, pixelX, pixelY, nnPixelX, nnPixelY;
 	float scaledWidth = w * scale;
 	float scaledHeight = h * scale;
 	int xRatio = (int)((w << 16) / scaledWidth) + 1;
@@ -149,13 +126,13 @@ static void _blitRectNearestNeighbor(Video *video, Color32 *pixels, int x, int y
 	{
 		for (framebufferX = x, pixelY = 0; framebufferX < x + scaledWidth; pixelY++, framebufferX++)
 		{
-			pixelX2 = (pixelY * xRatio) >> 16;
-			pixelY2 = (pixelX * yRatio) >> 16;
+			nnPixelX = (pixelY * xRatio) >> 16;
+			nnPixelY = (pixelX * yRatio) >> 16;
 
-			Color32 col = pixels[pixelY2 * pitch + pixelX2];
+			Color32 col = pixels[nnPixelY * pitch + nnPixelX];
 
 			if (col == video->colorKey)
-				video->framebuffer[FRAMEBUFFER_POS(framebufferX, framebufferY)] = col;
+				milkPixelSet(video, framebufferX, framebufferY, col);
 		}
 	}
 }
@@ -167,20 +144,17 @@ void milkSprite(Video *video, int idx, int x, int y)
 
 void milkScaledSprite(Video *video, int idx, int x, int y, float scale)
 {
-	if (idx < 0)
-		return;
-
-	if (idx > MILK_SPRSHEET_SQRSIZE)
+	if (idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
 		return;
 
 	int row = floor(idx / 16);
 	int col = floor(idx % 16);
-	Color32 *pixels = &video->spritesheet[row * MILK_SPRSHEET_SQRSIZE * MILK_SPR_SQRSIZE + col * MILK_SPR_SQRSIZE];
+	Color32 *pixels = &video->spritesheet[row * MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE + col * MILK_SPRSHEET_SPR_SQRSIZE];
 	
 	if (scale == 1.0f)
-		_blitRect(video, pixels, x, y, MILK_SPR_SQRSIZE, MILK_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE);
+		_blitRect(video, pixels, x, y, MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE);
 	else
-		_blitRectNearestNeighbor(video, pixels, x, y, MILK_SPR_SQRSIZE, MILK_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE, scale);
+		_blitRectNearestNeighbor(video, pixels, x, y, MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE, scale);
 }
 
 static int _isAscii(char character)
@@ -196,7 +170,7 @@ static void _drawCharacter(Video *video, char character, int x, int y)
 	/* bitmap font starts at ASCII character 32 (SPACE) */
 	int row = floor((character - 32) / 16);
 	int col = floor((character - 32) % 16);
-	Color32 *pixels = &video->font[(row * MILK_FONT_PITCH + col * MILK_CHAR_SQRSIZE)];
+	Color32 *pixels = &video->font[(row * MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE + col * MILK_CHAR_SQRSIZE)];
 
 	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH);
 }

@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 		MILK_FRAMEBUF_HEIGHT
 	);
 
-	uint32_t *frontBufferData = (uint32_t *)calloc(MILK_FRAMEBUF_AREA, sizeof(uint32_t));
+	uint32_t *frontBufferData = (uint32_t *)calloc(MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT, sizeof(uint32_t));
 
 	if (frontBufferTexture == NULL)
 	{
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 
 		milkUpdate(milk);
 		milkDraw(milk);
-		_flipFramebuffer(frontBufferData, milk->video.framebuffer, MILK_FRAMEBUF_AREA);
+		_flipFramebuffer(frontBufferData, milk->video.framebuffer, MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT);
 		SDL_UpdateTexture(frontBufferTexture, NULL, (void *)frontBufferData, MILK_FRAMEBUF_PITCH);
 		SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
 		SDL_RenderPresent(renderer);
