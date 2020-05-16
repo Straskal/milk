@@ -3,7 +3,7 @@
 
 #include "milk.h"
 
-void milkLoadSpritesheet(Milk *milk, char *filename);
-void milkLoadFont(Milk *milk, char *filename);
+void milkLoadSpritesheet(Color32 *spritesheet, char *filename);
+void milkLoadFont(Color32 *font, char *filename);
 
 #endif

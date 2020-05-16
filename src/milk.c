@@ -199,19 +199,18 @@ int _isNewline(char *characters)
 
 void milkSpriteFont(Video *video, int x, int y, const char *str, float scale)
 {
-	char *currentChar = str;
 	int xCurrent = x;
 	int yCurrent = y;
 
-	while (*currentChar)
+	while (*str)
 	{
-		while (_isNewline(currentChar))
+		while (_isNewline(str))
 		{
 			xCurrent = x;
 			yCurrent += MILK_CHAR_SQRSIZE * scale;
-			currentChar++;
+			str++;
 		}
 
-		_drawCharacter(video, (xCurrent += MILK_CHAR_SQRSIZE * scale), yCurrent, *(currentChar++), scale);
+		_drawCharacter(video, (xCurrent += MILK_CHAR_SQRSIZE * scale), yCurrent, *(str++), scale);
 	}
 }
