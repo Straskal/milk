@@ -165,8 +165,9 @@ void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale)
 	if (idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
 		return;
 
-	int row = floor(idx / 16);
-	int col = floor(idx % 16);
+	int numColumns = MILK_SPRSHEET_SPR_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
+	int row = floor(idx / numColumns);
+	int col = floor(idx % numColumns);
 	Color32 *pixels = &video->spritesheet[row * MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE + col * MILK_SPRSHEET_SPR_SQRSIZE];
 
 	_blitRect(video, pixels, x, y, MILK_SPRSHEET_SPR_SQRSIZE * w, MILK_SPRSHEET_SPR_SQRSIZE * h, MILK_SPRSHEET_SQRSIZE, scale);
@@ -183,8 +184,9 @@ static void _drawCharacter(Video *video, int x, int y, char character, float sca
 		character = '?';
 
 	/* bitmap font starts at ASCII character 32 (SPACE) */
-	int row = floor((character - 32) / 16);
-	int col = floor((character - 32) % 16);
+	int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
+	int row = floor((character - 32) / numColumns);
+	int col = floor((character - 32) % numColumns);
 	Color32 *pixels = &video->font[(row * MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE + col * MILK_CHAR_SQRSIZE)];
 
 	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale);
