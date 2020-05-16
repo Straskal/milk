@@ -45,10 +45,22 @@ void milkDraw(Milk *milk)
 
 void milkClipRect(Video *video, int x, int y, int w, int h)
 {
+	int right = x + w;
+	int bottom = y + h;
+
+	if (x < 0)
+		x = 0;
+	if (x > MILK_FRAMEBUF_WIDTH)
+		x = MILK_FRAMEBUF_WIDTH;
+	if (right < 0)
+		right = 0;
+	if (bottom > MILK_FRAMEBUF_HEIGHT)
+		bottom = MILK_FRAMEBUF_HEIGHT;
+
 	video->clipRect.left = x;
-	video->clipRect.right = x + w;
+	video->clipRect.right = right;
 	video->clipRect.top = y;
-	video->clipRect.bottom = y + h;
+	video->clipRect.bottom = bottom;
 }
 
 int milkButton(Input *input, uint8_t button)
