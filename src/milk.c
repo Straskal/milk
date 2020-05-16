@@ -211,6 +211,7 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale)
 			str++;
 		}
 
-		_drawCharacter(video, (xCurrent += MILK_CHAR_SQRSIZE * scale), yCurrent, *(str++), scale);
+		_drawCharacter(video, xCurrent, yCurrent, *(str++), scale);
+		xCurrent += MILK_CHAR_SQRSIZE * scale;
 	}
 }
