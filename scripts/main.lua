@@ -1,36 +1,45 @@
-gTicks = 0;
+local ticks = 0;
 
-gPlayer = {
-	xPos 	= 10,
-	yPos 	= 10,
-	speed 	= 1,
-	sprite 	= 0,
+local player = {
+	xPos 		= 10,
+	yPos 		= 10,
+	speed 		= 1,
+	sprite 		= 0,
+	update = function(self)
+		local mvx = 0
+		local mvy = 0
+
+		if btn(0) then mvy = -self.speed end
+		if btn(1) then mvy = self.speed end
+		if btn(2) then mvx = -self.speed end
+		if btn(3) then mvx = self.speed end
+
+		self.xPos = self.xPos + mvx
+		self.yPos = self.yPos + mvy
+	
+		if mvx ~= 0 or mvy ~= 0 then
+			if ticks % 16 < 8 then
+				self.sprite = 0
+			else
+				self.sprite = 1
+			end
+		end
+	end,
+	draw = function(self) 
+		spr(self.sprite, self.xPos, self.yPos)
+	end
 }
 
+function _init()
+	-- initialization
+end
+
 function _update()
-	local mvx = 0
-	local mvy = 0
-
-	if btn(0) then mvy = -gPlayer.speed end
-	if btn(1) then mvy = gPlayer.speed end
-	if btn(2) then mvx = -gPlayer.speed end
-	if btn(3) then mvx = gPlayer.speed end
-
-	gPlayer.xPos = gPlayer.xPos + mvx
-	gPlayer.yPos = gPlayer.yPos + mvy
-
-	if mvx ~= 0 or mvy ~= 0 then
-		if gTicks % 16 < 8 then
-			gPlayer.sprite = 0
-		else
-			gPlayer.sprite = 1
-		end
-	end
+	player:update()
 end
 
 function _draw()
-	clrs(0x008751);
-	spr(gPlayer.sprite, gPlayer.xPos, gPlayer.yPos);
-	sprfont("Hey! You! C'mere!", 10, 40)
-	gTicks = gTicks + 1
+	clrs(0)
+	player:draw()
+	ticks = ticks + 1
 end

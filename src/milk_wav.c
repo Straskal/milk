@@ -22,14 +22,37 @@
  *  SOFTWARE.
  */
 
-#ifndef __MILK_API__
-#define __MILK_API__
+#include "milk_wav.h"
+#include <SDL.h>
 
-#include "milk.h"
+static void _loadWav(const char* filename, SampleData *sampleData)
+{
+	SDL_AudioSpec waveSpec;
+	SDL_LoadWAV(filename, &waveSpec, &sampleData->buffer, &sampleData->length);
 
-void milkLoadScripts(Milk *code);
-void milkUnloadScripts(Milk *milk);
-void milkInvokeUpdate(Code *code);
-void milkInvokeDraw(Code *code);
+    if (waveSpec.channels != 2)
+    {
+        SDL_AudioCVT conversion;
+        SDL_BuildAudioCVT(&conversion, waveSpec.format, waveSpec.channels, waveSpec.freq, AUDIO_S16LSB, MILK_AUDIO_CHANNELS, MILK_AUDIO_FREQUENCY);
+        conversion.len = sampleData->length;
+        conversion.buf = (Uint8 *)SDL_malloc(conversion.len * conversion.len_mult);
+        SDL_memcpy(conversion.buf, sampleData->buffer, sampleData->length);
+        SDL_ConvertAudio(&conversion);
+        int ratio = conversion.len_ratio;
+        int newLength = conversion.len * conversion.len_ratio;
+        SDL_FreeWAV(sampleData->buffer);
+        sampleData->buffer = conversion.buf;
+        sampleData->length = newLength;
+    }
+}
 
-#endif
+void milkLoadSamples(SampleData *samples)
+{
+	_loadWav("music.wav", samples++);
+    _loadWav("punch.wav", samples++);
+}
+
+void milkFreeSamples(SampleData *samples)
+{
+	SDL_FreeWAV(samples->buffer);
+}

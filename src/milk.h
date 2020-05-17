@@ -1,54 +1,131 @@
+/*
+ *  MIT License
+ *
+ *  Copyright(c) 2018 - 2020 Stephen Traskal
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software andassociated documentation files(the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, andto permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions :
+ *
+ *  The above copyright notice andthis permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
+
 #ifndef __MILK_H__
 #define __MILK_H__
 
 #include <stdint.h>
 
-#define MILK_FRAMERATE (1000.0f / 30.0f) /* Fixed 30 FPS */
+/* Frame rate */
+#define MILK_FRAMERATE (1000.0f / 50.0f)
+
+/* Audio */
+#define MILK_AUDIO_FREQUENCY 44100
+#define MILK_AUDIO_CHANNELS 2 /* Stereo */
+#define MILK_AUDIO_SAMPLES 4096
+#define MILK_AUDIO_MAX 25
+#define MILK_AUDIO_QUEUE_MAX 16
+
+/* Frame buffer */
 #define MILK_FRAMEBUF_WIDTH 256
 #define MILK_FRAMEBUF_HEIGHT 224
-#define MILK_FRAMEBUF_AREA (MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT)
-#define MILK_WINDOW_WIDTH MILK_FRAMEBUF_WIDTH * 2
-#define MILK_WINDOW_HEIGHT MILK_FRAMEBUF_HEIGHT * 2
+
+/* Window */
+#define MILK_WINDOW_WIDTH MILK_FRAMEBUF_WIDTH * 3
+#define MILK_WINDOW_HEIGHT MILK_FRAMEBUF_HEIGHT * 3
+
+/* Sprite sheet */
 #define MILK_SPRSHEET_SQRSIZE 256
-#define MILK_SPRSHEET_AREA MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE
-#define MILK_SPR_SQRSIZE 16 /* Each sprite is considered to be 16x16 px */
-#define MILK_SPR_FILENAME "sprsheet.bmp"
+#define MILK_SPRSHEET_SPR_SQRSIZE 16
+#define MILK_SPRSHEET_ROWS (MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE)
+#define MILK_SPRSHEET_FILENAME "sprsheet.bmp"
+
+/* Font */
 #define MILK_FONT_FILENAME "font.bmp"
 #define MILK_FONT_WIDTH 128
 #define MILK_FONT_HEIGHT 48
-#define MILK_FONT_AREA MILK_FONT_WIDTH * MILK_FONT_HEIGHT
 #define MILK_CHAR_SQRSIZE 8
-#define MILK_FONT_PITCH MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE
 
 #define MILK_BOOL int
 #define MILK_TRUE 1
 #define MILK_FALSE 0
 
-/*
- * Milk supports 3 channel, 24 bit colors.
- */
-typedef struct ColorRGB
+/* Sample data for sounds. */
+typedef struct SampleData
 {
-	uint8_t r;
-	uint8_t g;
-	uint8_t b;
-} ColorRGB;
+    uint32_t length;
+    uint8_t *buffer;
+} SampleData;
+
+/* A queue of active samples. */
+typedef struct AudioQueueItem
+{
+    SampleData *sampleData;
+    uint32_t remainingLength;
+    uint8_t *position;
+    uint8_t volume;
+    uint8_t isMusic;
+    uint8_t isFading;
+    uint8_t isFree;
+
+    struct AudioQueueItem *next;
+} AudioQueueItem;
+
+/* Since we're using an async callback system, we must lock and unlock the audio device when manipulating the audio queue. */
+typedef struct Audio
+{
+    SampleData samples[MILK_AUDIO_MAX];
+    AudioQueueItem queueItems[MILK_AUDIO_QUEUE_MAX];
+    AudioQueueItem *queue;
+    uint8_t masterVolume;
+    uint8_t musicVolume;
+    uint8_t soundVolume;
+    void(*lock)();
+    void(*unlock)();
+} Audio;
+
+/* 24 bit color is packed into 32 bits: 0x00RRGGBB */
+typedef uint32_t Color32;
+
+#define COLOR_R(c) (c >> 24)
+#define COLOR_G(c) (c >> 16)
+#define COLOR_B(c) (c >> 8)
+
+typedef struct Rect
+{
+    int top;
+    int bottom;
+    int left;
+    int right;
+} Rect;
 
 /*
- * Essentially VRAM.
  * - The framebuffer is what we actively draw to, and display at the end of each frame.
- * - The sprite sheet is a single 256x256 px image buffer.
- * - The color key is the current color to consider as transparent.
+ * - The sprite sheet is a single image px buffer.
+ * - The font is a single image px buffer.
+ * - When blitting sprites or fonts, any pixels matching the color key will not be drawn.
  */
 typedef struct Video
 {
-	ColorRGB framebuffer[MILK_FRAMEBUF_AREA];
-	ColorRGB spritesheet[MILK_SPRSHEET_AREA];
-    ColorRGB font[MILK_FONT_AREA];
-	ColorRGB colorKey;
+    Color32 framebuffer[MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT];
+    Color32 spritesheet[MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE];
+    Color32 font[MILK_FONT_WIDTH * MILK_FONT_HEIGHT];
+    Color32 colorKey;
+    Rect clipRect;
 } Video;
 
-typedef enum ButtonState
+enum
 {
 	BTN_UP      = 1 << 0,
 	BTN_DOWN    = 1 << 1,
@@ -58,7 +135,7 @@ typedef enum ButtonState
 	BTN_B       = 1 << 5,
 	BTN_X       = 1 << 6,
 	BTN_Y       = 1 << 7
-} ButtonState;
+};
 
 typedef struct Gamepad
 {
@@ -87,65 +164,25 @@ typedef struct Code
 typedef struct Milk
 {
 	Input input;
+    Audio audio;
 	Video video;
 	Code code;
 } Milk;
 
-/*
- * Initialize milk, loading all of it's content.
- */
 Milk *milkInit();
-
-/*
- * Free milk and all of it's content.
- */
 void milkFree(Milk *milk);
-
-/*
- * Update milk's current state.
- */
 void milkUpdate(Milk *milk);
-
-/*
- * Returns true if the given button is down.
- */
-int milkButton(Input *input, uint8_t button);
-
-/*
- * Draw milk's current state.
- */
 void milkDraw(Milk *milk);
-
-/*
- * Clear milk's framebuffer to the specified color.
- */
-void milkClear(Video *video, int idx);
-
-/*
- * Set the framebuffer's pixel at the given coordinates.
- */
-void milkPixelSet(Video *video, int x, int y, int hex);
-
-/*
- * Draw a solid rectangle to the framebuffer at the given coordinates.
- */
-void milkRectFill(Video *video, int x, int y, int w, int h, int hex);
-
-/*
- * Draw a rectangle to the framebuffer at the given coordinates.
- */
-void milkRect(Video *video, int x, int y, int w, int h, int hex);
-
-/*
- * Draw a sprite to the framebuffer at the given coordinates.
- *
- * - I'll have a milk sprite with my milk steak please.
- */
-void milkSprite(Video *video, int idx, int x, int y);
-
-/*
- * Draw the text to the framebuffer at the given coordinates.
- */
-void milkSpriteFont(Video *video, int x, int y, const char *str);
+int milkButton(Input *input, uint8_t button);
+int milkButtonPressed(Input *input, uint8_t button);
+void milkPlayMusic(Audio *audio, int idx);
+void milkSound(Audio *audio, int idx, uint8_t volume);
+void milkClipRect(Video *video, int x, int y, int w, int h);
+void milkClear(Video *video, Color32 idx);
+void milkPixelSet(Video *video, int x, int y, Color32 color);
+void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color);
+void milkRect(Video *video, int x, int y, int w, int h, Color32 color);
+void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale);
+void milkSpriteFont(Video *video, int x, int y, const char *str, float scale);
 
 #endif

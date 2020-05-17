@@ -60,6 +60,8 @@ set(MILK_SRC_FILES
 	src/milk_api.h
 	src/milk_bmp.c
 	src/milk_bmp.h
+	src/milk_wav.c
+	src/milk_wav.h
 )
 
 add_executable(milk ${MILK_SRC_FILES})
