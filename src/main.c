@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 	{
 		SDL_RenderSetLogicalSize(renderer, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
 		SDL_PauseAudioDevice(audioDevice, 0);
-		//milkPlayMusic(&milk->audio, 0);
+		milkPlayMusic(&milk->audio, 0);
 	}
 
 	int running = MILK_TRUE;
@@ -217,7 +217,6 @@ static void _audioCallback(void *userdata, uint8_t *stream, int len)
 				currentLength = ((uint32_t)len > queueItr->remainingLength) ? queueItr->remainingLength : (uint32_t)len;
 
 			SDL_MixAudioFormat(stream, queueItr->position, AUDIO_S16LSB, currentLength, queueItr->volume);
-
 			queueItr->position += currentLength;
 			queueItr->remainingLength -= currentLength;
 
