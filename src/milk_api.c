@@ -88,6 +88,25 @@ static int l_btn(lua_State *L)
 	return 1;
 }
 
+static int l_btnp(lua_State *L)
+{
+	Milk *milk = _getGlobalMilk(L);
+	lua_pushboolean(L,
+		milkButtonPressed(&milk->input, (uint8_t)(1 << lua_tointeger(L, 1)))
+	);
+	return 1;
+}
+
+static int l_snd(lua_State *L)
+{
+	Milk *milk = _getGlobalMilk(L);
+	milkSound(&milk->audio,
+		(int)lua_tointeger(L, 1),
+		(uint8_t)luaL_optinteger(L, 2, 128)
+	);
+	return 0;
+}
+
 static int l_clrs(lua_State *L)
 {
 	Milk *milk = _getGlobalMilk(L);
@@ -167,11 +186,13 @@ static void _pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_
 
 static void _pushApi(lua_State *L)
 {
+	_pushApiFunction(L, "btn", l_btn);
+	_pushApiFunction(L, "btnp", l_btnp);
+	_pushApiFunction(L, "snd", l_snd);
 	_pushApiFunction(L, "clrs", l_clrs);
 	_pushApiFunction(L, "pset", l_pset);
 	_pushApiFunction(L, "rectfill", l_rectfill);
 	_pushApiFunction(L, "rect", l_rect);
 	_pushApiFunction(L, "spr", l_spr);
-	_pushApiFunction(L, "btn", l_btn);
 	_pushApiFunction(L, "sprfont", l_sprfont);
 }

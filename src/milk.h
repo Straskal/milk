@@ -28,13 +28,14 @@
 #include <stdint.h>
 
 /* Frame rate */
-#define MILK_FRAMERATE (1000.0f / 60.0f) /* Fixed 30 FPS */
+#define MILK_FRAMERATE (1000.0f / 50.0f)
 
 /* Audio */
 #define MILK_AUDIO_FREQUENCY 44100
 #define MILK_AUDIO_CHANNELS 2 /* Stereo */
 #define MILK_AUDIO_SAMPLES 4096
 #define MILK_AUDIO_MAX 25
+#define MILK_AUDIO_QUEUE_MAX 16
 
 /* Frame buffer */
 #define MILK_FRAMEBUF_WIDTH 256
@@ -60,12 +61,14 @@
 #define MILK_TRUE 1
 #define MILK_FALSE 0
 
+/* Sample data for sounds. */
 typedef struct SampleData
 {
     uint32_t length;
     uint8_t *buffer;
 } SampleData;
 
+/* A queue of active samples. */
 typedef struct AudioQueueItem
 {
     SampleData *sampleData;
@@ -79,10 +82,11 @@ typedef struct AudioQueueItem
     struct AudioQueueItem *next;
 } AudioQueueItem;
 
+/* Since we're using an async callback system, we must lock and unlock the audio device when manipulating the audio queue. */
 typedef struct Audio
 {
     SampleData samples[MILK_AUDIO_MAX];
-    AudioQueueItem queueItems[MILK_AUDIO_MAX];
+    AudioQueueItem queueItems[MILK_AUDIO_QUEUE_MAX];
     AudioQueueItem *queue;
     uint8_t masterVolume;
     uint8_t musicVolume;
@@ -165,71 +169,20 @@ typedef struct Milk
 	Code code;
 } Milk;
 
-/*
- * Initialize milk, loading all of it's content.
- */
 Milk *milkInit();
-
-/*
- * Free milk and all of it's content.
- */
 void milkFree(Milk *milk);
-
-/*
- * Update milk's current state.
- */
 void milkUpdate(Milk *milk);
-
-/*
- * Draw milk's current state.
- */
 void milkDraw(Milk *milk);
-
-/*
- * Set milks clipping rectangle.
-*/
-void milkClipRect(Video *video, int x, int y, int w, int h);
-
-/*
- * Returns true if the given button is down.
- */
 int milkButton(Input *input, uint8_t button);
-
-/*
- * Play the music at the given index.
- */
+int milkButtonPressed(Input *input, uint8_t button);
 void milkPlayMusic(Audio *audio, int idx);
-
-/*
- * Clear milk's framebuffer to the specified color.
- */
+void milkSound(Audio *audio, int idx, uint8_t volume);
+void milkClipRect(Video *video, int x, int y, int w, int h);
 void milkClear(Video *video, Color32 idx);
-
-/*
- * Set the framebuffer's pixel at the given coordinates.
- */
 void milkPixelSet(Video *video, int x, int y, Color32 color);
-
-/*
- * Draw a solid rectangle to the framebuffer at the given coordinates.
- */
 void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color);
-
-/*
- * Draw a rectangle to the framebuffer at the given coordinates.
- */
 void milkRect(Video *video, int x, int y, int w, int h, Color32 color);
-
-/*
- * Draw a sprite to the framebuffer at the given coordinates.
- *
- * - I'll have a milk sprite with my milk steak please.
- */
 void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale);
-
-/*
- * Draw the text to the framebuffer at the given coordinates.
- */
 void milkSpriteFont(Video *video, int x, int y, const char *str, float scale);
 
 #endif

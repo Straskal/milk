@@ -33,7 +33,8 @@ static void _loadWav(const char* filename, SampleData *sample)
 
 void milkLoadSamples(SampleData *samples)
 {
-	_loadWav("highlands.wav", samples);
+	_loadWav("music.wav", samples++);
+    _loadWav("punch.wav", samples++);
 }
 
 void milkFreeSamples(SampleData *samples)

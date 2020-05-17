@@ -34,24 +34,34 @@
 #define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x)
 #define NOT_CLIPPED(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
 
-static void _initFreeQueueItems(Audio *audio)
+static void _initAudio(Audio *audio)
 {
+	audio->masterVolume = 128;
+	audio->musicVolume = 128;
+	audio->soundVolume = 128;
+
 	AudioQueueItem *itr = audio->queueItems;
-	AudioQueueItem *end = &audio->queueItems[MILK_AUDIO_MAX - 1];
+	AudioQueueItem *end = &audio->queueItems[MILK_AUDIO_QUEUE_MAX - 1];
 
 	while (itr != end)
-	{
 		(itr++)->isFree = 1;
-	}
+
+	milkLoadSamples(audio->samples);
+}
+
+static void _initVideo(Video *video)
+{
+	milkLoadSpritesheet(video->spritesheet, MILK_SPRSHEET_FILENAME);
+	milkLoadFont(video->font, MILK_FONT_FILENAME);
 }
 
 Milk *milkInit()
 {
 	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
-	_initFreeQueueItems(&milk->audio);
-	milkLoadSamples(&milk->audio.samples);
-	milkLoadSpritesheet(&milk->video.spritesheet, MILK_SPRSHEET_FILENAME);
-	milkLoadFont(&milk->video.font, MILK_FONT_FILENAME);
+
+	_initAudio(&milk->audio);
+	_initVideo(&milk->video);
+
 	milkLoadScripts(milk);
 	return milk;
 }
@@ -83,29 +93,14 @@ void milkDraw(Milk *milk)
 	milkInvokeDraw(&milk->code);
 }
 
-void milkClipRect(Video *video, int x, int y, int w, int h)
-{
-	int right = x + w;
-	int bottom = y + h;
-
-	if (x < 0) x = 0;
-	else if (x > MILK_FRAMEBUF_WIDTH) x = MILK_FRAMEBUF_WIDTH;
-	if (y < 0) y = 0;
-	else if (y > MILK_FRAMEBUF_HEIGHT) y = MILK_FRAMEBUF_HEIGHT;
-	if (right < 0) right = 0;
-	else if (right > MILK_FRAMEBUF_WIDTH) right = MILK_FRAMEBUF_WIDTH;
-	if (bottom < 0) bottom = 0;
-	else if (bottom > MILK_FRAMEBUF_HEIGHT) bottom = MILK_FRAMEBUF_HEIGHT;
-
-	video->clipRect.left = x;
-	video->clipRect.right = right;
-	video->clipRect.top = y;
-	video->clipRect.bottom = bottom;
-}
-
 int milkButton(Input *input, uint8_t button)
 {
 	return (input->gamepad.buttonState & button) == button;
+}
+
+int milkButtonPressed(Input *input, uint8_t button)
+{
+	return (input->gamepad.buttonState & button) == button && (input->gamepad.previousButtonState & button) != button;
 }
 
 static void _enqueueSample(AudioQueueItem **root, AudioQueueItem *new)
@@ -127,20 +122,19 @@ static void _enqueueSample(AudioQueueItem **root, AudioQueueItem *new)
 static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 {
 	AudioQueueItem *itr = audio->queueItems;
-	AudioQueueItem *end = &audio->queueItems[MILK_AUDIO_MAX - 1];
+	AudioQueueItem *end = &audio->queueItems[MILK_AUDIO_QUEUE_MAX - 1];
 
 	while (itr != end)
 	{
-		if (itr->isFree)
+		AudioQueueItem *curr = (itr++);
+
+		if (curr->isFree)
 		{
-			itr->isFree = 0;
-			*queueItem = itr;
+			curr->isFree = 0;
+			*queueItem = curr;
 			return 1;
 		}
-
-		itr++;
 	}
-
 	return 0;
 }
 
@@ -164,6 +158,48 @@ void milkPlayMusic(Audio *audio, int idx)
 	audio->lock();
 	_enqueueSample(&audio->queue, queueItem);
 	audio->unlock();
+}
+
+void milkSound(Audio *audio, int idx, uint8_t volume)
+{
+	AudioQueueItem *queueItem;
+	SampleData *sampleData;
+
+	if (!_getFreeQueueItem(audio, &queueItem))
+		return;
+
+	sampleData = &audio->samples[idx];
+	queueItem->sampleData = sampleData;
+	queueItem->position = sampleData->buffer;
+	queueItem->remainingLength = sampleData->length;
+	queueItem->volume = volume;
+	queueItem->isMusic = 0;
+	queueItem->isFading = 0;
+	queueItem->next = NULL;
+
+	audio->lock();
+	_enqueueSample(&audio->queue, queueItem);
+	audio->unlock();
+}
+
+void milkClipRect(Video *video, int x, int y, int w, int h)
+{
+	int right = x + w;
+	int bottom = y + h;
+
+	if (x < 0) x = 0;
+	else if (x > MILK_FRAMEBUF_WIDTH) x = MILK_FRAMEBUF_WIDTH;
+	if (y < 0) y = 0;
+	else if (y > MILK_FRAMEBUF_HEIGHT) y = MILK_FRAMEBUF_HEIGHT;
+	if (right < 0) right = 0;
+	else if (right > MILK_FRAMEBUF_WIDTH) right = MILK_FRAMEBUF_WIDTH;
+	if (bottom < 0) bottom = 0;
+	else if (bottom > MILK_FRAMEBUF_HEIGHT) bottom = MILK_FRAMEBUF_HEIGHT;
+
+	video->clipRect.left = x;
+	video->clipRect.right = right;
+	video->clipRect.top = y;
+	video->clipRect.bottom = bottom;
 }
 
 void milkClear(Video *video, Color32 color)

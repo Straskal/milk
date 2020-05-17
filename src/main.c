@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 	{
 		SDL_RenderSetLogicalSize(renderer, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
 		SDL_PauseAudioDevice(audioDevice, 0);
-		milkPlayMusic(&milk->audio, 0);
+		//milkPlayMusic(&milk->audio, 0);
 	}
 
 	int running = MILK_TRUE;
@@ -150,7 +150,8 @@ int main(int argc, char *argv[])
 		}
 
 		Uint32 elapsedTicks = SDL_GetTicks() - frameStartTicks;
-		if (elapsedTicks < MILK_FRAMERATE) SDL_Delay((Uint32)(MILK_FRAMERATE - elapsedTicks));
+		if (elapsedTicks < MILK_FRAMERATE)
+			SDL_Delay((Uint32)(MILK_FRAMERATE - elapsedTicks));
 	}
 
 	SDL_CloseAudioDevice(audioDevice);
@@ -158,8 +159,8 @@ int main(int argc, char *argv[])
 	SDL_DestroyTexture(frontBufferTexture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
-	SDL_Quit();
 	milkFree(milk);
+	SDL_Quit();
 	return 0;
 }
 
@@ -224,7 +225,7 @@ static void _audioCallback(void *userdata, uint8_t *stream, int len)
 			queueItr = queueItr->next;
 		}
 		/* If the sample is music with no remaining length, then start it from the beginning. */
-		else if (queueItr->isMusic && queueItr->isFading)
+		else if (queueItr->isMusic && !queueItr->isFading)
 		{
 			queueItr->position = queueItr->sampleData->buffer;
 			queueItr->remainingLength = queueItr->sampleData->length;
