@@ -1,3 +1,27 @@
+/*
+ *  MIT License
+ *
+ *  Copyright(c) 2018 - 2020 Stephen Traskal
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software andassociated documentation files(the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, andto permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions :
+ *
+ *  The above copyright notice andthis permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
+
 #include "milk_api.h"
 #include "milk.h"
 
@@ -7,10 +31,50 @@
 #include <math.h>
 #include <stdio.h>
 
+static void _pushApi(lua_State *L);
+
+void milkLoadScripts(Milk *milk)
+{
+	lua_State *L = luaL_newstate();
+	luaL_openlibs(L);
+
+	if (luaL_dofile(L, "main.lua"))
+	{
+		printf("%s\n", lua_tostring(L, -1));
+		return;
+	}
+
+	lua_pushlightuserdata(L, (void *)milk);
+	lua_setglobal(L, "__milk");
+	_pushApi(L);
+	milk->code.state = (void *)L;
+	lua_getglobal(L, "_init");
+	lua_call(L, 0, 0);
+}
+
+void milkUnloadScripts(Milk *milk)
+{
+	lua_close((lua_State*)milk->code.state);
+}
+
+void milkInvokeUpdate(Code *code)
+{
+	lua_State *L = (lua_State *)code->state;
+	lua_getglobal(L, "_update");
+	lua_call(L, 0, 0);
+}
+
+void milkInvokeDraw(Code *code)
+{
+	lua_State *L = (lua_State *)code->state;
+	lua_getglobal(L, "_draw");
+	lua_call(L, 0, 0);
+}
+
 static Milk *_getGlobalMilk(lua_State *L)
 {
 	lua_getglobal(L, "__milk");
-	Milk* milk = (Milk *)lua_touserdata(L, -1);
+	Milk *milk = (Milk *)lua_touserdata(L, -1);
 	lua_pop(L, 1);
 	return milk;
 }
@@ -110,34 +174,4 @@ static void _pushApi(lua_State *L)
 	_pushApiFunction(L, "spr", l_spr);
 	_pushApiFunction(L, "btn", l_btn);
 	_pushApiFunction(L, "sprfont", l_sprfont);
-}
-
-void milkLoadScripts(Milk *milk)
-{
-	lua_State *L = luaL_newstate();
-	luaL_openlibs(L);
-	if (luaL_dofile(L, "main.lua"))
-	{
-		printf("%s\n", lua_tostring(L, -1));
-	}
-	lua_pushlightuserdata(L, (void *)milk);
-	lua_setglobal(L, "__milk");
-	_pushApi(L);
-	milk->code.state = (void *)L;
-	lua_getglobal(L, "_init");
-	lua_call(L, 0, 0);
-}
-
-void milkInvokeUpdate(Code *code)
-{
-	lua_State *L = (lua_State *)code->state;
-	lua_getglobal(L, "_update");
-	lua_call(L, 0, 0);
-}
-
-void milkInvokeDraw(Code *code)
-{
-	lua_State *L = (lua_State *)code->state;
-	lua_getglobal(L, "_draw");
-	lua_call(L, 0, 0);
 }

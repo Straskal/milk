@@ -1,16 +1,55 @@
-#include "milk.h"
-#include "milk_api.h"
-#include "milk_bmp.h"
+/*
+ *  MIT License
+ *
+ *  Copyright(c) 2018 - 2020 Stephen Traskal
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software andassociated documentation files(the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, andto permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions :
+ *
+ *  The above copyright notice andthis permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
+
 #include <math.h>
 #include <memory.h>
 #include <stdio.h>
 
+#include "milk.h"
+#include "milk_api.h"
+#include "milk_bmp.h"
+#include "milk_wav.h"
+
 #define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x)
-#define NOT_CLIPPED(clip, x, y) (clip.left < x && x < clip.right && clip.top < y && y < clip.bottom)
+#define NOT_CLIPPED(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
+
+static void _initFreeQueueItems(Audio *audio)
+{
+	AudioQueueItem *itr = audio->queueItems;
+	AudioQueueItem *end = &audio->queueItems[MILK_AUDIO_MAX - 1];
+
+	while (itr != end)
+	{
+		(itr++)->isFree = 1;
+	}
+}
 
 Milk *milkInit()
 {
 	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
+	_initFreeQueueItems(&milk->audio);
+	milkLoadSamples(&milk->audio.samples);
 	milkLoadSpritesheet(&milk->video.spritesheet, MILK_SPRSHEET_FILENAME);
 	milkLoadFont(&milk->video.font, MILK_FONT_FILENAME);
 	milkLoadScripts(milk);
@@ -19,6 +58,8 @@ Milk *milkInit()
 
 void milkFree(Milk *milk)
 {
+	milkUnloadScripts(milk);
+	milkFreeSamples(&milk->audio.samples);
 	free(milk);
 }
 
@@ -30,7 +71,6 @@ void milkUpdate(Milk *milk)
 static void _resetDrawState(Video *video)
 {
 	video->colorKey = 0;
-
 	video->clipRect.top = 0;
 	video->clipRect.bottom = MILK_FRAMEBUF_HEIGHT;
 	video->clipRect.right = MILK_FRAMEBUF_WIDTH;
@@ -48,14 +88,14 @@ void milkClipRect(Video *video, int x, int y, int w, int h)
 	int right = x + w;
 	int bottom = y + h;
 
-	if (x < 0)
-		x = 0;
-	if (x > MILK_FRAMEBUF_WIDTH)
-		x = MILK_FRAMEBUF_WIDTH;
-	if (right < 0)
-		right = 0;
-	if (bottom > MILK_FRAMEBUF_HEIGHT)
-		bottom = MILK_FRAMEBUF_HEIGHT;
+	if (x < 0) x = 0;
+	else if (x > MILK_FRAMEBUF_WIDTH) x = MILK_FRAMEBUF_WIDTH;
+	if (y < 0) y = 0;
+	else if (y > MILK_FRAMEBUF_HEIGHT) y = MILK_FRAMEBUF_HEIGHT;
+	if (right < 0) right = 0;
+	else if (right > MILK_FRAMEBUF_WIDTH) right = MILK_FRAMEBUF_WIDTH;
+	if (bottom < 0) bottom = 0;
+	else if (bottom > MILK_FRAMEBUF_HEIGHT) bottom = MILK_FRAMEBUF_HEIGHT;
 
 	video->clipRect.left = x;
 	video->clipRect.right = right;
@@ -66,6 +106,64 @@ void milkClipRect(Video *video, int x, int y, int w, int h)
 int milkButton(Input *input, uint8_t button)
 {
 	return (input->gamepad.buttonState & button) == button;
+}
+
+static void _enqueueSample(AudioQueueItem **root, AudioQueueItem *new)
+{
+	AudioQueueItem *rootPtr = *root;
+
+	if (rootPtr == NULL)
+	{
+		*root = new;
+		return;
+	}
+
+	while (rootPtr->next != NULL)
+		root = rootPtr->next;
+
+	rootPtr->next = new;
+}
+
+static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
+{
+	AudioQueueItem *itr = audio->queueItems;
+	AudioQueueItem *end = &audio->queueItems[MILK_AUDIO_MAX - 1];
+
+	while (itr != end)
+	{
+		if (itr->isFree)
+		{
+			itr->isFree = 0;
+			*queueItem = itr;
+			return 1;
+		}
+
+		itr++;
+	}
+
+	return 0;
+}
+
+void milkPlayMusic(Audio *audio, int idx)
+{
+	AudioQueueItem *queueItem;
+	SampleData *sampleData;
+
+	if (!_getFreeQueueItem(audio, &queueItem))
+		return;
+
+	sampleData = &audio->samples[idx];
+	queueItem->sampleData = sampleData;
+	queueItem->position = sampleData->buffer;
+	queueItem->remainingLength = sampleData->length;
+	queueItem->volume = 128;
+	queueItem->isMusic = 1;
+	queueItem->isFading = 0;
+	queueItem->next = NULL;
+
+	audio->lock();
+	_enqueueSample(&audio->queue, queueItem);
+	audio->unlock();
 }
 
 void milkClear(Video *video, Color32 color)

@@ -22,14 +22,21 @@
  *  SOFTWARE.
  */
 
-#ifndef __MILK_API__
-#define __MILK_API__
+#include "milk_wav.h"
+#include <SDL.h>
 
-#include "milk.h"
+static void _loadWav(const char* filename, SampleData *sample)
+{
+	SDL_AudioSpec sp;
+	SDL_LoadWAV(filename, &sp, &sample->buffer, &sample->length);
+}
 
-void milkLoadScripts(Milk *code);
-void milkUnloadScripts(Milk *milk);
-void milkInvokeUpdate(Code *code);
-void milkInvokeDraw(Code *code);
+void milkLoadSamples(SampleData *samples)
+{
+	_loadWav("highlands.wav", samples);
+}
 
-#endif
+void milkFreeSamples(SampleData *samples)
+{
+	SDL_FreeWAV(samples->buffer);
+}
