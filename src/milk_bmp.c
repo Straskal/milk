@@ -29,7 +29,6 @@ static void _loadBmp(Color32 *dest, char *filename)
 {
 	SDL_Surface *bmp = SDL_LoadBMP(filename);
 	int bpp = bmp->format->BytesPerPixel;
-	int pitch = bmp->pitch;
 	int width = bmp->w;
 	int height = bmp->h;
 	int len = width * height * bpp;

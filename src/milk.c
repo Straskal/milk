@@ -69,7 +69,7 @@ Milk *milkInit()
 void milkFree(Milk *milk)
 {
 	milkUnloadScripts(milk);
-	milkFreeSamples(&milk->audio.samples);
+	milkFreeSamples(&milk->audio.samples[0]);
 	free(milk);
 }
 
@@ -114,7 +114,7 @@ static void _enqueueSample(AudioQueueItem **root, AudioQueueItem *new)
 	}
 
 	while (rootPtr->next != NULL)
-		root = rootPtr->next;
+		rootPtr = rootPtr->next;
 
 	rootPtr->next = new;
 }
@@ -140,11 +140,16 @@ static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 
 void milkPlayMusic(Audio *audio, int idx)
 {
+	audio->lock();
+
 	AudioQueueItem *queueItem;
 	SampleData *sampleData;
 
 	if (!_getFreeQueueItem(audio, &queueItem))
+	{
+		audio->unlock();
 		return;
+	}
 
 	sampleData = &audio->samples[idx];
 	queueItem->sampleData = sampleData;
@@ -155,18 +160,22 @@ void milkPlayMusic(Audio *audio, int idx)
 	queueItem->isFading = 0;
 	queueItem->next = NULL;
 
-	audio->lock();
 	_enqueueSample(&audio->queue, queueItem);
 	audio->unlock();
 }
 
 void milkSound(Audio *audio, int idx, uint8_t volume)
 {
+	audio->lock();
+
 	AudioQueueItem *queueItem;
 	SampleData *sampleData;
 
 	if (!_getFreeQueueItem(audio, &queueItem))
+	{
+		audio->unlock();
 		return;
+	}
 
 	sampleData = &audio->samples[idx];
 	queueItem->sampleData = sampleData;
@@ -177,7 +186,6 @@ void milkSound(Audio *audio, int idx, uint8_t volume)
 	queueItem->isFading = 0;
 	queueItem->next = NULL;
 
-	audio->lock();
 	_enqueueSample(&audio->queue, queueItem);
 	audio->unlock();
 }
@@ -300,8 +308,8 @@ void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale)
 		return;
 
 	int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
-	int row = floor(idx / numColumns);
-	int col = floor(idx % numColumns);
+	int row = (int)floor(idx / numColumns);
+	int col = (int)floor(idx % numColumns);
 	Color32 *pixels = &video->spritesheet[row * MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE + col * MILK_SPRSHEET_SPR_SQRSIZE];
 
 	_blitRect(video, pixels, x, y, MILK_SPRSHEET_SPR_SQRSIZE * w, MILK_SPRSHEET_SPR_SQRSIZE * h, MILK_SPRSHEET_SQRSIZE, scale);
@@ -319,14 +327,14 @@ static void _drawCharacter(Video *video, int x, int y, char character, float sca
 
 	/* bitmap font starts at ASCII character 32 (SPACE) */
 	int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
-	int row = floor((character - 32) / numColumns);
-	int col = floor((character - 32) % numColumns);
+	int row = (int)floor((character - 32) / numColumns);
+	int col = (int)floor((character - 32) % numColumns);
 	Color32 *pixels = &video->font[(row * MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE + col * MILK_CHAR_SQRSIZE)];
 
 	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale);
 }
 
-int _isNewline(char *characters)
+int _isNewline(const char *characters)
 {
 	return *characters == '\n';
 }
