@@ -36,7 +36,7 @@ static void _pushApi(lua_State *L);
 void milkLoadScripts(Milk *milk)
 {
 	lua_State *L = luaL_newstate();
-	luaL_openlibs(L);
+	luaL_openlibs(L); /* Potentially set up a restricted environment. */
 
 	if (luaL_dofile(L, "main.lua"))
 	{
@@ -45,10 +45,10 @@ void milkLoadScripts(Milk *milk)
 	}
 
 	lua_pushlightuserdata(L, (void *)milk);
-	lua_setglobal(L, "__milk");
+	lua_setglobal(L, "__milk"); /* Set global __milk to access in API functions. */
 	_pushApi(L);
 	milk->code.state = (void *)L;
-	lua_getglobal(L, "_init");
+	lua_getglobal(L, "_init"); /* Invoke _init callback. */
 	lua_call(L, 0, 0);
 }
 
@@ -75,7 +75,7 @@ static Milk *_getGlobalMilk(lua_State *L)
 {
 	lua_getglobal(L, "__milk");
 	Milk *milk = (Milk *)lua_touserdata(L, -1);
-	lua_pop(L, 1);
+	lua_pop(L, 1); /* Remember to pop __milk off of the stack. */
 	return milk;
 }
 
@@ -95,6 +95,13 @@ static int l_btnp(lua_State *L)
 		milkButtonPressed(&milk->input, (uint8_t)(1 << lua_tointeger(L, 1)))
 	);
 	return 1;
+}
+
+static int l_vol(lua_State *L)
+{
+	Milk *milk = _getGlobalMilk(L);
+	milkVolume(&milk->audio, (uint8_t)lua_tointeger(L, 1));
+	return 0;
 }
 
 static int l_snd(lua_State *L)
@@ -188,6 +195,7 @@ static void _pushApi(lua_State *L)
 {
 	_pushApiFunction(L, "btn", l_btn);
 	_pushApiFunction(L, "btnp", l_btnp);
+	_pushApiFunction(L, "vol", l_vol);
 	_pushApiFunction(L, "snd", l_snd);
 	_pushApiFunction(L, "clrs", l_clrs);
 	_pushApiFunction(L, "pset", l_pset);

@@ -36,9 +36,9 @@
 
 static void _initAudio(Audio *audio)
 {
-	audio->masterVolume = 128;
-	audio->musicVolume = 128;
-	audio->soundVolume = 128;
+	audio->masterVolume = MILK_MAX_VOLUME;
+	audio->musicVolume = MILK_MAX_VOLUME;
+	audio->soundVolume = MILK_MAX_VOLUME;
 
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
 	{
@@ -102,7 +102,7 @@ int milkButtonPressed(Input *input, uint8_t button)
 	return (input->gamepad.buttonState & button) == button && (input->gamepad.previousButtonState & button) != button;
 }
 
-static void _enqueueSample(AudioQueueItem **root, AudioQueueItem *new)
+static void _queueSample(AudioQueueItem **root, AudioQueueItem *new)
 {
 	AudioQueueItem *rootPtr = *root;
 
@@ -154,7 +154,8 @@ static void _playSample(Audio *audio, int idx, uint8_t volume, uint8_t loop)
 	queueItem->isFading = 0;
 	queueItem->next = NULL;
 
-	_enqueueSample(&audio->queue, queueItem);
+	_queueSample(&audio->queue, queueItem);
+
 	audio->unlock();
 }
 
@@ -166,6 +167,16 @@ void milkPlayMusic(Audio *audio, int idx, uint8_t volume)
 void milkSound(Audio *audio, int idx, uint8_t volume)
 {
 	_playSample(audio, idx, volume, 0);
+}
+
+void milkVolume(Audio *audio, uint8_t volume)
+{
+	if (volume < 0)
+		volume = 0;
+	if (volume > MILK_MAX_VOLUME)
+		volume = MILK_MAX_VOLUME;
+
+	audio->masterVolume = volume;
 }
 
 void milkClipRect(Video *video, int x, int y, int w, int h)

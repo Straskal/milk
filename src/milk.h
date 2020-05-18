@@ -36,6 +36,7 @@
 #define MILK_AUDIO_SAMPLES 4096
 #define MILK_AUDIO_MAX 25
 #define MILK_AUDIO_QUEUE_MAX 16
+#define MILK_MAX_VOLUME 128
 
 /* Frame buffer */
 #define MILK_FRAMEBUF_WIDTH 256
@@ -177,6 +178,7 @@ int milkButton(Input *input, uint8_t button);
 int milkButtonPressed(Input *input, uint8_t button);
 void milkPlayMusic(Audio *audio, int idx, uint8_t volume);
 void milkSound(Audio *audio, int idx, uint8_t volume);
+void milkVolume(Audio *audio, uint8_t volume);
 void milkClipRect(Video *video, int x, int y, int w, int h);
 void milkClear(Video *video, Color32 idx);
 void milkPixelSet(Video *video, int x, int y, Color32 color);

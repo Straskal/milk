@@ -215,7 +215,9 @@ static void _audioCallback(void *userdata, uint8_t *stream, int len)
 			else
 				currentLength = ((uint32_t)len > queueItr->remainingLength) ? queueItr->remainingLength : (uint32_t)len;
 
-			SDL_MixAudioFormat(stream, queueItr->position, AUDIO_S16LSB, currentLength, queueItr->volume);
+			double norm = ((double)queueItr->volume / MILK_MAX_VOLUME);
+			int vol = (int)round(norm * audio->masterVolume);
+			SDL_MixAudioFormat(stream, queueItr->position, AUDIO_S16LSB, currentLength, vol);
 			queueItr->position += currentLength;
 			queueItr->remainingLength -= currentLength;
 

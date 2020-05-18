@@ -30,6 +30,7 @@ static void _loadWav(const char* filename, SampleData *sampleData)
 	SDL_AudioSpec waveSpec;
 	SDL_LoadWAV(filename, &waveSpec, &sampleData->buffer, &sampleData->length);
 
+    /* A lot of sound effects are mono (1 channel), so must CONVERT THEM mwuhahahahahahahahahaAHAHAHAHA. ha. */
     if (waveSpec.channels != MILK_AUDIO_CHANNELS)
     {
         SDL_AudioCVT conversion;
