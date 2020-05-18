@@ -186,62 +186,38 @@ static void _unlockAudioDevice()
 static void _audioCallback(void *userdata, uint8_t *stream, int len)
 {
 	Audio *audio = (Audio *)userdata;
-	AudioQueueItem *queueItr = audio->queue;
+	AudioQueueItem *currentItem = audio->queue;
 	AudioQueueItem *previousItem = NULL;
-	int currentLength;
-	uint8_t isFadingOut = 0;
-
 	SDL_memset(stream, 0, len);
 
-	while (queueItr != NULL)
+	while (currentItem != NULL)
 	{
-		if (queueItr->remainingLength > 0)
+		if (currentItem->remainingLength > 0)
 		{
-			/* If music is marked to fade out */
-			if (queueItr->isFading && queueItr->isMusic)
-			{
-				/* We've found music and we're fading it out. */
-				isFadingOut = 1;
-
-				if (queueItr->volume > 0)
-					queueItr->volume--;
-				else
-					queueItr->remainingLength = 0;
-			}
-
-			/* If we find another music queued but another one is currently fading out, then don't mix it. */
-			if (isFadingOut && queueItr->isMusic && !queueItr->isFading)
-				currentLength = 0;
-			else
-				currentLength = ((uint32_t)len > queueItr->remainingLength) ? queueItr->remainingLength : (uint32_t)len;
-
-			double norm = ((double)queueItr->volume / MILK_MAX_VOLUME);
-			int vol = (int)round(norm * audio->masterVolume);
-			SDL_MixAudioFormat(stream, queueItr->position, AUDIO_S16LSB, currentLength, vol);
-			queueItr->position += currentLength;
-			queueItr->remainingLength -= currentLength;
-
-			previousItem = queueItr;
-			queueItr = queueItr->next;
+			int lengthToSubmit = ((uint32_t)len > currentItem->remainingLength) ? currentItem->remainingLength : (uint32_t)len;
+			double normalizedVolume = ((double)currentItem->volume / MILK_MAX_VOLUME);
+			SDL_MixAudioFormat(stream, currentItem->position, AUDIO_S16LSB, lengthToSubmit, (int)round(normalizedVolume * audio->masterVolume));
+			currentItem->position += lengthToSubmit;
+			currentItem->remainingLength -= lengthToSubmit;
+			previousItem = currentItem;
+			currentItem = currentItem->next;
 		}
-		/* If the sample is music with no remaining length, then start it from the beginning. */
-		else if (queueItr->isMusic && !queueItr->isFading)
+		else if (currentItem->isMusic)
 		{
-			queueItr->position = queueItr->sampleData->buffer;
-			queueItr->remainingLength = queueItr->sampleData->length;
+			currentItem->position = currentItem->sampleData->buffer;
+			currentItem->remainingLength = currentItem->sampleData->length;
 		}
-		/* Else if it's just a sound that happened to end, then remove it from the queue and free the instance. */
 		else
 		{
 			if (previousItem == NULL)
-				audio->queue = queueItr->next;
+				audio->queue = currentItem->next; /* Set root */
 			else
-				previousItem->next = queueItr->next;
+				previousItem->next = currentItem->next;
 
-			queueItr->isFree = 1;
-			AudioQueueItem *next = queueItr->next;
-			queueItr->next = NULL;
-			queueItr = next;
+			currentItem->isFree = 1;
+			AudioQueueItem *next = currentItem->next;
+			currentItem->next = NULL;
+			currentItem = next;
 		}
 	}
 }

@@ -184,7 +184,7 @@ void milkClear(Video *video, Color32 idx);
 void milkPixelSet(Video *video, int x, int y, Color32 color);
 void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color);
 void milkRect(Video *video, int x, int y, int w, int h, Color32 color);
-void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale);
+void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int xflip);
 void milkSpriteFont(Video *video, int x, int y, const char *str, float scale);
 
 #endif

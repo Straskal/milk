@@ -248,7 +248,7 @@ void milkRect(Video *video, int x, int y, int w, int h, Color32 color)
 	_verticalLine(video, x + w, y, h, color);
 }
 
-static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale)
+static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int xflip)
 {
 	int xPixel;
 	int yPixel;
@@ -291,7 +291,7 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 	}
 }
 
-void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale)
+void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int xflip)
 {
 	if (idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
 		return;
@@ -301,7 +301,7 @@ void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale)
 	int col = (int)floor(idx % numColumns);
 	Color32 *pixels = &video->spritesheet[row * MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE + col * MILK_SPRSHEET_SPR_SQRSIZE];
 
-	_blitRect(video, pixels, x, y, MILK_SPRSHEET_SPR_SQRSIZE * w, MILK_SPRSHEET_SPR_SQRSIZE * h, MILK_SPRSHEET_SQRSIZE, scale);
+	_blitRect(video, pixels, x, y, MILK_SPRSHEET_SPR_SQRSIZE * w, MILK_SPRSHEET_SPR_SQRSIZE * h, MILK_SPRSHEET_SQRSIZE, scale, xflip);
 }
 
 static int _isAscii(char character)
@@ -320,7 +320,7 @@ static void _drawCharacter(Video *video, int x, int y, char character, float sca
 	int col = (int)floor((character - 32) % numColumns);
 	Color32 *pixels = &video->font[(row * MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE + col * MILK_CHAR_SQRSIZE)];
 
-	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale);
+	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0);
 }
 
 int _isNewline(const char *characters)
