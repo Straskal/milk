@@ -40,11 +40,10 @@ static void _initAudio(Audio *audio)
 	audio->musicVolume = 128;
 	audio->soundVolume = 128;
 
-	AudioQueueItem *itr = audio->queueItems;
-	AudioQueueItem *end = &audio->queueItems[MILK_AUDIO_QUEUE_MAX - 1];
-
-	while (itr != end)
-		(itr++)->isFree = 1;
+	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+	{
+		audio->queueItems[i].isFree = MILK_TRUE;
+	}
 
 	milkLoadSamples(audio->samples);
 }
@@ -121,50 +120,19 @@ static void _enqueueSample(AudioQueueItem **root, AudioQueueItem *new)
 
 static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 {
-	AudioQueueItem *itr = audio->queueItems;
-	AudioQueueItem *end = &audio->queueItems[MILK_AUDIO_QUEUE_MAX - 1];
-
-	while (itr != end)
+	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
 	{
-		AudioQueueItem *curr = (itr++);
-
-		if (curr->isFree)
+		if (audio->queueItems[i].isFree)
 		{
-			curr->isFree = 0;
-			*queueItem = curr;
+			audio->queueItems[i].isFree = 0;
+			*queueItem = &audio->queueItems[i];
 			return 1;
 		}
 	}
 	return 0;
 }
 
-void milkPlayMusic(Audio *audio, int idx)
-{
-	audio->lock();
-
-	AudioQueueItem *queueItem;
-	SampleData *sampleData;
-
-	if (!_getFreeQueueItem(audio, &queueItem))
-	{
-		audio->unlock();
-		return;
-	}
-
-	sampleData = &audio->samples[idx];
-	queueItem->sampleData = sampleData;
-	queueItem->position = sampleData->buffer;
-	queueItem->remainingLength = sampleData->length;
-	queueItem->volume = 128;
-	queueItem->isMusic = 1;
-	queueItem->isFading = 0;
-	queueItem->next = NULL;
-
-	_enqueueSample(&audio->queue, queueItem);
-	audio->unlock();
-}
-
-void milkSound(Audio *audio, int idx, uint8_t volume)
+static void _playSample(Audio *audio, int idx, uint8_t volume, uint8_t loop)
 {
 	audio->lock();
 
@@ -182,12 +150,22 @@ void milkSound(Audio *audio, int idx, uint8_t volume)
 	queueItem->position = sampleData->buffer;
 	queueItem->remainingLength = sampleData->length;
 	queueItem->volume = volume;
-	queueItem->isMusic = 0;
+	queueItem->isMusic = loop;
 	queueItem->isFading = 0;
 	queueItem->next = NULL;
 
 	_enqueueSample(&audio->queue, queueItem);
 	audio->unlock();
+}
+
+void milkPlayMusic(Audio *audio, int idx, uint8_t volume)
+{
+	_playSample(audio, idx, volume, 1);
+}
+
+void milkSound(Audio *audio, int idx, uint8_t volume)
+{
+	_playSample(audio, idx, volume, 0);
 }
 
 void milkClipRect(Video *video, int x, int y, int w, int h)

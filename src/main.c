@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 	{
 		SDL_RenderSetLogicalSize(renderer, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
 		SDL_PauseAudioDevice(audioDevice, 0);
-		milkPlayMusic(&milk->audio, 0);
+		milkPlayMusic(&milk->audio, 0, 50);
 	}
 
 	int running = MILK_TRUE;
@@ -167,11 +167,10 @@ int main(int argc, char *argv[])
 /* HMM: milk should output the appropriate frame buffer. Not a huge deal right now because we don't need this level of control client side. */
 static void _flipFramebuffer(uint32_t *frontbuffer, Color32 *backbuffer, size_t len)
 {
-	Color32 *itr = backbuffer;
-	Color32 *end = &backbuffer[len - 1];
-
-	while (itr != end)
-		*(frontbuffer++) = (uint32_t)SHIFT_ALPHA(*(itr++));
+	for (int i = 0; i < len; i++)
+	{
+		frontbuffer[i] = SHIFT_ALPHA(backbuffer[i]);
+	}
 }
 
 static void _lockAudioDevice()
@@ -188,7 +187,7 @@ static void _audioCallback(void *userdata, uint8_t *stream, int len)
 {
 	Audio *audio = (Audio *)userdata;
 	AudioQueueItem *queueItr = audio->queue;
-	AudioQueueItem *previousItem = audio->queue;
+	AudioQueueItem *previousItem = NULL;
 	int currentLength;
 	uint8_t isFadingOut = 0;
 
@@ -232,10 +231,15 @@ static void _audioCallback(void *userdata, uint8_t *stream, int len)
 		/* Else if it's just a sound that happened to end, then remove it from the queue and free the instance. */
 		else
 		{
-			previousItem->next = queueItr->next;
-			queueItr->next = NULL;
+			if (previousItem == NULL)
+				audio->queue = queueItr->next;
+			else
+				previousItem->next = queueItr->next;
+
 			queueItr->isFree = 1;
-			queueItr = previousItem->next;
+			AudioQueueItem *next = queueItr->next;
+			queueItr->next = NULL;
+			queueItr = next;
 		}
 	}
 }

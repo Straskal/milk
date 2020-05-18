@@ -175,7 +175,7 @@ void milkUpdate(Milk *milk);
 void milkDraw(Milk *milk);
 int milkButton(Input *input, uint8_t button);
 int milkButtonPressed(Input *input, uint8_t button);
-void milkPlayMusic(Audio *audio, int idx);
+void milkPlayMusic(Audio *audio, int idx, uint8_t volume);
 void milkSound(Audio *audio, int idx, uint8_t volume);
 void milkClipRect(Video *video, int x, int y, int w, int h);
 void milkClear(Video *video, Color32 idx);
