@@ -44,7 +44,6 @@ static int gAudioDevice;
 static void _lockAudioDevice();
 static void _unlockAudioDevice();
 static void _audioCallback(void *userdata, uint8_t *stream, int len);
-static void _flipFramebuffer(uint32_t *frontbuffer, Color32 *backbuffer, size_t len);
 
 int main(int argc, char *argv[])
 {
@@ -65,8 +64,7 @@ int main(int argc, char *argv[])
 		milk = milkInit();
 		window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MILK_WINDOW_WIDTH, MILK_WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
 		renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
-		frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
-		frontBufferData = (uint32_t *)calloc(MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT, sizeof(uint32_t));
+		frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
 	}
 
 	{
@@ -143,8 +141,7 @@ int main(int argc, char *argv[])
 		}
 
 		{
-			_flipFramebuffer(frontBufferData, milk->video.framebuffer, MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT);
-			SDL_UpdateTexture(frontBufferTexture, NULL, (void *)frontBufferData, MILK_FRAMEBUF_PITCH);
+			SDL_UpdateTexture(frontBufferTexture, NULL, (void *)milk->video.framebuffer, MILK_FRAMEBUF_PITCH);
 			SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
 			SDL_RenderPresent(renderer);
 		}
@@ -155,22 +152,12 @@ int main(int argc, char *argv[])
 	}
 
 	SDL_CloseAudioDevice(audioDevice);
-	free(frontBufferData);
 	SDL_DestroyTexture(frontBufferTexture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	milkFree(milk);
 	SDL_Quit();
 	return 0;
-}
-
-/* HMM: milk should output the appropriate frame buffer. Not a huge deal right now because we don't need this level of control client side. */
-static void _flipFramebuffer(uint32_t *frontbuffer, Color32 *backbuffer, size_t len)
-{
-	for (int i = 0; i < len; i++)
-	{
-		frontbuffer[i] = SHIFT_ALPHA(backbuffer[i]);
-	}
 }
 
 static void _lockAudioDevice()
