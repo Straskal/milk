@@ -34,11 +34,16 @@
 
 /* Functions to lock and unlock the audio device so you can safely manipulate the milk's audio queue without another thread grabbing for it. */
 static int gAudioDevice; /* Global audio device so we can access from our methods below. */
-static void _lockAudioDevice();
-static void _unlockAudioDevice();
 
-/* The audio stream request callback. This is where mixing happens. */
-static void _audioCallback(void *userdata, uint8_t *stream, int len);
+static void _lockAudioDevice()
+{
+	SDL_LockAudioDevice(gAudioDevice);
+}
+
+static void _unlockAudioDevice()
+{
+	SDL_UnlockAudioDevice(gAudioDevice);
+}
 
 int main(int argc, char *argv[])
 {
@@ -69,7 +74,7 @@ int main(int argc, char *argv[])
 	audioSpec.samples = MILK_AUDIO_SAMPLES;
 
 	/* Give the audio spec our mixing callback, and milk's audio as user data. */
-	audioSpec.callback = _audioCallback;
+	audioSpec.callback = milkMixCallback;
 	audioSpec.userdata = (void *)&milk->audio;
 
 	audioDevice = SDL_OpenAudioDevice(NULL, 0, &audioSpec, NULL, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE | SDL_AUDIO_ALLOW_CHANNELS_CHANGE);
@@ -141,61 +146,4 @@ int main(int argc, char *argv[])
 	milkFree(milk);
 	SDL_Quit();
 	return 0;
-}
-
-static void _lockAudioDevice()
-{
-	SDL_LockAudioDevice(gAudioDevice);
-}
-
-static void _unlockAudioDevice()
-{
-	SDL_UnlockAudioDevice(gAudioDevice);
-}
-
-/*
- * Mix milk's audio queue samples in the audio device's sample stream.
- * Milk limits the queue size to 16 sounds at a given time, so many mixed sounds should not cause distortion.
- */
-static void _audioCallback(void *userdata, uint8_t *stream, int len)
-{
-	Audio *audio = (Audio *)userdata;
-	AudioQueueItem *currentItem = audio->queue;
-	AudioQueueItem *previousItem = NULL;
-	SDL_memset(stream, 0, len); /* Silence to stream before writing to it. */
-
-	while (currentItem != NULL)
-	{
-		if (currentItem->remainingLength > 0)
-		{
-			uint32_t bytesToWrite = ((uint32_t)len > currentItem->remainingLength) ? currentItem->remainingLength : (uint32_t)len;
-			double volNormalized = ((double)currentItem->volume / MILK_AUDIO_MAX_VOLUME);
-
-			SDL_MixAudioFormat(stream, currentItem->position, AUDIO_S16LSB, bytesToWrite, (int)round(volNormalized * audio->masterVolume));
-
-			currentItem->position += bytesToWrite;
-			currentItem->remainingLength -= bytesToWrite;
-			previousItem = currentItem;
-			currentItem = currentItem->next;
-		}
-		else if (currentItem->loop)
-		{
-			/* Music loops. */
-			currentItem->position = currentItem->sampleData->buffer;
-			currentItem->remainingLength = currentItem->sampleData->length;
-		}
-		else
-		{
-			/* A sound has finished playing and needs to be removed from the queue. */
-			if (previousItem == NULL)
-				audio->queue = currentItem->next; /* Set root */
-			else
-				previousItem->next = currentItem->next;
-
-			currentItem->isFree = 1;
-			AudioQueueItem *next = currentItem->next;
-			currentItem->next = NULL;
-			currentItem = next;
-		}
-	}
 }
