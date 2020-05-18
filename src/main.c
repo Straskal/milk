@@ -23,26 +23,21 @@
  */
 
 #include "milk.h"
-#include "milk_bmp.h"
+#include "milk_audio.h"
 #include "SDL.h"
+
 #include <memory.h>
 #include <stdio.h>
 
 #define SDL_FIRST_AVAILABLE_RENDERER -1
 #define MILK_FRAMEBUF_PITCH (MILK_FRAMEBUF_WIDTH * 4)
 
-/* Milk outputs the framebuffer as an array of 32 bit colors: 00RRGGBB. Need to shift down the alpha. */
-#define SHIFT_ALPHA(c) (c << 8)
-
-/*
- * HACK methods that need to be refactored:
- * - Audio needs to be refactored into a circular queue.
- * - Need to refactor audio queue into a *push API instead of a *callback API. The callback API requires milk to know about locking & unlocking.
- * - The framebuffer should be pulled from milk in the correct format. Need to revisit milk framebuf impl and 24 bit color impl.
- */
-static int gAudioDevice;
+/* Functions to lock and unlock the audio device so you can safely manipulate the milk's audio queue without another thread grabbing for it. */
+static int gAudioDevice; /* Global audio device so we can access from our methods below. */
 static void _lockAudioDevice();
 static void _unlockAudioDevice();
+
+/* The audio stream request callback. This is where mixing happens. */
 static void _audioCallback(void *userdata, uint8_t *stream, int len);
 
 int main(int argc, char *argv[])
@@ -60,91 +55,79 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	{
-		milk = milkInit();
-		window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MILK_WINDOW_WIDTH, MILK_WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
-		renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
-		frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
-	}
+	/* We could check for errors here, but we're not asking for much. So it's probably fine until we run into an issue. */
+	milk = milkInit();
+	window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MILK_WINDOW_WIDTH, MILK_WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
+	renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
+	frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
+	SDL_RenderSetLogicalSize(renderer, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
 
-	{
-		SDL_AudioSpec audioSpec;
-		audioSpec.freq = MILK_AUDIO_FREQUENCY;
-		audioSpec.format = AUDIO_S16LSB;
-		audioSpec.channels = MILK_AUDIO_CHANNELS;
-		audioSpec.samples = MILK_AUDIO_SAMPLES;
-		audioSpec.callback = _audioCallback;
-		audioSpec.userdata = (void *)&milk->audio;
+	SDL_AudioSpec audioSpec;
+	audioSpec.freq = MILK_AUDIO_FREQUENCY;
+	audioSpec.format = AUDIO_S16LSB;
+	audioSpec.channels = MILK_AUDIO_CHANNELS;
+	audioSpec.samples = MILK_AUDIO_SAMPLES;
 
-		audioDevice = SDL_OpenAudioDevice(NULL, 0, &audioSpec, NULL, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE | SDL_AUDIO_ALLOW_CHANNELS_CHANGE);
-		gAudioDevice = audioDevice;
-		milk->audio.lock = _lockAudioDevice;
-		milk->audio.unlock = _unlockAudioDevice;
-	}
+	/* Give the audio spec our mixing callback, and milk's audio as user data. */
+	audioSpec.callback = _audioCallback;
+	audioSpec.userdata = (void *)&milk->audio;
 
-	{
-		SDL_RenderSetLogicalSize(renderer, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
-		SDL_PauseAudioDevice(audioDevice, 0);
-		milkPlayMusic(&milk->audio, 0, 50);
-	}
+	audioDevice = SDL_OpenAudioDevice(NULL, 0, &audioSpec, NULL, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE | SDL_AUDIO_ALLOW_CHANNELS_CHANGE);
+	gAudioDevice = audioDevice;
+	milk->audio.lock = _lockAudioDevice;
+	milk->audio.unlock = _unlockAudioDevice;
+	SDL_PauseAudioDevice(audioDevice, 0); /* Pause(0) starts the device. */
 
 	int running = MILK_TRUE;
 
 	while (running)
 	{
 		Uint32 frameStartTicks = SDL_GetTicks();
+		Input *input = &milk->input;
 
-		milk->input.mouseDownPrevious = milk->input.mouseDown;
-		milk->input.mouseDown = 0;
-		milk->input.gamepad.previousButtonState = milk->input.gamepad.buttonState;
-		milk->input.gamepad.buttonState = 0;
+		input->mouseDownPrevious = input->mouseDown;
+		input->mouseDown = 0;
+		input->gamepad.previousButtonState = input->gamepad.buttonState;
+		input->gamepad.buttonState = 0;
 
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
 		{
-			SDL_Event event;
-			while (SDL_PollEvent(&event))
+			switch (event.type)
 			{
-				switch (event.type)
+			case SDL_QUIT:
+				running = MILK_FALSE;
+				break;
+			case SDL_MOUSEMOTION:
+				milk->input.mouseX = event.motion.x;
+				milk->input.mouseY = event.motion.y;
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				if (event.button.button == SDL_BUTTON_LEFT)
 				{
-				case SDL_QUIT:
-					running = MILK_FALSE;
-					break;
-				case SDL_MOUSEMOTION:
-					milk->input.mouseX = event.motion.x;
-					milk->input.mouseY = event.motion.y;
-					break;
-				case SDL_MOUSEBUTTONDOWN:
-					if (event.button.button == SDL_BUTTON_LEFT)
-					{
-						milk->input.mouseDown = 1;
-					}
-					break;
+					milk->input.mouseDown = 1;
 				}
+				break;
 			}
 		}
 
-		{
-			Gamepad *gamepad = &milk->input.gamepad;
-			const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
-			if (keyboardState[SDL_SCANCODE_UP]) gamepad->buttonState |= BTN_UP;
-			if (keyboardState[SDL_SCANCODE_DOWN]) gamepad->buttonState |= BTN_DOWN;
-			if (keyboardState[SDL_SCANCODE_LEFT]) gamepad->buttonState |= BTN_LEFT;
-			if (keyboardState[SDL_SCANCODE_RIGHT]) gamepad->buttonState |= BTN_RIGHT;
-			if (keyboardState[SDL_SCANCODE_Z]) gamepad->buttonState |= BTN_A;
-			if (keyboardState[SDL_SCANCODE_X]) gamepad->buttonState |= BTN_B;
-			if (keyboardState[SDL_SCANCODE_C]) gamepad->buttonState |= BTN_X;
-			if (keyboardState[SDL_SCANCODE_V]) gamepad->buttonState |= BTN_Y;
-		}
+		Gamepad *gamepad = &milk->input.gamepad;
+		const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
+		if (keyboardState[SDL_SCANCODE_UP]) gamepad->buttonState |= BTN_UP;
+		if (keyboardState[SDL_SCANCODE_DOWN]) gamepad->buttonState |= BTN_DOWN;
+		if (keyboardState[SDL_SCANCODE_LEFT]) gamepad->buttonState |= BTN_LEFT;
+		if (keyboardState[SDL_SCANCODE_RIGHT]) gamepad->buttonState |= BTN_RIGHT;
+		if (keyboardState[SDL_SCANCODE_Z]) gamepad->buttonState |= BTN_A;
+		if (keyboardState[SDL_SCANCODE_X]) gamepad->buttonState |= BTN_B;
+		if (keyboardState[SDL_SCANCODE_C]) gamepad->buttonState |= BTN_X;
+		if (keyboardState[SDL_SCANCODE_V]) gamepad->buttonState |= BTN_Y;
 
-		{
-			milkUpdate(milk);
-			milkDraw(milk);
-		}
+		milkUpdate(milk);
+		milkDraw(milk);
 
-		{
-			SDL_UpdateTexture(frontBufferTexture, NULL, (void *)milk->video.framebuffer, MILK_FRAMEBUF_PITCH);
-			SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
-			SDL_RenderPresent(renderer);
-		}
+		SDL_UpdateTexture(frontBufferTexture, NULL, (void *)milk->video.framebuffer, MILK_FRAMEBUF_PITCH);
+		SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
+		SDL_RenderPresent(renderer);
 
 		Uint32 elapsedTicks = SDL_GetTicks() - frameStartTicks;
 		if (elapsedTicks < MILK_FRAMERATE)
@@ -170,32 +153,40 @@ static void _unlockAudioDevice()
 	SDL_UnlockAudioDevice(gAudioDevice);
 }
 
+/*
+ * Mix milk's audio queue samples in the audio device's sample stream.
+ * Milk limits the queue size to 16 sounds at a given time, so many mixed sounds should not cause distortion.
+ */
 static void _audioCallback(void *userdata, uint8_t *stream, int len)
 {
 	Audio *audio = (Audio *)userdata;
 	AudioQueueItem *currentItem = audio->queue;
 	AudioQueueItem *previousItem = NULL;
-	SDL_memset(stream, 0, len);
+	SDL_memset(stream, 0, len); /* Silence to stream before writing to it. */
 
 	while (currentItem != NULL)
 	{
 		if (currentItem->remainingLength > 0)
 		{
-			int lengthToSubmit = ((uint32_t)len > currentItem->remainingLength) ? currentItem->remainingLength : (uint32_t)len;
-			double normalizedVolume = ((double)currentItem->volume / MILK_MAX_VOLUME);
-			SDL_MixAudioFormat(stream, currentItem->position, AUDIO_S16LSB, lengthToSubmit, (int)round(normalizedVolume * audio->masterVolume));
-			currentItem->position += lengthToSubmit;
-			currentItem->remainingLength -= lengthToSubmit;
+			uint32_t bytesToWrite = ((uint32_t)len > currentItem->remainingLength) ? currentItem->remainingLength : (uint32_t)len;
+			double volNormalized = ((double)currentItem->volume / MILK_AUDIO_MAX_VOLUME);
+
+			SDL_MixAudioFormat(stream, currentItem->position, AUDIO_S16LSB, bytesToWrite, (int)round(volNormalized * audio->masterVolume));
+
+			currentItem->position += bytesToWrite;
+			currentItem->remainingLength -= bytesToWrite;
 			previousItem = currentItem;
 			currentItem = currentItem->next;
 		}
-		else if (currentItem->isMusic)
+		else if (currentItem->loop)
 		{
+			/* Music loops. */
 			currentItem->position = currentItem->sampleData->buffer;
 			currentItem->remainingLength = currentItem->sampleData->length;
 		}
 		else
 		{
+			/* A sound has finished playing and needs to be removed from the queue. */
 			if (previousItem == NULL)
 				audio->queue = currentItem->next; /* Set root */
 			else

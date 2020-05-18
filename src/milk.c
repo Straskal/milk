@@ -29,24 +29,9 @@
 #include "milk.h"
 #include "milk_api.h"
 #include "milk_bmp.h"
-#include "milk_wav.h"
 
 #define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x)
 #define NOT_CLIPPED(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
-
-static void _initAudio(Audio *audio)
-{
-	audio->masterVolume = MILK_MAX_VOLUME;
-	audio->musicVolume = MILK_MAX_VOLUME;
-	audio->soundVolume = MILK_MAX_VOLUME;
-
-	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
-	{
-		audio->queueItems[i].isFree = MILK_TRUE;
-	}
-
-	milkLoadSamples(audio->samples);
-}
 
 static void _initVideo(Video *video)
 {
@@ -57,8 +42,7 @@ static void _initVideo(Video *video)
 Milk *milkInit()
 {
 	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
-
-	_initAudio(&milk->audio);
+	milkOpenAudio(&milk->audio);
 	_initVideo(&milk->video);
 
 	milkLoadScripts(milk);
@@ -68,7 +52,7 @@ Milk *milkInit()
 void milkFree(Milk *milk)
 {
 	milkUnloadScripts(milk);
-	milkFreeSamples(&milk->audio.samples[0]);
+	milkCloseAudio(&milk->audio);
 	free(milk);
 }
 
@@ -100,83 +84,6 @@ int milkButton(Input *input, uint8_t button)
 int milkButtonPressed(Input *input, uint8_t button)
 {
 	return (input->gamepad.buttonState & button) == button && (input->gamepad.previousButtonState & button) != button;
-}
-
-static void _queueSample(AudioQueueItem **root, AudioQueueItem *new)
-{
-	AudioQueueItem *rootPtr = *root;
-
-	if (rootPtr == NULL)
-	{
-		*root = new;
-		return;
-	}
-
-	while (rootPtr->next != NULL)
-		rootPtr = rootPtr->next;
-
-	rootPtr->next = new;
-}
-
-static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
-{
-	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
-	{
-		if (audio->queueItems[i].isFree)
-		{
-			audio->queueItems[i].isFree = 0;
-			*queueItem = &audio->queueItems[i];
-			return 1;
-		}
-	}
-	return 0;
-}
-
-static void _playSample(Audio *audio, int idx, uint8_t volume, uint8_t loop)
-{
-	audio->lock();
-
-	AudioQueueItem *queueItem;
-	SampleData *sampleData;
-
-	if (!_getFreeQueueItem(audio, &queueItem))
-	{
-		audio->unlock();
-		return;
-	}
-
-	sampleData = &audio->samples[idx];
-	queueItem->sampleData = sampleData;
-	queueItem->position = sampleData->buffer;
-	queueItem->remainingLength = sampleData->length;
-	queueItem->volume = volume;
-	queueItem->isMusic = loop;
-	queueItem->isFading = 0;
-	queueItem->next = NULL;
-
-	_queueSample(&audio->queue, queueItem);
-
-	audio->unlock();
-}
-
-void milkPlayMusic(Audio *audio, int idx, uint8_t volume)
-{
-	_playSample(audio, idx, volume, 1);
-}
-
-void milkSound(Audio *audio, int idx, uint8_t volume)
-{
-	_playSample(audio, idx, volume, 0);
-}
-
-void milkVolume(Audio *audio, uint8_t volume)
-{
-	if (volume < 0)
-		volume = 0;
-	if (volume > MILK_MAX_VOLUME)
-		volume = MILK_MAX_VOLUME;
-
-	audio->masterVolume = volume;
 }
 
 void milkClipRect(Video *video, int x, int y, int w, int h)

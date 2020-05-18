@@ -24,6 +24,7 @@
 
 #include "milk_api.h"
 #include "milk.h"
+#include "milk_audio.h"
 
 #include <lua.h>
 #include <lauxlib.h>

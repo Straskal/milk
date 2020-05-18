@@ -1,0 +1,119 @@
+#include "milk_audio.h"
+
+#include <stdlib.h>
+#include <SDL.h>
+
+static void _loadWav(const char *filename, SampleData *sampleData)
+{
+	SDL_AudioSpec waveSpec;
+	SDL_LoadWAV(filename, &waveSpec, &sampleData->buffer, &sampleData->length);
+
+	/* A lot of sound effects are mono (1 channel), so must CONVERT THEM. */
+	if (waveSpec.channels != MILK_AUDIO_CHANNELS)
+	{
+		SDL_AudioCVT conversion;
+		SDL_BuildAudioCVT(&conversion, waveSpec.format, waveSpec.channels, waveSpec.freq, AUDIO_S16LSB, MILK_AUDIO_CHANNELS, MILK_AUDIO_FREQUENCY);
+		conversion.len = sampleData->length;
+		conversion.buf = (Uint8 *)SDL_malloc((size_t)conversion.len * conversion.len_mult);
+		SDL_memcpy(conversion.buf, sampleData->buffer, sampleData->length);
+		SDL_ConvertAudio(&conversion);
+		SDL_FreeWAV(sampleData->buffer);
+
+		sampleData->buffer = conversion.buf;
+		sampleData->length = conversion.len * conversion.len_ratio;;
+	}
+}
+
+void milkOpenAudio(Audio *audio)
+{
+	audio->masterVolume = MILK_AUDIO_MAX_VOLUME;
+
+	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+	{
+		audio->queueItems[i].isFree = 1;
+	}
+
+	_loadWav("music.wav", &audio->samples[0]);
+	_loadWav("fireball_shoot.wav", &audio->samples[1]);
+	_loadWav("punch.wav", &audio->samples[2]);
+}
+
+void milkCloseAudio(Audio *audio)
+{
+	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
+	{
+		SDL_FreeWAV(audio->samples[i].buffer);
+	}
+}
+
+static void _queueSample(AudioQueueItem **root, AudioQueueItem *new)
+{
+	AudioQueueItem *rootPtr = *root;
+
+	if (rootPtr == NULL)
+		*root = new;
+	else
+	{
+		while (rootPtr->next != NULL)
+			rootPtr = rootPtr->next;
+
+		rootPtr->next = new;
+	}
+}
+
+/* Milk limits the amount of concurrent sounds. If a free queue spot isn't found, then the sound isn't played. END OF FUCKING STORY. */
+static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
+{
+	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+	{
+		if (audio->queueItems[i].isFree)
+		{
+			audio->queueItems[i].isFree = 0;
+			*queueItem = &audio->queueItems[i];
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static void _playSample(Audio *audio, int idx, uint8_t volume, uint8_t loop)
+{
+	audio->lock();
+	{
+		AudioQueueItem *queueItem;
+
+		if (_getFreeQueueItem(audio, &queueItem))
+		{
+			SampleData *sampleData = &audio->samples[idx];
+			queueItem->sampleData = sampleData;
+			queueItem->position = sampleData->buffer;
+			queueItem->remainingLength = sampleData->length;
+			queueItem->volume = volume;
+			queueItem->loop = loop;
+			queueItem->next = NULL;
+
+			_queueSample(&audio->queue, queueItem);
+		}
+	}
+	audio->unlock();
+}
+
+void milkPlayMusic(Audio *audio, int idx, uint8_t volume)
+{
+	_playSample(audio, idx, volume, 1);
+}
+
+void milkSound(Audio *audio, int idx, uint8_t volume)
+{
+	_playSample(audio, idx, volume, 0);
+}
+
+void milkVolume(Audio *audio, uint8_t volume)
+{
+	if (volume < 0)
+		volume = 0;
+	if (volume > MILK_AUDIO_MAX_VOLUME)
+		volume = MILK_AUDIO_MAX_VOLUME;
+
+	audio->masterVolume = volume;
+}

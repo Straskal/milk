@@ -25,18 +25,12 @@
 #ifndef __MILK_H__
 #define __MILK_H__
 
+#include "milk_audio.h"
+
 #include <stdint.h>
 
 /* Frame rate */
 #define MILK_FRAMERATE (1000.0f / 50.0f)
-
-/* Audio */
-#define MILK_AUDIO_FREQUENCY 44100
-#define MILK_AUDIO_CHANNELS 2 /* Stereo */
-#define MILK_AUDIO_SAMPLES 4096
-#define MILK_AUDIO_MAX 25
-#define MILK_AUDIO_QUEUE_MAX 16
-#define MILK_MAX_VOLUME 128
 
 /* Frame buffer */
 #define MILK_FRAMEBUF_WIDTH 256
@@ -61,40 +55,6 @@
 #define MILK_BOOL int
 #define MILK_TRUE 1
 #define MILK_FALSE 0
-
-/* Sample data for sounds. */
-typedef struct SampleData
-{
-    uint32_t length;
-    uint8_t *buffer;
-} SampleData;
-
-/* A queue of active samples. */
-typedef struct AudioQueueItem
-{
-    SampleData *sampleData;
-    uint32_t remainingLength;
-    uint8_t *position;
-    uint8_t volume;
-    uint8_t isMusic;
-    uint8_t isFading;
-    uint8_t isFree;
-
-    struct AudioQueueItem *next;
-} AudioQueueItem;
-
-/* Since we're using an async callback system, we must lock and unlock the audio device when manipulating the audio queue. */
-typedef struct Audio
-{
-    SampleData samples[MILK_AUDIO_MAX];
-    AudioQueueItem queueItems[MILK_AUDIO_QUEUE_MAX];
-    AudioQueueItem *queue;
-    uint8_t masterVolume;
-    uint8_t musicVolume;
-    uint8_t soundVolume;
-    void(*lock)();
-    void(*unlock)();
-} Audio;
 
 /* 24 bit color is packed into 32 bits: 0x00RRGGBB */
 typedef uint32_t Color32;
@@ -172,13 +132,13 @@ typedef struct Milk
 
 Milk *milkInit();
 void milkFree(Milk *milk);
+
 void milkUpdate(Milk *milk);
 void milkDraw(Milk *milk);
+
 int milkButton(Input *input, uint8_t button);
 int milkButtonPressed(Input *input, uint8_t button);
-void milkPlayMusic(Audio *audio, int idx, uint8_t volume);
-void milkSound(Audio *audio, int idx, uint8_t volume);
-void milkVolume(Audio *audio, uint8_t volume);
+
 void milkClipRect(Video *video, int x, int y, int w, int h);
 void milkClear(Video *video, Color32 idx);
 void milkPixelSet(Video *video, int x, int y, Color32 color);
