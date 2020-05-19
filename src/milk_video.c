@@ -165,7 +165,7 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 		yDirection = 1;
 	}
 
-	/* Pretty much running the nearest neighbor scaling on all blit pixels. Not really sure if this affects performance too much. */
+	/* Pretty much running the nearest neighbor scaling on all blit pixels. This doesn't seem to affect performance. */
 	for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yDirection)
 	{
 		for (xFramebuffer = x, xPixel = xPixelStart; xFramebuffer < x + width; xFramebuffer++, xPixel += xDirection)
@@ -183,20 +183,24 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip)
 {
 	static int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
+	static int rowSize = MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE;
+	static int colSize = MILK_SPRSHEET_SPR_SQRSIZE;
 
 	if (idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
 		return;
 
 	int row = (int)floor(idx / numColumns);
 	int col = (int)floor(idx % numColumns);
-	Color32 *pixels = &video->spritesheet[row * MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE + col * MILK_SPRSHEET_SPR_SQRSIZE];
+	Color32 *pixels = &video->spritesheet[row * rowSize + col * colSize];
 
-	_blitRect(video, pixels, x, y, MILK_SPRSHEET_SPR_SQRSIZE * w, MILK_SPRSHEET_SPR_SQRSIZE * h, MILK_SPRSHEET_SQRSIZE, scale, flip);
+	_blitRect(video, pixels, x, y, w * MILK_SPRSHEET_SPR_SQRSIZE, h * MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE, scale, flip);
 }
 
 static void _drawCharacter(Video *video, int x, int y, char character, float scale)
 {
 	static int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
+	static int rowSize = MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE;
+	static int colSize = MILK_CHAR_SQRSIZE;
 
 	if (!IS_ASCII(character))
 		character = '?';
@@ -204,7 +208,7 @@ static void _drawCharacter(Video *video, int x, int y, char character, float sca
 	/* bitmap font starts at ASCII character 32 (SPACE) */
 	int row = (int)floor((character - 32) / numColumns);
 	int col = (int)floor((character - 32) % numColumns);
-	Color32 *pixels = &video->font[(row * MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE + col * MILK_CHAR_SQRSIZE)];
+	Color32 *pixels = &video->font[(row * rowSize + col * colSize)];
 
 	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0);
 }
