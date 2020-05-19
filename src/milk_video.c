@@ -164,6 +164,7 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 		yDirection = 1;
 	}
 
+	/* Pretty much running the nearest neighbor scaling on all blit pixels. Not really sure if this affects performance too much. */
 	for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yDirection)
 	{
 		for (xFramebuffer = x, xPixel = xPixelStart; xFramebuffer < x + width; xFramebuffer++, xPixel += xDirection)
