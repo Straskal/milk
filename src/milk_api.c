@@ -170,7 +170,7 @@ static int l_spr(lua_State *L)
 		(int)luaL_optinteger(L, 4, 1),
 		(int)luaL_optinteger(L, 5, 1),
 		(float)luaL_optnumber(L, 6, 1.0),
-		0
+		(int)luaL_optinteger(L, 7, 0)
 	);
 	return 0;
 }

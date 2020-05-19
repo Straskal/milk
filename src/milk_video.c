@@ -29,6 +29,9 @@
 #define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x)
 #define NOT_CLIPPED(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
 
+#define FLIP_X 1
+#define FLIP_Y 2
+
 static void _loadBmp(Color32 *dest, char *filename)
 {
 	SDL_Surface *bmp = SDL_LoadBMP(filename);
@@ -128,45 +131,49 @@ void milkRect(Video *video, int x, int y, int w, int h, Color32 color)
 	_verticalLine(video, x + w, y, h, color);
 }
 
-static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int xflip)
+static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip)
 {
-	int xPixel;
-	int yPixel;
-	int xFramebuffer;
-	int yFramebuffer;
+	int xPixel, yPixel; /* Pixel position to draw. */
+	int xFramebuffer, yFramebuffer; /* Position to draw on to the frame buffer. */
+	int xPixelStart, xDirection; /* The x pixel to start drawing from and the direction to iterate */
+	int yPixelStart, yDirection; /* The y pixel to start drawing from and the direction to iterate */
+	int width = w * scale;
+	int height = h * scale;
+	int xRatio = (int)((w << 16) / width) + 1;
+	int yRatio = (int)((h << 16) / height) + 1;
 
-	if (scale == 1.0f)
+	if ((flip & FLIP_X) == FLIP_X)
 	{
-		for (yFramebuffer = y, yPixel = 0; yFramebuffer < y + h; yFramebuffer++, yPixel++)
-		{
-			for (xFramebuffer = x, xPixel = 0; xFramebuffer < x + w; xFramebuffer++, xPixel++)
-			{
-				Color32 col = pixels[yPixel * pitch + xPixel];
-
-				if (col != video->colorKey)
-					milkPixelSet(video, xFramebuffer, yFramebuffer, col);
-			}
-		}
+		xPixelStart = width;
+		xDirection = -1;
 	}
 	else
 	{
-		float scaledWidth = w * scale;
-		float scaledHeight = h * scale;
-		int xRatio = (int)((w << 16) / scaledWidth) + 1;
-		int yRatio = (int)((h << 16) / scaledHeight) + 1;
+		xPixelStart = 0;
+		xDirection = 1;
+	}
 
-		for (yFramebuffer = y, yPixel = 0; yFramebuffer < y + scaledHeight; yFramebuffer++, yPixel++)
+	if ((flip & FLIP_Y) == FLIP_Y)
+	{
+		yPixelStart = height;
+		yDirection = -1;
+	}
+	else
+	{
+		yPixelStart = 0;
+		yDirection = 1;
+	}
+
+	for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yDirection)
+	{
+		for (xFramebuffer = x, xPixel = xPixelStart; xFramebuffer < x + width; xFramebuffer++, xPixel += xDirection)
 		{
-			for (xFramebuffer = x, xPixel = 0; xFramebuffer < x + scaledWidth; xFramebuffer++, xPixel++)
-			{
-				int xNearest = (xPixel * xRatio) >> 16;
-				int yNearest = (yPixel * yRatio) >> 16;
+			int xNearest = (xPixel * xRatio) >> 16;
+			int yNearest = (yPixel * yRatio) >> 16;
+			Color32 col = pixels[yNearest * pitch + xNearest];
 
-				Color32 col = pixels[yNearest * pitch + xNearest];
-
-				if (col != video->colorKey)
-					milkPixelSet(video, xFramebuffer, yFramebuffer, col);
-			}
+			if (col != video->colorKey)
+				milkPixelSet(video, xFramebuffer, yFramebuffer, col);
 		}
 	}
 }
