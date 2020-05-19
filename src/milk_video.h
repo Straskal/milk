@@ -32,9 +32,6 @@
 #define MILK_FRAMEBUF_WIDTH 256
 #define MILK_FRAMEBUF_HEIGHT 224
 
-#define MILK_WINDOW_WIDTH MILK_FRAMEBUF_WIDTH * 3
-#define MILK_WINDOW_HEIGHT MILK_FRAMEBUF_HEIGHT * 3
-
 #define MILK_SPRSHEET_SQRSIZE 256
 #define MILK_SPRSHEET_SPR_SQRSIZE 16
 #define MILK_SPRSHEET_ROWS (MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE)
@@ -45,7 +42,7 @@
 #define MILK_FONT_HEIGHT 48
 #define MILK_CHAR_SQRSIZE 8
 
-/* 24 bit color is packed into 32 bits: 0x00RRGGBB */
+/* Packed 32 bit color: 0xAARRGGBB */
 typedef uint32_t Color32;
 
 #define COLOR_R(c) (c >> 24)
@@ -76,13 +73,12 @@ typedef struct Video
 } Video;
 
 void milkOpenVideo(Video *video);
-
 void milkClipRect(Video *video, int x, int y, int w, int h);
 void milkClear(Video *video, Color32 idx);
 void milkPixelSet(Video *video, int x, int y, Color32 color);
-void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color);
 void milkRect(Video *video, int x, int y, int w, int h, Color32 color);
-void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int xflip);
+void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color);
+void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip);
 void milkSpriteFont(Video *video, int x, int y, const char *str, float scale);
 
 #endif

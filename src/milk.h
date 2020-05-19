@@ -30,6 +30,9 @@
 
 #include <stdint.h>
 
+#define MILK_WINDOW_WIDTH MILK_FRAMEBUF_WIDTH * 3
+#define MILK_WINDOW_HEIGHT MILK_FRAMEBUF_HEIGHT * 3
+
 #define MILK_BOOL int
 #define MILK_TRUE 1
 #define MILK_FALSE 0
@@ -80,10 +83,8 @@ typedef struct Milk
 
 Milk *milkInit();
 void milkFree(Milk *milk);
-
 void milkUpdate(Milk *milk);
 void milkDraw(Milk *milk);
-
 int milkButton(Input *input, uint8_t button);
 int milkButtonPressed(Input *input, uint8_t button);
 

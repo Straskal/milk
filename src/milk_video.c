@@ -26,31 +26,32 @@
 
 #include <SDL.h>
 
-#define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x)
-#define NOT_CLIPPED(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
+#define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x) /* xy coords to framebuffer pixel index. */
+#define WITHIN_CLIP_RECT(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
+#define FRAMEBUFFER_MIN(x) (x < 0 ? 0 : x)
+#define FRAMEBUFFER_MAXX(x) (x > MILK_FRAMEBUF_WIDTH ? MILK_FRAMEBUF_WIDTH : x)
+#define FRAMEBUFFER_MAXY(y) (y > MILK_FRAMEBUF_HEIGHT ? MILK_FRAMEBUF_HEIGHT : y)
 
-#define FLIP_X 1
-#define FLIP_Y 2
+#define FLIPX 1
+#define FLIPY 2
 
-static void _loadBmp(Color32 *dest, char *filename)
+#define IS_ASCII(c) ((c & 0xff80) == 0)
+#define IS_NEWLINE(c) (c == '\n')
+
+/* Load bitmap and copy it's pixel data into a fixed size buffer. */
+/* Would also love to rid of this SDL dependency. Could have custom bmp loading here. */
+static void _loadBitmap(char *filename, Color32 *dest, size_t len)
 {
 	SDL_Surface *bmp = SDL_LoadBMP(filename);
-	int bpp = bmp->format->BytesPerPixel;
-	int width = bmp->w;
-	int height = bmp->h;
-	int len = width * height * bpp;
 	uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
-	uint8_t *itr = bmpPixels;
-	uint8_t *end = &bmpPixels[len];
-	Color32 *pixelitr = dest;
 
-	while (itr != end)
+	for (int i = 0; i < len; i++)
 	{
-		int b = *(itr++);
-		int g = *(itr++);
-		int r = *(itr++);
+		int b = *(bmpPixels++);
+		int g = *(bmpPixels++);
+		int r = *(bmpPixels++);
 
-		*(pixelitr++) = (r << 16) | (g << 8) | (b);
+		dest[i] = (r << 16) | (g << 8) | (b);
 	}
 
 	SDL_FreeSurface(bmp);
@@ -58,8 +59,8 @@ static void _loadBmp(Color32 *dest, char *filename)
 
 void milkOpenVideo(Video *video)
 {
-	_loadBmp(&video->spritesheet, MILK_SPRSHEET_FILENAME);
-	_loadBmp(&video->font, MILK_FONT_FILENAME);
+	_loadBitmap(MILK_SPRSHEET_FILENAME, &video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
+	_loadBitmap(MILK_FONT_FILENAME, &video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
 }
 
 void milkClipRect(Video *video, int x, int y, int w, int h)
@@ -67,14 +68,14 @@ void milkClipRect(Video *video, int x, int y, int w, int h)
 	int right = x + w;
 	int bottom = y + h;
 
-	if (x < 0) x = 0;
-	else if (x > MILK_FRAMEBUF_WIDTH) x = MILK_FRAMEBUF_WIDTH;
-	if (y < 0) y = 0;
-	else if (y > MILK_FRAMEBUF_HEIGHT) y = MILK_FRAMEBUF_HEIGHT;
-	if (right < 0) right = 0;
-	else if (right > MILK_FRAMEBUF_WIDTH) right = MILK_FRAMEBUF_WIDTH;
-	if (bottom < 0) bottom = 0;
-	else if (bottom > MILK_FRAMEBUF_HEIGHT) bottom = MILK_FRAMEBUF_HEIGHT;
+	x = FRAMEBUFFER_MIN(x);
+	x = FRAMEBUFFER_MAXX(x);
+	right = FRAMEBUFFER_MIN(right);
+	right = FRAMEBUFFER_MAXX(right);
+	y = FRAMEBUFFER_MIN(y);
+	y = FRAMEBUFFER_MAXY(y);
+	bottom = FRAMEBUFFER_MIN(bottom);
+	bottom = FRAMEBUFFER_MAXY(bottom);
 
 	video->clipRect.left = x;
 	video->clipRect.right = right;
@@ -92,19 +93,8 @@ void milkClear(Video *video, Color32 color)
 
 void milkPixelSet(Video *video, int x, int y, Color32 color)
 {
-	if (NOT_CLIPPED(video->clipRect, x, y))
+	if (WITHIN_CLIP_RECT(video->clipRect, x, y))
 		video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
-}
-
-void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
-{
-	for (int j = y; j < y + h; j++)
-	{
-		for (int i = x; i < x + w; i++)
-		{
-			milkPixelSet(video, i, j, color);
-		}
-	}
 }
 
 static void _horizontalLine(Video *video, int x, int y, int w, Color32 color)
@@ -131,6 +121,17 @@ void milkRect(Video *video, int x, int y, int w, int h, Color32 color)
 	_verticalLine(video, x + w, y, h, color);
 }
 
+void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
+{
+	for (int j = y; j < y + h; j++)
+	{
+		for (int i = x; i < x + w; i++)
+		{
+			milkPixelSet(video, i, j, color);
+		}
+	}
+}
+
 static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip)
 {
 	int xPixel, yPixel; /* Pixel position to draw. */
@@ -142,7 +143,7 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 	int xRatio = (int)((w << 16) / width) + 1;
 	int yRatio = (int)((h << 16) / height) + 1;
 
-	if ((flip & FLIP_X) == FLIP_X)
+	if ((flip & FLIPX) == FLIPX)
 	{
 		xPixelStart = width;
 		xDirection = -1;
@@ -153,7 +154,7 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 		xDirection = 1;
 	}
 
-	if ((flip & FLIP_Y) == FLIP_Y)
+	if ((flip & FLIPY) == FLIPY)
 	{
 		yPixelStart = height;
 		yDirection = -1;
@@ -179,31 +180,28 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 	}
 }
 
-void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int xflip)
+void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip)
 {
+	static int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
+
 	if (idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
 		return;
 
-	int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
 	int row = (int)floor(idx / numColumns);
 	int col = (int)floor(idx % numColumns);
 	Color32 *pixels = &video->spritesheet[row * MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE + col * MILK_SPRSHEET_SPR_SQRSIZE];
 
-	_blitRect(video, pixels, x, y, MILK_SPRSHEET_SPR_SQRSIZE * w, MILK_SPRSHEET_SPR_SQRSIZE * h, MILK_SPRSHEET_SQRSIZE, scale, xflip);
-}
-
-static int _isAscii(char character)
-{
-	return (character & 0xff80) == 0;
+	_blitRect(video, pixels, x, y, MILK_SPRSHEET_SPR_SQRSIZE * w, MILK_SPRSHEET_SPR_SQRSIZE * h, MILK_SPRSHEET_SQRSIZE, scale, flip);
 }
 
 static void _drawCharacter(Video *video, int x, int y, char character, float scale)
 {
-	if (!_isAscii(character))
+	static int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
+
+	if (!IS_ASCII(character))
 		character = '?';
 
 	/* bitmap font starts at ASCII character 32 (SPACE) */
-	int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
 	int row = (int)floor((character - 32) / numColumns);
 	int col = (int)floor((character - 32) % numColumns);
 	Color32 *pixels = &video->font[(row * MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE + col * MILK_CHAR_SQRSIZE)];
@@ -211,26 +209,22 @@ static void _drawCharacter(Video *video, int x, int y, char character, float sca
 	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0);
 }
 
-int _isNewline(const char *characters)
-{
-	return *characters == '\n';
-}
-
 void milkSpriteFont(Video *video, int x, int y, const char *str, float scale)
 {
+	int size = MILK_CHAR_SQRSIZE * scale;
 	int xCurrent = x;
 	int yCurrent = y;
 
 	while (*str)
 	{
-		while (_isNewline(str))
+		while (IS_NEWLINE(*str))
 		{
 			xCurrent = x;
-			yCurrent += MILK_CHAR_SQRSIZE * scale;
+			yCurrent += size;
 			str++;
 		}
 
 		_drawCharacter(video, xCurrent, yCurrent, *(str++), scale);
-		xCurrent += MILK_CHAR_SQRSIZE * scale;
+		xCurrent += size;
 	}
 }
