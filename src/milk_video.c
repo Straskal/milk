@@ -50,7 +50,8 @@ static void _loadBmp(Color32 *dest, char *filename)
 		*(pixelitr++) = (r << 16) | (g << 8) | (b);
 	}
 
-	SDL_FreeSurface(bmp);}
+	SDL_FreeSurface(bmp);
+}
 
 void milkOpenVideo(Video *video)
 {
