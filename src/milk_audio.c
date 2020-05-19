@@ -85,6 +85,34 @@ static void _queueSample(AudioQueueItem **root, AudioQueueItem *new)
 	}
 }
 
+/* Milk only allows for 1 looping sound at a time. Stop loop must be called before mixing another looping sound. */
+static void _stopCurrentLoop(AudioQueueItem **root)
+{
+	AudioQueueItem *rootPtr = *root;
+	AudioQueueItem *previous = *root;
+
+	if (rootPtr == NULL)
+		return;
+
+	if (rootPtr->loop == 1)
+	{
+		rootPtr->isFree = 1;
+		*root = rootPtr->next;
+	}
+	else
+	{
+		while (rootPtr->next != NULL)
+		{
+			if (rootPtr->loop)
+			{
+				rootPtr->isFree = 1;
+				previous->next = rootPtr->next;
+				return;
+			}
+		}
+	}
+}
+
 /* Milk limits the amount of concurrent sounds. If a free queue spot isn't found, then the sound isn't played. END OF FUCKING STORY. */
 static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 {
@@ -108,6 +136,9 @@ static void _playSample(Audio *audio, int idx, uint8_t volume, uint8_t loop)
 
 		if (_getFreeQueueItem(audio, &queueItem))
 		{
+			if (loop) /* Stop current loop in favor of the new looping sound. */
+				_stopCurrentLoop(&audio->queue);
+
 			SampleData *sampleData = &audio->samples[idx];
 			queueItem->sampleData = sampleData;
 			queueItem->position = sampleData->buffer;
@@ -122,14 +153,9 @@ static void _playSample(Audio *audio, int idx, uint8_t volume, uint8_t loop)
 	audio->unlock();
 }
 
-void milkPlayMusic(Audio *audio, int idx, uint8_t volume)
+void milkSound(Audio *audio, int idx, uint8_t volume, uint8_t loop)
 {
-	_playSample(audio, idx, volume, 1);
-}
-
-void milkSound(Audio *audio, int idx, uint8_t volume)
-{
-	_playSample(audio, idx, volume, 0);
+	_playSample(audio, idx, volume, loop);
 }
 
 void milkVolume(Audio *audio, uint8_t volume)

@@ -111,7 +111,8 @@ static int l_snd(lua_State *L)
 	Milk *milk = _getGlobalMilk(L);
 	milkSound(&milk->audio,
 		(int)lua_tointeger(L, 1),
-		(uint8_t)luaL_optinteger(L, 2, 128)
+		(uint8_t)luaL_optinteger(L, 2, 128),
+		(uint8_t)luaL_optinteger(L, 3, 0)
 	);
 	return 0;
 }

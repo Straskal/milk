@@ -65,8 +65,7 @@ typedef struct
 
 void milkOpenAudio(Audio *audio);
 void milkCloseAudio(Audio *audio);
-void milkPlayMusic(Audio *audio, int idx, uint8_t volume);
-void milkSound(Audio *audio, int idx, uint8_t volume);
+void milkSound(Audio *audio, int idx, uint8_t volume, uint8_t loop);
 void milkVolume(Audio *audio, uint8_t volume);
 void milkMixCallback(void *userdata, uint8_t *stream, int len);
 
