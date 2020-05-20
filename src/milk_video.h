@@ -44,10 +44,6 @@
 /* Packed 32 bit color: 0xAARRGGBB */
 typedef uint32_t Color32;
 
-#define COLOR_R(c) (c >> 24)
-#define COLOR_G(c) (c >> 16)
-#define COLOR_B(c) (c >> 8)
-
 typedef struct Rect
 {
     int top;

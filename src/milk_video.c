@@ -76,7 +76,6 @@ void milkClipRect(Video *video, int x, int y, int w, int h)
 	y = FRAMEBUFFER_MAXY(y);
 	bottom = FRAMEBUFFER_MIN(bottom);
 	bottom = FRAMEBUFFER_MAXY(bottom);
-
 	video->clipRect.left = x;
 	video->clipRect.right = right;
 	video->clipRect.top = y;
@@ -85,9 +84,12 @@ void milkClipRect(Video *video, int x, int y, int w, int h)
 
 void milkClear(Video *video, Color32 color)
 {
-	for (int i = 0; i < MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT; i++)
+	Rect clip = video->clipRect;
+
+	for (int i = clip.top; i < clip.bottom; i++)
 	{
-		video->framebuffer[i] = color;
+		for (int j = clip.left; j < clip.right; j++)
+			video->framebuffer[i] = color;
 	}
 }
 
@@ -100,17 +102,13 @@ void milkPixelSet(Video *video, int x, int y, Color32 color)
 static void _horizontalLine(Video *video, int x, int y, int w, Color32 color)
 {
 	for (int i = x; i <= x + w; i++)
-	{
 		milkPixelSet(video, i, y, color);
-	}
 }
 
 static void _verticalLine(Video *video, int x, int y, int h, Color32 color)
 {
 	for (int i = y; i <= y + h; i++)
-	{
 		milkPixelSet(video, x, i, color);
-	}
 }
 
 void milkRect(Video *video, int x, int y, int w, int h, Color32 color)
@@ -126,9 +124,7 @@ void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
 	for (int j = y; j < y + h; j++)
 	{
 		for (int i = x; i < x + w; i++)
-		{
 			milkPixelSet(video, i, j, color);
-		}
 	}
 }
 

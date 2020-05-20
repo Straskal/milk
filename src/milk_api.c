@@ -117,6 +117,18 @@ static int l_snd(lua_State *L)
 	return 0;
 }
 
+static int l_clip(lua_State *L)
+{
+	Milk *milk = _getGlobalMilk(L);
+	milkClipRect(&milk->video,
+		(int)lua_tointeger(L, 1),
+		(int)lua_tointeger(L, 2),
+		(int)lua_tointeger(L, 3),
+		(int)lua_tointeger(L, 4)
+	);
+	return 0;
+}
+
 static int l_clrs(lua_State *L)
 {
 	Milk *milk = _getGlobalMilk(L);
@@ -201,6 +213,7 @@ static void _pushApi(lua_State *L)
 	_pushApiFunction(L, "btnp", l_btnp);
 	_pushApiFunction(L, "vol", l_vol);
 	_pushApiFunction(L, "snd", l_snd);
+	_pushApiFunction(L, "clip", l_clip);
 	_pushApiFunction(L, "clrs", l_clrs);
 	_pushApiFunction(L, "pset", l_pset);
 	_pushApiFunction(L, "rectfill", l_rectfill);
