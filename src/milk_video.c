@@ -128,6 +128,10 @@ void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
 	}
 }
 
+/*
+ * Blit a rectangular pixel buffer onto the video's frame buffer.
+ * Allows for scaling and flipping.
+ */
 static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip)
 {
 	int xPixel, yPixel; /* Pixel position to draw. */
