@@ -24,6 +24,7 @@
 
 #include "milk_video.h"
 
+#include <stdlib.h>
 #include <SDL.h>
 
 #define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x) /* xy coords to framebuffer pixel index. */
@@ -45,7 +46,7 @@ static void _loadBitmap(char *filename, Color32 *dest, size_t len)
 	SDL_Surface *bmp = SDL_LoadBMP(filename);
 	uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
 
-	for (int i = 0; i < len; i++)
+	for (size_t i = 0; i < len; i++)
 	{
 		int b = *(bmpPixels++);
 		int g = *(bmpPixels++);
@@ -59,8 +60,8 @@ static void _loadBitmap(char *filename, Color32 *dest, size_t len)
 
 void milkOpenVideo(Video *video)
 {
-	_loadBitmap(MILK_SPRSHEET_FILENAME, &video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
-	_loadBitmap(MILK_FONT_FILENAME, &video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
+	_loadBitmap(MILK_SPRSHEET_FILENAME, video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
+	_loadBitmap(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
 }
 
 void milkClipRect(Video *video, int x, int y, int w, int h)
@@ -128,42 +129,20 @@ void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
 	}
 }
 
-/*
- * Blit a rectangular pixel buffer onto the video's frame buffer.
- * Allows for scaling and flipping.
- */
 static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip)
 {
-	int xPixel, yPixel; /* Pixel position to draw. */
-	int xFramebuffer, yFramebuffer; /* Position to draw on to the frame buffer. */
-	int xPixelStart, xDirection; /* The x pixel to start drawing from and the direction to iterate */
-	int yPixelStart, yDirection; /* The y pixel to start drawing from and the direction to iterate */
-	int width = w * scale;
-	int height = h * scale;
+	int width = (int)floor((double)w * scale);
+	int height = (int)floor((double)h * scale);
 	int xRatio = (int)((w << 16) / width) + 1;
 	int yRatio = (int)((h << 16) / height) + 1;
-
-	if ((flip & FLIPX) == FLIPX)
-	{
-		xPixelStart = width - 1;
-		xDirection = -1;
-	}
-	else
-	{
-		xPixelStart = 0;
-		xDirection = 1;
-	}
-
-	if ((flip & FLIPY) == FLIPY)
-	{
-		yPixelStart = height - 1;
-		yDirection = -1;
-	}
-	else
-	{
-		yPixelStart = 0;
-		yDirection = 1;
-	}
+	int xflip = (flip & FLIPX) == FLIPX;
+	int yflip = (flip & FLIPY) == FLIPY;
+	int xPixelStart = xflip ? width - 1 : 0;
+	int xDirection = xflip ? -1 : 1;
+	int yPixelStart = yflip ? height - 1 : 0;
+	int yDirection = yflip ? -1 : 1;
+	int xPixel, yPixel;
+	int xFramebuffer, yFramebuffer;
 
 	/* Pretty much running the nearest neighbor scaling on all blit pixels. This doesn't seem to affect performance. */
 	for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yDirection)
@@ -196,39 +175,37 @@ void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 	_blitRect(video, pixels, x, y, w * MILK_SPRSHEET_SPR_SQRSIZE, h * MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE, scale, flip);
 }
 
-static void _drawCharacter(Video *video, int x, int y, char character, float scale)
+void milkSpriteFont(Video *video, int x, int y, const char *str, float scale)
 {
 	static int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
 	static int rowSize = MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE;
 	static int colSize = MILK_CHAR_SQRSIZE;
 
-	if (!IS_ASCII(character))
-		character = '?';
-
-	/* bitmap font starts at ASCII character 32 (SPACE) */
-	int row = (int)floor((character - 32) / numColumns);
-	int col = (int)floor((character - 32) % numColumns);
-	Color32 *pixels = &video->font[(row * rowSize + col * colSize)];
-
-	_blitRect(video, pixels, x, y, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0);
-}
-
-void milkSpriteFont(Video *video, int x, int y, const char *str, float scale)
-{
-	int size = MILK_CHAR_SQRSIZE * scale;
+	int charSize = (int)floor((double)MILK_CHAR_SQRSIZE * scale);
 	int xCurrent = x;
 	int yCurrent = y;
 
 	while (*str)
 	{
-		while (IS_NEWLINE(*str))
+		if (IS_NEWLINE(*str))
 		{
 			xCurrent = x;
-			yCurrent += size;
+			yCurrent += charSize;
 			str++;
 		}
+		else
+		{
+			char ch = *(str++);
+			if (!IS_ASCII(ch))
+				ch = '?';
 
-		_drawCharacter(video, xCurrent, yCurrent, *(str++), scale);
-		xCurrent += size;
+			/* bitmap font starts at ASCII character 32 (SPACE) */
+			int row = (int)floor((ch - 32) / numColumns);
+			int col = (int)floor((ch - 32) % numColumns);
+			Color32 *pixels = &video->font[(row * rowSize + col * colSize)];
+
+			_blitRect(video, pixels, xCurrent, yCurrent, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0);
+			xCurrent += charSize;
+		}
 	}
 }
