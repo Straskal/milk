@@ -89,7 +89,7 @@ void milkClear(Video *video, Color32 color)
 	for (int i = clip.top; i < clip.bottom; i++)
 	{
 		for (int j = clip.left; j < clip.right; j++)
-			video->framebuffer[i] = color;
+			video->framebuffer[FRAMEBUFFER_POS(j, i)] = color;
 	}
 }
 
