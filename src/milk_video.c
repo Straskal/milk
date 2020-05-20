@@ -141,7 +141,7 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 
 	if ((flip & FLIPX) == FLIPX)
 	{
-		xPixelStart = width;
+		xPixelStart = width - 1;
 		xDirection = -1;
 	}
 	else
@@ -152,7 +152,7 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 
 	if ((flip & FLIPY) == FLIPY)
 	{
-		yPixelStart = height;
+		yPixelStart = height - 1;
 		yDirection = -1;
 	}
 	else
