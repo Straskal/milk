@@ -23,7 +23,7 @@
  */
 
 #include <math.h>
-#include <memory.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 #include "milk.h"
@@ -50,18 +50,9 @@ void milkUpdate(Milk *milk)
 	milkInvokeUpdate(&milk->code);
 }
 
-static void _resetDrawState(Video *video)
-{
-	video->colorKey = 0;
-	video->clipRect.top = 0;
-    video->clipRect.left = 0;
-	video->clipRect.bottom = MILK_FRAMEBUF_HEIGHT;
-	video->clipRect.right = MILK_FRAMEBUF_WIDTH;
-}
-
 void milkDraw(Milk *milk)
 {
-	_resetDrawState(&milk->video);
+	milkResetDrawState(&milk->video);
 	milkInvokeDraw(&milk->code);
 }
 

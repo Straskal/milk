@@ -68,6 +68,7 @@ typedef struct Video
 } Video;
 
 void milkOpenVideo(Video *video);
+void milkResetDrawState(Video *video);
 void milkClipRect(Video *video, int x, int y, int w, int h);
 void milkClear(Video *video, Color32 color);
 void milkPixelSet(Video *video, int x, int y, Color32 color);

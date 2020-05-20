@@ -64,6 +64,15 @@ void milkOpenVideo(Video *video)
 	_loadBitmap(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
 }
 
+void milkResetDrawState(Video *video)
+{
+	video->colorKey = 0;
+	video->clipRect.top = 0;
+	video->clipRect.left = 0;
+	video->clipRect.bottom = MILK_FRAMEBUF_HEIGHT;
+	video->clipRect.right = MILK_FRAMEBUF_WIDTH;
+}
+
 void milkClipRect(Video *video, int x, int y, int w, int h)
 {
 	int right = x + w;
