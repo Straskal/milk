@@ -50,12 +50,11 @@ static void _loadWav(const char *filename, SampleData *sampleData)
 
 void milkOpenAudio(Audio *audio)
 {
+	audio->queue = (AudioQueueItem *)calloc(1, sizeof(AudioQueueItem));
 	audio->masterVolume = MILK_AUDIO_MAX_VOLUME;
 
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
-	{
 		audio->queueItems[i].isFree = 1;
-	}
 
 	_loadWav("music.wav", &audio->samples[0]);
 	_loadWav("fireball_shoot.wav", &audio->samples[1]);
@@ -64,63 +63,48 @@ void milkOpenAudio(Audio *audio)
 
 void milkCloseAudio(Audio *audio)
 {
+	free(audio->queue);
+
 	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
-	{
 		SDL_FreeWAV(audio->samples[i].buffer);
-	}
 }
 
-static void _queueSample(AudioQueueItem **root, AudioQueueItem *new)
+static void _queueSample(AudioQueueItem *queue, AudioQueueItem *new)
 {
-	AudioQueueItem *rootPtr = *root;
+	while (queue->next != NULL)
+		queue = queue->next;
 
-	if (rootPtr == NULL)
-		*root = new;
-	else
-	{
-		while (rootPtr->next != NULL)
-			rootPtr = rootPtr->next;
-
-		rootPtr->next = new;
-	}
+	queue->next = new;
 }
 
 /* Milk only allows for 1 looping sound at a time. Stop loop must be called before mixing another looping sound. */
-static void _stopCurrentLoop(AudioQueueItem **root)
+static void _stopCurrentLoop(AudioQueueItem *queue)
 {
-	AudioQueueItem *rootPtr = *root;
-	AudioQueueItem *previous = *root;
+	AudioQueueItem *curr = queue->next;
+	AudioQueueItem *prev = queue;
 
-	if (rootPtr == NULL)
-		return;
-
-	if (rootPtr->loop == 1)
+	while (curr != NULL)
 	{
-		rootPtr->isFree = 1;
-		*root = rootPtr->next;
-	}
-	else
-	{
-		while (rootPtr->next != NULL)
+		if (curr->loop)
 		{
-			if (rootPtr->loop)
-			{
-				rootPtr->isFree = 1;
-				previous->next = rootPtr->next;
-				return;
-			}
+			curr->isFree = 1;
+			prev->next = curr->next;
+			break;
 		}
+
+		prev = curr;
+		curr = curr->next;
 	}
 }
 
-/* Milk limits the amount of concurrent sounds. If a free queue spot isn't found, then the sound isn't played. END OF FUCKING STORY. */
+/* Milk limits the amount of concurrent sounds. If a free queue spot isn't found, then the sound isn't played. END OF FUCKING STORY, BABY. */
 static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 {
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
 	{
 		if (audio->queueItems[i].isFree)
 		{
-			audio->queueItems[i].isFree = 0;
+			audio->queueItems[i].isFree = 0; /* Queue item is not free any more. */
 			*queueItem = &audio->queueItems[i];
 			return 1;
 		}
@@ -128,34 +112,27 @@ static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 	return 0;
 }
 
-static void _playSample(Audio *audio, int idx, uint8_t volume, uint8_t loop)
-{
-	audio->lock();
-	{
-		AudioQueueItem *queueItem;
-
-		if (_getFreeQueueItem(audio, &queueItem))
-		{
-			if (loop) /* Stop current loop in favor of the new looping sound. */
-				_stopCurrentLoop(&audio->queue);
-
-			SampleData *sampleData = &audio->samples[idx];
-			queueItem->sampleData = sampleData;
-			queueItem->position = sampleData->buffer;
-			queueItem->remainingLength = sampleData->length;
-			queueItem->volume = volume;
-			queueItem->loop = loop;
-			queueItem->next = NULL;
-
-			_queueSample(&audio->queue, queueItem);
-		}
-	}
-	audio->unlock();
-}
-
 void milkSound(Audio *audio, int idx, uint8_t volume, uint8_t loop)
 {
-	_playSample(audio, idx, volume, loop);
+	audio->lock();
+	AudioQueueItem *queueItem;
+
+	if (_getFreeQueueItem(audio, &queueItem))
+	{
+		if (loop) /* Stop current loop in favor of the new looping sound. */
+			_stopCurrentLoop(audio->queue);
+
+		SampleData *sampleData = &audio->samples[idx];
+		queueItem->sampleData = sampleData;
+		queueItem->position = sampleData->buffer;
+		queueItem->remainingLength = sampleData->length;
+		queueItem->volume = volume;
+		queueItem->loop = loop;
+		queueItem->next = NULL;
+
+		_queueSample(audio->queue, queueItem);
+	}
+	audio->unlock();
 }
 
 void milkVolume(Audio *audio, uint8_t volume)
@@ -175,9 +152,9 @@ void milkVolume(Audio *audio, uint8_t volume)
 void milkMixCallback(void *userdata, uint8_t *stream, int len)
 {
 	Audio *audio = (Audio *)userdata;
-	AudioQueueItem *currentItem = audio->queue;
-	AudioQueueItem *previousItem = NULL;
-	SDL_memset(stream, 0, len); /* Silence to stream before writing to it. */
+	AudioQueueItem *currentItem = audio->queue->next;
+	AudioQueueItem *previousItem = audio->queue;
+	SDL_memset(stream, 0, len); /* Silence the stream before writing to it. */
 
 	while (currentItem != NULL)
 	{
@@ -201,14 +178,9 @@ void milkMixCallback(void *userdata, uint8_t *stream, int len)
 		}
 		else
 		{
-			/* A sound has finished playing and needs to be removed from the queue. */
-			if (previousItem == NULL)
-				audio->queue = currentItem->next; /* Set root */
-			else
-				previousItem->next = currentItem->next;
-
-			currentItem->isFree = 1;
 			AudioQueueItem *next = currentItem->next;
+			currentItem->isFree = 1;
+			previousItem->next = next;
 			currentItem->next = NULL;
 			currentItem = next;
 		}
