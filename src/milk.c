@@ -45,13 +45,13 @@
 /*
  *******************************************************************************
  * ASSET LOADING
+
+ * Load WAV data into dynamically allocated buffers.
+ * Load bitmap and copy it's pixel data into a fixed size buffer.
+ * Would also love to rid of this SDL dependency. Could have custom wav loading here.
  *******************************************************************************
  */
 
-/*
- * Load WAV data into dynamically allocated buffers.
- * Would also love to rid of this SDL dependency. Could have custom wav loading here.
- */
 static void _loadWave(const char *filename, SampleData *sampleData)
 {
 	SDL_AudioSpec waveSpec;
@@ -73,10 +73,6 @@ static void _loadWave(const char *filename, SampleData *sampleData)
 	}
 }
 
-/*
- * Load bitmap and copy it's pixel data into a fixed size buffer.
- * Would also love to rid of this SDL dependency. Could have custom bmp loading here.
- */
 static void _loadBitmap(char *filename, Color32 *dest, size_t len)
 {
 	SDL_Surface *bmp = SDL_LoadBMP(filename);
@@ -148,6 +144,8 @@ void milkFree(Milk *milk)
 /*
  *******************************************************************************
  * LOOP
+
+ * Milk's main loop functions. Draw state gets reset with every frame.
  *******************************************************************************
  */
 
