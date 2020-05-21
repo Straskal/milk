@@ -94,7 +94,7 @@ typedef struct
     uint8_t *buffer;
 } SampleData;
 
-typedef struct
+typedef struct AudioQueueItem
 {
     SampleData *sampleData;
     uint32_t remainingLength;

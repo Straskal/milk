@@ -50,7 +50,6 @@ int main(int argc, char *argv[])
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	SDL_Texture *frontBufferTexture;
-	uint32_t *frontBufferData;
 	SDL_AudioDeviceID audioDevice;
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
