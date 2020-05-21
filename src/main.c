@@ -23,7 +23,6 @@
  */
 
 #include "milk.h"
-#include "milk_audio.h"
 #include "SDL.h"
 
 #include <memory.h>
