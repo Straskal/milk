@@ -1,0 +1,11 @@
+# build output
+build/
+cmake-build-release/
+cmake-build-debug/
+
+# visual studio
+.vs
+CMakeSettings.json
+
+# clion
+.idea
