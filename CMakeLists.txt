@@ -60,8 +60,6 @@ set(MILK_SRC_FILES
 	src/milkapi.h
 	src/milkeditor.c
 	src/milkeditor.h
-	src/milkmain.c
-	src/milkmain.h
 )
 
 add_executable(milk ${MILK_SRC_FILES})

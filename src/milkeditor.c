@@ -1,88 +1,141 @@
 #include "milkeditor.h"
 #include "milkapi.h"
 
+#include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 
-#define COMMAND_QUEUE_MAX 25
+static unsigned int _ticks = 0;
 
-static char *commands[COMMAND_QUEUE_MAX];
-static char command[32];
-static int len = 2;
-static int ticks = 0;
-static char *result;
-
-typedef enum
+typedef struct Command
 {
-	ENTRY,
-	COMMAND_LINE
-} State;
+	char *cmd;
+	void(*execute)(MilkEditor *, Milk *);
+} Command;
 
-static State _state = COMMAND_LINE;
-static State _next;
-
-void milkEditorOpen(Milk *milk)
+static void _cmdReload(MilkEditor *editor, Milk *milk)
 {
-	command[0] = '>';
-	command[1] = ':';
-	len = 2;
-	for (int i = len; i < 32; i++)
-		command[i] = ' ';
-	milk->system.startTextInput();
+	if (editor->isGameInitialized)
+		milkUnloadScripts(milk);
+
+	milkLoadScripts(milk);
+	editor->isGameInitialized = 1;
 }
 
-void milkEditorLoop(Milk *milk)
+static Command _commands[] =
+{
+	{ "reload", _cmdReload }
+};
+
+static Command *_parseCommand(const char *cmd)
+{
+	for (int i = 0; i < 1; i++)
+	{
+		if (strcmp(_commands[i].cmd, cmd) == 0)
+			return &_commands[i];
+	}
+	return NULL;
+}
+
+static void _resetCommandCandidate(CommandLine *cmdLine)
+{
+	cmdLine->commandCandidate[0] = '>';
+	cmdLine->commandCandidate[1] = ':';
+	cmdLine->commandCandidate[2] = '\0';
+	cmdLine->commandCandidateLength = 2;
+}
+
+static void _updateCommandLine(MilkEditor *editor, Milk *milk)
+{
+	CommandLine *cmdLine = &editor->commandLine;
+	char ch;
+
+	if (milk->system.backspace() && cmdLine->commandCandidateLength > 2)
+		cmdLine->commandCandidate[--cmdLine->commandCandidateLength] = '\0';
+
+	if (milk->system.readTextInput(&ch))
+	{
+		cmdLine->commandCandidate[cmdLine->commandCandidateLength++] = ch;
+		cmdLine->commandCandidate[cmdLine->commandCandidateLength] = '\0';
+	}
+
+	if (milk->system.enter())
+	{
+		Command *cmd = _parseCommand(&cmdLine->commandCandidate[2]);
+		if (cmd != NULL)
+			cmd->execute(editor, milk);		
+
+		_resetCommandCandidate(cmdLine);
+	}
+}
+
+static void _drawCommandLine(CommandLine *cmdLine, Milk *milk)
+{
+	size_t cmdLength = cmdLine->commandCandidateLength;
+
+	milkClear(&milk->video, 0x1a1a1a);
+	milkSpriteFont(&milk->video, 8, 10, "MILK\n------------------------------", 1);
+	milkSpriteFont(&milk->video, 8, 40, cmdLine->commandCandidate, 1);
+
+	/* Draw blinking position marker. */
+	if (_ticks % 32 > 16 == 0)
+		milkSpriteFont(&milk->video, (cmdLength + 1) * 8, 42, "_", 1);
+}
+
+MilkEditor *milkEditorInit()
+{
+	MilkEditor *editor = calloc(1, sizeof(MilkEditor));
+	editor->state = COMMAND;
+	editor->isGameInitialized = 0;
+	_resetCommandCandidate(&editor->commandLine);
+	return editor;
+}
+
+void milkEditorUpdate(MilkEditor *editor, Milk *milk)
 {
 	milkResetDrawState(&milk->video);
 
-	switch (_state)
+	if (milk->system.escape() && editor->isGameInitialized)
 	{
-	case COMMAND_LINE:
-	{
-		char ch;
-		if (milk->system.backspace() && len > 2)
-			command[len--] = ' ';
-
-		if (milk->system.readTextInput(&ch))
-			command[len++] = ch;
-
-		command[len] = ticks % 32 > 16 == 0 ? '_' : ' ';
-		milkClear(&milk->video, 0x1a1a1a);
-		milkSpriteFont(&milk->video, 10, 10, "MILK v1.0", 1);
-		milkSpriteFont(&milk->video, 10, 26, "---------------------------", 1);
-		milkSpriteFont(&milk->video, 10, 40, command, 1);
-		milkSpriteFont(&milk->video, 10, 62, result, 1);
-
-		if (milk->system.enter())
+		if (editor->state != COMMAND)
 		{
-			command[len] = '\0';
-			if (strcmp("reload", &command[2]) == 0)
-			{
-				milkUnloadScripts(milk);
-				milkLoadScripts(milk);
-				result = "Scripts have been reloaded.";
-			}
-			else
-			{
-				result = "Unknown command.";
-			}
-
-			command[0] = '>';
-			command[1] = ':';
-			len = 2;
-			for (int i = len; i < 32; i++)
-				command[i] = ' ';
+			editor->state = COMMAND;
+			milk->system.startTextInput();
 		}
-		break;
-	}
-	default:
-		break;
+		else
+		{
+			editor->state = GAME;
+			milk->system.stopTextInput();
+		}
 	}
 
-	ticks++;
+	switch (editor->state)
+	{
+		case COMMAND:
+			_updateCommandLine(editor, milk);
+			break;
+		case GAME:
+			milkResetDrawState(&milk->video);
+			milkInvokeUpdate(&milk->code);
+			break;
+	}
 }
 
-void milkEditorClose(Milk *milk)
+void milkEditorDraw(MilkEditor *editor, Milk *milk)
 {
-	result = NULL;
-	milk->system.stopTextInput();
+	switch (editor->state)
+	{
+	case COMMAND:
+		_drawCommandLine(&editor->commandLine, milk);
+		break;
+	case GAME:
+		milkInvokeDraw(&milk->code);
+		break;
+	}
+	_ticks++;
+}
+
+void milkEditorFree(MilkEditor *editor)
+{
+	free(editor);
 }
