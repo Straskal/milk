@@ -44,6 +44,8 @@ void milkLoadScripts(Milk *milk)
 		return;
 	}
 
+	milkLog(milk, "Found main.lua", INFO);
+
 	lua_pushlightuserdata(L, (void *)milk);
 	lua_setglobal(L, "__milk"); /* Set global __milk to access in API functions. */
 	_pushApi(L);

@@ -57,6 +57,20 @@
 #define MILK_AUDIO_QUEUE_MAX 16
 #define MILK_AUDIO_MAX_VOLUME 128
 
+#define MILK_MAX_LOGS 16
+
+enum
+{
+    BTN_UP = 1 << 0,
+    BTN_DOWN = 1 << 1,
+    BTN_LEFT = 1 << 2,
+    BTN_RIGHT = 1 << 3,
+    BTN_A = 1 << 4,
+    BTN_B = 1 << 5,
+    BTN_X = 1 << 6,
+    BTN_Y = 1 << 7
+};
+
 typedef struct
 {
     uint8_t buttonState;
@@ -128,18 +142,6 @@ typedef struct
     void(*unlock)();
 } Audio;
 
-enum
-{
-	BTN_UP      = 1 << 0,
-	BTN_DOWN    = 1 << 1,
-	BTN_LEFT    = 1 << 2,
-	BTN_RIGHT   = 1 << 3,
-	BTN_A       = 1 << 4,
-	BTN_B       = 1 << 5,
-	BTN_X       = 1 << 6,
-	BTN_Y       = 1 << 7
-};
-
 typedef struct
 {
     uint8_t tiles[MILK_TILEMAP_WIDTH * MILK_TILEMAP_HEIGHT];
@@ -165,9 +167,27 @@ typedef struct
     int(*escape)();
 } System;
 
+typedef enum
+{
+    INFO, WARN, ERROR
+} LogType;
+
+typedef struct
+{
+    char *message;
+    LogType type;
+} Log;
+
+typedef struct
+{
+    Log logs[MILK_MAX_LOGS];
+    int count;
+} Logs;
+
 typedef struct
 {
     System system;
+    Logs logs;
 	Input input;
     Video video;
     Audio audio;
@@ -177,6 +197,8 @@ typedef struct
 
 Milk *milkInit();
 void milkFree(Milk *milk);
+void milkLog(Milk *milk, const char *message, LogType type);
+void milkClearLogs(Milk *milk);
 void milkLoadBmp(char *filename, Color32 *dest, size_t len);
 int milkButton(Input *input, uint8_t button);
 int milkButtonPressed(Input *input, uint8_t button);

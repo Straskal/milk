@@ -22,12 +22,13 @@
  *  SOFTWARE.
  */
 
+#include "milk.h"
+#include "milkapi.h"
+
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <SDL.h>
-
-#include "milk.h"
 
 #define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x) /* xy coords to framebuffer pixel index. */
 #define WITHIN_CLIP_RECT(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
@@ -121,6 +122,9 @@ Milk *milkInit()
 	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
 	_milkOpenAudio(&milk->audio);
 	_milkOpenVideo(&milk->video);
+	milkLog(milk, "Found sprsheet.bmp", INFO);
+	milkLog(milk, "Found font.bmp", INFO);
+	milkLoadScripts(milk);
 	return milk;
 }
 
@@ -134,8 +138,31 @@ static void _milkCloseAudio(Audio *audio)
 
 void milkFree(Milk *milk)
 {
+	milkUnloadScripts(milk);
 	_milkCloseAudio(&milk->audio);
 	free(milk);
+}
+
+void milkLog(Milk *milk, const char *message, LogType type)
+{
+	int idx = 0;
+
+	if (milk->logs.count == MILK_MAX_LOGS) /* Shift items in array. */
+	{
+		for (int i = 0; i < MILK_MAX_LOGS - 1; i++)
+			milk->logs.logs[i] = milk->logs.logs[i + 1];
+
+		idx = MILK_MAX_LOGS - 1;
+	}
+	else idx = milk->logs.count++;
+
+	milk->logs.logs[idx].message = message;
+	milk->logs.logs[idx].type = type;
+}
+
+void milkClearLogs(Milk *milk)
+{
+	milk->logs.count = 0;
 }
 
 /*

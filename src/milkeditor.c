@@ -29,11 +29,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define WHITESPACE " "
+#define COMMAND_DELIM " "
 #define CMD_RELOAD "reload"
 #define CMD_RELOAD_SCRIPTS "scripts"
 #define CMD_RELOAD_SPRITES "sprites"
 #define CMD_RELOAD_FONT "font"
+#define CMD_CLEAR "clear"
 
 static unsigned int _ticks = 0;
 
@@ -45,41 +46,54 @@ static unsigned int _ticks = 0;
 
 static void _cmdReload(MilkEditor *editor, Milk *milk, char *args[], int nargs)
 {
+	(void *)editor;
+
 	if (nargs == 1)
 	{
 		if (strcmp(args[0], CMD_RELOAD_SCRIPTS) == 0)
 		{
-			if (editor->isGameInitialized)
-				milkUnloadScripts(milk);
-
+			milkUnloadScripts(milk);
 			milkLoadScripts(milk);
-			editor->isGameInitialized = 1;
+			milkLog(milk, "Scripts have been reloaded", INFO);
 		}
 		else if (strcmp(args[0], CMD_RELOAD_SPRITES) == 0)
 		{
 			milkLoadBmp("sprsheet.bmp", milk->video.spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
+			milkLog(milk, "Sprites have been reloaded", INFO);
 		}
 		else if (strcmp(args[0], CMD_RELOAD_FONT) == 0)
 		{
 			milkLoadBmp(MILK_FONT_FILENAME, milk->video.font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
+			milkLog(milk, "Font has been reloaded", INFO);
 		}
 	}
+	else milkLog(milk, "reload command expects an argument", WARN);
 }
 
-typedef struct Command
+static void _cmdClear(MilkEditor *editor, Milk *milk, char *args[], int nargs)
+{
+	(void *)editor;
+	(void *)args;
+	(void *)nargs;
+	milkClearLogs(milk);
+}
+
+typedef struct CommandImpl
 {
 	char *cmd;
 	void(*execute)(MilkEditor *, Milk *, char **, int);
-} Command;
+} CommandImpl;
 
-static Command _commands[] =
+static CommandImpl _commands[] =
 {
-	{ CMD_RELOAD, _cmdReload }
+	{ CMD_RELOAD, _cmdReload },
+	{ CMD_CLEAR, _cmdClear }
 };
 
-static Command *_findCommand(const char *cmd)
+static CommandImpl *_findCommand(const char *cmd)
 {
-	for (int i = 0; i < sizeof(_commands) / sizeof(Command); i++)
+	size_t len = sizeof(_commands) / sizeof(CommandImpl);
+	for (int i = 0; i < len; i++)
 	{
 		if (strcmp(cmd, _commands[i].cmd) == 0)
 			return &_commands[i];
@@ -87,20 +101,21 @@ static Command *_findCommand(const char *cmd)
 	return NULL;
 }
 
-static Command *_parseCommand(char *cmd, char *args[], int *nargs)
+static CommandImpl *_parseCommand(char *cmd, char *args[], int *nargs)
 {
 	*nargs = 0;
-	char *token = strtok(cmd, WHITESPACE); /* Get command. */
-	Command *command = _findCommand(token);
+	char tempCmd[COMMAND_LENGTH];
+	strcpy(tempCmd, cmd);
+	char *token = strtok(tempCmd, COMMAND_DELIM); /* Get command name. */
+	CommandImpl *command = _findCommand(token);
 
-	if (command != NULL)
+	if (command != NULL) /* Parse args. */
 	{
-		/* Parse args. */
-		token = strtok(NULL, WHITESPACE);
+		token = strtok(NULL, COMMAND_DELIM);
 		while (token != NULL)
 		{
 			args[*nargs] = token;
-			token = strtok(NULL, WHITESPACE);
+			token = strtok(NULL, COMMAND_DELIM);
 			(*nargs)++;
 		}
 	}
@@ -109,33 +124,50 @@ static Command *_parseCommand(char *cmd, char *args[], int *nargs)
 
 static void _resetCommandCandidate(CommandLine *cmdLine)
 {
-	cmdLine->commandCandidate[0] = '>';
-	cmdLine->commandCandidate[1] = ':';
-	cmdLine->commandCandidate[2] = '\0';
-	cmdLine->commandCandidateLength = 2;
+	cmdLine->commandCandidateLength = 0;
+
+	for (int i = 0; i < COMMAND_LENGTH; i++)
+		cmdLine->commandCandidate[i] = 0;
 }
 
 static void _updateCommandLine(MilkEditor *editor, Milk *milk)
 {
 	CommandLine *cmdLine = &editor->commandLine;
-	char *args[8];
-	int nargs;
 	char ch;
 
-	if (milk->system.backspace() && cmdLine->commandCandidateLength > 2)
-		cmdLine->commandCandidate[--cmdLine->commandCandidateLength] = '\0';
+	if (milk->system.backspace() && cmdLine->commandCandidateLength > 0)
+		cmdLine->commandCandidate[--cmdLine->commandCandidateLength] = 0;
 
-	if (milk->system.readTextInput(&ch))
+	if (milk->system.readTextInput(&ch) && cmdLine->commandCandidateLength < COMMAND_LENGTH - 1)
 	{
 		cmdLine->commandCandidate[cmdLine->commandCandidateLength++] = ch;
-		cmdLine->commandCandidate[cmdLine->commandCandidateLength] = '\0';
+		cmdLine->commandCandidate[cmdLine->commandCandidateLength] = 0;
 	}
 
-	if (milk->system.enter())
+	if (milkButtonPressed(&milk->input, BTN_UP) && cmdLine->previousCommandLength > 0)
 	{
-		Command *cmd = _parseCommand(&cmdLine->commandCandidate[2], args, &nargs);
+		strcpy(cmdLine->commandCandidate, cmdLine->previousCommand);
+		cmdLine->commandCandidateLength = cmdLine->previousCommandLength;
+	}
+
+	if (milkButtonPressed(&milk->input, (1 << 1)))
+		_resetCommandCandidate(cmdLine);
+
+	if (milk->system.enter() && cmdLine->commandCandidateLength > 0)
+	{
+		char *args[COMMAND_MAX_ARGS];
+		int nargs;
+
+		CommandImpl *cmd = _parseCommand(cmdLine->commandCandidate, args, &nargs);
 		if (cmd != NULL)
-			cmd->execute(editor, milk, args, nargs);		
+		{
+			cmd->execute(editor, milk, args, nargs);
+
+			/* After executing valid command, update the previous command. */
+			strcpy(cmdLine->previousCommand, cmdLine->commandCandidate);
+			cmdLine->previousCommandLength = cmdLine->commandCandidateLength;
+		}
+		else milkLog(milk, "Unknown command", INFO);
 
 		_resetCommandCandidate(cmdLine);
 	}
@@ -144,21 +176,28 @@ static void _updateCommandLine(MilkEditor *editor, Milk *milk)
 static void _drawCommandLine(CommandLine *cmdLine, Milk *milk)
 {
 	size_t cmdLength = cmdLine->commandCandidateLength;
+	int logYPosition = 56;
 
 	milkClear(&milk->video, 0x1a1a1a);
 	milkSpriteFont(&milk->video, 8, 10, "MILK\n------------------------------", 1);
-	milkSpriteFont(&milk->video, 8, 40, cmdLine->commandCandidate, 1);
+	milkSpriteFont(&milk->video, 8, 40, ">:", 1);
+	milkSpriteFont(&milk->video, 24, 40, cmdLine->commandCandidate, 1);
 
 	/* Draw blinking position marker. */
 	if (_ticks % 32 > 16)
-		milkSpriteFont(&milk->video, (cmdLength + 1) * 8, 42, "_", 1);
+		milkSpriteFont(&milk->video, 24 + cmdLength * 8, 42, "_", 1);
+
+	for (int i = 0; i < milk->logs.count; i++)
+	{
+		milkSpriteFont(&milk->video, 8, logYPosition, milk->logs.logs[i].message, 1);
+		logYPosition += 9;
+	}
 }
 
 MilkEditor *milkEditorInit()
 {
 	MilkEditor *editor = calloc(1, sizeof(MilkEditor));
 	editor->state = COMMAND;
-	editor->isGameInitialized = 0;
 	_resetCommandCandidate(&editor->commandLine);
 	return editor;
 }
@@ -167,7 +206,7 @@ void milkEditorUpdate(MilkEditor *editor, Milk *milk)
 {
 	milkResetDrawState(&milk->video);
 
-	if (milk->system.escape() && editor->isGameInitialized)
+	if (milk->system.escape())
 	{
 		if (editor->state != COMMAND)
 		{

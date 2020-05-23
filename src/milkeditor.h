@@ -27,7 +27,7 @@
 
 #include "milk.h"
 
-#define COMMAND_QUEUE_MAX 25
+#define COMMAND_MAX_ARGS 8
 #define COMMAND_LENGTH 25
 
 typedef enum
@@ -36,25 +36,18 @@ typedef enum
 	COMMAND
 } EditorState;
 
-typedef struct CommandQueue
-{
-	char *command;
-	struct CommandQueue *next;
-} CommandQueue;
-
 typedef struct CommandLine
 {
-	CommandQueue commandQueue;
-	size_t commandQueueLength;
 	size_t commandCandidateLength;
-	char commandCandidate[COMMAND_LENGTH];
+    size_t previousCommandLength;
+    char commandCandidate[COMMAND_LENGTH];
+    char previousCommand[COMMAND_LENGTH];
 } CommandLine;
 
 typedef struct
 {
 	EditorState state;
 	CommandLine commandLine;
-	uint8_t isGameInitialized;
 } MilkEditor;
 
 MilkEditor *milkEditorInit();
