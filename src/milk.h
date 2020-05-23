@@ -177,6 +177,7 @@ typedef struct
 
 Milk *milkInit();
 void milkFree(Milk *milk);
+void milkLoadBmp(char *filename, Color32 *dest, size_t len);
 int milkButton(Input *input, uint8_t button);
 int milkButtonPressed(Input *input, uint8_t button);
 void milkResetDrawState(Video *video);

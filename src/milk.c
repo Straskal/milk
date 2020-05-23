@@ -72,7 +72,7 @@ static void _loadWave(const char *filename, SampleData *sampleData)
 	}
 }
 
-static void _loadBitmap(char *filename, Color32 *dest, size_t len)
+void milkLoadBmp(char *filename, Color32 *dest, size_t len)
 {
 	SDL_Surface *bmp = SDL_LoadBMP(filename);
 	uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
@@ -111,9 +111,9 @@ static void _milkOpenAudio(Audio *audio)
 
 static void _milkOpenVideo(Video *video)
 {
-	_loadBitmap(MILK_SPRSHEET_FILENAME, video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
-	_loadBitmap(MILK_TILESHEET_FILENAME, video->tilesheet, MILK_TILESHEET_SQRSIZE * MILK_TILESHEET_SQRSIZE);
-	_loadBitmap(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
+	milkLoadBmp(MILK_SPRSHEET_FILENAME, video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
+	milkLoadBmp(MILK_TILESHEET_FILENAME, video->tilesheet, MILK_TILESHEET_SQRSIZE * MILK_TILESHEET_SQRSIZE);
+	milkLoadBmp(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
 }
 
 Milk *milkInit()
