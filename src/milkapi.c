@@ -37,19 +37,17 @@ void milkLoadScripts(Milk *milk)
 {
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L); /* Potentially set up a restricted environment. */
-
-	if (luaL_dofile(L, "main.lua"))
-	{
-		printf("%s\n", lua_tostring(L, -1));
-		return;
-	}
-
-	milkLog(milk, "Found main.lua", INFO);
-
+	milk->code.state = (void *)L;
 	lua_pushlightuserdata(L, (void *)milk);
 	lua_setglobal(L, "__milk"); /* Set global __milk to access in API functions. */
 	_pushApi(L);
-	milk->code.state = (void *)L;
+
+	if (luaL_dofile(L, "main.lua"))
+	{
+		milkLog(milk, lua_tostring(L, -1), ERROR);
+		return;
+	}
+
 	lua_getglobal(L, "_init"); /* Invoke _init callback. */
 	lua_call(L, 0, 0);
 }
@@ -59,26 +57,30 @@ void milkUnloadScripts(Milk *milk)
 	lua_close((lua_State*)milk->code.state);
 }
 
-void milkInvokeUpdate(Code *code)
-{
-	lua_State *L = (lua_State *)code->state;
-	lua_getglobal(L, "_update");
-	lua_call(L, 0, 0);
-}
-
-void milkInvokeDraw(Code *code)
-{
-	lua_State *L = (lua_State *)code->state;
-	lua_getglobal(L, "_draw");
-	lua_call(L, 0, 0);
-}
-
 static Milk *_getGlobalMilk(lua_State *L)
 {
 	lua_getglobal(L, "__milk");
 	Milk *milk = (Milk *)lua_touserdata(L, -1);
 	lua_pop(L, 1); /* Remember to pop __milk off of the stack. */
 	return milk;
+}
+
+void milkInvokeUpdate(Code *code)
+{
+	lua_State *L = (lua_State *)code->state;
+	lua_getglobal(L, "_update");
+
+	if (lua_pcall(L, 0, 0, 0) != 0)
+		milkLog(_getGlobalMilk(L), lua_tostring(L, -1), ERROR);
+}
+
+void milkInvokeDraw(Code *code)
+{
+	lua_State *L = (lua_State *)code->state;
+	lua_getglobal(L, "_draw");
+
+	if (lua_pcall(L, 0, 0, 0) != 0)
+		milkLog(_getGlobalMilk(L), lua_tostring(L, -1), ERROR);
 }
 
 static int l_btn(lua_State *L)
@@ -196,7 +198,8 @@ static int l_sprfont(lua_State *L)
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		lua_tostring(L, 3),
-		(float)luaL_optnumber(L, 4, 1.0)
+		(float)luaL_optnumber(L, 4, 1.0),
+		(Color32)luaL_optinteger(L, 5, 0xffffff)
 	);
 	return 1;
 }
