@@ -31,23 +31,25 @@
 #include <math.h>
 #include <stdio.h>
 
+
+static Milk *_globalMilk;
 static void _pushApi(lua_State *L);
 
 void milkLoadScripts(Milk *milk)
 {
+	_globalMilk = milk;
+
 	lua_State *L = luaL_newstate();
-	luaL_openlibs(L); /* Potentially set up a restricted environment. */
+	luaL_openlibs(L);
+	milk->code.state = (void *)L;
+	_pushApi(L);
 
 	if (luaL_dofile(L, "main.lua"))
 	{
-		printf("%s\n", lua_tostring(L, -1));
+		milkLog(milk, lua_tostring(L, -1), ERROR);
 		return;
 	}
 
-	lua_pushlightuserdata(L, (void *)milk);
-	lua_setglobal(L, "__milk"); /* Set global __milk to access in API functions. */
-	_pushApi(L);
-	milk->code.state = (void *)L;
 	lua_getglobal(L, "_init"); /* Invoke _init callback. */
 	lua_call(L, 0, 0);
 }
@@ -55,59 +57,58 @@ void milkLoadScripts(Milk *milk)
 void milkUnloadScripts(Milk *milk)
 {
 	lua_close((lua_State*)milk->code.state);
+	_globalMilk = NULL;
 }
 
 void milkInvokeUpdate(Code *code)
 {
 	lua_State *L = (lua_State *)code->state;
 	lua_getglobal(L, "_update");
-	lua_call(L, 0, 0);
+
+	if (lua_pcall(L, 0, 0, 0) != 0)
+	{
+		milkLog(_globalMilk, lua_tostring(L, -1), ERROR);
+		lua_pop(L, -1);
+	}
 }
 
 void milkInvokeDraw(Code *code)
 {
 	lua_State *L = (lua_State *)code->state;
 	lua_getglobal(L, "_draw");
-	lua_call(L, 0, 0);
-}
 
-static Milk *_getGlobalMilk(lua_State *L)
-{
-	lua_getglobal(L, "__milk");
-	Milk *milk = (Milk *)lua_touserdata(L, -1);
-	lua_pop(L, 1); /* Remember to pop __milk off of the stack. */
-	return milk;
+	if (lua_pcall(L, 0, 0, 0) != 0)
+	{
+		milkLog(_globalMilk, lua_tostring(L, -1), ERROR);
+		lua_pop(L, -1);
+	}
 }
 
 static int l_btn(lua_State *L)
 {
-	Milk *milk = _getGlobalMilk(L);
 	lua_pushboolean(L,
-		milkButton(&milk->input, (uint8_t)(1 << lua_tointeger(L, 1)))
+		milkButton(&_globalMilk->input, (uint8_t)(1 << lua_tointeger(L, 1)))
 	);
 	return 1;
 }
 
 static int l_btnp(lua_State *L)
 {
-	Milk *milk = _getGlobalMilk(L);
 	lua_pushboolean(L,
-		milkButtonPressed(&milk->input, (uint8_t)(1 << lua_tointeger(L, 1)))
+		milkButtonPressed(&_globalMilk->input, (uint8_t)(1 << lua_tointeger(L, 1)))
 	);
 	return 1;
 }
 
 static int l_vol(lua_State *L)
 {
-	Milk *milk = _getGlobalMilk(L);
-	milkVolume(&milk->audio, (uint8_t)lua_tointeger(L, 1));
+	milkVolume(&_globalMilk->audio, (uint8_t)lua_tointeger(L, 1));
 	return 0;
 }
 
 static int l_snd(lua_State *L)
 {
-	Milk *milk = _getGlobalMilk(L);
-	milkSound(&milk->audio,
+	milkSound(&_globalMilk->audio,
 		(int)lua_tointeger(L, 1),
 		(uint8_t)luaL_optinteger(L, 2, 128),
 		(uint8_t)luaL_optinteger(L, 3, 0)
@@ -117,8 +118,7 @@ static int l_snd(lua_State *L)
 
 static int l_clip(lua_State *L)
 {
-	Milk *milk = _getGlobalMilk(L);
-	milkClipRect(&milk->video,
+	milkClipRect(&_globalMilk->video,
 		(int)lua_tointeger(L, 1),
 		(int)lua_tointeger(L, 2),
 		(int)lua_tointeger(L, 3),
@@ -129,15 +129,13 @@ static int l_clip(lua_State *L)
 
 static int l_clrs(lua_State *L)
 {
-	Milk *milk = _getGlobalMilk(L);
-	milkClear(&milk->video, (Color32)luaL_optinteger(L, 1, 0x000000));
+	milkClear(&_globalMilk->video, (Color32)luaL_optinteger(L, 1, 0x000000));
 	return 0;
 }
 
 static int l_pset(lua_State *L)
 {
-	Milk *milk = _getGlobalMilk(L);
-	milkPixelSet(&milk->video,
+	milkPixelSet(&_globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(Color32)lua_tointeger(L, 3)
@@ -147,8 +145,7 @@ static int l_pset(lua_State *L)
 
 static int l_rectfill(lua_State *L)
 {
-	Milk *milk = _getGlobalMilk(L);
-	milkRectFill(&milk->video,
+	milkRectFill(&_globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
@@ -160,8 +157,7 @@ static int l_rectfill(lua_State *L)
 
 static int l_rect(lua_State *L)
 {
-	Milk *milk = _getGlobalMilk(L);
-	milkRect(&milk->video,
+	milkRect(&_globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
@@ -173,8 +169,7 @@ static int l_rect(lua_State *L)
 
 static int l_spr(lua_State *L)
 {
-	Milk *milk = _getGlobalMilk(L);
-	milkSprite(&milk->video,
+	milkSprite(&_globalMilk->video,
 		(int)lua_tointeger(L, 1),
 		(int)floor(lua_tonumber(L, 2)),
 		(int)floor(lua_tonumber(L, 3)),
@@ -188,13 +183,13 @@ static int l_spr(lua_State *L)
 
 static int l_sprfont(lua_State *L)
 {
-	Milk *milk = _getGlobalMilk(L);
 	milkSpriteFont(
-		&milk->video,
+		&_globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		lua_tostring(L, 3),
-		(float)luaL_optnumber(L, 4, 1.0)
+		(float)luaL_optnumber(L, 4, 1.0),
+		(Color32)luaL_optinteger(L, 5, 0xffffff)
 	);
 	return 1;
 }

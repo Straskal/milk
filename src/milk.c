@@ -22,12 +22,14 @@
  *  SOFTWARE.
  */
 
+#include "milk.h"
+#include "milkapi.h"
+
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <SDL.h>
-
-#include "milk.h"
 
 #define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x) /* xy coords to framebuffer pixel index. */
 #define WITHIN_CLIP_RECT(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
@@ -68,11 +70,11 @@ static void _loadWave(const char *filename, SampleData *sampleData)
 		SDL_FreeWAV(sampleData->buffer);
 
 		sampleData->buffer = conversion.buf;
-		sampleData->length = conversion.len * conversion.len_ratio;
+		sampleData->length = (uint32_t)floor(conversion.len * conversion.len_ratio);
 	}
 }
 
-static void _loadBitmap(char *filename, Color32 *dest, size_t len)
+static void _milkLoadBmp(const char *filename, Color32 *dest, size_t len)
 {
 	SDL_Surface *bmp = SDL_LoadBMP(filename);
 	uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
@@ -89,6 +91,16 @@ static void _loadBitmap(char *filename, Color32 *dest, size_t len)
 	SDL_FreeSurface(bmp);
 }
 
+void milkLoadSpritesheet(Video *video)
+{
+	_milkLoadBmp(MILK_SPRSHEET_FILENAME, video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
+}
+
+void milkLoadFont(Video *video)
+{
+	_milkLoadBmp(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
+}
+
 /*
  *******************************************************************************
  * INITIALIZATION & SHUT DOWN
@@ -103,7 +115,7 @@ static void _milkOpenAudio(Audio *audio)
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
 		audio->queueItems[i].isFree = 1;
 
-	/* Temporary */
+	/* Temporary until i've figured how I want to handle loading sounds. */
 	_loadWave("music.wav", &audio->samples[0]);
 	_loadWave("fireball_shoot.wav", &audio->samples[1]);
 	_loadWave("punch.wav", &audio->samples[2]);
@@ -111,9 +123,8 @@ static void _milkOpenAudio(Audio *audio)
 
 static void _milkOpenVideo(Video *video)
 {
-	_loadBitmap(MILK_SPRSHEET_FILENAME, video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
-	_loadBitmap(MILK_TILESHEET_FILENAME, video->tilesheet, MILK_TILESHEET_SQRSIZE * MILK_TILESHEET_SQRSIZE);
-	_loadBitmap(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
+	milkLoadSpritesheet(video);
+	milkLoadFont(video);
 }
 
 Milk *milkInit()
@@ -121,6 +132,7 @@ Milk *milkInit()
 	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
 	_milkOpenAudio(&milk->audio);
 	_milkOpenVideo(&milk->video);
+	milkLoadScripts(milk);
 	return milk;
 }
 
@@ -134,8 +146,14 @@ static void _milkCloseAudio(Audio *audio)
 
 void milkFree(Milk *milk)
 {
+	milkUnloadScripts(milk);
 	_milkCloseAudio(&milk->audio);
 	free(milk);
+}
+
+void milkQuit(Milk *milk)
+{
+	milk->shouldQuit = 1;
 }
 
 /*
@@ -143,6 +161,34 @@ void milkFree(Milk *milk)
  * SYSTEM
  *******************************************************************************
  */
+
+void milkLog(Milk *milk, const char *message, LogType type)
+{
+	LogMessage *newLogMessage;
+
+	/* If the logs are full, then shift the items down and insert the new log at the end of the list. */
+	if (milk->logs.count == MILK_MAX_LOGS)
+	{
+		for (int i = 0; i < MILK_MAX_LOGS - 1; i++)
+			milk->logs.messages[i] = milk->logs.messages[i + 1];
+
+		newLogMessage = &milk->logs.messages[MILK_MAX_LOGS - 1];
+	}
+	else newLogMessage = &milk->logs.messages[milk->logs.count++];
+
+	strcpy(newLogMessage->message, message);
+	newLogMessage->length = strlen(message);
+	newLogMessage->type = type;
+
+	if (type == ERROR)
+		milk->logs.errorCount++;
+}
+
+void milkClearLogs(Milk *milk)
+{
+	milk->logs.count = 0;
+	milk->logs.errorCount = 0;
+}
 
 int milkButton(Input *input, uint8_t button)
 {
@@ -236,7 +282,7 @@ void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
 	}
 }
 
-static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip)
+static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip, Color32 *color)
 {
 	int width = (int)floor((double)w * scale);
 	int height = (int)floor((double)h * scale);
@@ -261,7 +307,7 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 			Color32 col = pixels[yNearest * pitch + xNearest];
 
 			if (col != video->colorKey)
-				milkPixelSet(video, xFramebuffer, yFramebuffer, col);
+				milkPixelSet(video, xFramebuffer, yFramebuffer, color != NULL ? *color : col);
 		}
 	}
 }
@@ -279,10 +325,10 @@ void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 	int col = (int)floor(idx % numColumns);
 	Color32 *pixels = &video->spritesheet[row * rowSize + col * colSize];
 
-	_blitRect(video, pixels, x, y, w * MILK_SPRSHEET_SPR_SQRSIZE, h * MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE, scale, flip);
+	_blitRect(video, pixels, x, y, w * MILK_SPRSHEET_SPR_SQRSIZE, h * MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE, scale, flip, NULL);
 }
 
-void milkSpriteFont(Video *video, int x, int y, const char *str, float scale)
+void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Color32 color)
 {
 	static int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
 	static int rowSize = MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE;
@@ -306,15 +352,11 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale)
 		else
 		{
 			char ch = *(str++);
-			if (!IS_ASCII(ch))
-				ch = '?';
-
-			/* bitmap font starts at ASCII character 32 (SPACE) */
-			int row = (int)floor((ch - 32) / numColumns);
+			if (!IS_ASCII(ch)) ch = '?';
+			int row = (int)floor((ch - 32) / numColumns); /* bitmap font starts at ASCII character 32 (SPACE) */
 			int col = (int)floor((ch - 32) % numColumns);
 			Color32 *pixels = &video->font[(row * rowSize + col * colSize)];
-
-			_blitRect(video, pixels, xCurrent, yCurrent, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0);
+			_blitRect(video, pixels, xCurrent, yCurrent, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0, &color);
 			xCurrent += charSize;
 		}
 	}

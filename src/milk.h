@@ -31,21 +31,13 @@
 #define MILK_WINDOW_HEIGHT MILK_FRAMEBUF_HEIGHT * 3
 
 #define MILK_FRAMERATE (1000.0f / 50.0f)
-
 #define MILK_FRAMEBUF_WIDTH 256
 #define MILK_FRAMEBUF_HEIGHT 224
 
+#define MILK_SPRSHEET_FILENAME "sprsheet.bmp"
+#define MILK_FONT_FILENAME "font.bmp"
 #define MILK_SPRSHEET_SQRSIZE 256
 #define MILK_SPRSHEET_SPR_SQRSIZE 16
-#define MILK_SPRSHEET_FILENAME "sprsheet.bmp"
-
-#define MILK_TILEMAP_WIDTH (16 * 8)
-#define MILK_TILEMAP_HEIGHT (14 * 8)
-#define MILK_TILESHEET_SQRSIZE 256
-#define MILK_TILESHEET_SPR_SQRSIZE 16
-#define MILK_TILESHEET_FILENAME "tilesheet.bmp"
-
-#define MILK_FONT_FILENAME "font.bmp"
 #define MILK_FONT_WIDTH 128
 #define MILK_FONT_HEIGHT 48
 #define MILK_CHAR_SQRSIZE 8
@@ -57,13 +49,57 @@
 #define MILK_AUDIO_QUEUE_MAX 16
 #define MILK_AUDIO_MAX_VOLUME 128
 
-typedef struct
+#define MILK_MAX_LOGS 16
+#define MILK_LOG_LENGTH 256
+
+typedef struct system
 {
-    uint8_t buttonState;
-    uint8_t previousButtonState;
+    void(*startTextInput)();
+    void(*stopTextInput)();
+    int(*readTextInput)(char *);
+    int(*backspace)();
+    int(*enter)();
+    int(*escape)();
+} System;
+
+typedef enum logType
+{
+    INFO, WARN, ERROR
+} LogType;
+
+typedef struct logMessage
+{
+    size_t length;
+    LogType type;
+    char message[MILK_LOG_LENGTH];
+} LogMessage;
+
+typedef struct logs
+{
+    LogMessage messages[MILK_MAX_LOGS];
+    int count;
+    int errorCount;
+} Logs;
+
+typedef enum buttonState
+{
+    BTN_UP = 1 << 0,
+    BTN_DOWN = 1 << 1,
+    BTN_LEFT = 1 << 2,
+    BTN_RIGHT = 1 << 3,
+    BTN_A = 1 << 4,
+    BTN_B = 1 << 5,
+    BTN_X = 1 << 6,
+    BTN_Y = 1 << 7
+} ButtonState;
+
+typedef struct gamepad
+{
+    ButtonState buttonState;
+    ButtonState previousButtonState;
 } Gamepad;
 
-typedef struct
+typedef struct input
 {
     uint32_t mouseX;
     uint32_t mouseY;
@@ -75,7 +111,7 @@ typedef struct
  /* Packed 32 bit color: 0xAARRGGBB */
 typedef uint32_t Color32;
 
-typedef struct Rect
+typedef struct rect
 {
     int top;
     int bottom;
@@ -89,17 +125,16 @@ typedef struct Rect
  * - The font is a single image px buffer.
  * - When blitting sprites or fonts, any pixels matching the color key will not be drawn.
  */
-typedef struct Video
+typedef struct video
 {
     Color32 framebuffer[MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT];
     Color32 spritesheet[MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE];
-    Color32 tilesheet[MILK_TILESHEET_SQRSIZE * MILK_TILESHEET_SQRSIZE];
     Color32 font[MILK_FONT_WIDTH * MILK_FONT_HEIGHT];
     Color32 colorKey;
     Rect clipRect;
 } Video;
 
-typedef struct
+typedef struct sampleData
 {
     uint32_t length;
     uint8_t *buffer;
@@ -117,7 +152,7 @@ typedef struct AudioQueueItem
     struct AudioQueueItem *next;
 } AudioQueueItem;
 
-typedef struct
+typedef struct audio
 {
     SampleData samples[MILK_AUDIO_MAX_SOUNDS];
     AudioQueueItem queueItems[MILK_AUDIO_QUEUE_MAX];
@@ -128,55 +163,33 @@ typedef struct
     void(*unlock)();
 } Audio;
 
-enum
-{
-	BTN_UP      = 1 << 0,
-	BTN_DOWN    = 1 << 1,
-	BTN_LEFT    = 1 << 2,
-	BTN_RIGHT   = 1 << 3,
-	BTN_A       = 1 << 4,
-	BTN_B       = 1 << 5,
-	BTN_X       = 1 << 6,
-	BTN_Y       = 1 << 7
-};
-
-typedef struct
-{
-    uint8_t tiles[MILK_TILEMAP_WIDTH * MILK_TILEMAP_HEIGHT];
-    uint8_t flags[MILK_TILEMAP_WIDTH * MILK_TILEMAP_HEIGHT];
-} Tilemap;
-
 /*
  * Code is the client side script(s).
  * - state holds the current state of the program. In this case, it is a Lua state.
  */
-typedef struct
+typedef struct code
 {
 	void *state;
 } Code;
 
-typedef struct
-{
-    void(*startTextInput)();
-    void(*stopTextInput)();
-    int(*readTextInput)(char *);
-    int(*backspace)();
-    int(*enter)();
-    int(*escape)();
-} System;
-
-typedef struct
+typedef struct milk
 {
     System system;
+    Logs logs;
 	Input input;
     Video video;
     Audio audio;
-    Tilemap tilemap;
 	Code code;
+    uint8_t shouldQuit;
 } Milk;
 
 Milk *milkInit();
 void milkFree(Milk *milk);
+void milkQuit(Milk *milk);
+void milkLog(Milk *milk, const char *message, LogType type);
+void milkClearLogs(Milk *milk);
+void milkLoadSpritesheet(Video *video);
+void milkLoadFont(Video *video);
 int milkButton(Input *input, uint8_t button);
 int milkButtonPressed(Input *input, uint8_t button);
 void milkResetDrawState(Video *video);
@@ -186,7 +199,7 @@ void milkPixelSet(Video *video, int x, int y, Color32 color);
 void milkRect(Video *video, int x, int y, int w, int h, Color32 color);
 void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color);
 void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip);
-void milkSpriteFont(Video *video, int x, int y, const char *str, float scale);
+void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Color32 color);
 void milkSound(Audio *audio, int idx, uint8_t volume, uint8_t loop);
 void milkVolume(Audio *audio, uint8_t volume);
 void milkMixCallback(void *userdata, uint8_t *stream, int len);
