@@ -48,6 +48,7 @@ typedef struct
 {
 	EditorState state;
 	CommandLine commandLine;
+    uint8_t lastErrorCount;
 } MilkEditor;
 
 MilkEditor *milkEditorInit();

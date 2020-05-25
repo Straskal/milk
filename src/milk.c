@@ -181,17 +181,6 @@ void milkClearLogs(Milk *milk)
 	milk->logs.count = 0;
 }
 
-int milkHasError(Milk *milk)
-{
-	int i;
-	for (i = 0; i < milk->logs.count; i++)
-	{
-		if (milk->logs.messages[i].type == ERROR)
-			return 1;
-	}
-	return 0;
-}
-
 int milkButton(Input *input, uint8_t button)
 {
 	return (input->gamepad.buttonState & button) == button;

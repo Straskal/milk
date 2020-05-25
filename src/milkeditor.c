@@ -38,11 +38,11 @@
 
 #define CMD_COLOR 0xffffff
 #define CMD_COLOR_INFO 0x5c5c5c
-#define CMD_COLOR_ERROR 0xff0000
+#define CMD_COLOR_ERROR 0xbf4040
 #define CMD_COLOR_WARN 0xffec27
 
 #define LOG_START_HEIGHT 56
-#define LOG_END_HEIGHT 224-16
+#define LOG_END_HEIGHT (224 - 32)
 #define MAX_LINES ((LOG_END_HEIGHT - LOG_START_HEIGHT) / MILK_CHAR_SQRSIZE)
 #define CHARS_PER_LINE 31
 
@@ -222,12 +222,14 @@ static Color32 _getLogColor(LogType type)
 
 static void _getLogLines(Logs *logs, LogLine *lines, int *numLines)
 {
-	char tempMessage[MILK_LOG_LENGTH];
+	char tempMessage[MILK_LOG_LENGTH + 2];
+	tempMessage[0] = '>';
+	tempMessage[1] = ':';
 	int currentLine = 0;
 
 	for (int i = logs->count - 1; i >= 0; i--)
 	{
-		strcpy(tempMessage, logs->messages[i].message);
+		strcpy(&tempMessage[2], logs->messages[i].message);
 		char *splitByNewline = strtok(tempMessage, "\n"); /* Split message by newline. */
 
 		while (splitByNewline != NULL && currentLine < MAX_LINES - 1)
@@ -274,8 +276,18 @@ MilkEditor *milkEditorInit()
 
 static void _errorCheck(MilkEditor *editor, Milk *milk)
 {
-	if (milkHasError(milk))
+	int errorCount = 0;
+	int i;
+
+	for (i = 0; i < milk->logs.count; i++)
 	{
+		if (milk->logs.messages[i].type == ERROR)
+			errorCount++;
+	}
+
+	if (errorCount > editor->lastErrorCount)
+	{
+		editor->lastErrorCount++;
 		editor->state = COMMAND;
 		milk->system.startTextInput();
 	}

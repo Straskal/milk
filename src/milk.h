@@ -185,7 +185,6 @@ Milk *milkInit();
 void milkFree(Milk *milk);
 void milkLog(Milk *milk, const char *message, LogType type);
 void milkClearLogs(Milk *milk);
-int milkHasError(Milk *milk);
 void milkLoadSpritesheet(Video *video);
 void milkLoadFont(Video *video);
 int milkButton(Input *input, uint8_t button);
