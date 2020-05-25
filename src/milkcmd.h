@@ -22,13 +22,12 @@
  *  SOFTWARE.
  */
 
-#ifndef __MILK_EDITOR_H__
-#define __MILK_EDITOR_H__
+#ifndef __MILK_COMMAND_LINE_H__
+#define __MILK_COMMAND_LINE_H__
 
 #include "milk.h"
 
-#define COMMAND_MAX_ARGS 8
-#define COMMAND_LENGTH 25
+#define MILK_COMMAND_LEN 25
 
 typedef enum cmdState
 {
@@ -36,18 +35,13 @@ typedef enum cmdState
 	COMMAND
 } CmdState;
 
-typedef struct commandLine
-{
-	size_t commandCandidateLength;
-    size_t previousCommandLength;
-    char commandCandidate[COMMAND_LENGTH];
-    char previousCommand[COMMAND_LENGTH];
-} CommandLine;
-
 typedef struct milkCmd
 {
 	CmdState state;
-	CommandLine commandLine;
+    size_t commandCandidateLength;
+    size_t previousCommandLength;
+    char commandCandidate[MILK_COMMAND_LEN];
+    char previousCommand[MILK_COMMAND_LEN];
     uint8_t lastErrorCount;
 } MilkCmd;
 

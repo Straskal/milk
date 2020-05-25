@@ -30,7 +30,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define COMMAND_DELIM " "
+#define CMD_MAX_ARGS 8
+#define CMD_DELIM " "
+
 #define CMD_RELOAD "reload"
 #define CMD_RELOAD_SCRIPTS "scripts"
 #define CMD_RELOAD_SPRITES "sprites"
@@ -49,25 +51,23 @@
 
 static unsigned int _ticks = 0;
 
-static Milk *_gmilk;
-
 /*
  *******************************************************************************
  * COMMAND LINE
  *******************************************************************************
  */
 
-typedef struct CommandImpl
+typedef struct commandImpl
 {
 	char *cmd;
 	void(*execute)(MilkCmd *, Milk *, char **, int);
 } CommandImpl;
 
-typedef struct
+typedef struct commandLogLine
 {
 	char message[CHARS_PER_LINE];
 	Color32 color;
-} LogLine;
+} CommandLogLine;
 
 static void _cmdReload(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 {
@@ -125,72 +125,71 @@ static CommandImpl *_findCommand(const char *cmd)
 static CommandImpl *_parseCommand(char *cmd, char *args[], int *nargs)
 {
 	*nargs = 0;
-	char tempCmd[COMMAND_LENGTH];
+	char tempCmd[MILK_COMMAND_LEN];
 	strcpy(tempCmd, cmd);
-	char *token = strtok(tempCmd, COMMAND_DELIM); /* Get command name. */
+	char *token = strtok(tempCmd, CMD_DELIM); /* Get command name. */
 	CommandImpl *command = _findCommand(token);
 
 	if (command != NULL) /* Parse args. */
 	{
-		token = strtok(NULL, COMMAND_DELIM);
+		token = strtok(NULL, CMD_DELIM);
 		while (token != NULL)
 		{
 			args[*nargs] = token;
-			token = strtok(NULL, COMMAND_DELIM);
+			token = strtok(NULL, CMD_DELIM);
 			(*nargs)++;
 		}
 	}
 	return command;
 }
 
-static void _resetCommandCandidate(CommandLine *cmdLine)
+static void _resetCommandCandidate(MilkCmd *cmdLine)
 {
 	cmdLine->commandCandidateLength = 0;
 
-	for (int i = 0; i < COMMAND_LENGTH; i++)
+	for (int i = 0; i < MILK_COMMAND_LEN; i++)
 		cmdLine->commandCandidate[i] = 0;
 }
 
 static void _updateCommandLine(MilkCmd *cmd, Milk *milk)
 {
-	CommandLine *cmdLine = &cmd->commandLine;
 	char ch;
 
-	if (milk->system.backspace() && cmdLine->commandCandidateLength > 0)
-		cmdLine->commandCandidate[--cmdLine->commandCandidateLength] = '\0';
+	if (milk->system.backspace() && cmd->commandCandidateLength > 0)
+		cmd->commandCandidate[--cmd->commandCandidateLength] = '\0';
 
-	if (milk->system.readTextInput(&ch) && cmdLine->commandCandidateLength < COMMAND_LENGTH - 1)
+	if (milk->system.readTextInput(&ch) && cmd->commandCandidateLength < MILK_COMMAND_LEN - 1)
 	{
-		cmdLine->commandCandidate[cmdLine->commandCandidateLength++] = ch;
-		cmdLine->commandCandidate[cmdLine->commandCandidateLength] = '\0';
+		cmd->commandCandidate[cmd->commandCandidateLength++] = ch;
+		cmd->commandCandidate[cmd->commandCandidateLength] = '\0';
 	}
 
-	if (milkButtonPressed(&milk->input, BTN_UP) && cmdLine->previousCommandLength > 0)
+	if (milkButtonPressed(&milk->input, BTN_UP) && cmd->previousCommandLength > 0)
 	{
-		strcpy(cmdLine->commandCandidate, cmdLine->previousCommand);
-		cmdLine->commandCandidateLength = cmdLine->previousCommandLength;
+		strcpy(cmd->commandCandidate, cmd->previousCommand);
+		cmd->commandCandidateLength = cmd->previousCommandLength;
 	}
 
 	if (milkButtonPressed(&milk->input, (1 << 1)))
-		_resetCommandCandidate(cmdLine);
+		_resetCommandCandidate(cmd);
 
-	if (milk->system.enter() && cmdLine->commandCandidateLength > 0)
+	if (milk->system.enter() && cmd->commandCandidateLength > 0)
 	{
-		char *args[COMMAND_MAX_ARGS];
+		char *args[CMD_MAX_ARGS];
 		int nargs;
 
-		CommandImpl *cmdImpl = _parseCommand(cmdLine->commandCandidate, args, &nargs);
+		CommandImpl *cmdImpl = _parseCommand(cmd->commandCandidate, args, &nargs);
 		if (cmdImpl != NULL)
 		{
 			cmdImpl->execute(cmd, milk, args, nargs);
 
 			/* After executing valid command, update the previous command. */
-			strcpy(cmdLine->previousCommand, cmdLine->commandCandidate);
-			cmdLine->previousCommandLength = cmdLine->commandCandidateLength;
+			strcpy(cmd->previousCommand, cmd->commandCandidate);
+			cmd->previousCommandLength = cmd->commandCandidateLength;
 		}
 		else milkLog(milk, "Unknown command", WARN);
 
-		_resetCommandCandidate(cmdLine);
+		_resetCommandCandidate(cmd);
 	}
 }
 
@@ -209,7 +208,8 @@ static Color32 _getLogColor(LogType type)
 	}
 }
 
-static void _getLogLines(Logs *logs, LogLine *lines, int *numLines)
+/* This is poopy. Need to refactor. */
+static void _getLogLines(Logs *logs, CommandLogLine *lines, int *numLines)
 {
 	int currentLine = 0;
 
@@ -251,15 +251,16 @@ static void _getLogLines(Logs *logs, LogLine *lines, int *numLines)
 
 static void _drawLogLines(Milk *milk)
 {
-	LogLine lines[MAX_LINES];
+	CommandLogLine lines[MAX_LINES];
 	int numLines;
+
 	_getLogLines(&milk->logs, lines, &numLines);
 
 	for (int i = 0; i < numLines; i++)
 		milkSpriteFont(&milk->video, 8, LOG_START_HEIGHT + ((MILK_CHAR_SQRSIZE + 2) * i), lines[i].message, 1, lines[i].color);
 }
 
-static void _drawCommandLine(CommandLine *cmdLine, Milk *milk)
+static void _drawCommandLine(MilkCmd *cmdLine, Milk *milk)
 {
 	size_t cmdLength = cmdLine->commandCandidateLength;
 
@@ -271,16 +272,14 @@ static void _drawCommandLine(CommandLine *cmdLine, Milk *milk)
 	/* Draw blinking position marker. */
 	if (_ticks % 32 > 16)
 		milkSpriteFont(&milk->video, 24 + cmdLength * 8, 42, "_", 1, CMD_COLOR);
-
-	_drawLogLines(milk);
 }
 
 MilkCmd *milkCmdInit()
 {
-	MilkCmd *editor = calloc(1, sizeof(MilkCmd));
-	editor->state = COMMAND;
-	_resetCommandCandidate(&editor->commandLine);
-	return editor;
+	MilkCmd *cmd = calloc(1, sizeof(MilkCmd));
+	cmd->state = COMMAND;
+	_resetCommandCandidate(cmd);
+	return cmd;
 }
 
 void milkCmdFree(MilkCmd *cmd)
@@ -343,7 +342,8 @@ void milkCmdDraw(MilkCmd *cmd, Milk *milk)
 	switch (cmd->state)
 	{
 		case COMMAND:
-			_drawCommandLine(&cmd->commandLine, milk);
+			_drawCommandLine(cmd, milk);
+			_drawLogLines(milk);
 			break;
 		case GAME:
 			milkInvokeDraw(&milk->code);
