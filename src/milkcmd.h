@@ -42,7 +42,7 @@ typedef struct milkCmd
     size_t previousCommandLength;
     char commandCandidate[MILK_COMMAND_LEN];
     char previousCommand[MILK_COMMAND_LEN];
-    uint8_t lastErrorCount;
+    int lastErrorCount;
 } MilkCmd;
 
 MilkCmd *milkCmdInit();

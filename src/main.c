@@ -134,9 +134,7 @@ int main(int argc, char *argv[])
 	milk->system.escape = _escape;
 	milk->system.enter = _enter;
 
-	int running = 1;
-
-	while (running)
+	while (!milk->shouldQuit)
 	{
 		Uint32 frameStartTicks = SDL_GetTicks();
 		Input *input = &milk->input;
@@ -157,7 +155,7 @@ int main(int argc, char *argv[])
 			switch (event.type)
 			{
 			case SDL_QUIT:
-				running = 0;
+				milkQuit(milk);
 				break;
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym)

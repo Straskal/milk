@@ -151,6 +151,11 @@ void milkFree(Milk *milk)
 	free(milk);
 }
 
+void milkQuit(Milk *milk)
+{
+	milk->shouldQuit = 1;
+}
+
 /*
  *******************************************************************************
  * SYSTEM
@@ -174,11 +179,15 @@ void milkLog(Milk *milk, const char *message, LogType type)
 	strcpy(newLogMessage->message, message);
 	newLogMessage->length = strlen(message);
 	newLogMessage->type = type;
+
+	if (type == ERROR)
+		milk->logs.errorCount++;
 }
 
 void milkClearLogs(Milk *milk)
 {
 	milk->logs.count = 0;
+	milk->logs.errorCount = 0;
 }
 
 int milkButton(Input *input, uint8_t button)

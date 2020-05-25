@@ -78,6 +78,7 @@ typedef struct logs
 {
     LogMessage messages[MILK_MAX_LOGS];
     int count;
+    int errorCount;
 } Logs;
 
 typedef enum buttonState
@@ -179,10 +180,12 @@ typedef struct milk
     Video video;
     Audio audio;
 	Code code;
+    uint8_t shouldQuit;
 } Milk;
 
 Milk *milkInit();
 void milkFree(Milk *milk);
+void milkQuit(Milk *milk);
 void milkLog(Milk *milk, const char *message, LogType type);
 void milkClearLogs(Milk *milk);
 void milkLoadSpritesheet(Video *video);

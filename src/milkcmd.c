@@ -38,6 +38,7 @@
 #define CMD_RELOAD_SPRITES "sprites"
 #define CMD_RELOAD_FONT "font"
 #define CMD_CLEAR "clear"
+#define CMD_QUIT "quit"
 
 #define CMD_COLOR 0xffffff
 #define CMD_COLOR_INFO 0x5c5c5c
@@ -102,12 +103,23 @@ static void _cmdClear(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 	(void *)nargs;
 
 	milkClearLogs(milk);
+	cmd->lastErrorCount = 0;
+}
+
+static void _cmdQuit(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
+{
+	(void *)cmd;
+	(void *)args;
+	(void *)nargs;
+
+	milkQuit(milk);
 }
 
 static CommandImpl _commands[] =
 {
 	{ CMD_RELOAD, _cmdReload },
-	{ CMD_CLEAR, _cmdClear }
+	{ CMD_CLEAR, _cmdClear },
+	{ CMD_QUIT, _cmdQuit }
 };
 
 #define NUM_COMMANDS sizeof(_commands) / sizeof(CommandImpl)
@@ -289,18 +301,9 @@ void milkCmdFree(MilkCmd *cmd)
 
 static void _errorCheck(MilkCmd *cmd, Milk *milk)
 {
-	int errorCount = 0;
-	int i;
-
-	for (i = 0; i < milk->logs.count; i++)
+	if (cmd->lastErrorCount < milk->logs.errorCount)
 	{
-		if (milk->logs.messages[i].type == ERROR)
-			errorCount++;
-	}
-
-	if (errorCount > cmd->lastErrorCount)
-	{
-		cmd->lastErrorCount++;
+		cmd->lastErrorCount = milk->logs.errorCount;
 		cmd->state = COMMAND;
 		milk->system.startTextInput();
 	}
