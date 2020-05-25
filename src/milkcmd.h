@@ -30,13 +30,13 @@
 #define COMMAND_MAX_ARGS 8
 #define COMMAND_LENGTH 25
 
-typedef enum
+typedef enum cmdState
 {
 	GAME,
 	COMMAND
-} EditorState;
+} CmdState;
 
-typedef struct CommandLine
+typedef struct commandLine
 {
 	size_t commandCandidateLength;
     size_t previousCommandLength;
@@ -44,16 +44,16 @@ typedef struct CommandLine
     char previousCommand[COMMAND_LENGTH];
 } CommandLine;
 
-typedef struct
+typedef struct milkCmd
 {
-	EditorState state;
+	CmdState state;
 	CommandLine commandLine;
     uint8_t lastErrorCount;
-} MilkEditor;
+} MilkCmd;
 
-MilkEditor *milkEditorInit();
-void milkEditorUpdate(MilkEditor *editor, Milk *milk);
-void milkEditorDraw(MilkEditor *editor, Milk *milk);
-void milkEditorFree(MilkEditor *editor);
+MilkCmd *milkCmdInit();
+void milkCmdFree(MilkCmd *cmd);
+void milkCmdUpdate(MilkCmd *cmd, Milk *milk);
+void milkCmdDraw(MilkCmd *cmd, Milk *milk);
 
 #endif

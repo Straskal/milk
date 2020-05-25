@@ -23,8 +23,9 @@
  */
 
 #include "milk.h"
-#include "milkeditor.h"
+#include "milkcmd.h"
 #include "SDL.h"
+#include "SDL_main.h"
 
 #include <memory.h>
 #include <stdio.h>
@@ -90,7 +91,7 @@ static int _enter()
 int main(int argc, char *argv[])
 {
 	Milk *milk;
-	MilkEditor *editor;
+	MilkCmd *milkCmd;
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	SDL_Texture *frontBufferTexture;
@@ -104,7 +105,7 @@ int main(int argc, char *argv[])
 
 	/* We could check for errors here, but we're not asking for much. So it's probably fine until we run into an issue. */
 	milk = milkInit();
-	editor = milkEditorInit();
+	milkCmd = milkCmdInit();
 	window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MILK_WINDOW_WIDTH, MILK_WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
 	renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
 	frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
@@ -200,8 +201,8 @@ int main(int argc, char *argv[])
 		if (keyboardState[SDL_SCANCODE_C]) gamepad->buttonState |= BTN_X;
 		if (keyboardState[SDL_SCANCODE_V]) gamepad->buttonState |= BTN_Y;
 
-		milkEditorUpdate(editor, milk);
-		milkEditorDraw(editor, milk);
+		milkCmdUpdate(milkCmd, milk);
+		milkCmdDraw(milkCmd, milk);
 		SDL_UpdateTexture(frontBufferTexture, NULL, (void *)milk->video.framebuffer, MILK_FRAMEBUF_PITCH);
 		SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
 		SDL_RenderPresent(renderer);
@@ -215,7 +216,7 @@ int main(int argc, char *argv[])
 	SDL_DestroyTexture(frontBufferTexture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
-	milkEditorFree(editor);
+	milkCmdFree(milkCmd);
 	milkFree(milk);
 	SDL_Quit();
 	return 0;

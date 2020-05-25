@@ -52,7 +52,7 @@
 #define MILK_MAX_LOGS 16
 #define MILK_LOG_LENGTH 256
 
-typedef struct
+typedef struct system
 {
     void(*startTextInput)();
     void(*stopTextInput)();
@@ -62,25 +62,25 @@ typedef struct
     int(*escape)();
 } System;
 
-typedef enum
+typedef enum logType
 {
     INFO, WARN, ERROR
 } LogType;
 
-typedef struct
+typedef struct logMessage
 {
     size_t length;
     LogType type;
     char message[MILK_LOG_LENGTH];
 } LogMessage;
 
-typedef struct
+typedef struct logs
 {
     LogMessage messages[MILK_MAX_LOGS];
     int count;
 } Logs;
 
-typedef enum
+typedef enum buttonState
 {
     BTN_UP = 1 << 0,
     BTN_DOWN = 1 << 1,
@@ -92,13 +92,13 @@ typedef enum
     BTN_Y = 1 << 7
 } ButtonState;
 
-typedef struct
+typedef struct gamepad
 {
     ButtonState buttonState;
     ButtonState previousButtonState;
 } Gamepad;
 
-typedef struct
+typedef struct input
 {
     uint32_t mouseX;
     uint32_t mouseY;
@@ -110,7 +110,7 @@ typedef struct
  /* Packed 32 bit color: 0xAARRGGBB */
 typedef uint32_t Color32;
 
-typedef struct Rect
+typedef struct rect
 {
     int top;
     int bottom;
@@ -124,7 +124,7 @@ typedef struct Rect
  * - The font is a single image px buffer.
  * - When blitting sprites or fonts, any pixels matching the color key will not be drawn.
  */
-typedef struct Video
+typedef struct video
 {
     Color32 framebuffer[MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT];
     Color32 spritesheet[MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE];
@@ -133,7 +133,7 @@ typedef struct Video
     Rect clipRect;
 } Video;
 
-typedef struct
+typedef struct sampleData
 {
     uint32_t length;
     uint8_t *buffer;
@@ -151,7 +151,7 @@ typedef struct AudioQueueItem
     struct AudioQueueItem *next;
 } AudioQueueItem;
 
-typedef struct
+typedef struct audio
 {
     SampleData samples[MILK_AUDIO_MAX_SOUNDS];
     AudioQueueItem queueItems[MILK_AUDIO_QUEUE_MAX];
@@ -166,12 +166,12 @@ typedef struct
  * Code is the client side script(s).
  * - state holds the current state of the program. In this case, it is a Lua state.
  */
-typedef struct
+typedef struct code
 {
 	void *state;
 } Code;
 
-typedef struct
+typedef struct milk
 {
     System system;
     Logs logs;

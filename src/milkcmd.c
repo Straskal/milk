@@ -22,9 +22,10 @@
  *  SOFTWARE.
  */
 
-#include "milkeditor.h"
 #include "milkapi.h"
+#include "milkcmd.h"
 
+#include <assert.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,6 +49,8 @@
 
 static unsigned int _ticks = 0;
 
+static Milk *_gmilk;
+
 /*
  *******************************************************************************
  * COMMAND LINE
@@ -57,7 +60,7 @@ static unsigned int _ticks = 0;
 typedef struct CommandImpl
 {
 	char *cmd;
-	void(*execute)(MilkEditor *, Milk *, char **, int);
+	void(*execute)(MilkCmd *, Milk *, char **, int);
 } CommandImpl;
 
 typedef struct
@@ -66,9 +69,9 @@ typedef struct
 	Color32 color;
 } LogLine;
 
-static void _cmdReload(MilkEditor *editor, Milk *milk, char *args[], int nargs)
+static void _cmdReload(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 {
-	(void *)editor;
+	(void *)cmd;
 
 	if (nargs == 1)
 	{
@@ -92,9 +95,9 @@ static void _cmdReload(MilkEditor *editor, Milk *milk, char *args[], int nargs)
 	else milkLog(milk, "'reload' expects an argument", WARN);
 }
 
-static void _cmdClear(MilkEditor *editor, Milk *milk, char *args[], int nargs)
+static void _cmdClear(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 {
-	(void *)editor;
+	(void *)cmd;
 	(void *)args;
 	(void *)nargs;
 
@@ -148,9 +151,9 @@ static void _resetCommandCandidate(CommandLine *cmdLine)
 		cmdLine->commandCandidate[i] = 0;
 }
 
-static void _updateCommandLine(MilkEditor *editor, Milk *milk)
+static void _updateCommandLine(MilkCmd *cmd, Milk *milk)
 {
-	CommandLine *cmdLine = &editor->commandLine;
+	CommandLine *cmdLine = &cmd->commandLine;
 	char ch;
 
 	if (milk->system.backspace() && cmdLine->commandCandidateLength > 0)
@@ -176,10 +179,10 @@ static void _updateCommandLine(MilkEditor *editor, Milk *milk)
 		char *args[COMMAND_MAX_ARGS];
 		int nargs;
 
-		CommandImpl *cmd = _parseCommand(cmdLine->commandCandidate, args, &nargs);
-		if (cmd != NULL)
+		CommandImpl *cmdImpl = _parseCommand(cmdLine->commandCandidate, args, &nargs);
+		if (cmdImpl != NULL)
 		{
-			cmd->execute(editor, milk, args, nargs);
+			cmdImpl->execute(cmd, milk, args, nargs);
 
 			/* After executing valid command, update the previous command. */
 			strcpy(cmdLine->previousCommand, cmdLine->commandCandidate);
@@ -189,20 +192,6 @@ static void _updateCommandLine(MilkEditor *editor, Milk *milk)
 
 		_resetCommandCandidate(cmdLine);
 	}
-}
-
-static void _drawCommandLine(CommandLine *cmdLine, Milk *milk)
-{
-	size_t cmdLength = cmdLine->commandCandidateLength;
-
-	milkClear(&milk->video, 0x1a1a1a);
-	milkSpriteFont(&milk->video, 8, 10, "MILK\n------------------------------", 1, CMD_COLOR);
-	milkSpriteFont(&milk->video, 8, 40, ">:", 1, CMD_COLOR);
-	milkSpriteFont(&milk->video, 24, 40, cmdLine->commandCandidate, 1, CMD_COLOR);
-
-	/* Draw blinking position marker. */
-	if (_ticks % 32 > 16)
-		milkSpriteFont(&milk->video, 24 + cmdLength * 8, 42, "_", 1, CMD_COLOR);
 }
 
 static Color32 _getLogColor(LogType type)
@@ -222,13 +211,17 @@ static Color32 _getLogColor(LogType type)
 
 static void _getLogLines(Logs *logs, LogLine *lines, int *numLines)
 {
-	char tempMessage[MILK_LOG_LENGTH + 2];
-	tempMessage[0] = '>';
-	tempMessage[1] = ':';
 	int currentLine = 0;
 
 	for (int i = logs->count - 1; i >= 0; i--)
 	{
+		if (currentLine == MAX_LINES - 1)
+			break;
+
+		char tempMessage[MILK_LOG_LENGTH + 2];
+		tempMessage[0] = '>';
+		tempMessage[1] = ':';
+
 		strcpy(&tempMessage[2], logs->messages[i].message);
 		char *splitByNewline = strtok(tempMessage, "\n"); /* Split message by newline. */
 
@@ -237,7 +230,7 @@ static void _getLogLines(Logs *logs, LogLine *lines, int *numLines)
 			size_t messageLength = strlen(splitByNewline);
 			char *messageText = splitByNewline;
 
-			while (messageLength > 0) /* Draw the message in separate line. */
+			while (messageLength > 0 && currentLine < MAX_LINES - 1) /* Draw the message in separate line. */
 			{
 				size_t remainingLength = strlen(messageText);
 				size_t lineLength = remainingLength > CHARS_PER_LINE - 1 ? CHARS_PER_LINE - 1 : remainingLength;
@@ -245,8 +238,8 @@ static void _getLogLines(Logs *logs, LogLine *lines, int *numLines)
 				lines[currentLine].message[lineLength] = '\0';
 				lines[currentLine].color = _getLogColor(logs->messages[i].type);
 				messageLength -= lineLength;
-				currentLine++;
 				messageText += lineLength;
+				currentLine++;
 			}
 
 			splitByNewline = strtok(NULL, "\n");
@@ -256,7 +249,7 @@ static void _getLogLines(Logs *logs, LogLine *lines, int *numLines)
 	*numLines = currentLine;
 }
 
-static void _drawLogs(Milk *milk)
+static void _drawLogLines(Milk *milk)
 {
 	LogLine lines[MAX_LINES];
 	int numLines;
@@ -266,15 +259,36 @@ static void _drawLogs(Milk *milk)
 		milkSpriteFont(&milk->video, 8, LOG_START_HEIGHT + ((MILK_CHAR_SQRSIZE + 2) * i), lines[i].message, 1, lines[i].color);
 }
 
-MilkEditor *milkEditorInit()
+static void _drawCommandLine(CommandLine *cmdLine, Milk *milk)
 {
-	MilkEditor *editor = calloc(1, sizeof(MilkEditor));
+	size_t cmdLength = cmdLine->commandCandidateLength;
+
+	milkClear(&milk->video, 0x1a1a1a);
+	milkSpriteFont(&milk->video, 8, 10, "MILK\n------------------------------", 1, CMD_COLOR);
+	milkSpriteFont(&milk->video, 8, 40, ">:", 1, CMD_COLOR);
+	milkSpriteFont(&milk->video, 24, 40, cmdLine->commandCandidate, 1, CMD_COLOR);
+
+	/* Draw blinking position marker. */
+	if (_ticks % 32 > 16)
+		milkSpriteFont(&milk->video, 24 + cmdLength * 8, 42, "_", 1, CMD_COLOR);
+
+	_drawLogLines(milk);
+}
+
+MilkCmd *milkCmdInit()
+{
+	MilkCmd *editor = calloc(1, sizeof(MilkCmd));
 	editor->state = COMMAND;
 	_resetCommandCandidate(&editor->commandLine);
 	return editor;
 }
 
-static void _errorCheck(MilkEditor *editor, Milk *milk)
+void milkCmdFree(MilkCmd *cmd)
+{
+	free(cmd);
+}
+
+static void _errorCheck(MilkCmd *cmd, Milk *milk)
 {
 	int errorCount = 0;
 	int i;
@@ -285,62 +299,56 @@ static void _errorCheck(MilkEditor *editor, Milk *milk)
 			errorCount++;
 	}
 
-	if (errorCount > editor->lastErrorCount)
+	if (errorCount > cmd->lastErrorCount)
 	{
-		editor->lastErrorCount++;
-		editor->state = COMMAND;
+		cmd->lastErrorCount++;
+		cmd->state = COMMAND;
 		milk->system.startTextInput();
 	}
 }
 
-void milkEditorUpdate(MilkEditor *editor, Milk *milk)
+void milkCmdUpdate(MilkCmd *cmd, Milk *milk)
 {
 	milkResetDrawState(&milk->video);
 
 	if (milk->system.escape())
 	{
-		if (editor->state != COMMAND)
+		if (cmd->state != COMMAND)
 		{
-			editor->state = COMMAND;
+			cmd->state = COMMAND;
 			milk->system.startTextInput();
 		}
 		else
 		{
-			editor->state = GAME;
+			cmd->state = GAME;
 			milk->system.stopTextInput();
 		}
 	}
 
-	switch (editor->state)
+	switch (cmd->state)
 	{
 		case COMMAND:
-			_updateCommandLine(editor, milk);
+			_updateCommandLine(cmd, milk);
 			break;
 		case GAME:
 			milkResetDrawState(&milk->video);
 			milkInvokeUpdate(&milk->code);
-			_errorCheck(editor, milk);
+			_errorCheck(cmd, milk);
 			break;
 	}
 }
 
-void milkEditorDraw(MilkEditor *editor, Milk *milk)
+void milkCmdDraw(MilkCmd *cmd, Milk *milk)
 {
-	switch (editor->state)
+	switch (cmd->state)
 	{
 		case COMMAND:
-			_drawCommandLine(&editor->commandLine, milk);
-			_drawLogs(milk);
+			_drawCommandLine(&cmd->commandLine, milk);
 			break;
 		case GAME:
 			milkInvokeDraw(&milk->code);
-			_errorCheck(editor, milk);
+			_errorCheck(cmd, milk);
 			break;
 	}
 	_ticks++;
-}
-
-void milkEditorFree(MilkEditor *editor)
-{
-	free(editor);
 }

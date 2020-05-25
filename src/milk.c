@@ -171,7 +171,7 @@ void milkLog(Milk *milk, const char *message, LogType type)
 	}
 	else newLogMessage = &milk->logs.messages[milk->logs.count++];
 
-	strcpy(&newLogMessage->message, message);
+	strcpy(newLogMessage->message, message);
 	newLogMessage->length = strlen(message);
 	newLogMessage->type = type;
 }
@@ -298,7 +298,7 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 			Color32 col = pixels[yNearest * pitch + xNearest];
 
 			if (col != video->colorKey)
-				milkPixelSet(video, xFramebuffer, yFramebuffer, color != NULL ? *color : pixels[yNearest * pitch + xNearest]);
+				milkPixelSet(video, xFramebuffer, yFramebuffer, color != NULL ? *color : col);
 		}
 	}
 }
