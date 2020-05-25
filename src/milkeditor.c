@@ -222,40 +222,31 @@ static Color32 _getLogColor(LogType type)
 
 static void _getLogLines(Logs *logs, LogLine *lines, int *numLines)
 {
-	char mutableMessage[MILK_LOG_LENGTH];
+	char tempMessage[MILK_LOG_LENGTH];
 	int currentLine = 0;
 
 	for (int i = logs->count - 1; i >= 0; i--)
 	{
-		strcpy(mutableMessage, logs->messages[i].message);
-		char *splitByNewline = strtok(mutableMessage, "\n"); /* Split message by newline. */
+		strcpy(tempMessage, logs->messages[i].message);
+		char *splitByNewline = strtok(tempMessage, "\n"); /* Split message by newline. */
 
 		while (splitByNewline != NULL && currentLine < MAX_LINES - 1)
 		{
 			size_t messageLength = strlen(splitByNewline);
+			char *messageText = splitByNewline;
 
-			if (messageLength <= CHARS_PER_LINE) /* Just add one line for message. */
+			while (messageLength > 0) /* Draw the message in separate line. */
 			{
-				strcpy(lines[currentLine].message, splitByNewline);
+				size_t remainingLength = strlen(messageText);
+				size_t lineLength = remainingLength > CHARS_PER_LINE - 1 ? CHARS_PER_LINE - 1 : remainingLength;
+				strncpy(lines[currentLine].message, messageText, lineLength);
+				lines[currentLine].message[lineLength] = '\0';
 				lines[currentLine].color = _getLogColor(logs->messages[i].type);
+				messageLength -= lineLength;
 				currentLine++;
+				messageText += lineLength;
 			}
-			else
-			{
-				char *messageText = splitByNewline;
 
-				while (messageLength > 0) /* Draw the message in separate line. */
-				{
-					size_t remainingLength = strlen(messageText);
-					size_t lineLength = remainingLength > CHARS_PER_LINE - 1 ? CHARS_PER_LINE - 1 : remainingLength;
-					strncpy(lines[currentLine].message, messageText, lineLength);
-					lines[currentLine].message[lineLength] = '\0';
-					lines[currentLine].color = _getLogColor(logs->messages[i].type);
-					messageLength -= lineLength;
-					currentLine++;
-					messageText += lineLength;
-				}
-			}
 			splitByNewline = strtok(NULL, "\n");
 		}
 	}
