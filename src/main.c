@@ -176,12 +176,10 @@ int main(int argc, char *argv[])
 	{
 		/*
 		 *******************************************************************************
-		 * Load assets
+		 * Load code
 		 *******************************************************************************
 		 */
 
-		milkLoadSpritesheet(&milk->video);
-		milkLoadFont(&milk->video);
 		milkLoadCode(milk);
 	}
 

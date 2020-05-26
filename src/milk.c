@@ -61,6 +61,9 @@ Milk *milkCreate()
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
 		milk->audio.queueItems[i].isFree = 1;
 
+	milkLoadSpritesheet(&milk->video);
+	milkLoadFont(&milk->video);
+
 	return milk;
 }
 
