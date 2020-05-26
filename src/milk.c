@@ -46,6 +46,9 @@
 /*
  *******************************************************************************
  * Initialization and shutdown
+ *
+ * Milk's sprite and font memory is predetermined and statically allocated.
+ * Code and sounds are dynamically allocated and must be freed.
  *******************************************************************************
  */
 
@@ -70,14 +73,9 @@ void milkFree(Milk *milk)
 	free(milk);
 }
 
-void milkQuit(Milk *milk)
-{
-	milk->shouldQuit = 1;
-}
-
 /*
  *******************************************************************************
- * Logging
+ * Logging. Should use a queue instead of an array.
  *******************************************************************************
  */
 

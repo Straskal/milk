@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 				switch (event.type)
 				{
 					case SDL_QUIT:
-						milkQuit(milk);
+						milk->shouldQuit = 1;
 						break;
 					case SDL_KEYDOWN:
 						switch (event.key.keysym.sym)

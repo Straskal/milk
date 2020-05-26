@@ -27,29 +27,29 @@
 
 #include <stdint.h>
 
-#define MILK_WINDOW_WIDTH MILK_FRAMEBUF_WIDTH * 3
-#define MILK_WINDOW_HEIGHT MILK_FRAMEBUF_HEIGHT * 3
+#define MILK_WINDOW_WIDTH   MILK_FRAMEBUF_WIDTH * 3
+#define MILK_WINDOW_HEIGHT  MILK_FRAMEBUF_HEIGHT * 3
 
-#define MILK_FRAMERATE (1000.0f / 50.0f)
-#define MILK_FRAMEBUF_WIDTH 256
-#define MILK_FRAMEBUF_HEIGHT 224
+#define MILK_FRAMERATE          (1000.0f / 50.0f)
+#define MILK_FRAMEBUF_WIDTH     256
+#define MILK_FRAMEBUF_HEIGHT    224
 
-#define MILK_SPRSHEET_FILENAME "sprsheet.bmp"
-#define MILK_FONT_FILENAME "font.bmp"
-#define MILK_SPRSHEET_SQRSIZE 256
-#define MILK_SPRSHEET_SPR_SQRSIZE 16
-#define MILK_FONT_WIDTH 128
-#define MILK_FONT_HEIGHT 48
-#define MILK_CHAR_SQRSIZE 8
+#define MILK_SPRSHEET_FILENAME      "sprsheet.bmp"
+#define MILK_FONT_FILENAME          "font.bmp"
+#define MILK_SPRSHEET_SQRSIZE       256
+#define MILK_SPRSHEET_SPR_SQRSIZE   16
+#define MILK_FONT_WIDTH             128
+#define MILK_FONT_HEIGHT            48
+#define MILK_CHAR_SQRSIZE           8
 
-#define MILK_AUDIO_FREQUENCY 44100
-#define MILK_AUDIO_CHANNELS 2 /* Stereo */
-#define MILK_AUDIO_SAMPLES 4096
-#define MILK_AUDIO_MAX_SOUNDS 25
-#define MILK_AUDIO_QUEUE_MAX 16
-#define MILK_AUDIO_MAX_VOLUME 128
+#define MILK_AUDIO_FREQUENCY    44100
+#define MILK_AUDIO_CHANNELS     2 /* Stereo */
+#define MILK_AUDIO_SAMPLES      4096
+#define MILK_AUDIO_MAX_SOUNDS   25
+#define MILK_AUDIO_QUEUE_MAX    16
+#define MILK_AUDIO_MAX_VOLUME   128
 
-#define MILK_MAX_LOGS 16
+#define MILK_MAX_LOGS   16
 #define MILK_LOG_LENGTH 256
 
 typedef struct system
@@ -69,28 +69,28 @@ typedef enum logType
 
 typedef struct logMessage
 {
-    size_t length;
+    size_t  length;
     LogType type;
-    char message[MILK_LOG_LENGTH];
+    char    message[MILK_LOG_LENGTH];
 } LogMessage;
 
 typedef struct logs
 {
-    LogMessage messages[MILK_MAX_LOGS];
-    int count;
-    int errorCount;
+    LogMessage  messages[MILK_MAX_LOGS];
+    int         count;
+    int         errorCount;
 } Logs;
 
 typedef enum buttonState
 {
-    BTN_UP = 1 << 0,
-    BTN_DOWN = 1 << 1,
-    BTN_LEFT = 1 << 2,
+    BTN_UP =    1 << 0,
+    BTN_DOWN =  1 << 1,
+    BTN_LEFT =  1 << 2,
     BTN_RIGHT = 1 << 3,
-    BTN_A = 1 << 4,
-    BTN_B = 1 << 5,
-    BTN_X = 1 << 6,
-    BTN_Y = 1 << 7
+    BTN_A =     1 << 4,
+    BTN_B =     1 << 5,
+    BTN_X =     1 << 6,
+    BTN_Y =     1 << 7
 } ButtonState;
 
 typedef struct gamepad
@@ -127,7 +127,7 @@ typedef struct video
     Color32 spritesheet[MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE];
     Color32 font[MILK_FONT_WIDTH * MILK_FONT_HEIGHT];
     Color32 colorKey;
-    Rect clipRect;
+    Rect    clipRect;
 } Video;
 
 typedef struct sampleData
@@ -139,23 +139,23 @@ typedef struct sampleData
 typedef struct AudioQueueItem
 {
     SampleData *sampleData;
-    uint32_t remainingLength;
-    uint8_t *position;
-    uint8_t volume;
-    uint8_t loop;
-    uint8_t isFree;
+    uint32_t    remainingLength;
+    uint8_t    *position;
+    uint8_t     volume;
+    uint8_t     loop;
+    uint8_t     isFree;
 
     struct AudioQueueItem *next;
 } AudioQueueItem;
 
 typedef struct audio
 {
-    SampleData samples[MILK_AUDIO_MAX_SOUNDS];
-    AudioQueueItem queueItems[MILK_AUDIO_QUEUE_MAX];
+    SampleData      samples[MILK_AUDIO_MAX_SOUNDS];
+    AudioQueueItem  queueItems[MILK_AUDIO_QUEUE_MAX];
     AudioQueueItem *queue;
-    uint32_t frequency;
-    uint8_t masterVolume;
-    uint8_t channels;
+    uint32_t        frequency;
+    uint8_t         masterVolume;
+    uint8_t         channels;
 
     void(*lock)();
     void(*unlock)();
@@ -172,12 +172,12 @@ typedef struct code
 
 typedef struct milk
 {
-    System system;
-    Logs logs;
-	Input input;
-    Video video;
-    Audio audio;
-	Code code;
+    System  system;
+    Logs    logs;
+	Input   input;
+    Video   video;
+    Audio   audio;
+	Code    code;
     uint8_t shouldQuit;
 } Milk;
 

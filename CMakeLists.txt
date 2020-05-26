@@ -7,7 +7,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 project(libmilk)
 
-set(C_STANDARD 11)
+set(C_STANDARD 99)
 
 # set debug symbol = MILK_DEBUG
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DMILK_DEBUG")
