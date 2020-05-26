@@ -27,8 +27,8 @@
 
 #include "milk.h"
 
-void milkLoadScripts(Milk *code);
-void milkUnloadScripts(Milk *milk);
+void milkLoadCode(Milk *milk);
+void milkUnloadCode(Milk *milk);
 void milkInvokeUpdate(Code *code);
 void milkInvokeDraw(Code *code);
 

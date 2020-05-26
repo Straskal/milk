@@ -31,33 +31,39 @@
 #include <math.h>
 #include <stdio.h>
 
-
 static Milk *_globalMilk;
 static void _pushApi(lua_State *L);
 
-void milkLoadScripts(Milk *milk)
+void milkLoadCode(Milk *milk)
 {
-	_globalMilk = milk;
-
-	lua_State *L = luaL_newstate();
-	luaL_openlibs(L);
-	milk->code.state = (void *)L;
-	_pushApi(L);
-
-	if (luaL_dofile(L, "main.lua"))
+	if (milk->code.state == NULL)
 	{
-		milkLog(milk, lua_tostring(L, -1), ERROR);
-		return;
-	}
+		_globalMilk = milk;
 
-	lua_getglobal(L, "_init"); /* Invoke _init callback. */
-	lua_call(L, 0, 0);
+		lua_State *L = luaL_newstate();
+		luaL_openlibs(L);
+		milk->code.state = (void *)L;
+		_pushApi(L);
+
+		if (luaL_dofile(L, "main.lua"))
+		{
+			milkLog(milk, lua_tostring(L, -1), ERROR);
+			return;
+		}
+
+		lua_getglobal(L, "_init"); /* Invoke _init callback. */
+		lua_call(L, 0, 0);
+	}
 }
 
-void milkUnloadScripts(Milk *milk)
+void milkUnloadCode(Milk *milk)
 {
-	lua_close((lua_State*)milk->code.state);
-	_globalMilk = NULL;
+	if (milk->code.state != NULL)
+	{
+		lua_close((lua_State *)milk->code.state);
+		milk->code.state = NULL;
+		_globalMilk = NULL;
+	}
 }
 
 void milkInvokeUpdate(Code *code)

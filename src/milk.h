@@ -101,10 +101,6 @@ typedef struct gamepad
 
 typedef struct input
 {
-    uint32_t mouseX;
-    uint32_t mouseY;
-    uint8_t mouseDown;
-    uint8_t mouseDownPrevious;
     Gamepad gamepad;
 } Input;
 
@@ -157,7 +153,9 @@ typedef struct audio
     SampleData samples[MILK_AUDIO_MAX_SOUNDS];
     AudioQueueItem queueItems[MILK_AUDIO_QUEUE_MAX];
     AudioQueueItem *queue;
+    uint32_t frequency;
     uint8_t masterVolume;
+    uint8_t channels;
 
     void(*lock)();
     void(*unlock)();
@@ -183,15 +181,17 @@ typedef struct milk
     uint8_t shouldQuit;
 } Milk;
 
-Milk *milkInit();
+Milk *milkCreate();
 void milkFree(Milk *milk);
-void milkQuit(Milk *milk);
 void milkLog(Milk *milk, const char *message, LogType type);
 void milkClearLogs(Milk *milk);
+
 void milkLoadSpritesheet(Video *video);
 void milkLoadFont(Video *video);
+
 int milkButton(Input *input, uint8_t button);
 int milkButtonPressed(Input *input, uint8_t button);
+
 void milkResetDrawState(Video *video);
 void milkClipRect(Video *video, int x, int y, int w, int h);
 void milkClear(Video *video, Color32 color);
@@ -200,6 +200,7 @@ void milkRect(Video *video, int x, int y, int w, int h, Color32 color);
 void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color);
 void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip);
 void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Color32 color);
+
 void milkSound(Audio *audio, int idx, uint8_t volume, uint8_t loop);
 void milkVolume(Audio *audio, uint8_t volume);
 void milkMixCallback(void *userdata, uint8_t *stream, int len);

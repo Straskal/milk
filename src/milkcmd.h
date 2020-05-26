@@ -45,7 +45,7 @@ typedef struct milkCmd
     int lastErrorCount;
 } MilkCmd;
 
-MilkCmd *milkCmdInit();
+MilkCmd *milkCmdCreate();
 void milkCmdFree(MilkCmd *cmd);
 void milkCmdUpdate(MilkCmd *cmd, Milk *milk);
 void milkCmdDraw(MilkCmd *cmd, Milk *milk);

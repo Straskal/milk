@@ -78,8 +78,8 @@ static void _cmdReload(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 	{
 		if (strcmp(args[0], CMD_RELOAD_SCRIPTS) == 0)
 		{
-			milkUnloadScripts(milk);
-			milkLoadScripts(milk);
+			milkUnloadCode(milk);
+			milkLoadCode(milk);
 			milkLog(milk, "Scripts have been reloaded", INFO);
 		}
 		else if (strcmp(args[0], CMD_RELOAD_SPRITES) == 0)
@@ -112,7 +112,7 @@ static void _cmdQuit(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 	(void *)args;
 	(void *)nargs;
 
-	milkQuit(milk);
+	milk->shouldQuit = 1;
 }
 
 static CommandImpl _commands[] =
@@ -286,7 +286,7 @@ static void _drawCommandLine(MilkCmd *cmdLine, Milk *milk)
 		milkSpriteFont(&milk->video, 24 + cmdLength * 8, 42, "_", 1, CMD_COLOR);
 }
 
-MilkCmd *milkCmdInit()
+MilkCmd *milkCmdCreate()
 {
 	MilkCmd *cmd = calloc(1, sizeof(MilkCmd));
 	cmd->state = COMMAND;

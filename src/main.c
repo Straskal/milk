@@ -23,29 +23,35 @@
  */
 
 #include "milk.h"
+#include "milkapi.h"
 #include "milkcmd.h"
-#include "SDL.h"
-#include "SDL_main.h"
 
 #include <memory.h>
 #include <stdio.h>
+#include <SDL.h>
 
 #define SDL_FIRST_AVAILABLE_RENDERER -1
 #define MILK_FRAMEBUF_PITCH (MILK_FRAMEBUF_WIDTH * 4)
+#define MILK_CMD /* We want to compile with the command line. */
 
-/* Functions to lock and unlock the audio device so you can safely manipulate the milk's audio queue without another thread grabbing for it. */
-static int gAudioDevice; /* Global audio device so we can access from our methods below. */
+static int _gAudioDevice; /* Global audio device so we can access from our methods below. */
 
+ /* Functions to lock and unlock the audio device so you can safely manipulate the milk's audio queue without another thread grabbing for it. */
 static void _lockAudioDevice()
 {
-	SDL_LockAudioDevice(gAudioDevice);
+	SDL_LockAudioDevice(_gAudioDevice);
 }
 
 static void _unlockAudioDevice()
 {
-	SDL_UnlockAudioDevice(gAudioDevice);
+	SDL_UnlockAudioDevice(_gAudioDevice);
 }
 
+/*
+ *******************************************************************************
+ * System implementation. Need to refactor this. I don't like how it's implemented.
+ *******************************************************************************
+ */
 typedef struct
 {
 	char textInputChar;
@@ -88,6 +94,11 @@ static int _enter()
 	return _systemData.enter;
 }
 
+/*
+ *******************************************************************************
+ * SDL_main
+ *******************************************************************************
+ */
 int main(int argc, char *argv[])
 {
 	Milk *milk;
@@ -96,120 +107,157 @@ int main(int argc, char *argv[])
 	SDL_Renderer *renderer;
 	SDL_Texture *frontBufferTexture;
 	SDL_AudioDeviceID audioDevice;
+	SDL_AudioSpec wantedSpec;
+	SDL_AudioSpec actualSpec;
 
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
 	{
-		printf("Error initializing SDL: %s", SDL_GetError());
-		return 0;
+		/*
+		 *******************************************************************************
+		 * Initialization
+		 *******************************************************************************
+		 */
+
+		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
+		{
+			printf("Error initializing SDL: %s", SDL_GetError());
+			return 1;
+		}
+
+		milk = milkCreate();
+		milkCmd = milkCmdCreate();
+		window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MILK_WINDOW_WIDTH, MILK_WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
+		renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
+		frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
+
+		SDL_RenderSetLogicalSize(renderer, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
+		SDL_ShowCursor(0);
 	}
 
-	/* We could check for errors here, but we're not asking for much. So it's probably fine until we run into an issue. */
-	milk = milkInit();
-	milkCmd = milkCmdInit();
-	window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MILK_WINDOW_WIDTH, MILK_WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
-	renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
-	frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
-	SDL_RenderSetLogicalSize(renderer, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
+	{
+		/*
+		 *******************************************************************************
+		 * Audio device setup
+		 *******************************************************************************
+		 */
 
-	SDL_AudioSpec audioSpec;
-	audioSpec.freq = MILK_AUDIO_FREQUENCY;
-	audioSpec.format = AUDIO_S16LSB;
-	audioSpec.channels = MILK_AUDIO_CHANNELS;
-	audioSpec.samples = MILK_AUDIO_SAMPLES;
+		wantedSpec.freq = MILK_AUDIO_FREQUENCY;
+		wantedSpec.format = AUDIO_S16LSB;
+		wantedSpec.channels = MILK_AUDIO_CHANNELS;
+		wantedSpec.samples = MILK_AUDIO_SAMPLES;
+		wantedSpec.callback = milkMixCallback; /* Give the audio spec our mixing callback, and milk's audio as user data. */
+		wantedSpec.userdata = (void *)&milk->audio;
 
-	/* Give the audio spec our mixing callback, and milk's audio as user data. */
-	audioSpec.callback = milkMixCallback;
-	audioSpec.userdata = (void *)&milk->audio;
+		audioDevice = SDL_OpenAudioDevice(NULL, 0, &wantedSpec, &actualSpec, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE | SDL_AUDIO_ALLOW_CHANNELS_CHANGE);
+		_gAudioDevice = audioDevice;
 
-	audioDevice = SDL_OpenAudioDevice(NULL, 0, &audioSpec, NULL, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE | SDL_AUDIO_ALLOW_CHANNELS_CHANGE);
-	gAudioDevice = audioDevice;
-	SDL_PauseAudioDevice(audioDevice, 0); /* Pause(0) starts the device. */
+		milk->audio.channels = actualSpec.channels;
+		milk->audio.frequency = actualSpec.freq;
+		milk->audio.lock = _lockAudioDevice;
+		milk->audio.unlock = _unlockAudioDevice;
 
-	milk->audio.lock = _lockAudioDevice;
-	milk->audio.unlock = _unlockAudioDevice;
-	milk->system.startTextInput = _startTextInput;
-	milk->system.stopTextInput = _stopTextInput;
-	milk->system.readTextInput = _readInput;
-	milk->system.backspace = _backspace;
-	milk->system.escape = _escape;
-	milk->system.enter = _enter;
+		SDL_PauseAudioDevice(audioDevice, 0); /* Pause(0) starts the device. lawl. */
+	}
+
+	{
+		/*
+		 *******************************************************************************
+		 * System implementation
+		 *******************************************************************************
+		 */
+
+		milk->system.startTextInput = _startTextInput;
+		milk->system.stopTextInput = _stopTextInput;
+		milk->system.readTextInput = _readInput;
+		milk->system.backspace = _backspace;
+		milk->system.escape = _escape;
+		milk->system.enter = _enter;
+	}
+
+	{
+		/*
+		 *******************************************************************************
+		 * Load assets
+		 *******************************************************************************
+		 */
+
+		milkLoadSpritesheet(&milk->video);
+		milkLoadFont(&milk->video);
+		milkLoadCode(milk);
+	}
 
 	while (!milk->shouldQuit)
 	{
 		Uint32 frameStartTicks = SDL_GetTicks();
 		Input *input = &milk->input;
 
-		input->mouseDownPrevious = input->mouseDown;
-		input->mouseDown = 0;
-		input->gamepad.previousButtonState = input->gamepad.buttonState;
-		input->gamepad.buttonState = 0;
-
-		_systemData.hasInput = 0;
-		_systemData.backspace = 0;
-		_systemData.enter = 0;
-		_systemData.escape = 0;
-
-		SDL_Event event;
-		while (SDL_PollEvent(&event))
 		{
-			switch (event.type)
+			/* Reset input state. */
+			input->gamepad.previousButtonState = input->gamepad.buttonState;
+			input->gamepad.buttonState = 0;
+
+			_systemData.hasInput = 0;
+			_systemData.backspace = 0;
+			_systemData.enter = 0;
+			_systemData.escape = 0;
+
+			/* Poll input events and update input state. */
+			SDL_Event event;
+			while (SDL_PollEvent(&event))
 			{
-			case SDL_QUIT:
-				milkQuit(milk);
-				break;
-			case SDL_KEYDOWN:
-				switch (event.key.keysym.sym)
+				switch (event.type)
 				{
-					case SDLK_BACKSPACE:
-						_systemData.backspace = 1;
+					case SDL_QUIT:
+						milkQuit(milk);
 						break;
-					case SDLK_RETURN:
-						_systemData.enter = 1;
+					case SDL_KEYDOWN:
+						switch (event.key.keysym.sym)
+						{
+							case SDLK_BACKSPACE:
+								_systemData.backspace = 1;
+								break;
+							case SDLK_RETURN:
+								_systemData.enter = 1;
+								break;
+							case SDLK_ESCAPE:
+								_systemData.escape = 1;
+								break;
+						}
 						break;
-					case SDLK_ESCAPE:
-						_systemData.escape = 1;
+					case SDL_TEXTINPUT:
+						_systemData.hasInput = 1;
+						_systemData.textInputChar = event.text.text[0];
 						break;
 				}
-				break;
-			case SDL_MOUSEMOTION:
-				milk->input.mouseX = event.motion.x;
-				milk->input.mouseY = event.motion.y;
-				break;
-			case SDL_MOUSEBUTTONDOWN:
-				if (event.button.button == SDL_BUTTON_LEFT)
-				{
-					milk->input.mouseDown = 1;
-				}
-				break;
-			case SDL_TEXTINPUT:
-				_systemData.hasInput = 1;
-				_systemData.textInputChar = event.text.text[0];
-				break;
 			}
+
+			const Uint8 *kbState = SDL_GetKeyboardState(NULL);
+
+			if (kbState[SDL_SCANCODE_UP]) input->gamepad.buttonState |= BTN_UP;
+			if (kbState[SDL_SCANCODE_DOWN]) input->gamepad.buttonState |= BTN_DOWN;
+			if (kbState[SDL_SCANCODE_LEFT]) input->gamepad.buttonState |= BTN_LEFT;
+			if (kbState[SDL_SCANCODE_RIGHT]) input->gamepad.buttonState |= BTN_RIGHT;
+			if (kbState[SDL_SCANCODE_Z]) input->gamepad.buttonState |= BTN_A;
+			if (kbState[SDL_SCANCODE_X]) input->gamepad.buttonState |= BTN_B;
+			if (kbState[SDL_SCANCODE_C]) input->gamepad.buttonState |= BTN_X;
+			if (kbState[SDL_SCANCODE_V]) input->gamepad.buttonState |= BTN_Y;
 		}
 
-		Gamepad *gamepad = &milk->input.gamepad;
-		const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
-		if (keyboardState[SDL_SCANCODE_UP]) gamepad->buttonState |= BTN_UP;
-		if (keyboardState[SDL_SCANCODE_DOWN]) gamepad->buttonState |= BTN_DOWN;
-		if (keyboardState[SDL_SCANCODE_LEFT]) gamepad->buttonState |= BTN_LEFT;
-		if (keyboardState[SDL_SCANCODE_RIGHT]) gamepad->buttonState |= BTN_RIGHT;
-		if (keyboardState[SDL_SCANCODE_Z]) gamepad->buttonState |= BTN_A;
-		if (keyboardState[SDL_SCANCODE_X]) gamepad->buttonState |= BTN_B;
-		if (keyboardState[SDL_SCANCODE_C]) gamepad->buttonState |= BTN_X;
-		if (keyboardState[SDL_SCANCODE_V]) gamepad->buttonState |= BTN_Y;
-
-		milkCmdUpdate(milkCmd, milk);
-		milkCmdDraw(milkCmd, milk);
-		SDL_UpdateTexture(frontBufferTexture, NULL, (void *)milk->video.framebuffer, MILK_FRAMEBUF_PITCH);
-		SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
-		SDL_RenderPresent(renderer);
+		{
+			/* Main loop cycle. */
+			milkCmdUpdate(milkCmd, milk);
+			milkCmdDraw(milkCmd, milk);
+			SDL_UpdateTexture(frontBufferTexture, NULL, (void *)milk->video.framebuffer, MILK_FRAMEBUF_PITCH);
+			SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
+			SDL_RenderPresent(renderer);
+		}
 
 		Uint32 elapsedTicks = SDL_GetTicks() - frameStartTicks;
+
 		if (elapsedTicks < MILK_FRAMERATE)
 			SDL_Delay((Uint32)(MILK_FRAMERATE - elapsedTicks));
 	}
 
+	milkUnloadCode(milk);
 	SDL_CloseAudioDevice(audioDevice);
 	SDL_DestroyTexture(frontBufferTexture);
 	SDL_DestroyRenderer(renderer);

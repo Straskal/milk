@@ -45,24 +45,88 @@
 
 /*
  *******************************************************************************
- * ASSET LOADING
-
- * Load WAV data into dynamically allocated buffers.
- * Load bitmap and copy it's pixel data into a fixed size buffer.
- * Would also love to rid of this SDL dependency. Could have custom wav loading here.
+ * Initialization and shutdown
  *******************************************************************************
  */
 
-static void _loadWave(const char *filename, SampleData *sampleData)
+Milk *milkCreate()
+{
+	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
+	milk->audio.queue = (AudioQueueItem *)calloc(1, sizeof(AudioQueueItem));
+	milk->audio.masterVolume = MILK_AUDIO_MAX_VOLUME;
+
+	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+		milk->audio.queueItems[i].isFree = 1;
+
+	return milk;
+}
+
+void milkFree(Milk *milk)
+{
+	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
+		SDL_FreeWAV(milk->audio.samples[i].buffer);
+
+	free(milk->audio.queue);
+	free(milk);
+}
+
+void milkQuit(Milk *milk)
+{
+	milk->shouldQuit = 1;
+}
+
+/*
+ *******************************************************************************
+ * Logging
+ *******************************************************************************
+ */
+
+void milkLog(Milk *milk, const char *message, LogType type)
+{
+	LogMessage *newLogMessage;
+
+	/* If the logs are full, then shift the items down and insert the new log at the end of the list. */
+	if (milk->logs.count == MILK_MAX_LOGS)
+	{
+		for (int i = 0; i < MILK_MAX_LOGS - 1; i++)
+			milk->logs.messages[i] = milk->logs.messages[i + 1];
+
+		newLogMessage = &milk->logs.messages[MILK_MAX_LOGS - 1];
+	}
+	else newLogMessage = &milk->logs.messages[milk->logs.count++];
+
+	strcpy(newLogMessage->message, message);
+	newLogMessage->length = strlen(message);
+	newLogMessage->type = type;
+
+	if (type == ERROR)
+		milk->logs.errorCount++;
+}
+
+void milkClearLogs(Milk *milk)
+{
+	milk->logs.count = 0;
+	milk->logs.errorCount = 0;
+}
+
+/*
+ *******************************************************************************
+ * Asset loading
+
+ * Load wav data into dynamically allocated buffers.
+ * Load bitmap and copy it's pixel data into a fixed size buffer.
+ *******************************************************************************
+ */
+
+static void _loadWave(Audio *audio, const char *filename, SampleData *sampleData)
 {
 	SDL_AudioSpec waveSpec;
 	SDL_LoadWAV(filename, &waveSpec, &sampleData->buffer, &sampleData->length);
 
-	/* A lot of sound effects are mono (1 channel), so must CONVERT THEM. */
-	if (waveSpec.channels != MILK_AUDIO_CHANNELS)
+	if (waveSpec.channels != audio->channels || (uint32_t)waveSpec.freq != audio->frequency)
 	{
 		SDL_AudioCVT conversion;
-		SDL_BuildAudioCVT(&conversion, waveSpec.format, waveSpec.channels, waveSpec.freq, AUDIO_S16LSB, MILK_AUDIO_CHANNELS, MILK_AUDIO_FREQUENCY);
+		SDL_BuildAudioCVT(&conversion, waveSpec.format, waveSpec.channels, waveSpec.freq, AUDIO_S16LSB, audio->channels, audio->frequency);
 		conversion.len = sampleData->length;
 		conversion.buf = (Uint8 *)SDL_malloc((size_t)conversion.len * conversion.len_mult);
 		SDL_memcpy(conversion.buf, sampleData->buffer, sampleData->length);
@@ -103,92 +167,9 @@ void milkLoadFont(Video *video)
 
 /*
  *******************************************************************************
- * INITIALIZATION & SHUT DOWN
+ * Input
  *******************************************************************************
  */
-
-static void _milkOpenAudio(Audio *audio)
-{
-	audio->queue = (AudioQueueItem *)calloc(1, sizeof(AudioQueueItem));
-	audio->masterVolume = MILK_AUDIO_MAX_VOLUME;
-
-	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
-		audio->queueItems[i].isFree = 1;
-
-	/* Temporary until i've figured how I want to handle loading sounds. */
-	_loadWave("music.wav", &audio->samples[0]);
-	_loadWave("fireball_shoot.wav", &audio->samples[1]);
-	_loadWave("punch.wav", &audio->samples[2]);
-}
-
-static void _milkOpenVideo(Video *video)
-{
-	milkLoadSpritesheet(video);
-	milkLoadFont(video);
-}
-
-Milk *milkInit()
-{
-	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
-	_milkOpenAudio(&milk->audio);
-	_milkOpenVideo(&milk->video);
-	milkLoadScripts(milk);
-	return milk;
-}
-
-static void _milkCloseAudio(Audio *audio)
-{
-	free(audio->queue);
-
-	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
-		SDL_FreeWAV(audio->samples[i].buffer);
-}
-
-void milkFree(Milk *milk)
-{
-	milkUnloadScripts(milk);
-	_milkCloseAudio(&milk->audio);
-	free(milk);
-}
-
-void milkQuit(Milk *milk)
-{
-	milk->shouldQuit = 1;
-}
-
-/*
- *******************************************************************************
- * SYSTEM
- *******************************************************************************
- */
-
-void milkLog(Milk *milk, const char *message, LogType type)
-{
-	LogMessage *newLogMessage;
-
-	/* If the logs are full, then shift the items down and insert the new log at the end of the list. */
-	if (milk->logs.count == MILK_MAX_LOGS)
-	{
-		for (int i = 0; i < MILK_MAX_LOGS - 1; i++)
-			milk->logs.messages[i] = milk->logs.messages[i + 1];
-
-		newLogMessage = &milk->logs.messages[MILK_MAX_LOGS - 1];
-	}
-	else newLogMessage = &milk->logs.messages[milk->logs.count++];
-
-	strcpy(newLogMessage->message, message);
-	newLogMessage->length = strlen(message);
-	newLogMessage->type = type;
-
-	if (type == ERROR)
-		milk->logs.errorCount++;
-}
-
-void milkClearLogs(Milk *milk)
-{
-	milk->logs.count = 0;
-	milk->logs.errorCount = 0;
-}
 
 int milkButton(Input *input, uint8_t button)
 {
@@ -202,9 +183,9 @@ int milkButtonPressed(Input *input, uint8_t button)
 
 /*
  *******************************************************************************
- * VIDEO
+ * Video
  *
- * All drawing functions blit pixels onto milk's framebuffer.
+ * All drawing functions blit individual pixels onto milk's framebuffer.
  *******************************************************************************
  */
 
@@ -364,7 +345,7 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Co
 
 /*
  *******************************************************************************
- * AUDIO
+ * Audio
  *
  * Milk's audio is limited to 16 concurrent sounds, and only one looping sound.
  * The audio queue root is dynamically allocated, while the rest of the queue items are kept in the free store.
