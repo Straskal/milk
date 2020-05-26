@@ -380,6 +380,24 @@ static void _stopCurrentLoop(AudioQueueItem *queue)
 	}
 }
 
+static void _removeSampleInstanceFromQueue(AudioQueueItem *queue, SampleData *sampleData)
+{
+	AudioQueueItem *curr = queue->next;
+	AudioQueueItem *prev = queue;
+
+	while (curr != NULL)
+	{
+		if (curr->sampleData == sampleData)
+		{
+			curr->isFree = 1;
+			prev->next = curr->next;
+		}
+
+		prev = curr;
+		curr = curr->next;
+	}
+}
+
 static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 {
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
@@ -392,6 +410,24 @@ static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 		}
 	}
 	return 0;
+}
+
+void milkLoadSound(Audio *audio, int idx, const char *filename)
+{
+	audio->lock();
+
+	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
+		return;
+
+	if (audio->samples[idx].buffer != NULL)
+	{
+		_removeSampleInstanceFromQueue(audio->queue, &audio->samples[idx]);
+		SDL_FreeWAV(audio->samples[idx].buffer);
+	}
+
+	_loadWave(audio, filename, &audio->samples[idx]);
+
+	audio->unlock();
 }
 
 void milkSound(Audio *audio, int idx, uint8_t volume, uint8_t loop)

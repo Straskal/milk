@@ -112,6 +112,15 @@ static int l_vol(lua_State *L)
 	return 0;
 }
 
+static int l_loadsnd(lua_State *L)
+{
+	milkLoadSound(&_globalMilk->audio,
+		(int)lua_tointeger(L, 1),
+		lua_tostring(L, 2)
+	);
+	return 0;
+}
+
 static int l_snd(lua_State *L)
 {
 	milkSound(&_globalMilk->audio,
@@ -189,8 +198,7 @@ static int l_spr(lua_State *L)
 
 static int l_sprfont(lua_State *L)
 {
-	milkSpriteFont(
-		&_globalMilk->video,
+	milkSpriteFont(&_globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		lua_tostring(L, 3),
@@ -212,6 +220,7 @@ static void _pushApi(lua_State *L)
 	_pushApiFunction(L, "btnp", l_btnp);
 	_pushApiFunction(L, "vol", l_vol);
 	_pushApiFunction(L, "snd", l_snd);
+	_pushApiFunction(L, "loadsnd", l_loadsnd);
 	_pushApiFunction(L, "clip", l_clip);
 	_pushApiFunction(L, "clrs", l_clrs);
 	_pushApiFunction(L, "pset", l_pset);

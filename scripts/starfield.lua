@@ -4,8 +4,8 @@ local starColumns = {1,2,5,6,7,12}
 local warpFactor = 3
 
 local player = {
-	xPos 		= 10,
-	yPos 		= 10,
+	xPos 		= (256 / 2) - 16,
+	yPos 		= (224 / 2) + 16,
 	speed 		= 1,
 	sprite 		= 0,
 	update = function(self)
@@ -37,6 +37,10 @@ local player = {
 
 
 local function init()
+	loadsnd(0, "music.wav")
+	loadsnd(1, "punch.wav")
+	loadsnd(2, "fireball_shoot.wav")
+
 	for i = 1, #starColumns do
 		for j = 1, 10 do
 			local star = {
@@ -69,6 +73,7 @@ local function draw()
 	end
 
 	player:draw()
+	sprfont(10, 10, "powered by MILK\n\na game by\nSTEPHEN TRASKAL\nand JOSEPH VOAKES")
 	ticks = ticks + 1
 end
 

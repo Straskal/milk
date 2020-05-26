@@ -11,3 +11,9 @@ end
 function _draw()	
 	starField.draw()
 end
+
+function _cheat(cmd, args) 
+	if cmd == "health" then
+		-- giveHealth(args[0])
+	end
+end
