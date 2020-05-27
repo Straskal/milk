@@ -230,6 +230,7 @@ int main(int argc, char *argv[])
 
 			const Uint8 *kbState = SDL_GetKeyboardState(NULL);
 
+			if (kbState[SDL_SCANCODE_P]) input->gamepad.buttonState |= BTN_START;
 			if (kbState[SDL_SCANCODE_UP]) input->gamepad.buttonState |= BTN_UP;
 			if (kbState[SDL_SCANCODE_DOWN]) input->gamepad.buttonState |= BTN_DOWN;
 			if (kbState[SDL_SCANCODE_LEFT]) input->gamepad.buttonState |= BTN_LEFT;
