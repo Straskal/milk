@@ -93,7 +93,7 @@ void milkInvokeDraw(Code *code)
 static int l_btn(lua_State *L)
 {
 	lua_pushboolean(L,
-		milkButton(&_globalMilk->input, (uint8_t)(1 << lua_tointeger(L, 1)))
+		milkButton(&_globalMilk->input, (ButtonState)(1 << lua_tointeger(L, 1)))
 	);
 	return 1;
 }
@@ -101,7 +101,7 @@ static int l_btn(lua_State *L)
 static int l_btnp(lua_State *L)
 {
 	lua_pushboolean(L,
-		milkButtonPressed(&_globalMilk->input, (uint8_t)(1 << lua_tointeger(L, 1)))
+		milkButtonPressed(&_globalMilk->input, (ButtonState)(1 << lua_tointeger(L, 1)))
 	);
 	return 1;
 }

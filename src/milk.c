@@ -36,6 +36,8 @@
 #define FRAMEBUFFER_MIN(x) (x < 0 ? 0 : x)
 #define FRAMEBUFFER_MAXX(x) (x > MILK_FRAMEBUF_WIDTH ? MILK_FRAMEBUF_WIDTH : x)
 #define FRAMEBUFFER_MAXY(y) (y > MILK_FRAMEBUF_HEIGHT ? MILK_FRAMEBUF_HEIGHT : y)
+#define MIN_SCALE 0.5f
+#define MAX_SCALE 5.0f
 
 #define FLIPX 1
 #define FLIPY 2
@@ -46,9 +48,6 @@
 /*
  *******************************************************************************
  * Initialization and shutdown
- *
- * Milk's sprite and font memory is predetermined and statically allocated.
- * Code and sounds are dynamically allocated and must be freed.
  *******************************************************************************
  */
 
@@ -77,7 +76,7 @@ void milkFree(Milk *milk)
 
 /*
  *******************************************************************************
- * Logging. Should use a queue instead of an array.
+ * Logging
  *******************************************************************************
  */
 
@@ -112,9 +111,9 @@ void milkClearLogs(Milk *milk)
 /*
  *******************************************************************************
  * Asset loading
-
- * Load wav data into dynamically allocated buffers.
- * Load bitmap and copy it's pixel data into a fixed size buffer.
+ *
+ * Depends on SDL at the moment. Should either refactor this out into platform code, or implement custom bitmap and wav loading.
+ * The SDL dependency creates a weird order of operations for milk startup (SDL needs to be initialized externally before using these methods)
  *******************************************************************************
  */
 
@@ -171,12 +170,12 @@ void milkLoadFont(Video *video)
  *******************************************************************************
  */
 
-int milkButton(Input *input, uint8_t button)
+int milkButton(Input *input, ButtonState button)
 {
 	return (input->gamepad.buttonState & button) == button;
 }
 
-int milkButtonPressed(Input *input, uint8_t button)
+int milkButtonPressed(Input *input, ButtonState button)
 {
 	return (input->gamepad.buttonState & button) == button && (input->gamepad.previousButtonState & button) != button;
 }
@@ -185,7 +184,7 @@ int milkButtonPressed(Input *input, uint8_t button)
  *******************************************************************************
  * Video
  *
- * All drawing functions blit individual pixels onto milk's framebuffer.
+ * All drawing functions should draw left -> right, top -> bottom.
  *******************************************************************************
  */
 
@@ -256,17 +255,27 @@ void milkRect(Video *video, int x, int y, int w, int h, Color32 color)
 
 void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
 {
-	for (int j = y; j < y + h; j++)
+	for (int i = y; i < y + h; i++)
 	{
-		for (int i = x; i < x + w; i++)
-			milkPixelSet(video, i, j, color);
+		for (int j = x; j < x + w; j++)
+			milkPixelSet(video, j, i, color);
 	}
 }
 
+/*
+ * Main helper function to blit pixel images onto the framebuffer.
+ * We're pretty much running nearest neighbor scaling on all blit pixels.
+ * This greatly simplifies the code, so it should stay this way unless it starts causing performance issues.
+ *
+ * "Nearest neighbor scaling replaces every pixel with the nearest pixel in the output.
+ *  When upscaling an image, multiple pixels of the same color will be duplicated throughout the image." - Some random explanation on google.
+ */
 static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip, Color32 *color)
 {
-	if (scale <= 0.5f)
-		return;
+	if (scale <= MIN_SCALE)
+		scale = MIN_SCALE;
+	if (scale > MAX_SCALE)
+		scale = MAX_SCALE;
 
 	int width = (int)floor((double)w * scale);
 	int height = (int)floor((double)h * scale);
@@ -281,7 +290,6 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 	int xPixel, yPixel;
 	int xFramebuffer, yFramebuffer;
 
-	/* Pretty much running the nearest neighbor scaling on all blit pixels. This doesn't seem to affect performance. */
 	for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yDirection)
 	{
 		for (xFramebuffer = x, xPixel = xPixelStart; xFramebuffer < x + width; xFramebuffer++, xPixel += xDirection)
@@ -327,21 +335,21 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Co
 
 	while (*str)
 	{
-		if (IS_NEWLINE(*str))
-		{
-			xCurrent = x;
-			yCurrent += charSize;
-			str++;
-		}
-		else
+		if (!IS_NEWLINE(*str))
 		{
 			char ch = *(str++);
-			if (!IS_ASCII(ch)) ch = '?';
+			if (!IS_ASCII(ch)) ch = '?'; /* If the character is not ASCII, then we're just gonna be all like whaaaaaat? Problem solved. */
 			int row = (int)floor((ch - 32) / numColumns); /* bitmap font starts at ASCII character 32 (SPACE) */
 			int col = (int)floor((ch - 32) % numColumns);
 			Color32 *pixels = &video->font[(row * rowSize + col * colSize)];
 			_blitRect(video, pixels, xCurrent, yCurrent, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0, &color);
 			xCurrent += charSize;
+		}
+		else
+		{
+			xCurrent = x;
+			yCurrent += charSize;
+			str++;
 		}
 	}
 }
@@ -349,11 +357,45 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Co
 /*
  *******************************************************************************
  * Audio
- *
- * Milk's audio is limited to 16 concurrent sounds, and only one looping sound.
- * The audio queue root is dynamically allocated, while the rest of the queue items are kept in the free store.
  *******************************************************************************
  */
+
+static void _removeSampleInstanceFromQueue(AudioQueueItem *queue, SampleData *sampleData)
+{
+	AudioQueueItem *curr = queue->next;
+	AudioQueueItem *prev = queue;
+
+	while (curr != NULL)
+	{
+		if (curr->sampleData == sampleData)
+		{
+			curr->isFree = true;
+			prev->next = curr->next;
+		}
+
+		prev = curr;
+		curr = curr->next;
+	}
+}
+
+void milkLoadSound(Audio *audio, int idx, const char *filename)
+{
+	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
+		return;
+
+	audio->lock();
+
+	/* If we're loading a sound into a sample data that in use, then remove all instances playing in the queue, and then free it. */
+	if (audio->samples[idx].buffer != NULL)
+	{
+		_removeSampleInstanceFromQueue(audio->queue, &audio->samples[idx]);
+		SDL_FreeWAV(audio->samples[idx].buffer);
+	}
+
+	_loadWave(audio, filename, &audio->samples[idx]);
+
+	audio->unlock();
+}
 
 static void _queueSample(AudioQueueItem *queue, AudioQueueItem *new)
 {
@@ -382,24 +424,6 @@ static void _stopCurrentLoop(AudioQueueItem *queue)
 	}
 }
 
-static void _removeSampleInstanceFromQueue(AudioQueueItem *queue, SampleData *sampleData)
-{
-	AudioQueueItem *curr = queue->next;
-	AudioQueueItem *prev = queue;
-
-	while (curr != NULL)
-	{
-		if (curr->sampleData == sampleData)
-		{
-			curr->isFree = true;
-			prev->next = curr->next;
-		}
-
-		prev = curr;
-		curr = curr->next;
-	}
-}
-
 static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 {
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
@@ -412,24 +436,6 @@ static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 		}
 	}
 	return 0;
-}
-
-void milkLoadSound(Audio *audio, int idx, const char *filename)
-{
-	audio->lock();
-
-	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
-		return;
-
-	if (audio->samples[idx].buffer != NULL)
-	{
-		_removeSampleInstanceFromQueue(audio->queue, &audio->samples[idx]);
-		SDL_FreeWAV(audio->samples[idx].buffer);
-	}
-
-	_loadWave(audio, filename, &audio->samples[idx]);
-
-	audio->unlock();
 }
 
 void milkSound(Audio *audio, int idx, uint8_t volume, uint8_t loop)
@@ -466,7 +472,7 @@ void milkVolume(Audio *audio, uint8_t volume)
 }
 
 /*
- * Mix milk's audio queue samples in the audio device's sample stream.
+ * Mix milk's audio queue samples in the audio device's stream.
  */
 void milkMixCallback(void *userdata, uint8_t *stream, int len)
 {
@@ -477,7 +483,7 @@ void milkMixCallback(void *userdata, uint8_t *stream, int len)
 
 	while (currentItem != NULL)
 	{
-		if (currentItem->remainingLength > 0)
+		if (currentItem->remainingLength > 0) /* If the queue item still has remaining samples to spend, then mix it and update its length. */
 		{
 			uint32_t bytesToWrite = ((uint32_t)len > currentItem->remainingLength) ? currentItem->remainingLength : (uint32_t)len;
 			double volNormalized = ((double)currentItem->volume / MILK_AUDIO_MAX_VOLUME);
@@ -489,13 +495,12 @@ void milkMixCallback(void *userdata, uint8_t *stream, int len)
 			previousItem = currentItem;
 			currentItem = currentItem->next;
 		}
-		else if (currentItem->loop)
+		else if (currentItem->loop) /* Else if the sound loops (music), then reset it's buffer position and length to the beginning. */
 		{
-			/* Music loops. */
 			currentItem->position = currentItem->sampleData->buffer;
 			currentItem->remainingLength = currentItem->sampleData->length;
 		}
-		else
+		else /* Else the sound is completely finished and can be removed from the queue, freeing up space for another sound. */
 		{
 			AudioQueueItem *next = currentItem->next;
 			currentItem->isFree = true;

@@ -166,6 +166,7 @@ typedef struct video
  * Sounds are dynamically allocated SampleData, and must be freed when they are no longer being used.
  *
  * Milk uses a queue like structure to store the currently playing sound instances.
+ * The root queue item is a dynamically allocated dummy object. All other queue items act as a 'store', and are allocated on startup.
  * Many queue items can reference the same sample data, and sample data should be treated as readonly.
  *******************************************************************************
  */
@@ -208,11 +209,17 @@ typedef struct audio
  * Milk's script state. It's pretty much completely abstracted away.
  *******************************************************************************
  */
+
 typedef struct code
 {
 	void *state;
 } Code;
 
+/*
+ *******************************************************************************
+ * Milk
+ *******************************************************************************
+ */
 typedef struct milk
 {
     Logs    logs;
@@ -223,16 +230,18 @@ typedef struct milk
     bool    shouldQuit;
 } Milk;
 
+
 Milk *milkCreate();
 void milkFree(Milk *milk);
+
 void milkLog(Milk *milk, const char *message, LogType type);
 void milkClearLogs(Milk *milk);
 
 void milkLoadSpritesheet(Video *video);
 void milkLoadFont(Video *video);
 
-int milkButton(Input *input, uint8_t button);
-int milkButtonPressed(Input *input, uint8_t button);
+int milkButton(Input *input, ButtonState button);
+int milkButtonPressed(Input *input, ButtonState button);
 
 void milkResetDrawState(Video *video);
 void milkClipRect(Video *video, int x, int y, int w, int h);
