@@ -106,31 +106,6 @@ static int l_btnp(lua_State *L)
 	return 1;
 }
 
-static int l_vol(lua_State *L)
-{
-	milkVolume(&_globalMilk->audio, (uint8_t)lua_tointeger(L, 1));
-	return 0;
-}
-
-static int l_loadsnd(lua_State *L)
-{
-	milkLoadSound(&_globalMilk->audio,
-		(int)lua_tointeger(L, 1),
-		lua_tostring(L, 2)
-	);
-	return 0;
-}
-
-static int l_snd(lua_State *L)
-{
-	milkSound(&_globalMilk->audio,
-		(int)lua_tointeger(L, 1),
-		(uint8_t)luaL_optinteger(L, 2, 128),
-		(uint8_t)luaL_optinteger(L, 3, 0)
-	);
-	return 0;
-}
-
 static int l_clip(lua_State *L)
 {
 	milkClipRect(&_globalMilk->video,
@@ -158,9 +133,9 @@ static int l_pset(lua_State *L)
 	return 0;
 }
 
-static int l_rectfill(lua_State *L)
+static int l_rect(lua_State *L)
 {
-	milkRectFill(&_globalMilk->video,
+	milkRect(&_globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
@@ -170,9 +145,9 @@ static int l_rectfill(lua_State *L)
 	return 0;
 }
 
-static int l_rect(lua_State *L)
+static int l_rectfill(lua_State *L)
 {
-	milkRect(&_globalMilk->video,
+	milkRectFill(&_globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
@@ -214,18 +189,43 @@ static void _pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_
 	lua_setglobal(L, name);
 }
 
+static int l_loadsnd(lua_State *L)
+{
+	milkLoadSound(&_globalMilk->audio,
+		(int)lua_tointeger(L, 1),
+		lua_tostring(L, 2)
+	);
+	return 0;
+}
+
+static int l_snd(lua_State *L)
+{
+	milkSound(&_globalMilk->audio,
+		(int)lua_tointeger(L, 1),
+		(uint8_t)luaL_optinteger(L, 2, 128),
+		(uint8_t)luaL_optinteger(L, 3, 0)
+	);
+	return 0;
+}
+
+static int l_vol(lua_State *L)
+{
+	milkVolume(&_globalMilk->audio, (uint8_t)lua_tointeger(L, 1));
+	return 0;
+}
+
 static void _pushApi(lua_State *L)
 {
 	_pushApiFunction(L, "btn", l_btn);
 	_pushApiFunction(L, "btnp", l_btnp);
-	_pushApiFunction(L, "vol", l_vol);
-	_pushApiFunction(L, "snd", l_snd);
-	_pushApiFunction(L, "loadsnd", l_loadsnd);
 	_pushApiFunction(L, "clip", l_clip);
 	_pushApiFunction(L, "clrs", l_clrs);
 	_pushApiFunction(L, "pset", l_pset);
-	_pushApiFunction(L, "rectfill", l_rectfill);
 	_pushApiFunction(L, "rect", l_rect);
+	_pushApiFunction(L, "rectfill", l_rectfill);
 	_pushApiFunction(L, "spr", l_spr);
 	_pushApiFunction(L, "sprfont", l_sprfont);
+	_pushApiFunction(L, "loadsnd", l_loadsnd);
+	_pushApiFunction(L, "snd", l_snd);
+	_pushApiFunction(L, "vol", l_vol);
 }

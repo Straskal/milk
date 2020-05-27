@@ -1,19 +1,6 @@
-local starField = require("starfield")
+local milk = require("milk")
 
-function _init()
-	starField.init()
-end
-
-function _update()
-	starField.update()
-end
-
-function _draw()	
-	starField.draw()
-end
-
-function _cheat(cmd, args) 
-	if cmd == "health" then
-		-- giveHealth(args[0])
-	end
+function milk.draw()
+	milk.clrs()
+	milk.rectfill(10, 10, 60, 60, 0xff0000)
 end
