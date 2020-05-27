@@ -165,12 +165,12 @@ int main(int argc, char *argv[])
 		 *******************************************************************************
 		 */
 
-		milk->system.startTextInput = _startTextInput;
-		milk->system.stopTextInput = _stopTextInput;
-		milk->system.readTextInput = _readInput;
-		milk->system.backspace = _backspace;
-		milk->system.escape = _escape;
-		milk->system.enter = _enter;
+		milkCmd->system.startTextInput = _startTextInput;
+		milkCmd->system.stopTextInput = _stopTextInput;
+		milkCmd->system.readTextInput = _readInput;
+		milkCmd->system.backspace = _backspace;
+		milkCmd->system.escape = _escape;
+		milkCmd->system.enter = _enter;
 	}
 
 	{
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
 				switch (event.type)
 				{
 					case SDL_QUIT:
-						milk->shouldQuit = 1;
+						milk->shouldQuit = true;
 						break;
 					case SDL_KEYDOWN:
 						switch (event.key.keysym.sym)

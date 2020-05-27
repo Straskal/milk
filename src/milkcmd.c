@@ -167,10 +167,10 @@ static void _updateCommandLine(MilkCmd *cmd, Milk *milk)
 {
 	char ch;
 
-	if (milk->system.backspace() && cmd->commandCandidateLength > 0)
+	if (cmd->system.backspace() && cmd->commandCandidateLength > 0)
 		cmd->commandCandidate[--cmd->commandCandidateLength] = '\0';
 
-	if (milk->system.readTextInput(&ch) && cmd->commandCandidateLength < MILK_COMMAND_LEN - 1)
+	if (cmd->system.readTextInput(&ch) && cmd->commandCandidateLength < MILK_COMMAND_LEN - 1)
 	{
 		cmd->commandCandidate[cmd->commandCandidateLength++] = ch;
 		cmd->commandCandidate[cmd->commandCandidateLength] = '\0';
@@ -185,7 +185,7 @@ static void _updateCommandLine(MilkCmd *cmd, Milk *milk)
 	if (milkButtonPressed(&milk->input, (1 << 1)))
 		_resetCommandCandidate(cmd);
 
-	if (milk->system.enter() && cmd->commandCandidateLength > 0)
+	if (cmd->system.enter() && cmd->commandCandidateLength > 0)
 	{
 		char *args[CMD_MAX_ARGS];
 		int nargs;
@@ -230,7 +230,7 @@ static void _getLogLines(Logs *logs, CommandLogLine *lines, int *numLines)
 		if (currentLine == MAX_LINES - 1)
 			break;
 
-		char tempMessage[MILK_LOG_LENGTH + 2];
+		char tempMessage[MILK_LOG_MAX_LENGTH + 2];
 		tempMessage[0] = '>';
 		tempMessage[1] = ':';
 
@@ -305,7 +305,7 @@ static void _errorCheck(MilkCmd *cmd, Milk *milk)
 	{
 		cmd->lastErrorCount = milk->logs.errorCount;
 		cmd->state = COMMAND;
-		milk->system.startTextInput();
+		cmd->system.startTextInput();
 	}
 }
 
@@ -313,17 +313,17 @@ void milkCmdUpdate(MilkCmd *cmd, Milk *milk)
 {
 	milkResetDrawState(&milk->video);
 
-	if (milk->system.escape())
+	if (cmd->system.escape())
 	{
 		if (cmd->state != COMMAND)
 		{
 			cmd->state = COMMAND;
-			milk->system.startTextInput();
+			cmd->system.startTextInput();
 		}
 		else
 		{
 			cmd->state = GAME;
-			milk->system.stopTextInput();
+			cmd->system.stopTextInput();
 		}
 	}
 

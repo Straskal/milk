@@ -25,14 +25,27 @@
 #ifndef __MILK_H__
 #define __MILK_H__
 
+#include <stdbool.h>
 #include <stdint.h>
 
-#define MILK_WINDOW_WIDTH   MILK_FRAMEBUF_WIDTH * 3
-#define MILK_WINDOW_HEIGHT  MILK_FRAMEBUF_HEIGHT * 3
+/*
+ *******************************************************************************
+ * Configuration
+ *
+ * Specs:
+ * - 256x224 px resolution
+ * - 256x256 px spritesheet, each sprite being 16x16 px (256 sprites total)
+ * - 128x48  px bitmap font in ASCII order, starting from ASCII character 32 (space)
+ * - 16 loaded sounds into memory
+ * - 16 concurrent sounds, and 1 looping sound
+ *******************************************************************************
+ */
 
-#define MILK_FRAMERATE          (1000.0f / 50.0f)
-#define MILK_FRAMEBUF_WIDTH     256
-#define MILK_FRAMEBUF_HEIGHT    224
+#define MILK_FRAMERATE              (1000.0f / 50.0f)
+#define MILK_FRAMEBUF_WIDTH         256
+#define MILK_FRAMEBUF_HEIGHT        224
+#define MILK_WINDOW_WIDTH           MILK_FRAMEBUF_WIDTH * 3
+#define MILK_WINDOW_HEIGHT          MILK_FRAMEBUF_HEIGHT * 3
 
 #define MILK_SPRSHEET_FILENAME      "sprsheet.bmp"
 #define MILK_FONT_FILENAME          "font.bmp"
@@ -42,25 +55,23 @@
 #define MILK_FONT_HEIGHT            48
 #define MILK_CHAR_SQRSIZE           8
 
-#define MILK_AUDIO_FREQUENCY    44100
-#define MILK_AUDIO_CHANNELS     2 /* Stereo */
-#define MILK_AUDIO_SAMPLES      4096
-#define MILK_AUDIO_MAX_SOUNDS   25
-#define MILK_AUDIO_QUEUE_MAX    16
-#define MILK_AUDIO_MAX_VOLUME   128
+#define MILK_AUDIO_FREQUENCY        44100
+#define MILK_AUDIO_CHANNELS         2 /* Stereo */
+#define MILK_AUDIO_SAMPLES          4096
+#define MILK_AUDIO_MAX_SOUNDS       16
+#define MILK_AUDIO_QUEUE_MAX        16
+#define MILK_AUDIO_MAX_VOLUME       128
 
-#define MILK_MAX_LOGS   16
-#define MILK_LOG_LENGTH 256
+#define MILK_MAX_LOGS               16
+#define MILK_LOG_MAX_LENGTH         256
 
-typedef struct system
-{
-    void(*startTextInput)();
-    void(*stopTextInput)();
-    int(*readTextInput)(char *);
-    int(*backspace)();
-    int(*enter)();
-    int(*escape)();
-} System;
+/*
+ *******************************************************************************
+ * Logging
+ *
+ * As of right now, logging is pretty bare bones. Logs are only shown in the command line.
+ *******************************************************************************
+ */
 
 typedef enum logType
 {
@@ -69,9 +80,9 @@ typedef enum logType
 
 typedef struct logMessage
 {
+    char    message[MILK_LOG_MAX_LENGTH];
     size_t  length;
     LogType type;
-    char    message[MILK_LOG_LENGTH];
 } LogMessage;
 
 typedef struct logs
@@ -81,16 +92,25 @@ typedef struct logs
     int         errorCount;
 } Logs;
 
+/*
+ *******************************************************************************
+ * Input
+ *
+ * Milk supports a single gamepad with 9 buttons, each with a state of up and down.
+ *******************************************************************************
+ */
+
 typedef enum buttonState
 {
-    BTN_UP =    1 << 0,
-    BTN_DOWN =  1 << 1,
-    BTN_LEFT =  1 << 2,
-    BTN_RIGHT = 1 << 3,
-    BTN_A =     1 << 4,
-    BTN_B =     1 << 5,
-    BTN_X =     1 << 6,
-    BTN_Y =     1 << 7
+    BTN_START = 1 << 0,
+    BTN_UP =    1 << 1,
+    BTN_DOWN =  1 << 2,
+    BTN_LEFT =  1 << 3,
+    BTN_RIGHT = 1 << 4,
+    BTN_A =     1 << 5,
+    BTN_B =     1 << 6,
+    BTN_X =     1 << 7,
+    BTN_Y =     1 << 8,
 } ButtonState;
 
 typedef struct gamepad
@@ -104,7 +124,22 @@ typedef struct input
     Gamepad gamepad;
 } Input;
 
- /* Packed 32 bit color: 0xAARRGGBB */
+/*
+ *******************************************************************************
+ * Video
+ *
+ * Internally, milk draws to it's own framebuffer, which is drawn to the screen at the end of every frame.
+ * The framebuffer is just an array of pixels (32 bit color 0xAARRGGBB).
+ *
+ * The spritesheet and font are both loaded into memory during startup.
+ * They are stored in fixed size arrays, so they do not need to be freed when milk shuts down.
+
+ * Milk does not support transparency when drawing, but it does use a color key to consider as 'transparent', which defaults to black.
+
+ * All drawing functions only operate within the bounds of the clipping rectangle, which is reset to the framebuffer size at the beginning of each frame.
+ *******************************************************************************
+ */
+
 typedef uint32_t Color32;
 
 typedef struct rect
@@ -115,12 +150,6 @@ typedef struct rect
     int right;
 } Rect;
 
-/*
- * - The framebuffer is what we actively draw to, and display at the end of each frame.
- * - The sprite sheet is a single image px buffer.
- * - The font is a single image px buffer.
- * - When blitting sprites or fonts, any pixels matching the color key will not be drawn.
- */
 typedef struct video
 {
     Color32 framebuffer[MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT];
@@ -130,10 +159,21 @@ typedef struct video
     Rect    clipRect;
 } Video;
 
+/*
+ *******************************************************************************
+ * Audio
+ *
+ * Sounds are dynamically allocated SampleData, and must be freed when they are no longer being used.
+ *
+ * Milk uses a queue like structure to store the currently playing sound instances.
+ * Many queue items can reference the same sample data, and sample data should be treated as readonly.
+ *******************************************************************************
+ */
+
 typedef struct sampleData
 {
-    uint32_t length;
-    uint8_t *buffer;
+    uint32_t length; /* Readonly */
+    uint8_t *buffer; /* Readonly */
 } SampleData;
 
 typedef struct AudioQueueItem
@@ -142,8 +182,8 @@ typedef struct AudioQueueItem
     uint32_t    remainingLength;
     uint8_t    *position;
     uint8_t     volume;
-    uint8_t     loop;
-    uint8_t     isFree;
+    bool        loop;
+    bool        isFree;
 
     struct AudioQueueItem *next;
 } AudioQueueItem;
@@ -162,8 +202,11 @@ typedef struct audio
 } Audio;
 
 /*
- * Code is the client side script(s).
- * - state holds the current state of the program. In this case, it is a Lua state.
+ *******************************************************************************
+ * Code
+ *
+ * Milk's script state. It's pretty much completely abstracted away.
+ *******************************************************************************
  */
 typedef struct code
 {
@@ -172,13 +215,12 @@ typedef struct code
 
 typedef struct milk
 {
-    System  system;
     Logs    logs;
 	Input   input;
     Video   video;
     Audio   audio;
 	Code    code;
-    uint8_t shouldQuit;
+    bool    shouldQuit;
 } Milk;
 
 Milk *milkCreate();

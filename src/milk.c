@@ -59,11 +59,10 @@ Milk *milkCreate()
 	milk->audio.masterVolume = MILK_AUDIO_MAX_VOLUME;
 
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
-		milk->audio.queueItems[i].isFree = 1;
+		milk->audio.queueItems[i].isFree = true;
 
 	milkLoadSpritesheet(&milk->video);
 	milkLoadFont(&milk->video);
-
 	return milk;
 }
 
@@ -266,6 +265,9 @@ void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
 
 static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip, Color32 *color)
 {
+	if (scale <= 0.5f)
+		return;
+
 	int width = (int)floor((double)w * scale);
 	int height = (int)floor((double)h * scale);
 	int xRatio = (int)((w << 16) / width) + 1;
@@ -370,7 +372,7 @@ static void _stopCurrentLoop(AudioQueueItem *queue)
 	{
 		if (curr->loop)
 		{
-			curr->isFree = 1;
+			curr->isFree = true;
 			prev->next = curr->next;
 			break;
 		}
@@ -389,7 +391,7 @@ static void _removeSampleInstanceFromQueue(AudioQueueItem *queue, SampleData *sa
 	{
 		if (curr->sampleData == sampleData)
 		{
-			curr->isFree = 1;
+			curr->isFree = true;
 			prev->next = curr->next;
 		}
 
@@ -404,7 +406,7 @@ static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 	{
 		if (audio->queueItems[i].isFree)
 		{
-			audio->queueItems[i].isFree = 0; /* Queue item is not free any more. */
+			audio->queueItems[i].isFree = false; /* Queue item is not free any more. */
 			*queueItem = &audio->queueItems[i];
 			return 1;
 		}
@@ -496,7 +498,7 @@ void milkMixCallback(void *userdata, uint8_t *stream, int len)
 		else
 		{
 			AudioQueueItem *next = currentItem->next;
-			currentItem->isFree = 1;
+			currentItem->isFree = true;
 			previousItem->next = next;
 			currentItem->next = NULL;
 			currentItem = next;
