@@ -240,8 +240,8 @@ void milkClearLogs(Milk *milk);
 void milkLoadSpritesheet(Video *video);
 void milkLoadFont(Video *video);
 
-int milkButton(Input *input, ButtonState button);
-int milkButtonPressed(Input *input, ButtonState button);
+bool milkButton(Input *input, ButtonState button);
+bool milkButtonPressed(Input *input, ButtonState button);
 
 void milkResetDrawState(Video *video);
 void milkClipRect(Video *video, int x, int y, int w, int h);

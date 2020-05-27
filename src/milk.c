@@ -170,12 +170,12 @@ void milkLoadFont(Video *video)
  *******************************************************************************
  */
 
-int milkButton(Input *input, ButtonState button)
+bool milkButton(Input *input, ButtonState button)
 {
 	return (input->gamepad.buttonState & button) == button;
 }
 
-int milkButtonPressed(Input *input, ButtonState button)
+bool milkButtonPressed(Input *input, ButtonState button)
 {
 	return (input->gamepad.buttonState & button) == button && (input->gamepad.previousButtonState & button) != button;
 }

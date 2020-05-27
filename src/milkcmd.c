@@ -52,12 +52,6 @@
 
 static unsigned int _ticks = 0;
 
-/*
- *******************************************************************************
- * COMMAND LINE
- *******************************************************************************
- */
-
 typedef struct commandImpl
 {
 	char *cmd;
@@ -69,6 +63,12 @@ typedef struct commandLogLine
 	char message[CHARS_PER_LINE];
 	Color32 color;
 } CommandLogLine;
+
+/*
+ *******************************************************************************
+ * Commands
+ *******************************************************************************
+ */
 
 static void _cmdReload(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 {
@@ -123,6 +123,12 @@ static CommandImpl _commands[] =
 };
 
 #define NUM_COMMANDS sizeof(_commands) / sizeof(CommandImpl)
+
+/*
+ *******************************************************************************
+ * Command line
+ *******************************************************************************
+ */
 
 static CommandImpl *_findCommand(const char *cmd)
 {
@@ -333,7 +339,6 @@ void milkCmdUpdate(MilkCmd *cmd, Milk *milk)
 			_updateCommandLine(cmd, milk);
 			break;
 		case GAME:
-			milkResetDrawState(&milk->video);
 			milkInvokeUpdate(&milk->code);
 			_errorCheck(cmd, milk);
 			break;

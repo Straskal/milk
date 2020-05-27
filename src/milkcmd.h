@@ -29,13 +29,13 @@
 
 #define MILK_COMMAND_LEN 25
 
- /*
-  *******************************************************************************
-  * System
-  *
-  * Platform code is responsible for providing system implementation.
-  *******************************************************************************
-  */
+/*
+ *******************************************************************************
+ * System
+ *
+ * Platform code is responsible for providing system implementation.
+ *******************************************************************************
+ */
 
 typedef struct system
 {
@@ -47,6 +47,12 @@ typedef struct system
     int(*escape)();
 } System;
 
+/*
+ *******************************************************************************
+ * Command line
+ *******************************************************************************
+ */
+
 typedef enum cmdState
 {
 	GAME,
@@ -57,11 +63,11 @@ typedef struct milkCmd
 {
     System  system;
 	CmdState state;
+    int lastErrorCount;
     size_t commandCandidateLength;
     size_t previousCommandLength;
     char commandCandidate[MILK_COMMAND_LEN];
     char previousCommand[MILK_COMMAND_LEN];
-    int lastErrorCount;
 } MilkCmd;
 
 MilkCmd *milkCmdCreate();
