@@ -237,7 +237,7 @@ void milkClear(Video *video, Color32 color)
 
 void milkPixelSet(Video *video, int x, int y, Color32 color)
 {
-	if (WITHIN_CLIP_RECT(video->clipRect, x, y))
+	if (WITHIN_CLIP_RECT(video->clipRect, x, y)) /* Only draw pixels within the clip rect. */
 		video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
