@@ -1,45 +1,13 @@
-local ticks = 0;
+local milk = require("milk")
+
 local stars = {}
 local starColumns = {1,2,5,6,7,12}
 local warpFactor = 3
 
-local player = {
-	xPos 		= (256 / 2) - 16,
-	yPos 		= (224 / 2) + 16,
-	speed 		= 1,
-	sprite 		= 0,
-	update = function(self)
-		local mvx = 0
-		local mvy = 0
-
-		if btn(0) then mvy = -self.speed end
-		if btn(1) then mvy = self.speed end
-		if btn(2) then mvx = -self.speed end
-		if btn(3) then mvx = self.speed end
-
-		if btnp(4) then snd(1) end
-		if btnp(5) then snd(2) end
-		if btnp(6) then snd(0, 128, 1) end
-
-		self.xPos = self.xPos + mvx
-		self.yPos = self.yPos + mvy
-	
-		if ticks % 24 < 12 then
-			self.sprite = 4
-		else
-			self.sprite = 5
-		end
-	end,
-	draw = function(self) 
-		spr(self.sprite, self.xPos, self.yPos)
-	end
-}
-
-
 local function init()
-	loadsnd(0, "music.wav")
-	loadsnd(1, "punch.wav")
-	loadsnd(2, "fireball_shoot.wav")
+	milk.loadsnd(0, "music.wav")
+	milk.loadsnd(1, "punch.wav")
+	milk.loadsnd(2, "fireball_shoot.wav")
 
 	for i = 1, #starColumns do
 		for j = 1, 10 do
@@ -55,30 +23,24 @@ local function init()
 end
 
 local function update()
-	player:update()
-end
-
-
-local function draw()	
-	clrs(0x1a1a1a)
-
 	for i = 1, #stars do
 		local star = stars[i]
-		star.y = star.y + star.z * warpFactor / 10		
+		star.y = star.y + star.z * warpFactor / 10
 		if star.y > 224 then
 			star.y = 0
 			star.x = math.random(256)
 		end
-		pset(stars[i].x, stars[i].y, stars[i].c)
 	end
+end
 
-	player:draw()
-	sprfont(10, 10, "powered by MILK\n\na game by\nSTEPHEN TRASKAL\nand JOSEPH VOAKES")
-	ticks = ticks + 1
+local function draw()
+	for i = 1, #stars do
+		milk.pset(stars[i].x, stars[i].y, stars[i].c)
+	end
 end
 
 return {
-    init    = init,
-    update  = update,
-    draw    = draw
+    init    	= init,
+    update  	= update,
+	draw	    = draw,
 }
