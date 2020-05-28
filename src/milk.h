@@ -63,7 +63,7 @@
 #define MILK_AUDIO_MAX_VOLUME       128
 
 #define MILK_MAX_LOGS               16
-#define MILK_LOG_MAX_LENGTH         256
+#define MILK_LOG_MAX_LENGTH         1024
 
 /*
  *******************************************************************************
@@ -220,6 +220,7 @@ typedef struct code
  * Milk
  *******************************************************************************
  */
+
 typedef struct milk
 {
     Logs    logs;
@@ -229,7 +230,6 @@ typedef struct milk
 	Code    code;
     bool    shouldQuit;
 } Milk;
-
 
 Milk *milkCreate();
 void milkFree(Milk *milk);

@@ -424,7 +424,7 @@ static void _stopCurrentLoop(AudioQueueItem *queue)
 	}
 }
 
-static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
+static bool _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 {
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
 	{
@@ -432,10 +432,10 @@ static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 		{
 			audio->queueItems[i].isFree = false; /* Queue item is not free any more. */
 			*queueItem = &audio->queueItems[i];
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 void milkSound(Audio *audio, int idx, uint8_t volume, uint8_t loop)
