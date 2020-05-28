@@ -37,7 +37,7 @@
  * - 256x256 px spritesheet, each sprite being 16x16 px (256 sprites total)
  * - 128x48  px bitmap font in ASCII order, starting from ASCII character 32 (space)
  * - 16 loaded sounds into memory
- * - 16 concurrent sounds, and 1 looping sound
+ * - 16 concurrent sounds, 1 of which can be looping.
  *******************************************************************************
  */
 
