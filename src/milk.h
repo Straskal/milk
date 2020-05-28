@@ -63,7 +63,7 @@
 #define MILK_AUDIO_MAX_VOLUME       128
 
 #define MILK_MAX_LOGS               16
-#define MILK_LOG_MAX_LENGTH         1024
+#define MILK_LOG_MAX_LENGTH         512
 
 /*
  *******************************************************************************
@@ -80,9 +80,9 @@ typedef enum logType
 
 typedef struct logMessage
 {
-    char    message[MILK_LOG_MAX_LENGTH];
     size_t  length;
     LogType type;
+    char    text[MILK_LOG_MAX_LENGTH];
 } LogMessage;
 
 typedef struct logs
@@ -135,7 +135,6 @@ typedef struct input
  * They are stored in fixed size arrays, so they do not need to be freed when milk shuts down.
 
  * Milk does not support transparency when drawing, but it does use a color key to consider as 'transparent', which defaults to black.
-
  * All drawing functions only operate within the bounds of the clipping rectangle, which is reset to the framebuffer size at the beginning of each frame.
  *******************************************************************************
  */
@@ -177,7 +176,7 @@ typedef struct sampleData
     uint8_t *buffer; /* Readonly */
 } SampleData;
 
-typedef struct AudioQueueItem
+typedef struct audioQueueItem
 {
     SampleData *sampleData;
     uint32_t    remainingLength;
@@ -186,7 +185,7 @@ typedef struct AudioQueueItem
     bool        loop;
     bool        isFree;
 
-    struct AudioQueueItem *next;
+    struct audioQueueItem *next;
 } AudioQueueItem;
 
 typedef struct audio
@@ -234,7 +233,7 @@ typedef struct milk
 Milk *milkCreate();
 void milkFree(Milk *milk);
 
-void milkLog(Milk *milk, const char *message, LogType type);
+void milkLog(Milk *milk, const char *text, LogType type);
 void milkClearLogs(Milk *milk);
 
 void milkLoadSpritesheet(Video *video);

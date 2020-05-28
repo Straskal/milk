@@ -80,26 +80,34 @@ void milkFree(Milk *milk)
  *******************************************************************************
  */
 
-void milkLog(Milk *milk, const char *message, LogType type)
+/* When milk's log array is full, we shift down all of the logs before inserting the next one.*/
+static LogMessage *_getNextFreeLogMessage(Logs *logs)
 {
-	LogMessage *newLogMessage;
-
-	/* If the logs are full, then shift the items down and insert the new log at the end of the list. */
-	if (milk->logs.count == MILK_MAX_LOGS)
+	if (logs->count == MILK_MAX_LOGS)
 	{
 		for (int i = 0; i < MILK_MAX_LOGS - 1; i++)
-			milk->logs.messages[i] = milk->logs.messages[i + 1];
+			logs->messages[i] = logs->messages[i + 1];
 
-		newLogMessage = &milk->logs.messages[MILK_MAX_LOGS - 1];
+		return &logs->messages[MILK_MAX_LOGS - 1];
 	}
-	else newLogMessage = &milk->logs.messages[milk->logs.count++];
+	else
+		return &logs->messages[logs->count++];
+}
 
-	strcpy(newLogMessage->message, message);
-	newLogMessage->length = strlen(message);
-	newLogMessage->type = type;
+void milkLog(Milk *milk, const char *text, LogType type)
+{
+	size_t len = strlen(text);
+
+	if (len > MILK_LOG_MAX_LENGTH)
+		len = MILK_LOG_MAX_LENGTH;
 
 	if (type == ERROR)
 		milk->logs.errorCount++;
+
+	LogMessage *newLogMessage = _getNextFreeLogMessage(&milk->logs);
+	strncpy(newLogMessage->text, text, len);
+	newLogMessage->length = len;
+	newLogMessage->type = type;
 }
 
 void milkClearLogs(Milk *milk)

@@ -60,7 +60,7 @@ typedef struct commandImpl
 
 typedef struct commandLogLine
 {
-	char message[CHARS_PER_LINE];
+	char text[CHARS_PER_LINE];
 	Color32 color;
 } CommandLogLine;
 
@@ -188,7 +188,7 @@ static void _updateCommandLine(MilkCmd *cmd, Milk *milk)
 		cmd->commandCandidateLength = cmd->previousCommandLength;
 	}
 
-	if (milkButtonPressed(&milk->input, (1 << 1)))
+	if (milkButtonPressed(&milk->input, BTN_DOWN))
 		_resetCommandCandidate(cmd);
 
 	if (cmd->system.enter() && cmd->commandCandidateLength > 0)
@@ -236,12 +236,10 @@ static void _getLogLines(Logs *logs, CommandLogLine *lines, int *numLines)
 		if (currentLine == MAX_LINES - 1)
 			break;
 
-		char tempMessage[MILK_LOG_MAX_LENGTH + 2];
-		tempMessage[0] = '>';
-		tempMessage[1] = ':';
+		char tempText[MILK_LOG_MAX_LENGTH + 3] = ">:";
 
-		strcpy(&tempMessage[2], logs->messages[i].message);
-		char *splitByNewline = strtok(tempMessage, "\n"); /* Split message by newline. */
+		strcpy(&tempText[2], logs->messages[i].text);
+		char *splitByNewline = strtok(tempText, "\n"); /* Split message by newline. */
 
 		while (splitByNewline != NULL && currentLine < MAX_LINES - 1)
 		{
@@ -252,8 +250,8 @@ static void _getLogLines(Logs *logs, CommandLogLine *lines, int *numLines)
 			{
 				size_t remainingLength = strlen(messageText);
 				size_t lineLength = remainingLength > CHARS_PER_LINE - 1 ? CHARS_PER_LINE - 1 : remainingLength;
-				strncpy(lines[currentLine].message, messageText, lineLength);
-				lines[currentLine].message[lineLength] = '\0';
+				strncpy(lines[currentLine].text, messageText, lineLength);
+				lines[currentLine].text[lineLength] = '\0';
 				lines[currentLine].color = _getLogColor(logs->messages[i].type);
 				messageLength -= lineLength;
 				messageText += lineLength;
@@ -275,7 +273,7 @@ static void _drawLogLines(Milk *milk)
 	_getLogLines(&milk->logs, lines, &numLines);
 
 	for (int i = 0; i < numLines; i++)
-		milkSpriteFont(&milk->video, 8, LOG_START_HEIGHT + ((MILK_CHAR_SQRSIZE + 2) * i), lines[i].message, 1, lines[i].color);
+		milkSpriteFont(&milk->video, 8, LOG_START_HEIGHT + ((MILK_CHAR_SQRSIZE + 2) * i), lines[i].text, 1, lines[i].color);
 }
 
 static void _drawCommandLine(MilkCmd *cmdLine, Milk *milk)

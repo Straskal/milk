@@ -183,12 +183,6 @@ static int l_sprfont(lua_State *L)
 	return 1;
 }
 
-static void _pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_State *))
-{
-	lua_pushcfunction(L, api_func);
-	lua_setglobal(L, name);
-}
-
 static int l_loadsnd(lua_State *L)
 {
 	milkLoadSound(&_globalMilk->audio,
@@ -212,6 +206,12 @@ static int l_vol(lua_State *L)
 {
 	milkVolume(&_globalMilk->audio, (uint8_t)lua_tointeger(L, 1));
 	return 0;
+}
+
+static void _pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_State *))
+{
+	lua_pushcfunction(L, api_func);
+	lua_setglobal(L, name);
 }
 
 static void _pushApi(lua_State *L)
