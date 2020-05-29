@@ -42,9 +42,6 @@
 #define FLIPX 1
 #define FLIPY 2
 
-#define IS_ASCII(c) ((c & 0xff80) == 0)
-#define IS_NEWLINE(c) (c == '\n')
-
 /*
  *******************************************************************************
  * Initialization and shutdown
@@ -130,19 +127,16 @@ static void _loadWave(Audio *audio, const char *filename, SampleData *sampleData
 	SDL_AudioSpec waveSpec;
 	SDL_LoadWAV(filename, &waveSpec, &sampleData->buffer, &sampleData->length);
 
-	if (waveSpec.channels != audio->channels || (uint32_t)waveSpec.freq != audio->frequency)
-	{
-		SDL_AudioCVT conversion;
-		SDL_BuildAudioCVT(&conversion, waveSpec.format, waveSpec.channels, waveSpec.freq, AUDIO_S16LSB, audio->channels, audio->frequency);
-		conversion.len = sampleData->length;
-		conversion.buf = (Uint8 *)SDL_malloc((size_t)conversion.len * conversion.len_mult);
-		SDL_memcpy(conversion.buf, sampleData->buffer, sampleData->length);
-		SDL_ConvertAudio(&conversion);
-		SDL_FreeWAV(sampleData->buffer);
+	SDL_AudioCVT conversion;
+	SDL_BuildAudioCVT(&conversion, waveSpec.format, waveSpec.channels, waveSpec.freq, AUDIO_S16LSB, audio->channels, audio->frequency);
+	conversion.len = sampleData->length;
+	conversion.buf = (Uint8 *)malloc((size_t)conversion.len * conversion.len_mult);
+	SDL_memcpy(conversion.buf, sampleData->buffer, sampleData->length);
+	SDL_FreeWAV(sampleData->buffer);
+	SDL_ConvertAudio(&conversion);
 
-		sampleData->buffer = conversion.buf;
-		sampleData->length = (uint32_t)floor(conversion.len * conversion.len_ratio);
-	}
+	sampleData->buffer = conversion.buf;
+	sampleData->length = (uint32_t)floor(conversion.len * conversion.len_ratio);
 }
 
 static void _milkLoadBmp(const char *filename, Color32 *dest, size_t len)
@@ -152,9 +146,9 @@ static void _milkLoadBmp(const char *filename, Color32 *dest, size_t len)
 
 	for (size_t i = 0; i < len; i++)
 	{
-		int b = *(bmpPixels++);
-		int g = *(bmpPixels++);
-		int r = *(bmpPixels++);
+		int b = *bmpPixels++;
+		int g = *bmpPixels++;
+		int r = *bmpPixels++;
 
 		dest[i] = (r << 16) | (g << 8) | (b);
 	}
@@ -282,6 +276,7 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 {
 	if (scale <= MIN_SCALE)
 		scale = MIN_SCALE;
+
 	if (scale > MAX_SCALE)
 		scale = MAX_SCALE;
 
@@ -314,9 +309,9 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 
 void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip)
 {
-	static int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
-	static int rowSize = MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE;
-	static int colSize = MILK_SPRSHEET_SPR_SQRSIZE;
+	const int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
+	const int rowSize = MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE;
+	const int colSize = MILK_SPRSHEET_SPR_SQRSIZE;
 
 	if (idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
 		return;
@@ -330,9 +325,12 @@ void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 
 void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Color32 color)
 {
-	static int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
-	static int rowSize = MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE;
-	static int colSize = MILK_CHAR_SQRSIZE;
+	#define IS_ASCII(c)		((c & 0xff80) == 0)
+	#define IS_NEWLINE(c)	(c == '\n')
+
+	const int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
+	const int rowSize = MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE;
+	const int colSize = MILK_CHAR_SQRSIZE;
 
 	if (str == NULL)
 		return;
@@ -360,6 +358,9 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Co
 			str++;
 		}
 	}
+
+	#undef IS_ASCII
+	#undef IS_NEWLINE
 }
 
 /*
@@ -397,7 +398,7 @@ void milkLoadSound(Audio *audio, int idx, const char *filename)
 	if (audio->samples[idx].buffer != NULL)
 	{
 		_removeSampleInstanceFromQueue(audio->queue, &audio->samples[idx]);
-		SDL_FreeWAV(audio->samples[idx].buffer);
+		free(audio->samples[idx].buffer);
 	}
 
 	_loadWave(audio, filename, &audio->samples[idx]);
@@ -473,21 +474,48 @@ void milkVolume(Audio *audio, uint8_t volume)
 {
 	if (volume < 0)
 		volume = 0;
+
 	if (volume > MILK_AUDIO_MAX_VOLUME)
 		volume = MILK_AUDIO_MAX_VOLUME;
 
 	audio->masterVolume = volume;
 }
 
-/*
- * Mix milk's audio queue samples in the audio device's stream.
- */
+static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, int volume)
+{
+	#define _16_BIT_MAX 32767
+
+	int16_t sourceLeft;
+	int16_t sourceRight;
+	length /= 2;
+
+	while (length--)
+	{
+		sourceLeft = (source[1] << 8 | source[0]) * volume;
+		sourceRight = (destination[1] << 8 | destination[0]) * volume;
+		int mixedSample = sourceLeft + sourceRight;
+
+		if (mixedSample > _16_BIT_MAX)
+			mixedSample = _16_BIT_MAX;
+		else if (mixedSample < -_16_BIT_MAX - 1)
+			mixedSample = -_16_BIT_MAX - 1;
+
+		destination[0] = mixedSample & 0xff;
+		destination[1] = (mixedSample >> 8) & 0xff;
+		source += 2;
+		destination += 2;
+	}
+
+	#undef _16_BIT_MAX
+}
+
 void milkMixCallback(void *userdata, uint8_t *stream, int len)
 {
+	memset(stream, 0, len);
+
 	Audio *audio = (Audio *)userdata;
 	AudioQueueItem *currentItem = audio->queue->next;
 	AudioQueueItem *previousItem = audio->queue;
-	SDL_memset(stream, 0, len); /* Silence the stream before writing to it. */
 
 	while (currentItem != NULL)
 	{
@@ -495,9 +523,7 @@ void milkMixCallback(void *userdata, uint8_t *stream, int len)
 		{
 			uint32_t bytesToWrite = ((uint32_t)len > currentItem->remainingLength) ? currentItem->remainingLength : (uint32_t)len;
 			double volNormalized = ((double)currentItem->volume / MILK_AUDIO_MAX_VOLUME);
-
-			SDL_MixAudioFormat(stream, currentItem->position, AUDIO_S16LSB, bytesToWrite, (int)round(volNormalized * audio->masterVolume));
-
+			_mixSample(stream, currentItem->position, bytesToWrite, volNormalized);
 			currentItem->position += bytesToWrite;
 			currentItem->remainingLength -= bytesToWrite;
 			previousItem = currentItem;
