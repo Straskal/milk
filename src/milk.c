@@ -29,7 +29,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <SDL.h>
 
 #define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x) /* xy coords to framebuffer pixel index. */
 #define WITHIN_CLIP_RECT(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
@@ -110,6 +109,12 @@ void milkClearLogs(Milk *milk)
 	milk->logs.count = 0;
 	milk->logs.errorCount = 0;
 }
+
+/*
+ *******************************************************************************
+ * Art
+ *******************************************************************************
+ */
 
 void milkLoadSpritesheet(Video *video)
 {
@@ -435,7 +440,7 @@ void milkVolume(Audio *audio, uint8_t volume)
 	audio->masterVolume = volume;
 }
 
-static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, int volume)
+static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, double volume)
 {
 	#define _16_BIT_MAX 32767
 
@@ -445,8 +450,8 @@ static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, i
 
 	while (length--)
 	{
-		sourceLeft = (source[1] << 8 | source[0]) * volume;
-		sourceRight = (destination[1] << 8 | destination[0]) * volume;
+		sourceLeft = (int16_t)((source[1] << 8 | source[0]) * volume);
+		sourceRight = (int16_t)((destination[1] << 8 | destination[0]) * volume);
 		int mixedSample = sourceLeft + sourceRight;
 
 		if (mixedSample > _16_BIT_MAX)
@@ -465,6 +470,8 @@ static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, i
 
 void milkMixCallback(void *userdata, uint8_t *stream, int len)
 {
+	#define NORMALIZE_VOLUME(v) (double)(v / MILK_AUDIO_MAX_VOLUME)
+
 	memset(stream, 0, len);
 
 	Audio *audio = (Audio *)userdata;
@@ -476,8 +483,7 @@ void milkMixCallback(void *userdata, uint8_t *stream, int len)
 		if (currentItem->remainingLength > 0) /* If the queue item still has remaining samples to spend, then mix it and update its length. */
 		{
 			uint32_t bytesToWrite = ((uint32_t)len > currentItem->remainingLength) ? currentItem->remainingLength : (uint32_t)len;
-			double volNormalized = ((double)currentItem->volume / MILK_AUDIO_MAX_VOLUME);
-			_mixSample(stream, currentItem->position, bytesToWrite, volNormalized);
+			_mixSample(stream, currentItem->position, bytesToWrite, NORMALIZE_VOLUME(currentItem->volume));
 			currentItem->position += bytesToWrite;
 			currentItem->remainingLength -= bytesToWrite;
 			previousItem = currentItem;
@@ -497,4 +503,6 @@ void milkMixCallback(void *userdata, uint8_t *stream, int len)
 			currentItem = next;
 		}
 	}
+
+	#undef NORMALIZE_VOLUME
 }
