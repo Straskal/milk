@@ -47,6 +47,42 @@ static void _unlockAudioDevice()
 	SDL_UnlockAudioDevice(_gAudioDevice);
 }
 
+static void _loadWave(Audio *audio, const char *filename, int idx)
+{
+	SampleData *sampleData = &audio->samples[idx];
+
+	SDL_AudioSpec waveSpec;
+	SDL_LoadWAV(filename, &waveSpec, &sampleData->buffer, &sampleData->length);
+
+	SDL_AudioCVT conversion;
+	SDL_BuildAudioCVT(&conversion, waveSpec.format, waveSpec.channels, waveSpec.freq, AUDIO_S16LSB, audio->channels, audio->frequency);
+	conversion.len = sampleData->length;
+	conversion.buf = (Uint8 *)malloc((size_t)conversion.len * conversion.len_mult);
+	SDL_memcpy(conversion.buf, sampleData->buffer, sampleData->length);
+	SDL_FreeWAV(sampleData->buffer);
+	SDL_ConvertAudio(&conversion);
+
+	sampleData->buffer = conversion.buf;
+	sampleData->length = (uint32_t)floor(conversion.len * conversion.len_ratio);
+}
+
+static void _milkLoadBmp(const char *filename, Color32 *dest, size_t len)
+{
+	SDL_Surface *bmp = SDL_LoadBMP(filename);
+	uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
+
+	for (size_t i = 0; i < len; i++)
+	{
+		int b = *bmpPixels++;
+		int g = *bmpPixels++;
+		int r = *bmpPixels++;
+
+		dest[i] = (r << 16) | (g << 8) | (b);
+	}
+
+	SDL_FreeSurface(bmp);
+}
+
 /*
  *******************************************************************************
  * System implementation. Need to refactor this. I don't like how it's implemented.
@@ -179,6 +215,11 @@ int main(int argc, char *argv[])
 		 *******************************************************************************
 		 */
 
+		milk->video.loadBMP = _milkLoadBmp;
+		milk->audio.loadWAV = _loadWave;
+
+		milkLoadSpritesheet(&milk->video);
+		milkLoadFont(&milk->video);
 		milkLoadCode(milk);
 	}
 

@@ -57,15 +57,13 @@ Milk *milkCreate()
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
 		milk->audio.queueItems[i].isFree = true;
 
-	milkLoadSpritesheet(&milk->video);
-	milkLoadFont(&milk->video);
 	return milk;
 }
 
 void milkFree(Milk *milk)
 {
 	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
-		SDL_FreeWAV(milk->audio.samples[i].buffer);
+		free(milk->audio.samples[i].buffer);
 
 	free(milk->audio.queue);
 	free(milk);
@@ -113,57 +111,14 @@ void milkClearLogs(Milk *milk)
 	milk->logs.errorCount = 0;
 }
 
-/*
- *******************************************************************************
- * Asset loading
- *
- * Depends on SDL at the moment. Should either refactor this out into platform code, or implement custom bitmap and wav loading.
- * The SDL dependency creates a weird order of operations for milk startup (SDL needs to be initialized externally before using these methods)
- *******************************************************************************
- */
-
-static void _loadWave(Audio *audio, const char *filename, SampleData *sampleData)
-{
-	SDL_AudioSpec waveSpec;
-	SDL_LoadWAV(filename, &waveSpec, &sampleData->buffer, &sampleData->length);
-
-	SDL_AudioCVT conversion;
-	SDL_BuildAudioCVT(&conversion, waveSpec.format, waveSpec.channels, waveSpec.freq, AUDIO_S16LSB, audio->channels, audio->frequency);
-	conversion.len = sampleData->length;
-	conversion.buf = (Uint8 *)malloc((size_t)conversion.len * conversion.len_mult);
-	SDL_memcpy(conversion.buf, sampleData->buffer, sampleData->length);
-	SDL_FreeWAV(sampleData->buffer);
-	SDL_ConvertAudio(&conversion);
-
-	sampleData->buffer = conversion.buf;
-	sampleData->length = (uint32_t)floor(conversion.len * conversion.len_ratio);
-}
-
-static void _milkLoadBmp(const char *filename, Color32 *dest, size_t len)
-{
-	SDL_Surface *bmp = SDL_LoadBMP(filename);
-	uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
-
-	for (size_t i = 0; i < len; i++)
-	{
-		int b = *bmpPixels++;
-		int g = *bmpPixels++;
-		int r = *bmpPixels++;
-
-		dest[i] = (r << 16) | (g << 8) | (b);
-	}
-
-	SDL_FreeSurface(bmp);
-}
-
 void milkLoadSpritesheet(Video *video)
 {
-	_milkLoadBmp(MILK_SPRSHEET_FILENAME, video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
+	video->loadBMP(MILK_SPRSHEET_FILENAME, video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
 }
 
 void milkLoadFont(Video *video)
 {
-	_milkLoadBmp(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
+	video->loadBMP(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
 }
 
 /*
@@ -401,8 +356,7 @@ void milkLoadSound(Audio *audio, int idx, const char *filename)
 		free(audio->samples[idx].buffer);
 	}
 
-	_loadWave(audio, filename, &audio->samples[idx]);
-
+	audio->loadWAV(audio, filename, idx);
 	audio->unlock();
 }
 

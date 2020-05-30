@@ -156,6 +156,8 @@ typedef struct video
     Color32 font[MILK_FONT_WIDTH * MILK_FONT_HEIGHT];
     Color32 colorKey;
     Rect    clipRect;
+
+    void(*loadBMP)(const char *, Color32 *, size_t);
 } Video;
 
 /*
@@ -197,6 +199,7 @@ typedef struct audio
     uint8_t         masterVolume;
     uint8_t         channels;
 
+    void(*loadWAV)(struct audio *, const char *, int);
     void(*lock)();
     void(*unlock)();
 } Audio;
