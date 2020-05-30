@@ -53,16 +53,22 @@ find_package(Lua53 REQUIRED)
 #---------------------------------------------------------------------------
 
 set(MILK_SRC_FILES
-	src/main.c
 	src/milk.c
 	src/milk.h
+)
+
+set(MILK_MAIN_SRC_FILES
+	src/main.c
 	src/milkapi.c
 	src/milkapi.h
 	src/milkcmd.c
 	src/milkcmd.h
 )
 
-add_executable(milk ${MILK_SRC_FILES})
+add_executable(milk
+	${MILK_SRC_FILES}
+	${MILK_MAIN_SRC_FILES}
+)
 
 target_include_directories(milk
 	PUBLIC
@@ -85,6 +91,21 @@ target_link_libraries(milk
 		${SDL2_LIBRARY}
 		${LUA53_LIBRARIES}
 )
+
+enable_testing()
+
+add_executable(milktests
+	src/milk.c
+	src/milk.h
+	tests/main.c
+)
+
+target_include_directories(milktests
+	PUBLIC
+		${MILK_SRC_DIR}
+)
+
+add_test(milktests COMMAND milktests)
 
 #---------------------------------------------------------------------------
 # post build step to copy dlls to output file
