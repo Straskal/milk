@@ -408,7 +408,7 @@ static bool _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 	return false;
 }
 
-void milkSound(Audio *audio, int idx, uint8_t volume, uint8_t loop)
+void milkSound(Audio *audio, int idx, uint8_t volume, bool loop)
 {
 	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
 		return;

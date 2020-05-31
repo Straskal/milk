@@ -45,9 +45,10 @@ Test *gCurrentTest = NULL; /* The current test. */
 
 #define BASE_ASSERT(condition)\
 	do {\
-		if (!(condition))\
+		if (!(condition)) {\
 			gCurrentTest->failedAsserts[gCurrentTest->failedAssertCount++] = #condition;\
 			goto cleanup;\
+		}\
 	} while(0)
 
 #define ASSERT_TRUE(val)				BASE_ASSERT(val)

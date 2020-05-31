@@ -197,7 +197,7 @@ static int l_snd(lua_State *L)
 	milkSound(&_globalMilk->audio,
 		(int)lua_tointeger(L, 1),
 		(uint8_t)luaL_optinteger(L, 2, 128),
-		(uint8_t)luaL_optinteger(L, 3, 0)
+		lua_isboolean(L, 3) ? lua_toboolean(L, 3) : false
 	);
 	return 0;
 }

@@ -182,6 +182,14 @@ TEST_CASE(milkPixelSet_SetsPixelWithinClipRect)
  *******************************************************************************
  */
 
+static void _mockLock() /* Should find a nice way to track calls. */
+{
+}
+
+static void _mockUnlock()
+{
+}
+
 TEST_CASE(milkSound_WhenIndexOutOfBounds_DoesNothing)
 {
 	SETUP(milk);
@@ -196,14 +204,6 @@ TEST_CASE(milkSound_WhenSampleAtIndexNotLoaded_DoesNothing)
 	ACT(milkSound(&milk->audio, 0, 0, 0));
 	ASSERT_NULL(milk->audio.queue->next);
 	TEARDOWN(milk);
-}
-
-static void _mockLock() /* Should find a nice way to track calls. */
-{
-}
-
-static void _mockUnlock()
-{
 }
 
 TEST_CASE(milkSound_WhenMaxNumberOfConcurrentSoundsPlaying_DoesNothing)
