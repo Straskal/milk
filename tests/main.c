@@ -59,7 +59,7 @@ TEST_METHOD(milkResetDrawState_ResetsColorKey)
 {
 	ARRANGE_MILK(milk);
 	milk->video.colorKey = 57;
-	milkResetDrawState(&milk->video);
+	ACT(milkResetDrawState(&milk->video));
 	ASSERT_EQ(0x00, milk->video.colorKey);
 	FREE_MILK(milk);
 }
