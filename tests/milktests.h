@@ -133,7 +133,9 @@ TEST_CASE(milkButtonPressed_WhenPressed_ReturnsTrue)
 	SETUP(milk);
 	milk->input.gamepad.buttonState |= BTN_DOWN;
 	milk->input.gamepad.previousButtonState = 0;
+
 	bool isPressed = ACT(milkButtonPressed(&milk->input, BTN_DOWN));
+
 	ASSERT_TRUE(isPressed);
 	TEARDOWN(milk);
 }
@@ -236,18 +238,22 @@ TEST_CASE(milkClear_SetsPixelsWithinClipRect)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkPixelSet_SetsPixelWithinClipRect)
+TEST_CASE(milkPixelSet_WhenPixelWithinClipRect_SetsPixel)
 {
 	SETUP(milk);
-	milkClipRect(&milk->video, 0, 0, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
-	milkClear(&milk->video, 0x000000);
-	milkClipRect(&milk->video, 10, 20, 200, 100);
-
-	ACT(milkPixelSet(&milk->video, 1, 1, 0xff0000));
+	milkClear(&milk->video, 0x00);
 	ACT(milkPixelSet(&milk->video, 15, 30, 0x00ff00));
-
-	ASSERT_NEQ(0xff0000, milk->video.framebuffer[FRAMEBUFFER_POS(1, 1)]);
 	ASSERT_EQ(0x00ff00, milk->video.framebuffer[FRAMEBUFFER_POS(15, 30)]);
+	TEARDOWN(milk);
+}
+
+TEST_CASE(milkPixelSet_WhenPixelIsNotWithinClipRect_DoesNotSetPixel)
+{
+	SETUP(milk);
+	milkClear(&milk->video, 0x00);
+	milkClipRect(&milk->video, 10, 20, 200, 100);
+	ACT(milkPixelSet(&milk->video, 1, 1, 0xff0000));
+	ASSERT_NEQ(0xff0000, milk->video.framebuffer[FRAMEBUFFER_POS(1, 1)]);
 	TEARDOWN(milk);
 }
 

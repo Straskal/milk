@@ -24,7 +24,8 @@ static Test _tests[] =
 	REGISTER_TEST(milkClipRect_ClampsClipRectToFramebufferSize),
 	REGISTER_TEST(milkClipRect_SetsClipRect),
 	REGISTER_TEST(milkClear_SetsPixelsWithinClipRect),
-	REGISTER_TEST(milkPixelSet_SetsPixelWithinClipRect),
+	REGISTER_TEST(milkPixelSet_WhenPixelWithinClipRect_SetsPixel),
+	REGISTER_TEST(milkPixelSet_WhenPixelIsNotWithinClipRect_DoesNotSetPixel),
 
 	REGISTER_TEST(milkSound_WhenIndexOutOfBounds_DoesNothing),
 	REGISTER_TEST(milkSound_WhenSampleAtIndexNotLoaded_DoesNothing),

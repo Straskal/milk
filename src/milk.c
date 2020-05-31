@@ -187,23 +187,23 @@ void milkResetDrawState(Video *video)
 	video->clipRect.right = MILK_FRAMEBUF_WIDTH;
 }
 
+static int _clamp(int value, int min, int max)
+{
+	if (value < min)
+		value = min;
+
+	if (value > max)
+		value = max;
+
+	return value;
+}
+
 void milkClipRect(Video *video, int x, int y, int w, int h)
 {
-	int right = x + w;
-	int bottom = y + h;
-
-	x = FRAMEBUFFER_MIN(x);
-	x = FRAMEBUFFER_MAXX(x);
-	right = FRAMEBUFFER_MIN(right);
-	right = FRAMEBUFFER_MAXX(right);
-	y = FRAMEBUFFER_MIN(y);
-	y = FRAMEBUFFER_MAXY(y);
-	bottom = FRAMEBUFFER_MIN(bottom);
-	bottom = FRAMEBUFFER_MAXY(bottom);
-	video->clipRect.left = x;
-	video->clipRect.right = right;
-	video->clipRect.top = y;
-	video->clipRect.bottom = bottom;
+	video->clipRect.left = _clamp(x, 0, MILK_FRAMEBUF_WIDTH);
+	video->clipRect.right = _clamp(x + w, 0, MILK_FRAMEBUF_WIDTH);
+	video->clipRect.top = _clamp(y, 0, MILK_FRAMEBUF_HEIGHT);
+	video->clipRect.bottom = _clamp(y + h, 0, MILK_FRAMEBUF_HEIGHT);
 }
 
 void milkClear(Video *video, Color32 color)
@@ -219,7 +219,7 @@ void milkClear(Video *video, Color32 color)
 
 void milkPixelSet(Video *video, int x, int y, Color32 color)
 {
-	if (WITHIN_CLIP_RECT(video->clipRect, x, y)) /* Only draw pixels within the clip rect. */
+	if (WITHIN_CLIP_RECT(video->clipRect, x, y))
 		video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
@@ -434,17 +434,6 @@ static bool _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 		}
 	}
 	return false;
-}
-
-static int _clamp(int value, int min, int max)
-{
-	if (value < min)
-		value = min;
-
-	if (value > max)
-		value = max;
-
-	return value;
 }
 
 void milkSound(Audio *audio, int idx, int volume, bool loop)
