@@ -1,44 +1,15 @@
 #include "milk.h"
+#include "milkassert.h"
 
 #include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-/* Test helpers */
-#define TEST_METHOD(test)				static void test()
-#define ARRANGE_MILK(milk)				Milk *milk = milkCreate()
-#define FREE_MILK(milk)					milkFree(milk)
-
-typedef void(*TestFunction)();
-
-typedef struct test
-{
-	char *name;
-	TestFunction testFunc;
-	char *failedAsserts[8];
-	int failedAssertCount;
-} Test;
-
-static Test *gCurrentTest = NULL;
-
-/* Asserts */
-#define BASE_ASSERT(condition)\
-	do {\
-		if ((!condition))\
-			gCurrentTest->failedAsserts[gCurrentTest->failedAssertCount++] = #condition;\
-	} while(0)
-
-#define ASSERT_TRUE(condition)			BASE_ASSERT(condition)
-#define ASSERT_FALSE(condition)			BASE_ASSERT(!(condition))
-#define ASSERT_EQ(expected, actual)		BASE_ASSERT(expected == actual)
-#define ASSERT_NEQ(expected, actual)	BASE_ASSERT(expected != actual)
-#define ASSERT_NOT_NULL(val)			BASE_ASSERT(val != NULL)
-
 TEST_METHOD(milkCreate_InitializesMilk)
 {
 	ARRANGE_MILK(milk);
-	ASSERT_NOT_NULL(milk->audio.queue);
+	ASSERT_NNULL(milk->audio.queue);
 	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, milk->audio.masterVolume);
 
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
@@ -47,25 +18,41 @@ TEST_METHOD(milkCreate_InitializesMilk)
 	FREE_MILK(milk);
 }
 
-TEST_METHOD(milkButton_ReturnsExpectedResult)
+TEST_METHOD(milkButton_WhenButtonDown_ReturnsTrue)
 {
 	ARRANGE_MILK(milk);
 	milk->input.gamepad.buttonState |= BTN_DOWN;
-	ASSERT_TRUE(milkButton(&milk->input, BTN_DOWN));
-	milk->input.gamepad.buttonState = 0;
-	ASSERT_FALSE(milkButton(&milk->input, BTN_DOWN));
+	bool isDown = ACT(milkButton(&milk->input, BTN_DOWN));
+	ASSERT_TRUE(isDown);
 	FREE_MILK(milk);
 }
 
-TEST_METHOD(milkButtonPressed_ReturnsExpectedResult)
+TEST_METHOD(milkButton_WhenButtonUp_ReturnsFalse)
+{
+	ARRANGE_MILK(milk);
+	milk->input.gamepad.buttonState = 0;
+	bool isDown = ACT(milkButton(&milk->input, BTN_DOWN));
+	ASSERT_FALSE(isDown);
+	FREE_MILK(milk);
+}
+
+TEST_METHOD(milkButtonPressed_WhenPressed_ReturnsTrue)
 {
 	ARRANGE_MILK(milk);
 	milk->input.gamepad.buttonState |= BTN_DOWN;
 	milk->input.gamepad.previousButtonState = 0;
-	ASSERT_TRUE(milkButtonPressed(&milk->input, BTN_DOWN));
+	bool isPressed = ACT(milkButtonPressed(&milk->input, BTN_DOWN));
+	ASSERT_TRUE(isPressed);
+	FREE_MILK(milk);
+}
+
+TEST_METHOD(milkButtonPressed_WhenHeld_ReturnsFalse)
+{
+	ARRANGE_MILK(milk);
 	milk->input.gamepad.buttonState |= BTN_DOWN;
 	milk->input.gamepad.previousButtonState |= BTN_DOWN;
-	ASSERT_FALSE(milkButtonPressed(&milk->input, BTN_DOWN));
+	bool isPressed = ACT(milkButtonPressed(&milk->input, BTN_DOWN));
+	ASSERT_FALSE(isPressed);
 	FREE_MILK(milk);
 }
 
@@ -85,7 +72,7 @@ TEST_METHOD(milkResetDrawState_ResetsClipRect)
 	milk->video.clipRect.bottom = 10;
 	milk->video.clipRect.left = 10;
 	milk->video.clipRect.right = 10;
-	milkResetDrawState(&milk->video);
+	ACT(milkResetDrawState(&milk->video));
 	ASSERT_EQ(0, milk->video.clipRect.top);
 	ASSERT_EQ(MILK_FRAMEBUF_HEIGHT, milk->video.clipRect.bottom);
 	ASSERT_EQ(0, milk->video.clipRect.left);
@@ -96,7 +83,7 @@ TEST_METHOD(milkResetDrawState_ResetsClipRect)
 TEST_METHOD(milkClipRect_LimitsClipRectToFramebufferSize)
 {
 	ARRANGE_MILK(milk);
-	milkClipRect(&milk->video, -10, -10, 500, 500);
+	ACT(milkClipRect(&milk->video, -10, -10, 500, 500));
 	ASSERT_EQ(0, milk->video.clipRect.top);
 	ASSERT_EQ(MILK_FRAMEBUF_HEIGHT, milk->video.clipRect.bottom);
 	ASSERT_EQ(0, milk->video.clipRect.left);
@@ -107,7 +94,7 @@ TEST_METHOD(milkClipRect_LimitsClipRectToFramebufferSize)
 TEST_METHOD(milkClipRect_SetsClipRect)
 {
 	ARRANGE_MILK(milk);
-	milkClipRect(&milk->video, 10, 20, 200, 100);
+	ACT(milkClipRect(&milk->video, 10, 20, 200, 100));
 	ASSERT_EQ(20, milk->video.clipRect.top);
 	ASSERT_EQ(120, milk->video.clipRect.bottom);
 	ASSERT_EQ(10, milk->video.clipRect.left);
@@ -124,7 +111,7 @@ TEST_METHOD(milkClear_SetsPixelsWithinClipRect)
 	milkClipRect(&milk->video, 0, 0, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
 	milkClear(&milk->video, 0xff0000);
 	milkClipRect(&milk->video, 10, 20, 200, 100);
-	milkClear(&milk->video, 0x00ff00);
+	ACT(milkClear(&milk->video, 0x00ff00));
 
 	for (int i = 0; i < MILK_FRAMEBUF_HEIGHT; i++)
 	{
@@ -148,24 +135,26 @@ TEST_METHOD(milkPixelSet_SetsPixelWithinClipRect)
 	milkClipRect(&milk->video, 0, 0, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
 	milkClear(&milk->video, 0x000000);
 	milkClipRect(&milk->video, 10, 20, 200, 100);
-	milkPixelSet(&milk->video, 1, 1, 0xff0000);
-	milkPixelSet(&milk->video, 15, 30, 0x00ff00);
+	ACT(milkPixelSet(&milk->video, 1, 1, 0xff0000));
+	ACT(milkPixelSet(&milk->video, 15, 30, 0x00ff00));
 	ASSERT_NEQ(0xff0000, milk->video.framebuffer[FRAMEBUFFER_POS(1, 1)]);
 	ASSERT_EQ(0x00ff00, milk->video.framebuffer[FRAMEBUFFER_POS(15, 30)]);
 }
 
 static Test _tests[] =
 {
-	#define TEST(func) { #func, func }
-	TEST(milkCreate_InitializesMilk),
-	TEST(milkButton_ReturnsExpectedResult),
-	TEST(milkButtonPressed_ReturnsExpectedResult),
-	TEST(milkResetDrawState_ResetsColorKey),
-	TEST(milkResetDrawState_ResetsClipRect),
-	TEST(milkClipRect_LimitsClipRectToFramebufferSize),
-	TEST(milkClipRect_SetsClipRect),
-	TEST(milkClear_SetsPixelsWithinClipRect),
-	TEST(milkPixelSet_SetsPixelWithinClipRect)
+	#define REGISTER_TEST(func) { #func, func }
+	REGISTER_TEST(milkCreate_InitializesMilk),
+	REGISTER_TEST(milkButton_WhenButtonDown_ReturnsTrue),
+	REGISTER_TEST(milkButton_WhenButtonUp_ReturnsFalse),
+	REGISTER_TEST(milkButtonPressed_WhenPressed_ReturnsTrue),
+	REGISTER_TEST(milkButtonPressed_WhenHeld_ReturnsFalse),
+	REGISTER_TEST(milkResetDrawState_ResetsColorKey),
+	REGISTER_TEST(milkResetDrawState_ResetsClipRect),
+	REGISTER_TEST(milkClipRect_LimitsClipRectToFramebufferSize),
+	REGISTER_TEST(milkClipRect_SetsClipRect),
+	REGISTER_TEST(milkClear_SetsPixelsWithinClipRect),
+	REGISTER_TEST(milkPixelSet_SetsPixelWithinClipRect)
 	#undef TEST
 };
 

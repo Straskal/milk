@@ -98,6 +98,7 @@ add_executable(milktests
 	src/milk.c
 	src/milk.h
 	tests/main.c
+	tests/milkassert.h
 )
 
 target_include_directories(milktests
