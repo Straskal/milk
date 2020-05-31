@@ -23,40 +23,9 @@ static Test _tests[] =
 	#undef TEST
 };
 
+#define TEST_COUNT sizeof(_tests) / sizeof(Test)
+
 int main(int argc, char *argv[])
 {
-	const size_t testCount = sizeof(_tests) / sizeof(Test);
-	int passedCount = 0;
-
-	printf("Running tests\n\n\n");
-
-	for (size_t i = 0; i < testCount; i++)
-	{
-		_tests[i].failedAssertCount = 0;
-		gCurrentTest = &_tests[i];
-		_tests[i].testFunc();
-	}
-
-	for (size_t i = 0; i < testCount; i++)
-		if (_tests[i].failedAssertCount == 0)
-			passedCount++;
-
-	printf("Passed %d/%d\n", passedCount, testCount);
-	printf("=======================================\n\n");
-
-	for (size_t i = 0; i < testCount; i++)
-		if (_tests[i].failedAssertCount == 0)
-			printf("	- %s\n", _tests[i].name);
-
-	printf("\nFailed %d/%d\n", testCount - passedCount, testCount);
-	printf("=======================================\n\n");
-
-	for (size_t i = 0; i < testCount; i++)
-		if (_tests[i].failedAssertCount > 0)
-		{
-			printf("	- %s\n", _tests[i].name);
-
-			for (int j = 0; j < _tests[i].failedAssertCount; j++)
-				printf("		%s\n", _tests[i].failedAsserts[j]);
-		}
+	RUN_ALL_TESTS(_tests, TEST_COUNT);
 }
