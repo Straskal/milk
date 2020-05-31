@@ -59,7 +59,7 @@ Test *gCurrentTest = NULL; /* The current test. */
  *******************************************************************************
  */
 
-void runTests(Test *tests, size_t count)
+int runTests(Test *tests, size_t count)
 {
 	int passedCount = 0;
 
@@ -94,6 +94,8 @@ void runTests(Test *tests, size_t count)
 			for (int j = 0; j < tests[i].failedAssertCount; j++)
 				printf("		%s\n", tests[i].failedAsserts[j]);
 		}
+
+	return !(passedCount == count);
 }
 
 #define RUN_ALL_TESTS(tests, count) runTests(tests, count)

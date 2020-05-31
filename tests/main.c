@@ -27,5 +27,5 @@ static Test _tests[] =
 
 int main(int argc, char *argv[])
 {
-	RUN_ALL_TESTS(_tests, TEST_COUNT);
+	return RUN_ALL_TESTS(_tests, TEST_COUNT);
 }

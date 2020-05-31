@@ -107,7 +107,7 @@ target_include_directories(milktests
 		${MILK_SRC_DIR}
 )
 
-add_test(milktests COMMAND milktests)
+add_test(milktests milktests)
 
 #---------------------------------------------------------------------------
 # post build step to copy dlls to output file

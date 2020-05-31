@@ -408,9 +408,9 @@ static bool _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 
 void milkSound(Audio *audio, int idx, uint8_t volume, uint8_t loop)
 {
-	audio->lock();
 	AudioQueueItem *queueItem;
 
+	audio->lock();
 	if (_getFreeQueueItem(audio, &queueItem))
 	{
 		if (loop) /* Stop current loop in favor of the new looping sound. */
