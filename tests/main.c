@@ -1,19 +1,14 @@
 #include "milk.h"
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 /* Test helpers */
 #define TEST_METHOD(test)				static void test()
 #define ARRANGE_MILK(milk)				Milk *milk = milkCreate()
 #define FREE_MILK(milk)					milkFree(milk)
-
-/* Asserts */
-#define ASSERT_TRUE(condition)			assert(condition)
-#define ASSERT_FALSE(condition)			assert(!(condition))
-#define ASSERT_EQ(expected, actual)		assert(expected == actual)
-#define ASSERT_NEQ(expected, actual)	assert(expected != actual)
-#define ASSERT_NOT_NULL(val)			assert(val != NULL)
 
 typedef void(*TestFunction)();
 
@@ -21,7 +16,24 @@ typedef struct test
 {
 	char *name;
 	TestFunction testFunc;
+	char *failedAsserts[8];
+	int failedAssertCount;
 } Test;
+
+static Test *gCurrentTest = NULL;
+
+/* Asserts */
+#define BASE_ASSERT(condition)\
+	do {\
+		if ((!condition))\
+			gCurrentTest->failedAsserts[gCurrentTest->failedAssertCount++] = #condition;\
+	} while(0)
+
+#define ASSERT_TRUE(condition)			BASE_ASSERT(condition)
+#define ASSERT_FALSE(condition)			BASE_ASSERT(!(condition))
+#define ASSERT_EQ(expected, actual)		BASE_ASSERT(expected == actual)
+#define ASSERT_NEQ(expected, actual)	BASE_ASSERT(expected != actual)
+#define ASSERT_NOT_NULL(val)			BASE_ASSERT(val != NULL)
 
 TEST_METHOD(milkCreate_InitializesMilk)
 {
@@ -160,7 +172,37 @@ static Test _tests[] =
 int main(int argc, char *argv[])
 {
 	const size_t testCount = sizeof(_tests) / sizeof(Test);
+	int passedCount = 0;
+
+	printf("Running tests\n\n\n");
 
 	for (size_t i = 0; i < testCount; i++)
+	{
+		_tests[i].failedAssertCount = 0;
+		gCurrentTest = &_tests[i];
 		_tests[i].testFunc();
+	}
+
+	for (size_t i = 0; i < testCount; i++)
+		if (_tests[i].failedAssertCount == 0)
+			passedCount++;
+
+	printf("Passed %d/%d\n", passedCount, testCount);
+	printf("=======================================\n\n");
+
+	for (size_t i = 0; i < testCount; i++)
+		if (_tests[i].failedAssertCount == 0)
+			printf("	- %s\n", _tests[i].name);
+
+	printf("\nFailed %d/%d\n", testCount - passedCount, testCount);
+	printf("=======================================\n\n");
+
+	for (size_t i = 0; i < testCount; i++)
+		if (_tests[i].failedAssertCount > 0)
+		{
+			printf("	- %s\n", _tests[i].name);
+
+			for (int j = 0; j < _tests[i].failedAssertCount; j++)
+				printf("		%s\n", _tests[i].failedAsserts[j]);
+		}
 }
