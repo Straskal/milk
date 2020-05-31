@@ -35,7 +35,11 @@ static Test _tests[] =
 	REGISTER_TEST(milkSound_ClampsVolumeToMin),
 	REGISTER_TEST(milkSound_ClampsVolumeToMax),
 	REGISTER_TEST(milkVolume_ClampsToMinValue),
-	REGISTER_TEST(milkVolume_ClampsToMaxValue)
+	REGISTER_TEST(milkVolume_ClampsToMaxValue),
+	REGISTER_TEST(milkMixCallback_WhenQueueIsEmpty_DoesNotMixStream),
+	REGISTER_TEST(milkMixCallback_WhenSamplesAreNotFinished_MixesSamplesIntoStream),
+	REGISTER_TEST(milkMixCallback_WhenSamplesIsFinishedAndLooping_ResetsSampleAndMixesIntoStream),
+	REGISTER_TEST(milkMixCallback_WhenSamplesIsFinished_RemovedSampleFromQueue)
 	#undef REGISTER_TEST
 };
 

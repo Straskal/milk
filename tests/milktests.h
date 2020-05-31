@@ -4,6 +4,8 @@
 #include "milk.h"
 #include "milkassert.h"
 
+#include <string.h>
+
 #define FRAMEBUFFER_POS(x, y)			((MILK_FRAMEBUF_WIDTH * y) + x)
 #define WITHIN_CLIP_RECT(clip, x, y)	(clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
 
@@ -403,6 +405,84 @@ TEST_CASE(milkVolume_ClampsToMaxValue)
 	ACT(milkVolume(&milk->audio, MILK_AUDIO_MAX_VOLUME + 10));
 	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, milk->audio.masterVolume);
 	TEARDOWN(milk);
+}
+
+TEST_CASE(milkMixCallback_WhenQueueIsEmpty_DoesNotMixStream)
+{
+	SETUP(milk);
+	uint8_t stream[10];
+	ACT(milkMixCallback(&milk->audio, stream, 10));
+
+	for (int i = 0; i < 10; i++)
+		ASSERT_EQ(0, stream[i]);
+
+	TEARDOWN(milk);
+}
+
+TEST_CASE(milkMixCallback_WhenSamplesAreNotFinished_MixesSamplesIntoStream)
+{
+	SETUP(milk);
+	milk->audio.lock = _mockLock;
+	milk->audio.unlock = _mockUnlock;
+
+	uint8_t buffer[] = { 7, 7, 7, 7 };
+	milk->audio.samples[0].buffer = buffer;
+	milk->audio.samples[0].length = 4;
+	milkSound(&milk->audio, 0, 128, true);
+
+	uint8_t stream[10];
+	ACT(milkMixCallback(&milk->audio, stream, 10));
+
+	for (int i = 0; i < 4; i++)
+		ASSERT_EQ(7, stream[i]);
+
+CUSTOM_TEARDOWN:
+	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+	FREE_MILK(milk);
+}
+
+TEST_CASE(milkMixCallback_WhenSamplesIsFinishedAndLooping_ResetsSampleAndMixesIntoStream)
+{
+	SETUP(milk);
+	milk->audio.lock = _mockLock;
+	milk->audio.unlock = _mockUnlock;
+
+	uint8_t buffer[] = { 7, 7, 7, 7 };
+	milk->audio.samples[0].buffer = buffer;
+	milk->audio.samples[0].length = 4;
+	milkSound(&milk->audio, 0, 128, true);
+	milk->audio.queue->next->remainingLength = 0;
+
+	uint8_t stream[10];
+	ACT(milkMixCallback(&milk->audio, stream, 10));
+
+	for (int i = 0; i < 4; i++)
+		ASSERT_EQ(7, stream[i]);
+
+CUSTOM_TEARDOWN:
+	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+	FREE_MILK(milk);
+}
+
+TEST_CASE(milkMixCallback_WhenSamplesIsFinished_RemovedSampleFromQueue)
+{
+	SETUP(milk);
+	milk->audio.lock = _mockLock;
+	milk->audio.unlock = _mockUnlock;
+
+	uint8_t buffer[] = { 7, 7, 7, 7 };
+	milk->audio.samples[0].buffer = buffer;
+	milk->audio.samples[0].length = 4;
+	milkSound(&milk->audio, 0, 128, false);
+	milk->audio.queue->next->remainingLength = 0;
+
+	uint8_t stream[10];
+	ACT(milkMixCallback(&milk->audio, stream, 10));
+	ASSERT_NULL(milk->audio.queue->next);
+
+CUSTOM_TEARDOWN:
+	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+	FREE_MILK(milk);
 }
 
 #endif
