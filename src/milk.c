@@ -478,7 +478,7 @@ static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, d
 	while (length--)
 	{
 		sourceLeft = (int16_t)((source[1] << 8 | source[0]) * volume);
-		sourceRight = (int16_t)((destination[1] << 8 | destination[0]) * volume);
+		sourceRight = (int16_t)((destination[1] << 8 | destination[0]));
 		int mixedSample = sourceLeft + sourceRight;
 
 		if (mixedSample > _16_BIT_MAX)
