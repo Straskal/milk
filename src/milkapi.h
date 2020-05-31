@@ -22,13 +22,13 @@
  *  SOFTWARE.
  */
 
-#ifndef __MILK_API__
-#define __MILK_API__
+#ifndef __MILK_API_H_
+#define __MILK_API_H_
 
 #include "milk.h"
 
-void milkLoadScripts(Milk *code);
-void milkUnloadScripts(Milk *milk);
+void milkLoadCode(Milk *milk);
+void milkUnloadCode(Milk *milk);
 void milkInvokeUpdate(Code *code);
 void milkInvokeDraw(Code *code);
 

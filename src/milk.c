@@ -29,159 +29,79 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <SDL.h>
 
 #define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x) /* xy coords to framebuffer pixel index. */
 #define WITHIN_CLIP_RECT(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
 #define FRAMEBUFFER_MIN(x) (x < 0 ? 0 : x)
 #define FRAMEBUFFER_MAXX(x) (x > MILK_FRAMEBUF_WIDTH ? MILK_FRAMEBUF_WIDTH : x)
 #define FRAMEBUFFER_MAXY(y) (y > MILK_FRAMEBUF_HEIGHT ? MILK_FRAMEBUF_HEIGHT : y)
+#define MIN_SCALE 0.5f
+#define MAX_SCALE 5.0f
 
 #define FLIPX 1
 #define FLIPY 2
 
-#define IS_ASCII(c) ((c & 0xff80) == 0)
-#define IS_NEWLINE(c) (c == '\n')
-
 /*
  *******************************************************************************
- * ASSET LOADING
-
- * Load WAV data into dynamically allocated buffers.
- * Load bitmap and copy it's pixel data into a fixed size buffer.
- * Would also love to rid of this SDL dependency. Could have custom wav loading here.
+ * Initialization and shutdown
  *******************************************************************************
  */
 
-static void _loadWave(const char *filename, SampleData *sampleData)
-{
-	SDL_AudioSpec waveSpec;
-	SDL_LoadWAV(filename, &waveSpec, &sampleData->buffer, &sampleData->length);
-
-	/* A lot of sound effects are mono (1 channel), so must CONVERT THEM. */
-	if (waveSpec.channels != MILK_AUDIO_CHANNELS)
-	{
-		SDL_AudioCVT conversion;
-		SDL_BuildAudioCVT(&conversion, waveSpec.format, waveSpec.channels, waveSpec.freq, AUDIO_S16LSB, MILK_AUDIO_CHANNELS, MILK_AUDIO_FREQUENCY);
-		conversion.len = sampleData->length;
-		conversion.buf = (Uint8 *)SDL_malloc((size_t)conversion.len * conversion.len_mult);
-		SDL_memcpy(conversion.buf, sampleData->buffer, sampleData->length);
-		SDL_ConvertAudio(&conversion);
-		SDL_FreeWAV(sampleData->buffer);
-
-		sampleData->buffer = conversion.buf;
-		sampleData->length = (uint32_t)floor(conversion.len * conversion.len_ratio);
-	}
-}
-
-static void _milkLoadBmp(const char *filename, Color32 *dest, size_t len)
-{
-	SDL_Surface *bmp = SDL_LoadBMP(filename);
-	uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
-
-	for (size_t i = 0; i < len; i++)
-	{
-		int b = *(bmpPixels++);
-		int g = *(bmpPixels++);
-		int r = *(bmpPixels++);
-
-		dest[i] = (r << 16) | (g << 8) | (b);
-	}
-
-	SDL_FreeSurface(bmp);
-}
-
-void milkLoadSpritesheet(Video *video)
-{
-	_milkLoadBmp(MILK_SPRSHEET_FILENAME, video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
-}
-
-void milkLoadFont(Video *video)
-{
-	_milkLoadBmp(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
-}
-
-/*
- *******************************************************************************
- * INITIALIZATION & SHUT DOWN
- *******************************************************************************
- */
-
-static void _milkOpenAudio(Audio *audio)
-{
-	audio->queue = (AudioQueueItem *)calloc(1, sizeof(AudioQueueItem));
-	audio->masterVolume = MILK_AUDIO_MAX_VOLUME;
-
-	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
-		audio->queueItems[i].isFree = 1;
-
-	/* Temporary until i've figured how I want to handle loading sounds. */
-	_loadWave("music.wav", &audio->samples[0]);
-	_loadWave("fireball_shoot.wav", &audio->samples[1]);
-	_loadWave("punch.wav", &audio->samples[2]);
-}
-
-static void _milkOpenVideo(Video *video)
-{
-	milkLoadSpritesheet(video);
-	milkLoadFont(video);
-}
-
-Milk *milkInit()
+Milk *milkCreate()
 {
 	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
-	_milkOpenAudio(&milk->audio);
-	_milkOpenVideo(&milk->video);
-	milkLoadScripts(milk);
+	milk->audio.queue = (AudioQueueItem *)calloc(1, sizeof(AudioQueueItem));
+	milk->audio.masterVolume = MILK_AUDIO_MAX_VOLUME;
+
+	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+		milk->audio.queueItems[i].isFree = true;
+
 	return milk;
-}
-
-static void _milkCloseAudio(Audio *audio)
-{
-	free(audio->queue);
-
-	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
-		SDL_FreeWAV(audio->samples[i].buffer);
 }
 
 void milkFree(Milk *milk)
 {
-	milkUnloadScripts(milk);
-	_milkCloseAudio(&milk->audio);
-	free(milk);
-}
+	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
+		free(milk->audio.samples[i].buffer);
 
-void milkQuit(Milk *milk)
-{
-	milk->shouldQuit = 1;
+	free(milk->audio.queue);
+	free(milk);
 }
 
 /*
  *******************************************************************************
- * SYSTEM
+ * Logging
  *******************************************************************************
  */
 
-void milkLog(Milk *milk, const char *message, LogType type)
+/* When milk's log array is full, we shift down all of the logs before inserting the next one.*/
+static LogMessage *_getNextFreeLogMessage(Logs *logs)
 {
-	LogMessage *newLogMessage;
-
-	/* If the logs are full, then shift the items down and insert the new log at the end of the list. */
-	if (milk->logs.count == MILK_MAX_LOGS)
+	if (logs->count == MILK_MAX_LOGS)
 	{
 		for (int i = 0; i < MILK_MAX_LOGS - 1; i++)
-			milk->logs.messages[i] = milk->logs.messages[i + 1];
+			logs->messages[i] = logs->messages[i + 1];
 
-		newLogMessage = &milk->logs.messages[MILK_MAX_LOGS - 1];
+		return &logs->messages[MILK_MAX_LOGS - 1];
 	}
-	else newLogMessage = &milk->logs.messages[milk->logs.count++];
+	else
+		return &logs->messages[logs->count++];
+}
 
-	strcpy(newLogMessage->message, message);
-	newLogMessage->length = strlen(message);
-	newLogMessage->type = type;
+void milkLog(Milk *milk, const char *text, LogType type)
+{
+	size_t len = strlen(text);
+
+	if (len > MILK_LOG_MAX_LENGTH)
+		len = MILK_LOG_MAX_LENGTH;
 
 	if (type == ERROR)
 		milk->logs.errorCount++;
+
+	LogMessage *newLogMessage = _getNextFreeLogMessage(&milk->logs);
+	strncpy(newLogMessage->text, text, len);
+	newLogMessage->length = len;
+	newLogMessage->type = type;
 }
 
 void milkClearLogs(Milk *milk)
@@ -190,21 +110,43 @@ void milkClearLogs(Milk *milk)
 	milk->logs.errorCount = 0;
 }
 
-int milkButton(Input *input, uint8_t button)
+/*
+ *******************************************************************************
+ * Art
+ *******************************************************************************
+ */
+
+void milkLoadSpritesheet(Video *video)
+{
+	video->loadBMP(MILK_SPRSHEET_FILENAME, video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
+}
+
+void milkLoadFont(Video *video)
+{
+	video->loadBMP(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
+}
+
+/*
+ *******************************************************************************
+ * Input
+ *******************************************************************************
+ */
+
+bool milkButton(Input *input, ButtonState button)
 {
 	return (input->gamepad.buttonState & button) == button;
 }
 
-int milkButtonPressed(Input *input, uint8_t button)
+bool milkButtonPressed(Input *input, ButtonState button)
 {
 	return (input->gamepad.buttonState & button) == button && (input->gamepad.previousButtonState & button) != button;
 }
 
 /*
  *******************************************************************************
- * VIDEO
+ * Video
  *
- * All drawing functions blit pixels onto milk's framebuffer.
+ * All drawing functions should draw left -> right, top -> bottom.
  *******************************************************************************
  */
 
@@ -249,7 +191,7 @@ void milkClear(Video *video, Color32 color)
 
 void milkPixelSet(Video *video, int x, int y, Color32 color)
 {
-	if (WITHIN_CLIP_RECT(video->clipRect, x, y))
+	if (WITHIN_CLIP_RECT(video->clipRect, x, y)) /* Only draw pixels within the clip rect. */
 		video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
@@ -275,15 +217,29 @@ void milkRect(Video *video, int x, int y, int w, int h, Color32 color)
 
 void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
 {
-	for (int j = y; j < y + h; j++)
+	for (int i = y; i < y + h; i++)
 	{
-		for (int i = x; i < x + w; i++)
-			milkPixelSet(video, i, j, color);
+		for (int j = x; j < x + w; j++)
+			milkPixelSet(video, j, i, color);
 	}
 }
 
+/*
+ * Main helper function to blit pixel images onto the framebuffer.
+ * We're pretty much running nearest neighbor scaling on all blit pixels.
+ * This greatly simplifies the code, so it should stay this way unless it starts causing performance issues.
+ *
+ * "Nearest neighbor scaling replaces every pixel with the nearest pixel in the output.
+ *  When upscaling an image, multiple pixels of the same color will be duplicated throughout the image." - Some random explanation on google.
+ */
 static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip, Color32 *color)
 {
+	if (scale <= MIN_SCALE)
+		scale = MIN_SCALE;
+
+	if (scale > MAX_SCALE)
+		scale = MAX_SCALE;
+
 	int width = (int)floor((double)w * scale);
 	int height = (int)floor((double)h * scale);
 	int xRatio = (int)((w << 16) / width) + 1;
@@ -297,7 +253,6 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 	int xPixel, yPixel;
 	int xFramebuffer, yFramebuffer;
 
-	/* Pretty much running the nearest neighbor scaling on all blit pixels. This doesn't seem to affect performance. */
 	for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yDirection)
 	{
 		for (xFramebuffer = x, xPixel = xPixelStart; xFramebuffer < x + width; xFramebuffer++, xPixel += xDirection)
@@ -314,9 +269,9 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 
 void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip)
 {
-	static int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
-	static int rowSize = MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE;
-	static int colSize = MILK_SPRSHEET_SPR_SQRSIZE;
+	const int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
+	const int rowSize = MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE;
+	const int colSize = MILK_SPRSHEET_SPR_SQRSIZE;
 
 	if (idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
 		return;
@@ -330,9 +285,12 @@ void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 
 void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Color32 color)
 {
-	static int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
-	static int rowSize = MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE;
-	static int colSize = MILK_CHAR_SQRSIZE;
+	#define IS_ASCII(c)		((c & 0xff80) == 0)
+	#define IS_NEWLINE(c)	(c == '\n')
+
+	const int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
+	const int rowSize = MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE;
+	const int colSize = MILK_CHAR_SQRSIZE;
 
 	if (str == NULL)
 		return;
@@ -343,33 +301,69 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Co
 
 	while (*str)
 	{
-		if (IS_NEWLINE(*str))
-		{
-			xCurrent = x;
-			yCurrent += charSize;
-			str++;
-		}
-		else
+		if (!IS_NEWLINE(*str))
 		{
 			char ch = *(str++);
-			if (!IS_ASCII(ch)) ch = '?';
+			if (!IS_ASCII(ch)) ch = '?'; /* If the character is not ASCII, then we're just gonna be all like whaaaaaat? Problem solved. */
 			int row = (int)floor((ch - 32) / numColumns); /* bitmap font starts at ASCII character 32 (SPACE) */
 			int col = (int)floor((ch - 32) % numColumns);
 			Color32 *pixels = &video->font[(row * rowSize + col * colSize)];
 			_blitRect(video, pixels, xCurrent, yCurrent, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0, &color);
 			xCurrent += charSize;
 		}
+		else
+		{
+			xCurrent = x;
+			yCurrent += charSize;
+			str++;
+		}
 	}
+
+	#undef IS_ASCII
+	#undef IS_NEWLINE
 }
 
 /*
  *******************************************************************************
- * AUDIO
- *
- * Milk's audio is limited to 16 concurrent sounds, and only one looping sound.
- * The audio queue root is dynamically allocated, while the rest of the queue items are kept in the free store.
+ * Audio
  *******************************************************************************
  */
+
+static void _removeSampleInstanceFromQueue(AudioQueueItem *queue, SampleData *sampleData)
+{
+	AudioQueueItem *curr = queue->next;
+	AudioQueueItem *prev = queue;
+
+	while (curr != NULL)
+	{
+		if (curr->sampleData == sampleData)
+		{
+			curr->isFree = true;
+			prev->next = curr->next;
+		}
+
+		prev = curr;
+		curr = curr->next;
+	}
+}
+
+void milkLoadSound(Audio *audio, int idx, const char *filename)
+{
+	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
+		return;
+
+	audio->lock();
+
+	/* If we're loading a sound into a sample data that in use, then remove all instances playing in the queue, and then free it. */
+	if (audio->samples[idx].buffer != NULL)
+	{
+		_removeSampleInstanceFromQueue(audio->queue, &audio->samples[idx]);
+		free(audio->samples[idx].buffer);
+	}
+
+	audio->loadWAV(audio, filename, idx);
+	audio->unlock();
+}
 
 static void _queueSample(AudioQueueItem *queue, AudioQueueItem *new)
 {
@@ -388,7 +382,7 @@ static void _stopCurrentLoop(AudioQueueItem *queue)
 	{
 		if (curr->loop)
 		{
-			curr->isFree = 1;
+			curr->isFree = true;
 			prev->next = curr->next;
 			break;
 		}
@@ -398,25 +392,25 @@ static void _stopCurrentLoop(AudioQueueItem *queue)
 	}
 }
 
-static int _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
+static bool _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 {
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
 	{
 		if (audio->queueItems[i].isFree)
 		{
-			audio->queueItems[i].isFree = 0; /* Queue item is not free any more. */
+			audio->queueItems[i].isFree = false; /* Queue item is not free any more. */
 			*queueItem = &audio->queueItems[i];
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 void milkSound(Audio *audio, int idx, uint8_t volume, uint8_t loop)
 {
-	audio->lock();
 	AudioQueueItem *queueItem;
 
+	audio->lock();
 	if (_getFreeQueueItem(audio, &queueItem))
 	{
 		if (loop) /* Stop current loop in favor of the new looping sound. */
@@ -439,49 +433,76 @@ void milkVolume(Audio *audio, uint8_t volume)
 {
 	if (volume < 0)
 		volume = 0;
+
 	if (volume > MILK_AUDIO_MAX_VOLUME)
 		volume = MILK_AUDIO_MAX_VOLUME;
 
 	audio->masterVolume = volume;
 }
 
-/*
- * Mix milk's audio queue samples in the audio device's sample stream.
- */
+static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, double volume)
+{
+	#define _16_BIT_MAX 32767
+
+	int16_t sourceLeft;
+	int16_t sourceRight;
+	length /= 2;
+
+	while (length--)
+	{
+		sourceLeft = (int16_t)((source[1] << 8 | source[0]) * volume);
+		sourceRight = (int16_t)((destination[1] << 8 | destination[0]) * volume);
+		int mixedSample = sourceLeft + sourceRight;
+
+		if (mixedSample > _16_BIT_MAX)
+			mixedSample = _16_BIT_MAX;
+		else if (mixedSample < -_16_BIT_MAX - 1)
+			mixedSample = -_16_BIT_MAX - 1;
+
+		destination[0] = mixedSample & 0xff;
+		destination[1] = (mixedSample >> 8) & 0xff;
+		source += 2;
+		destination += 2;
+	}
+
+	#undef _16_BIT_MAX
+}
+
 void milkMixCallback(void *userdata, uint8_t *stream, int len)
 {
+	#define NORMALIZE_VOLUME(v) (double)(v / MILK_AUDIO_MAX_VOLUME)
+
+	memset(stream, 0, len);
+
 	Audio *audio = (Audio *)userdata;
 	AudioQueueItem *currentItem = audio->queue->next;
 	AudioQueueItem *previousItem = audio->queue;
-	SDL_memset(stream, 0, len); /* Silence the stream before writing to it. */
 
 	while (currentItem != NULL)
 	{
-		if (currentItem->remainingLength > 0)
+		if (currentItem->remainingLength > 0) /* If the queue item still has remaining samples to spend, then mix it and update its length. */
 		{
 			uint32_t bytesToWrite = ((uint32_t)len > currentItem->remainingLength) ? currentItem->remainingLength : (uint32_t)len;
-			double volNormalized = ((double)currentItem->volume / MILK_AUDIO_MAX_VOLUME);
-
-			SDL_MixAudioFormat(stream, currentItem->position, AUDIO_S16LSB, bytesToWrite, (int)round(volNormalized * audio->masterVolume));
-
+			_mixSample(stream, currentItem->position, bytesToWrite, NORMALIZE_VOLUME(currentItem->volume));
 			currentItem->position += bytesToWrite;
 			currentItem->remainingLength -= bytesToWrite;
 			previousItem = currentItem;
 			currentItem = currentItem->next;
 		}
-		else if (currentItem->loop)
+		else if (currentItem->loop) /* Else if the sound loops (music), then reset it's buffer position and length to the beginning. */
 		{
-			/* Music loops. */
 			currentItem->position = currentItem->sampleData->buffer;
 			currentItem->remainingLength = currentItem->sampleData->length;
 		}
-		else
+		else /* Else the sound is completely finished and can be removed from the queue, freeing up space for another sound. */
 		{
 			AudioQueueItem *next = currentItem->next;
-			currentItem->isFree = 1;
+			currentItem->isFree = true;
 			previousItem->next = next;
 			currentItem->next = NULL;
 			currentItem = next;
 		}
 	}
+
+	#undef NORMALIZE_VOLUME
 }
