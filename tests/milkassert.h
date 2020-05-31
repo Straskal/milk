@@ -12,10 +12,12 @@
  * Helpers
  *******************************************************************************
  */
-#define TEST_METHOD(test)				static void test()
-#define ARRANGE_MILK(milk)				Milk *milk = milkCreate()
+#define TEST_CASE(test)					static void test()
+#define SETUP(milk)						Milk *milk = milkCreate()
 #define ACT(action) action
-#define FREE_MILK(milk)					milkFree(milk)
+#define FREE_MILK(milk)					milkFree(milk);
+#define TEARDOWN(milk)					cleanup: FREE_MILK(milk)
+#define CUSTOM_TEARDOWN					cleanup
 
 /*
  *******************************************************************************
@@ -45,12 +47,14 @@ Test *gCurrentTest = NULL; /* The current test. */
 	do {\
 		if (!(condition))\
 			gCurrentTest->failedAsserts[gCurrentTest->failedAssertCount++] = #condition;\
+			goto cleanup;\
 	} while(0)
 
-#define ASSERT_TRUE(condition)			BASE_ASSERT(condition)
-#define ASSERT_FALSE(condition)			BASE_ASSERT(!(condition))
+#define ASSERT_TRUE(val)				BASE_ASSERT(val)
+#define ASSERT_FALSE(val)				BASE_ASSERT(!(val))
 #define ASSERT_EQ(expected, actual)		BASE_ASSERT(expected == actual)
 #define ASSERT_NEQ(expected, actual)	BASE_ASSERT(expected != actual)
+#define ASSERT_NULL(val)				BASE_ASSERT(val == NULL)
 #define ASSERT_NNULL(val)				BASE_ASSERT(val != NULL)
 
 /*
@@ -61,7 +65,7 @@ Test *gCurrentTest = NULL; /* The current test. */
 
 int runTests(Test *tests, size_t count)
 {
-	int passedCount = 0;
+	size_t passedCount = 0;
 
 	printf("Running tests\n\n\n");
 
