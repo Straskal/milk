@@ -107,7 +107,7 @@ TEST_CASE(milkResetDrawState_ResetsClipRect)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkClipRect_LimitsClipRectToFramebufferSize)
+TEST_CASE(milkClipRect_ClampsClipRectToFramebufferSize)
 {
 	SETUP(milk);
 
@@ -238,12 +238,90 @@ TEST_CASE(milkSound_QueuesNewSample)
 	ASSERT_EQ(buffer, queuedItem->position);
 	ASSERT_EQ(3, queuedItem->remainingLength);
 	ASSERT_EQ(50, queuedItem->volume);
-	ASSERT_EQ(false, queuedItem->loop);
+	ASSERT_FALSE(queuedItem->isLooping);
 	ASSERT_NULL(queuedItem->next);
 
-	CUSTOM_TEARDOWN:
-		milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
-		FREE_MILK(milk);
+CUSTOM_TEARDOWN:
+	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+	FREE_MILK(milk);
+}
+
+TEST_CASE(milkSound_WhenLoop_ExistingLoopingSampleIsRemovedFromQueueBeforeQueueingNewSample)
+{
+	SETUP(milk);
+	milk->audio.lock = _mockLock;
+	milk->audio.unlock = _mockUnlock;
+	uint8_t buffer[] = { 7, 7, 7 };
+	milk->audio.samples[0].buffer = buffer;
+	milk->audio.samples[0].length = 3;
+	milkSound(&milk->audio, 0, 50, true);
+
+	ACT(milkSound(&milk->audio, 0, 50, true));
+
+	AudioQueueItem *queuedItem = milk->audio.queue->next;
+	ASSERT_NNULL(queuedItem);
+	ASSERT_TRUE(queuedItem->isLooping);
+	ASSERT_NULL(queuedItem->next);
+
+CUSTOM_TEARDOWN:
+	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+	FREE_MILK(milk);
+}
+
+TEST_CASE(milkSound_ClampsVolumeToMin)
+{
+	SETUP(milk);
+	milk->audio.lock = _mockLock;
+	milk->audio.unlock = _mockUnlock;
+	uint8_t buffer[] = { 7, 7, 7 };
+	milk->audio.samples[0].buffer = buffer;
+	milk->audio.samples[0].length = 3;
+
+	ACT(milkSound(&milk->audio, 0, -10, true));
+
+	AudioQueueItem *queuedItem = milk->audio.queue->next;
+	ASSERT_NNULL(queuedItem);
+	ASSERT_EQ(0, queuedItem->volume);
+
+CUSTOM_TEARDOWN:
+	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+	FREE_MILK(milk);
+}
+
+TEST_CASE(milkSound_ClampsVolumeToMax)
+{
+	SETUP(milk);
+	milk->audio.lock = _mockLock;
+	milk->audio.unlock = _mockUnlock;
+	uint8_t buffer[] = { 7, 7, 7 };
+	milk->audio.samples[0].buffer = buffer;
+	milk->audio.samples[0].length = 3;
+
+	ACT(milkSound(&milk->audio, 0, MILK_AUDIO_MAX_VOLUME + 10, true));
+
+	AudioQueueItem *queuedItem = milk->audio.queue->next;
+	ASSERT_NNULL(queuedItem);
+	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, queuedItem->volume);
+
+CUSTOM_TEARDOWN:
+	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+	FREE_MILK(milk);
+}
+
+TEST_CASE(milkVolume_ClampsToMinValue)
+{
+	SETUP(milk);
+	ACT(milkVolume(&milk->audio, -10));
+	ASSERT_EQ(0, milk->audio.masterVolume);
+	TEARDOWN(milk);
+}
+
+TEST_CASE(milkVolume_ClampsToMaxValue)
+{
+	SETUP(milk);
+	ACT(milkVolume(&milk->audio, MILK_AUDIO_MAX_VOLUME + 10));
+	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, milk->audio.masterVolume);
+	TEARDOWN(milk);
 }
 
 #endif

@@ -382,7 +382,7 @@ static void _stopCurrentLoop(Audio *audio)
 
 	while (curr != NULL)
 	{
-		if (curr->loop)
+		if (curr->isLooping)
 		{
 			curr->isFree = true;
 			prev->next = curr->next;
@@ -408,7 +408,18 @@ static bool _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 	return false;
 }
 
-void milkSound(Audio *audio, int idx, uint8_t volume, bool loop)
+static int _clamp(int value, int min, int max)
+{
+	if (value < min)
+		value = min;
+
+	if (value > max)
+		value = max;
+
+	return value;
+}
+
+void milkSound(Audio *audio, int idx, int volume, bool loop)
 {
 	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
 		return;
@@ -428,8 +439,8 @@ void milkSound(Audio *audio, int idx, uint8_t volume, bool loop)
 		queueItem->sampleData = sampleData;
 		queueItem->position = sampleData->buffer;
 		queueItem->remainingLength = sampleData->length;
-		queueItem->volume = volume;
-		queueItem->loop = loop;
+		queueItem->volume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);;
+		queueItem->isLooping = loop;
 		queueItem->next = NULL;
 
 		_queueSample(audio, queueItem);
@@ -437,15 +448,9 @@ void milkSound(Audio *audio, int idx, uint8_t volume, bool loop)
 	audio->unlock();
 }
 
-void milkVolume(Audio *audio, uint8_t volume)
+void milkVolume(Audio *audio, int volume)
 {
-	if (volume < 0)
-		volume = 0;
-
-	if (volume > MILK_AUDIO_MAX_VOLUME)
-		volume = MILK_AUDIO_MAX_VOLUME;
-
-	audio->masterVolume = volume;
+	audio->masterVolume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
 }
 
 static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, double volume)
@@ -497,7 +502,7 @@ void milkMixCallback(void *userdata, uint8_t *stream, int len)
 			previousItem = currentItem;
 			currentItem = currentItem->next;
 		}
-		else if (currentItem->loop) /* Else if the sound loops (music), then reset it's buffer position and length to the beginning. */
+		else if (currentItem->isLooping) /* Else if the sound loops (music), then reset it's buffer position and length to the beginning. */
 		{
 			currentItem->position = currentItem->sampleData->buffer;
 			currentItem->remainingLength = currentItem->sampleData->length;
