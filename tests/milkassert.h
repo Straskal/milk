@@ -32,6 +32,6 @@ static Test *gCurrentTest = NULL; /* The current test. */
 #define ASSERT_FALSE(condition)			BASE_ASSERT(!(condition))
 #define ASSERT_EQ(expected, actual)		BASE_ASSERT(expected == actual)
 #define ASSERT_NEQ(expected, actual)	BASE_ASSERT(expected != actual)
-#define ASSERT_NNULL(val)			BASE_ASSERT(val != NULL)
+#define ASSERT_NNULL(val)				BASE_ASSERT(val != NULL)
 
 #endif
