@@ -5,7 +5,14 @@
 static Test _tests[] =
 {
 	#define REGISTER_TEST(func) { #func, func }
-	REGISTER_TEST(milkCreate_InitializesMilk),
+	REGISTER_TEST(milkCreate_InitializesFramebuffer),
+	REGISTER_TEST(milkCreate_InitializesSpritesheet),
+	REGISTER_TEST(milkCreate_InitializesFont),
+	REGISTER_TEST(milkCreate_InitializesColorKey),
+	REGISTER_TEST(milkCreate_InitializesClipRect),
+	REGISTER_TEST(milkCreate_InitializesSamples),
+	REGISTER_TEST(milkCreate_InitializesAudioQueue),
+	REGISTER_TEST(milkCreate_InitializesAudioSettings),
 
 	REGISTER_TEST(milkButton_WhenButtonDown_ReturnsTrue),
 	REGISTER_TEST(milkButton_WhenButtonUp_ReturnsFalse),

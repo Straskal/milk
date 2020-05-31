@@ -47,15 +47,43 @@
  *******************************************************************************
  */
 
+static void _initVideo(Video *video)
+{
+	memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
+	memset(&video->spritesheet, 0x00, sizeof(video->spritesheet));
+	memset(&video->font,		0x00, sizeof(video->font));
+	milkResetDrawState(video);
+}
+
+static void _initAudio(Audio *audio)
+{
+	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
+	{
+		audio->samples[i].buffer = NULL;
+		audio->samples[i].length = 0;
+	}
+
+	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+	{
+		audio->queueItems[i].sampleData = NULL;
+		audio->queueItems[i].remainingLength = 0;
+		audio->queueItems[i].position = NULL;
+		audio->queueItems[i].volume = 0;
+		audio->queueItems[i].isLooping = false;
+		audio->queueItems[i].isFree = true;
+	}
+
+	audio->queue = (AudioQueueItem *)calloc(1, sizeof(AudioQueueItem));
+	audio->masterVolume = MILK_AUDIO_MAX_VOLUME;
+	audio->frequency = 0;
+	audio->channels = 0;
+}
+
 Milk *milkCreate()
 {
 	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
-	milk->audio.queue = (AudioQueueItem *)calloc(1, sizeof(AudioQueueItem));
-	milk->audio.masterVolume = MILK_AUDIO_MAX_VOLUME;
-
-	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
-		milk->audio.queueItems[i].isFree = true;
-
+	_initVideo(&milk->video);
+	_initAudio(&milk->audio);
 	return milk;
 }
 
@@ -439,7 +467,7 @@ void milkSound(Audio *audio, int idx, int volume, bool loop)
 		queueItem->sampleData = sampleData;
 		queueItem->position = sampleData->buffer;
 		queueItem->remainingLength = sampleData->length;
-		queueItem->volume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);;
+		queueItem->volume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
 		queueItem->isLooping = loop;
 		queueItem->next = NULL;
 

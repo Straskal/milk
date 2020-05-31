@@ -4,21 +4,99 @@
 #include "milk.h"
 #include "milkassert.h"
 
+#define FRAMEBUFFER_POS(x, y)			((MILK_FRAMEBUF_WIDTH * y) + x)
+#define WITHIN_CLIP_RECT(clip, x, y)	(clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
+
 /*
  *******************************************************************************
  * Initialization and shutdown
  *******************************************************************************
  */
 
-TEST_CASE(milkCreate_InitializesMilk)
+TEST_CASE(milkCreate_InitializesFramebuffer)
 {
 	SETUP(milk);
-	ASSERT_NNULL(milk->audio.queue);
-	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, milk->audio.masterVolume);
+
+	for (int i = 0; i < MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT; i++)
+		ASSERT_EQ(0x00, milk->video.framebuffer[i]);
+
+	TEARDOWN(milk);
+}
+
+TEST_CASE(milkCreate_InitializesSpritesheet)
+{
+	SETUP(milk);
+
+	for (int i = 0; i < MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE; i++)
+		ASSERT_EQ(0x00, milk->video.spritesheet[i]);
+
+	TEARDOWN(milk);
+}
+
+TEST_CASE(milkCreate_InitializesFont)
+{
+	SETUP(milk);
+
+	for (int i = 0; i < MILK_FONT_WIDTH * MILK_FONT_HEIGHT; i++)
+		ASSERT_EQ(0x00, milk->video.font[i]);
+
+	TEARDOWN(milk);
+}
+
+TEST_CASE(milkCreate_InitializesColorKey)
+{
+	SETUP(milk);
+	ASSERT_EQ(0x00, milk->video.colorKey);
+	TEARDOWN(milk);
+}
+
+TEST_CASE(milkCreate_InitializesClipRect)
+{
+	SETUP(milk);
+	ASSERT_EQ(0, milk->video.clipRect.top);
+	ASSERT_EQ(0, milk->video.clipRect.left);
+	ASSERT_EQ(MILK_FRAMEBUF_HEIGHT, milk->video.clipRect.bottom);
+	ASSERT_EQ(MILK_FRAMEBUF_WIDTH, milk->video.clipRect.right);
+	TEARDOWN(milk);
+}
+
+TEST_CASE(milkCreate_InitializesSamples)
+{
+	SETUP(milk);
+
+	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
+	{
+		ASSERT_NULL(milk->audio.samples[i].buffer);
+		ASSERT_EQ(0, milk->audio.samples[i].length);
+	}
+
+	TEARDOWN(milk);
+}
+
+TEST_CASE(milkCreate_InitializesAudioQueue)
+{
+	SETUP(milk);
 
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+	{
+		ASSERT_NULL(milk->audio.queueItems[i].sampleData);
+		ASSERT_EQ(0, milk->audio.queueItems[i].remainingLength);
+		ASSERT_NULL(milk->audio.queueItems[i].position);
+		ASSERT_EQ(0, milk->audio.queueItems[i].volume);
+		ASSERT_FALSE(milk->audio.queueItems[i].isLooping);
 		ASSERT_TRUE(milk->audio.queueItems[i].isFree);
+	}
 
+	ASSERT_NNULL(milk->audio.queue);
+	TEARDOWN(milk);
+}
+
+TEST_CASE(milkCreate_InitializesAudioSettings)
+{
+	SETUP(milk);
+	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, milk->audio.masterVolume);
+	ASSERT_EQ(0, milk->audio.frequency);
+	ASSERT_EQ(0, milk->audio.channels);
 	TEARDOWN(milk);
 }
 
@@ -132,9 +210,6 @@ TEST_CASE(milkClipRect_SetsClipRect)
 	ASSERT_EQ(210, milk->video.clipRect.right);
 	TEARDOWN(milk);
 }
-
-#define FRAMEBUFFER_POS(x, y)			((MILK_FRAMEBUF_WIDTH * y) + x)
-#define WITHIN_CLIP_RECT(clip, x, y)	(clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
 
 TEST_CASE(milkClear_SetsPixelsWithinClipRect)
 {

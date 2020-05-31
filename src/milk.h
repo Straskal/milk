@@ -102,15 +102,15 @@ typedef struct logs
 
 typedef enum buttonState
 {
-    BTN_START = 1 << 0,
-    BTN_UP =    1 << 1,
-    BTN_DOWN =  1 << 2,
-    BTN_LEFT =  1 << 3,
-    BTN_RIGHT = 1 << 4,
-    BTN_A =     1 << 5,
-    BTN_B =     1 << 6,
-    BTN_X =     1 << 7,
-    BTN_Y =     1 << 8,
+    BTN_START   = 1 << 0,
+    BTN_UP      = 1 << 1,
+    BTN_DOWN    = 1 << 2,
+    BTN_LEFT    = 1 << 3,
+    BTN_RIGHT   = 1 << 4,
+    BTN_A       = 1 << 5,
+    BTN_B       = 1 << 6,
+    BTN_X       = 1 << 7,
+    BTN_Y       = 1 << 8,
 } ButtonState;
 
 typedef struct gamepad
