@@ -431,11 +431,11 @@ TEST_CASE(milkVolume_ClampsToMaxValue)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkMixCallback_WhenQueueIsEmpty_DoesNotMixStream)
+TEST_CASE(milkAudioQueueToStream_WhenQueueIsEmpty_DoesNotMixIntoStream)
 {
 	SETUP(milk);
 	uint8_t stream[10];
-	ACT(milkMixCallback(&milk->audio, stream, 10));
+	ACT(milkAudioQueueToStream(&milk->audio, stream, 10));
 
 	for (int i = 0; i < 10; i++)
 		ASSERT_EQ(0, stream[i]);
@@ -443,7 +443,7 @@ TEST_CASE(milkMixCallback_WhenQueueIsEmpty_DoesNotMixStream)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkMixCallback_WhenSamplesAreNotFinished_MixesSamplesIntoStream)
+TEST_CASE(milkAudioQueueToStream_WhenQueueItemsAreNotFinished_MixesSamplesIntoStream)
 {
 	SETUP(milk);
 	milk->audio.lock = _mockLock;
@@ -455,7 +455,7 @@ TEST_CASE(milkMixCallback_WhenSamplesAreNotFinished_MixesSamplesIntoStream)
 	milkSound(&milk->audio, 0, 128, true);
 
 	uint8_t stream[10];
-	ACT(milkMixCallback(&milk->audio, stream, 10));
+	ACT(milkAudioQueueToStream(&milk->audio, stream, 10));
 
 	for (int i = 0; i < 4; i++)
 		ASSERT_EQ(7, stream[i]);
@@ -465,7 +465,7 @@ CUSTOM_TEARDOWN:
 	FREE_MILK(milk);
 }
 
-TEST_CASE(milkMixCallback_WhenSamplesIsFinishedAndLooping_ResetsSampleAndMixesIntoStream)
+TEST_CASE(milkAudioQueueToStream_WhenSamplesIsFinishedAndLooping_ResetsSampleAndMixesIntoStream)
 {
 	SETUP(milk);
 	milk->audio.lock = _mockLock;
@@ -478,7 +478,7 @@ TEST_CASE(milkMixCallback_WhenSamplesIsFinishedAndLooping_ResetsSampleAndMixesIn
 	milk->audio.queue->next->remainingLength = 0;
 
 	uint8_t stream[10];
-	ACT(milkMixCallback(&milk->audio, stream, 10));
+	ACT(milkAudioQueueToStream(&milk->audio, stream, 10));
 
 	for (int i = 0; i < 4; i++)
 		ASSERT_EQ(7, stream[i]);
@@ -488,7 +488,7 @@ CUSTOM_TEARDOWN:
 	FREE_MILK(milk);
 }
 
-TEST_CASE(milkMixCallback_WhenSamplesIsFinished_RemovedSampleFromQueue)
+TEST_CASE(milkAudioQueueToStream_WhenSamplesIsFinished_RemovesSampleFromQueue)
 {
 	SETUP(milk);
 	milk->audio.lock = _mockLock;
@@ -501,7 +501,7 @@ TEST_CASE(milkMixCallback_WhenSamplesIsFinished_RemovedSampleFromQueue)
 	milk->audio.queue->next->remainingLength = 0;
 
 	uint8_t stream[10];
-	ACT(milkMixCallback(&milk->audio, stream, 10));
+	ACT(milkAudioQueueToStream(&milk->audio, stream, 10));
 	ASSERT_NULL(milk->audio.queue->next);
 
 CUSTOM_TEARDOWN:

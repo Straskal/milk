@@ -495,13 +495,11 @@ static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, d
 	#undef _16_BIT_MAX
 }
 
-void milkMixCallback(void *userdata, uint8_t *stream, int len)
+void milkAudioQueueToStream(Audio *audio, uint8_t *stream, int len)
 {
 	#define NORMALIZE_VOLUME(v) (double)(v / MILK_AUDIO_MAX_VOLUME)
 
 	memset(stream, 0, len);
-
-	Audio *audio = (Audio *)userdata;
 	AudioQueueItem *currentItem = audio->queue->next;
 	AudioQueueItem *previousItem = audio->queue;
 

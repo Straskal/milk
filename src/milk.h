@@ -257,6 +257,6 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Co
 void milkLoadSound(Audio *audio, int idx, const char *filename);
 void milkSound(Audio *audio, int idx, int volume, bool loop);
 void milkVolume(Audio *audio, int volume);
-void milkMixCallback(void *userdata, uint8_t *stream, int len);
+void milkAudioQueueToStream(Audio *audio, uint8_t *stream, int len);
 
 #endif
