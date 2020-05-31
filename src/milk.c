@@ -357,7 +357,7 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Co
  *******************************************************************************
  */
 
-static void _removeSampleInstanceFromQueue(AudioQueueItem *queue, SampleData *sampleData)
+static void _removeSampleFromQueue(AudioQueueItem *queue, SampleData *sampleData)
 {
 	AudioQueueItem *curr = queue->next;
 	AudioQueueItem *prev = queue;
@@ -385,7 +385,7 @@ void milkLoadSound(Audio *audio, int idx, const char *filename)
 	/* If we're loading a sound into a sample data that in use, then remove all instances playing in the queue, and then free it. */
 	if (audio->samples[idx].buffer != NULL)
 	{
-		_removeSampleInstanceFromQueue(audio->queue, &audio->samples[idx]);
+		_removeSampleFromQueue(audio->queue, &audio->samples[idx]);
 		free(audio->samples[idx].buffer);
 	}
 
@@ -393,17 +393,21 @@ void milkLoadSound(Audio *audio, int idx, const char *filename)
 	audio->unlock();
 }
 
-static void _queueSample(Audio *audio, AudioQueueItem *new)
+static bool _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 {
-	AudioQueueItem *queue = audio->queue;
-
-	while (queue->next != NULL)
-		queue = queue->next;
-
-	queue->next = new;
+	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+	{
+		if (audio->queueItems[i].isFree)
+		{
+			audio->queueItems[i].isFree = false; /* Queue item is not free any more. */
+			*queueItem = &audio->queueItems[i];
+			return true;
+		}
+	}
+	return false;
 }
 
-static void _stopCurrentLoop(Audio *audio)
+static void _removeLoopingSampleFromQueue(Audio *audio)
 {
 	AudioQueueItem *curr = audio->queue->next;
 	AudioQueueItem *prev = audio->queue;
@@ -422,18 +426,14 @@ static void _stopCurrentLoop(Audio *audio)
 	}
 }
 
-static bool _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
+static void _queueSample(Audio *audio, AudioQueueItem *new)
 {
-	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
-	{
-		if (audio->queueItems[i].isFree)
-		{
-			audio->queueItems[i].isFree = false; /* Queue item is not free any more. */
-			*queueItem = &audio->queueItems[i];
-			return true;
-		}
-	}
-	return false;
+	AudioQueueItem *curr = audio->queue;
+
+	while (curr->next != NULL)
+		curr = curr->next;
+
+	curr->next = new;
 }
 
 void milkSound(Audio *audio, int idx, int volume, bool loop)
@@ -446,12 +446,12 @@ void milkSound(Audio *audio, int idx, int volume, bool loop)
 		return;
 
 	audio->lock();
-	AudioQueueItem *queueItem;
 
+	AudioQueueItem *queueItem;
 	if (_getFreeQueueItem(audio, &queueItem))
 	{
 		if (loop) /* Stop current loop in favor of the new looping sound. */
-			_stopCurrentLoop(audio);
+			_removeLoopingSampleFromQueue(audio);
 
 		queueItem->sampleData = sampleData;
 		queueItem->position = sampleData->buffer;
