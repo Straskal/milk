@@ -32,9 +32,6 @@
 
 #define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x) /* xy coords to framebuffer pixel index. */
 #define WITHIN_CLIP_RECT(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
-#define FRAMEBUFFER_MIN(x) (x < 0 ? 0 : x)
-#define FRAMEBUFFER_MAXX(x) (x > MILK_FRAMEBUF_WIDTH ? MILK_FRAMEBUF_WIDTH : x)
-#define FRAMEBUFFER_MAXY(y) (y > MILK_FRAMEBUF_HEIGHT ? MILK_FRAMEBUF_HEIGHT : y)
 #define MIN_SCALE 0.5f
 #define MAX_SCALE 5.0f
 
@@ -47,14 +44,72 @@
  *******************************************************************************
  */
 
-Milk *milkCreate()
+static void _initLogs(Logs *logs)
 {
-	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
-	milk->audio.queue = (AudioQueueItem *)calloc(1, sizeof(AudioQueueItem));
-	milk->audio.masterVolume = MILK_AUDIO_MAX_VOLUME;
+	for (int i = 0; i < MILK_MAX_LOGS; i++)
+	{
+		logs->messages[i].length = 0;
+		logs->messages[i].type = 0;
+		memset(logs->messages[i].text, 0, MILK_LOG_MAX_LENGTH);
+	}
+
+	logs->count = 0;
+	logs->errorCount = 0;
+}
+
+static void _initInput(Input *input)
+{
+	input->gamepad.buttonState = 0;
+	input->gamepad.previousButtonState = 0;
+}
+
+static void _initVideo(Video *video)
+{
+	memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
+	memset(&video->spritesheet, 0x00, sizeof(video->spritesheet));
+	memset(&video->font,		0x00, sizeof(video->font));
+	milkResetDrawState(video);
+}
+
+static void _initAudio(Audio *audio)
+{
+	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
+	{
+		audio->samples[i].buffer = NULL;
+		audio->samples[i].length = 0;
+	}
 
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
-		milk->audio.queueItems[i].isFree = true;
+	{
+		audio->queueItems[i].sampleData = NULL;
+		audio->queueItems[i].remainingLength = 0;
+		audio->queueItems[i].position = NULL;
+		audio->queueItems[i].volume = 0;
+		audio->queueItems[i].isLooping = false;
+		audio->queueItems[i].isFree = true;
+	}
+
+	audio->queue = (AudioQueueItem *)calloc(1, sizeof(AudioQueueItem));
+	audio->masterVolume = MILK_AUDIO_MAX_VOLUME;
+	audio->frequency = 0;
+	audio->channels = 0;
+}
+
+static void _initCode(Code *code)
+{
+	code->state = NULL;
+}
+
+Milk *milkCreate()
+{
+	Milk *milk = (Milk *)malloc(sizeof(Milk));
+	milk->shouldQuit = false;
+
+	_initLogs(&milk->logs);
+	_initInput(&milk->input);
+	_initVideo(&milk->video);
+	_initAudio(&milk->audio);
+	_initCode(&milk->code);
 
 	return milk;
 }
@@ -99,6 +154,7 @@ void milkLog(Milk *milk, const char *text, LogType type)
 		milk->logs.errorCount++;
 
 	LogMessage *newLogMessage = _getNextFreeLogMessage(&milk->logs);
+	memset(newLogMessage->text, 0, MILK_LOG_MAX_LENGTH);
 	strncpy(newLogMessage->text, text, len);
 	newLogMessage->length = len;
 	newLogMessage->type = type;
@@ -159,23 +215,23 @@ void milkResetDrawState(Video *video)
 	video->clipRect.right = MILK_FRAMEBUF_WIDTH;
 }
 
+static int _clamp(int value, int min, int max)
+{
+	if (value < min)
+		value = min;
+
+	if (value > max)
+		value = max;
+
+	return value;
+}
+
 void milkClipRect(Video *video, int x, int y, int w, int h)
 {
-	int right = x + w;
-	int bottom = y + h;
-
-	x = FRAMEBUFFER_MIN(x);
-	x = FRAMEBUFFER_MAXX(x);
-	right = FRAMEBUFFER_MIN(right);
-	right = FRAMEBUFFER_MAXX(right);
-	y = FRAMEBUFFER_MIN(y);
-	y = FRAMEBUFFER_MAXY(y);
-	bottom = FRAMEBUFFER_MIN(bottom);
-	bottom = FRAMEBUFFER_MAXY(bottom);
-	video->clipRect.left = x;
-	video->clipRect.right = right;
-	video->clipRect.top = y;
-	video->clipRect.bottom = bottom;
+	video->clipRect.left = _clamp(x, 0, MILK_FRAMEBUF_WIDTH);
+	video->clipRect.right = _clamp(x + w, 0, MILK_FRAMEBUF_WIDTH);
+	video->clipRect.top = _clamp(y, 0, MILK_FRAMEBUF_HEIGHT);
+	video->clipRect.bottom = _clamp(y + h, 0, MILK_FRAMEBUF_HEIGHT);
 }
 
 void milkClear(Video *video, Color32 color)
@@ -191,7 +247,7 @@ void milkClear(Video *video, Color32 color)
 
 void milkPixelSet(Video *video, int x, int y, Color32 color)
 {
-	if (WITHIN_CLIP_RECT(video->clipRect, x, y)) /* Only draw pixels within the clip rect. */
+	if (WITHIN_CLIP_RECT(video->clipRect, x, y))
 		video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
@@ -329,7 +385,7 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Co
  *******************************************************************************
  */
 
-static void _removeSampleInstanceFromQueue(AudioQueueItem *queue, SampleData *sampleData)
+static void _removeSampleFromQueue(AudioQueueItem *queue, SampleData *sampleData)
 {
 	AudioQueueItem *curr = queue->next;
 	AudioQueueItem *prev = queue;
@@ -357,41 +413,12 @@ void milkLoadSound(Audio *audio, int idx, const char *filename)
 	/* If we're loading a sound into a sample data that in use, then remove all instances playing in the queue, and then free it. */
 	if (audio->samples[idx].buffer != NULL)
 	{
-		_removeSampleInstanceFromQueue(audio->queue, &audio->samples[idx]);
+		_removeSampleFromQueue(audio->queue, &audio->samples[idx]);
 		free(audio->samples[idx].buffer);
 	}
 
 	audio->loadWAV(audio, filename, idx);
 	audio->unlock();
-}
-
-static void _queueSample(Audio *audio, AudioQueueItem *new)
-{
-	AudioQueueItem *queue = audio->queue;
-
-	while (queue->next != NULL)
-		queue = queue->next;
-
-	queue->next = new;
-}
-
-static void _stopCurrentLoop(Audio *audio)
-{
-	AudioQueueItem *curr = audio->queue->next;
-	AudioQueueItem *prev = audio->queue;
-
-	while (curr != NULL)
-	{
-		if (curr->loop)
-		{
-			curr->isFree = true;
-			prev->next = curr->next;
-			break;
-		}
-
-		prev = curr;
-		curr = curr->next;
-	}
 }
 
 static bool _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
@@ -408,7 +435,36 @@ static bool _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 	return false;
 }
 
-void milkSound(Audio *audio, int idx, uint8_t volume, bool loop)
+static void _removeLoopingSampleFromQueue(Audio *audio)
+{
+	AudioQueueItem *curr = audio->queue->next;
+	AudioQueueItem *prev = audio->queue;
+
+	while (curr != NULL)
+	{
+		if (curr->isLooping)
+		{
+			curr->isFree = true;
+			prev->next = curr->next;
+			break;
+		}
+
+		prev = curr;
+		curr = curr->next;
+	}
+}
+
+static void _queueSample(Audio *audio, AudioQueueItem *new)
+{
+	AudioQueueItem *curr = audio->queue;
+
+	while (curr->next != NULL)
+		curr = curr->next;
+
+	curr->next = new;
+}
+
+void milkSound(Audio *audio, int idx, int volume, bool loop)
 {
 	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
 		return;
@@ -418,18 +474,18 @@ void milkSound(Audio *audio, int idx, uint8_t volume, bool loop)
 		return;
 
 	audio->lock();
-	AudioQueueItem *queueItem;
 
+	AudioQueueItem *queueItem;
 	if (_getFreeQueueItem(audio, &queueItem))
 	{
 		if (loop) /* Stop current loop in favor of the new looping sound. */
-			_stopCurrentLoop(audio);
+			_removeLoopingSampleFromQueue(audio);
 
 		queueItem->sampleData = sampleData;
 		queueItem->position = sampleData->buffer;
 		queueItem->remainingLength = sampleData->length;
-		queueItem->volume = volume;
-		queueItem->loop = loop;
+		queueItem->volume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
+		queueItem->isLooping = loop;
 		queueItem->next = NULL;
 
 		_queueSample(audio, queueItem);
@@ -437,15 +493,9 @@ void milkSound(Audio *audio, int idx, uint8_t volume, bool loop)
 	audio->unlock();
 }
 
-void milkVolume(Audio *audio, uint8_t volume)
+void milkVolume(Audio *audio, int volume)
 {
-	if (volume < 0)
-		volume = 0;
-
-	if (volume > MILK_AUDIO_MAX_VOLUME)
-		volume = MILK_AUDIO_MAX_VOLUME;
-
-	audio->masterVolume = volume;
+	audio->masterVolume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
 }
 
 static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, double volume)
@@ -459,7 +509,7 @@ static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, d
 	while (length--)
 	{
 		sourceLeft = (int16_t)((source[1] << 8 | source[0]) * volume);
-		sourceRight = (int16_t)((destination[1] << 8 | destination[0]) * volume);
+		sourceRight = (int16_t)((destination[1] << 8 | destination[0]));
 		int mixedSample = sourceLeft + sourceRight;
 
 		if (mixedSample > _16_BIT_MAX)
@@ -476,13 +526,11 @@ static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, d
 	#undef _16_BIT_MAX
 }
 
-void milkMixCallback(void *userdata, uint8_t *stream, int len)
+void milkAudioQueueToStream(Audio *audio, uint8_t *stream, int len)
 {
 	#define NORMALIZE_VOLUME(v) (double)(v / MILK_AUDIO_MAX_VOLUME)
 
 	memset(stream, 0, len);
-
-	Audio *audio = (Audio *)userdata;
 	AudioQueueItem *currentItem = audio->queue->next;
 	AudioQueueItem *previousItem = audio->queue;
 
@@ -497,7 +545,7 @@ void milkMixCallback(void *userdata, uint8_t *stream, int len)
 			previousItem = currentItem;
 			currentItem = currentItem->next;
 		}
-		else if (currentItem->loop) /* Else if the sound loops (music), then reset it's buffer position and length to the beginning. */
+		else if (currentItem->isLooping) /* Else if the sound loops (music), then reset it's buffer position and length to the beginning. */
 		{
 			currentItem->position = currentItem->sampleData->buffer;
 			currentItem->remainingLength = currentItem->sampleData->length;

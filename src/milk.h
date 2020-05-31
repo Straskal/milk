@@ -102,15 +102,15 @@ typedef struct logs
 
 typedef enum buttonState
 {
-    BTN_START = 1 << 0,
-    BTN_UP =    1 << 1,
-    BTN_DOWN =  1 << 2,
-    BTN_LEFT =  1 << 3,
-    BTN_RIGHT = 1 << 4,
-    BTN_A =     1 << 5,
-    BTN_B =     1 << 6,
-    BTN_X =     1 << 7,
-    BTN_Y =     1 << 8,
+    BTN_START   = 1 << 0,
+    BTN_UP      = 1 << 1,
+    BTN_DOWN    = 1 << 2,
+    BTN_LEFT    = 1 << 3,
+    BTN_RIGHT   = 1 << 4,
+    BTN_A       = 1 << 5,
+    BTN_B       = 1 << 6,
+    BTN_X       = 1 << 7,
+    BTN_Y       = 1 << 8,
 } ButtonState;
 
 typedef struct gamepad
@@ -184,7 +184,7 @@ typedef struct audioQueueItem
     uint32_t    remainingLength;
     uint8_t    *position;
     uint8_t     volume;
-    bool        loop;
+    bool        isLooping;
     bool        isFree;
 
     struct audioQueueItem *next;
@@ -255,8 +255,8 @@ void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Color32 color);
 
 void milkLoadSound(Audio *audio, int idx, const char *filename);
-void milkSound(Audio *audio, int idx, uint8_t volume, bool loop);
-void milkVolume(Audio *audio, uint8_t volume);
-void milkMixCallback(void *userdata, uint8_t *stream, int len);
+void milkSound(Audio *audio, int idx, int volume, bool loop);
+void milkVolume(Audio *audio, int volume);
+void milkAudioQueueToStream(Audio *audio, uint8_t *stream, int len);
 
 #endif

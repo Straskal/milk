@@ -47,6 +47,11 @@ static void _unlockAudioDevice()
 	SDL_UnlockAudioDevice(_gAudioDevice);
 }
 
+static void _mixCallback(void *userdata, uint8_t *stream, int len)
+{
+	milkAudioQueueToStream((Audio *)userdata, stream, len);
+}
+
 static void _loadWave(Audio *audio, const char *filename, int idx)
 {
 	SampleData *sampleData = &audio->samples[idx];
@@ -179,7 +184,7 @@ int main(int argc, char *argv[])
 		wantedSpec.format = AUDIO_S16LSB;
 		wantedSpec.channels = MILK_AUDIO_CHANNELS;
 		wantedSpec.samples = MILK_AUDIO_SAMPLES;
-		wantedSpec.callback = milkMixCallback; /* Give the audio spec our mixing callback, and milk's audio as user data. */
+		wantedSpec.callback = _mixCallback;
 		wantedSpec.userdata = (void *)&milk->audio;
 
 		audioDevice = SDL_OpenAudioDevice(NULL, 0, &wantedSpec, &actualSpec, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE | SDL_AUDIO_ALLOW_CHANNELS_CHANGE);

@@ -22,8 +22,8 @@
  *  SOFTWARE.
  */
 
-#ifndef __MILK_API_H_
-#define __MILK_API_H_
+#ifndef __MILK_API_H__
+#define __MILK_API_H__
 
 #include "milk.h"
 
