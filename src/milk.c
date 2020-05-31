@@ -44,6 +44,25 @@
  *******************************************************************************
  */
 
+static void _initLogs(Logs *logs)
+{
+	for (int i = 0; i < MILK_MAX_LOGS; i++)
+	{
+		logs->messages[i].length = 0;
+		logs->messages[i].type = 0;
+		memset(logs->messages[i].text, 0, MILK_LOG_MAX_LENGTH);
+	}
+
+	logs->count = 0;
+	logs->errorCount = 0;
+}
+
+static void _initInput(Input *input)
+{
+	input->gamepad.buttonState = 0;
+	input->gamepad.previousButtonState = 0;
+}
+
 static void _initVideo(Video *video)
 {
 	memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
@@ -76,11 +95,22 @@ static void _initAudio(Audio *audio)
 	audio->channels = 0;
 }
 
+static void _initCode(Code *code)
+{
+	code->state = NULL;
+}
+
 Milk *milkCreate()
 {
-	Milk *milk = (Milk *)calloc(1, sizeof(Milk));
+	Milk *milk = (Milk *)malloc(sizeof(Milk));
+	milk->shouldQuit = false;
+
+	_initLogs(&milk->logs);
+	_initInput(&milk->input);
 	_initVideo(&milk->video);
 	_initAudio(&milk->audio);
+	_initCode(&milk->code);
+
 	return milk;
 }
 
@@ -124,6 +154,7 @@ void milkLog(Milk *milk, const char *text, LogType type)
 		milk->logs.errorCount++;
 
 	LogMessage *newLogMessage = _getNextFreeLogMessage(&milk->logs);
+	memset(newLogMessage->text, 0, MILK_LOG_MAX_LENGTH);
 	strncpy(newLogMessage->text, text, len);
 	newLogMessage->length = len;
 	newLogMessage->type = type;
