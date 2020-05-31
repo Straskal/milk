@@ -365,18 +365,20 @@ void milkLoadSound(Audio *audio, int idx, const char *filename)
 	audio->unlock();
 }
 
-static void _queueSample(AudioQueueItem *queue, AudioQueueItem *new)
+static void _queueSample(Audio *audio, AudioQueueItem *new)
 {
+	AudioQueueItem *queue = audio->queue;
+
 	while (queue->next != NULL)
 		queue = queue->next;
 
 	queue->next = new;
 }
 
-static void _stopCurrentLoop(AudioQueueItem *queue)
+static void _stopCurrentLoop(Audio *audio)
 {
-	AudioQueueItem *curr = queue->next;
-	AudioQueueItem *prev = queue;
+	AudioQueueItem *curr = audio->queue->next;
+	AudioQueueItem *prev = audio->queue;
 
 	while (curr != NULL)
 	{
@@ -406,17 +408,23 @@ static bool _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
 	return false;
 }
 
-void milkSound(Audio *audio, int idx, uint8_t volume, uint8_t loop)
+void milkSound(Audio *audio, int idx, uint8_t volume, bool loop)
 {
-	AudioQueueItem *queueItem;
+	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
+		return;
+
+	SampleData *sampleData = &audio->samples[idx];
+	if (sampleData->length == 0)
+		return;
 
 	audio->lock();
+	AudioQueueItem *queueItem;
+
 	if (_getFreeQueueItem(audio, &queueItem))
 	{
 		if (loop) /* Stop current loop in favor of the new looping sound. */
-			_stopCurrentLoop(audio->queue);
+			_stopCurrentLoop(audio);
 
-		SampleData *sampleData = &audio->samples[idx];
 		queueItem->sampleData = sampleData;
 		queueItem->position = sampleData->buffer;
 		queueItem->remainingLength = sampleData->length;
@@ -424,7 +432,7 @@ void milkSound(Audio *audio, int idx, uint8_t volume, uint8_t loop)
 		queueItem->loop = loop;
 		queueItem->next = NULL;
 
-		_queueSample(audio->queue, queueItem);
+		_queueSample(audio, queueItem);
 	}
 	audio->unlock();
 }

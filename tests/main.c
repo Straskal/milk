@@ -10,8 +10,10 @@ static Test _tests[] =
 {
 	#define REGISTER_TEST(func) { #func, func }
 	REGISTER_TEST(milkCreate_InitializesMilk),
+
 	REGISTER_TEST(milkButton_WhenButtonDown_ReturnsTrue),
 	REGISTER_TEST(milkButton_WhenButtonUp_ReturnsFalse),
+
 	REGISTER_TEST(milkButtonPressed_WhenPressed_ReturnsTrue),
 	REGISTER_TEST(milkButtonPressed_WhenHeld_ReturnsFalse),
 	REGISTER_TEST(milkResetDrawState_ResetsColorKey),
@@ -19,7 +21,12 @@ static Test _tests[] =
 	REGISTER_TEST(milkClipRect_LimitsClipRectToFramebufferSize),
 	REGISTER_TEST(milkClipRect_SetsClipRect),
 	REGISTER_TEST(milkClear_SetsPixelsWithinClipRect),
-	REGISTER_TEST(milkPixelSet_SetsPixelWithinClipRect)
+	REGISTER_TEST(milkPixelSet_SetsPixelWithinClipRect),
+
+	REGISTER_TEST(milkSound_WhenIndexOutOfBounds_DoesNothing),
+	REGISTER_TEST(milkSound_WhenSampleAtIndexNotLoaded_DoesNothing),
+	REGISTER_TEST(milkSound_WhenMaxNumberOfConcurrentSoundsPlaying_DoesNothing),
+	REGISTER_TEST(milkSound_QueuesNewSample)
 	#undef TEST
 };
 
