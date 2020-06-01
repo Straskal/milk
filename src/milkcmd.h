@@ -27,6 +27,8 @@
 
 #include "milk.h"
 
+#include <stdbool.h>
+
 #define MILK_COMMAND_LEN 25
 
 /*
@@ -68,6 +70,7 @@ typedef struct milkCmd
     size_t previousCommandLength;
     char commandCandidate[MILK_COMMAND_LEN];
     char previousCommand[MILK_COMMAND_LEN];
+    bool isGameInitialized;
 } MilkCmd;
 
 MilkCmd *milkCmdCreate();

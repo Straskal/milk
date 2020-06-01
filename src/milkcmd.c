@@ -80,6 +80,7 @@ static void _cmdReload(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 		{
 			milkUnloadCode(milk);
 			milkLoadCode(milk);
+			cmd->isGameInitialized = false;
 			milkLog(milk, "Scripts have been reloaded", INFO);
 		}
 		else if (strcmp(args[0], CMD_RELOAD_SPRITES) == 0)
@@ -237,7 +238,6 @@ static void _getLogLines(Logs *logs, CommandLogLine *lines, int *numLines)
 			break;
 
 		char tempText[MILK_LOG_MAX_LENGTH + 3] = ">:";
-
 		strcpy(&tempText[2], logs->messages[i].text);
 		char *splitByNewline = strtok(tempText, "\n"); /* Split message by newline. */
 
@@ -326,6 +326,9 @@ void milkCmdUpdate(MilkCmd *cmd, Milk *milk)
 		}
 		else
 		{
+			if (!cmd->isGameInitialized)
+				milkInvokeInit(&milk->code);
+
 			cmd->state = GAME;
 			cmd->system.stopTextInput();
 		}

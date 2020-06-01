@@ -29,6 +29,7 @@
 
 void milkLoadCode(Milk *milk);
 void milkUnloadCode(Milk *milk);
+void milkInvokeInit(Code *code);
 void milkInvokeUpdate(Code *code);
 void milkInvokeDraw(Code *code);
 

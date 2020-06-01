@@ -39,20 +39,13 @@ void milkLoadCode(Milk *milk)
 	if (milk->code.state == NULL)
 	{
 		_globalMilk = milk;
-
 		lua_State *L = luaL_newstate();
 		luaL_openlibs(L);
 		milk->code.state = (void *)L;
 		_pushApi(L);
 
 		if (luaL_dofile(L, "main.lua"))
-		{
 			milkLog(milk, lua_tostring(L, -1), ERROR);
-			return;
-		}
-
-		lua_getglobal(L, "_init"); /* Invoke _init callback. */
-		lua_call(L, 0, 0);
 	}
 }
 
@@ -66,11 +59,21 @@ void milkUnloadCode(Milk *milk)
 	}
 }
 
+void milkInvokeInit(Code *code)
+{
+	lua_State *L = (lua_State *)code->state;
+	lua_getglobal(L, "_init"); /* Invoke _init callback. */
+	if (lua_pcall(L, 0, 0, 0) != 0)
+	{
+		milkLog(_globalMilk, lua_tostring(L, -1), ERROR);
+		lua_pop(L, -1);
+	}
+}
+
 void milkInvokeUpdate(Code *code)
 {
 	lua_State *L = (lua_State *)code->state;
 	lua_getglobal(L, "_update");
-
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
 		milkLog(_globalMilk, lua_tostring(L, -1), ERROR);
@@ -82,7 +85,6 @@ void milkInvokeDraw(Code *code)
 {
 	lua_State *L = (lua_State *)code->state;
 	lua_getglobal(L, "_draw");
-
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
 		milkLog(_globalMilk, lua_tostring(L, -1), ERROR);
