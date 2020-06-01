@@ -44,6 +44,7 @@ static void _initLogs(Logs *logs)
 		logs->messages[i].type = 0;
 		memset(logs->messages[i].text, 0, MILK_LOG_MAX_LENGTH);
 	}
+
 	logs->count = 0;
 	logs->errorCount = 0;
 }
@@ -69,6 +70,7 @@ static void _initAudio(Audio *audio)
 		audio->samples[i].buffer = NULL;
 		audio->samples[i].length = 0;
 	}
+
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
 	{
 		audio->queueItems[i].sampleData = NULL;
@@ -78,6 +80,7 @@ static void _initAudio(Audio *audio)
 		audio->queueItems[i].isLooping = false;
 		audio->queueItems[i].isFree = true;
 	}
+
 	audio->queue = (AudioQueueItem *)calloc(1, sizeof(AudioQueueItem));
 	audio->masterVolume = MILK_AUDIO_MAX_VOLUME;
 	audio->frequency = 0;
@@ -93,11 +96,13 @@ Milk *milkCreate()
 {
 	Milk *milk = (Milk *)malloc(sizeof(Milk));
 	milk->shouldQuit = false;
+
 	_initLogs(&milk->logs);
 	_initInput(&milk->input);
 	_initVideo(&milk->video);
 	_initAudio(&milk->audio);
 	_initCode(&milk->code);
+
 	return milk;
 }
 
@@ -224,10 +229,10 @@ static float _clampf(float value, float min, float max)
 
 void milkClipRect(Video *video, int x, int y, int w, int h)
 {
-	video->clipRect.left = _clamp(x, 0, MILK_FRAMEBUF_WIDTH);
-	video->clipRect.right = _clamp(x + w, 0, MILK_FRAMEBUF_WIDTH);
-	video->clipRect.top = _clamp(y, 0, MILK_FRAMEBUF_HEIGHT);
-	video->clipRect.bottom = _clamp(y + h, 0, MILK_FRAMEBUF_HEIGHT);
+	video->clipRect.left =		_clamp(x, 0, MILK_FRAMEBUF_WIDTH);
+	video->clipRect.right =		_clamp(x + w, 0, MILK_FRAMEBUF_WIDTH);
+	video->clipRect.top =		_clamp(y, 0, MILK_FRAMEBUF_HEIGHT);
+	video->clipRect.bottom =	_clamp(y + h, 0, MILK_FRAMEBUF_HEIGHT);
 }
 
 #define FRAMEBUFFER_POS(x, y)			((MILK_FRAMEBUF_WIDTH * y) + x)
@@ -236,6 +241,7 @@ void milkClipRect(Video *video, int x, int y, int w, int h)
 void milkClear(Video *video, Color32 color)
 {
 	Rect clip = video->clipRect;
+
 	for (int i = clip.top; i < clip.bottom; i++)
 	{
 		for (int j = clip.left; j < clip.right; j++)
@@ -330,6 +336,7 @@ void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 	int row = (int)floor(idx / numColumns);
 	int col = (int)floor(idx % numColumns);
 	Color32 *pixels = &video->spritesheet[row * rowSize + col * colSize];
+
 	_blitRect(video, pixels, x, y, w * MILK_SPRSHEET_SPR_SQRSIZE, h * MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE, scale, flip, NULL);
 }
 
@@ -357,6 +364,7 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Co
 			int row = (int)floor((ch - 32) / numColumns); /* bitmap font starts at ASCII character 32 (SPACE) */
 			int col = (int)floor((ch - 32) % numColumns);
 			Color32 *pixels = &video->font[(row * rowSize + col * colSize)];
+
 			_blitRect(video, pixels, xCurrent, yCurrent, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0, &color);
 			xCurrent += charSize;
 		}
@@ -387,6 +395,7 @@ static void _removeSampleFromQueue(AudioQueueItem *queue, SampleData *sampleData
 			curr->isFree = true;
 			prev->next = curr->next;
 		}
+
 		prev = curr;
 		curr = curr->next;
 	}
@@ -398,11 +407,13 @@ void milkLoadSound(Audio *audio, int idx, const char *filename)
 		return;
 
 	audio->lock();
+
 	if (audio->samples[idx].buffer != NULL)
 	{
 		_removeSampleFromQueue(audio->queue, &audio->samples[idx]);
 		free(audio->samples[idx].buffer);
 	}
+
 	audio->loadWAV(audio, filename, idx);
 	audio->unlock();
 }
@@ -460,6 +471,7 @@ void milkSound(Audio *audio, int idx, int volume, bool loop)
 
 	audio->lock();
 	AudioQueueItem *queueItem;
+
 	if (_getFreeQueueItem(audio, &queueItem))
 	{
 		if (loop) /* Stop current loop in favor of the new looping sound. */
@@ -471,6 +483,7 @@ void milkSound(Audio *audio, int idx, int volume, bool loop)
 		queueItem->volume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
 		queueItem->isLooping = loop;
 		queueItem->next = NULL;
+
 		_queueSample(audio, queueItem);
 	}
 	audio->unlock();

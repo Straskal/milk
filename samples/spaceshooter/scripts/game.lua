@@ -27,10 +27,17 @@ end
 
 function game.pushState(state)
     table.insert(game.stateStack, state)
+    if state.enter then
+        state.enter()
+    end
 end
 
 function game.popState()
-    if #game.stateStack > 0 then
+    local len = #game.stateStack
+    if len > 0 then
+        if game.stateStack[len].exit then
+            game.stateStack[len].exit()
+        end
         table.remove(game.stateStack)
     end
 end
