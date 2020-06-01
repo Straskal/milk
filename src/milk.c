@@ -30,14 +30,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x) /* xy coords to framebuffer pixel index. */
-#define WITHIN_CLIP_RECT(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
-#define MIN_SCALE 0.5f
-#define MAX_SCALE 5.0f
-
-#define FLIPX 1
-#define FLIPY 2
-
 /*
  *******************************************************************************
  * Initialization and shutdown
@@ -52,7 +44,6 @@ static void _initLogs(Logs *logs)
 		logs->messages[i].type = 0;
 		memset(logs->messages[i].text, 0, MILK_LOG_MAX_LENGTH);
 	}
-
 	logs->count = 0;
 	logs->errorCount = 0;
 }
@@ -78,7 +69,6 @@ static void _initAudio(Audio *audio)
 		audio->samples[i].buffer = NULL;
 		audio->samples[i].length = 0;
 	}
-
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
 	{
 		audio->queueItems[i].sampleData = NULL;
@@ -88,7 +78,6 @@ static void _initAudio(Audio *audio)
 		audio->queueItems[i].isLooping = false;
 		audio->queueItems[i].isFree = true;
 	}
-
 	audio->queue = (AudioQueueItem *)calloc(1, sizeof(AudioQueueItem));
 	audio->masterVolume = MILK_AUDIO_MAX_VOLUME;
 	audio->frequency = 0;
@@ -104,13 +93,11 @@ Milk *milkCreate()
 {
 	Milk *milk = (Milk *)malloc(sizeof(Milk));
 	milk->shouldQuit = false;
-
 	_initLogs(&milk->logs);
 	_initInput(&milk->input);
 	_initVideo(&milk->video);
 	_initAudio(&milk->audio);
 	_initCode(&milk->code);
-
 	return milk;
 }
 
@@ -219,7 +206,16 @@ static int _clamp(int value, int min, int max)
 {
 	if (value < min)
 		value = min;
+	if (value > max)
+		value = max;
 
+	return value;
+}
+
+static float _clampf(float value, float min, float max)
+{
+	if (value < min)
+		value = min;
 	if (value > max)
 		value = max;
 
@@ -234,10 +230,12 @@ void milkClipRect(Video *video, int x, int y, int w, int h)
 	video->clipRect.bottom = _clamp(y + h, 0, MILK_FRAMEBUF_HEIGHT);
 }
 
+#define FRAMEBUFFER_POS(x, y)			((MILK_FRAMEBUF_WIDTH * y) + x)
+#define WITHIN_CLIP_RECT(clip, x, y)	(clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
+
 void milkClear(Video *video, Color32 color)
 {
 	Rect clip = video->clipRect;
-
 	for (int i = clip.top; i < clip.bottom; i++)
 	{
 		for (int j = clip.left; j < clip.right; j++)
@@ -280,6 +278,11 @@ void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
 	}
 }
 
+#define MIN_SCALE	0.5f
+#define MAX_SCALE	5.0f
+#define FLIP_X		1
+#define FLIP_Y		2
+
 /*
  * Main helper function to blit pixel images onto the framebuffer.
  * We're pretty much running nearest neighbor scaling on all blit pixels.
@@ -290,22 +293,15 @@ void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
  */
 static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip, Color32 *color)
 {
-	if (scale <= MIN_SCALE)
-		scale = MIN_SCALE;
-
-	if (scale > MAX_SCALE)
-		scale = MAX_SCALE;
-
+	scale = _clampf(scale, MIN_SCALE, MAX_SCALE);
 	int width = (int)floor((double)w * scale);
 	int height = (int)floor((double)h * scale);
 	int xRatio = (int)((w << 16) / width) + 1;
 	int yRatio = (int)((h << 16) / height) + 1;
-	int xflip = (flip & FLIPX) == FLIPX;
-	int yflip = (flip & FLIPY) == FLIPY;
-	int xPixelStart = xflip ? width - 1 : 0;
-	int xDirection = xflip ? -1 : 1;
-	int yPixelStart = yflip ? height - 1 : 0;
-	int yDirection = yflip ? -1 : 1;
+	int xPixelStart = (flip & FLIP_X) == FLIP_X ? width - 1 : 0;
+	int xDirection = (flip & FLIP_Y) == FLIP_Y ? -1 : 1;
+	int yPixelStart = (flip & FLIP_X) == FLIP_X ? height - 1 : 0;
+	int yDirection = (flip & FLIP_Y) == FLIP_Y ? -1 : 1;
 	int xPixel, yPixel;
 	int xFramebuffer, yFramebuffer;
 
@@ -325,32 +321,29 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 
 void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip)
 {
-	const int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
-	const int rowSize = MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE;
-	const int colSize = MILK_SPRSHEET_SPR_SQRSIZE;
-
 	if (idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
 		return;
 
+	const int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
+	const int rowSize = MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE;
+	const int colSize = MILK_SPRSHEET_SPR_SQRSIZE;
 	int row = (int)floor(idx / numColumns);
 	int col = (int)floor(idx % numColumns);
 	Color32 *pixels = &video->spritesheet[row * rowSize + col * colSize];
-
 	_blitRect(video, pixels, x, y, w * MILK_SPRSHEET_SPR_SQRSIZE, h * MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE, scale, flip, NULL);
 }
 
+#define IS_ASCII(c)		((c & 0xff80) == 0)
+#define IS_NEWLINE(c)	(c == '\n')
+
 void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Color32 color)
 {
-	#define IS_ASCII(c)		((c & 0xff80) == 0)
-	#define IS_NEWLINE(c)	(c == '\n')
+	if (str == NULL)
+		return;
 
 	const int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
 	const int rowSize = MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE;
 	const int colSize = MILK_CHAR_SQRSIZE;
-
-	if (str == NULL)
-		return;
-
 	int charSize = (int)floor((double)MILK_CHAR_SQRSIZE * scale);
 	int xCurrent = x;
 	int yCurrent = y;
@@ -374,9 +367,6 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Co
 			str++;
 		}
 	}
-
-	#undef IS_ASCII
-	#undef IS_NEWLINE
 }
 
 /*
@@ -397,7 +387,6 @@ static void _removeSampleFromQueue(AudioQueueItem *queue, SampleData *sampleData
 			curr->isFree = true;
 			prev->next = curr->next;
 		}
-
 		prev = curr;
 		curr = curr->next;
 	}
@@ -409,14 +398,11 @@ void milkLoadSound(Audio *audio, int idx, const char *filename)
 		return;
 
 	audio->lock();
-
-	/* If we're loading a sound into a sample data that in use, then remove all instances playing in the queue, and then free it. */
 	if (audio->samples[idx].buffer != NULL)
 	{
 		_removeSampleFromQueue(audio->queue, &audio->samples[idx]);
 		free(audio->samples[idx].buffer);
 	}
-
 	audio->loadWAV(audio, filename, idx);
 	audio->unlock();
 }
@@ -448,7 +434,6 @@ static void _removeLoopingSampleFromQueue(Audio *audio)
 			prev->next = curr->next;
 			break;
 		}
-
 		prev = curr;
 		curr = curr->next;
 	}
@@ -474,7 +459,6 @@ void milkSound(Audio *audio, int idx, int volume, bool loop)
 		return;
 
 	audio->lock();
-
 	AudioQueueItem *queueItem;
 	if (_getFreeQueueItem(audio, &queueItem))
 	{
@@ -487,7 +471,6 @@ void milkSound(Audio *audio, int idx, int volume, bool loop)
 		queueItem->volume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
 		queueItem->isLooping = loop;
 		queueItem->next = NULL;
-
 		_queueSample(audio, queueItem);
 	}
 	audio->unlock();
@@ -498,10 +481,10 @@ void milkVolume(Audio *audio, int volume)
 	audio->masterVolume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
 }
 
+#define _16_BIT_MAX 32767
+
 static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, double volume)
 {
-	#define _16_BIT_MAX 32767
-
 	int16_t sourceLeft;
 	int16_t sourceRight;
 	length /= 2;
@@ -510,26 +493,18 @@ static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, d
 	{
 		sourceLeft = (int16_t)((source[1] << 8 | source[0]) * volume);
 		sourceRight = (int16_t)((destination[1] << 8 | destination[0]));
-		int mixedSample = sourceLeft + sourceRight;
-
-		if (mixedSample > _16_BIT_MAX)
-			mixedSample = _16_BIT_MAX;
-		else if (mixedSample < -_16_BIT_MAX - 1)
-			mixedSample = -_16_BIT_MAX - 1;
-
+		int mixedSample = _clamp(sourceLeft + sourceRight, -_16_BIT_MAX - 1, _16_BIT_MAX);
 		destination[0] = mixedSample & 0xff;
 		destination[1] = (mixedSample >> 8) & 0xff;
 		source += 2;
 		destination += 2;
 	}
-
-	#undef _16_BIT_MAX
 }
+
+#define NORMALIZE_VOLUME(v) (double)(v / MILK_AUDIO_MAX_VOLUME)
 
 void milkAudioQueueToStream(Audio *audio, uint8_t *stream, int len)
 {
-	#define NORMALIZE_VOLUME(v) (double)(v / MILK_AUDIO_MAX_VOLUME)
-
 	memset(stream, 0, len);
 	AudioQueueItem *currentItem = audio->queue->next;
 	AudioQueueItem *previousItem = audio->queue;
@@ -559,6 +534,4 @@ void milkAudioQueueToStream(Audio *audio, uint8_t *stream, int len)
 			currentItem = next;
 		}
 	}
-
-	#undef NORMALIZE_VOLUME
 }

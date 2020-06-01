@@ -44,8 +44,8 @@
 #define MILK_FRAMERATE              (1000.0f / 50.0f)
 #define MILK_FRAMEBUF_WIDTH         256
 #define MILK_FRAMEBUF_HEIGHT        224
-#define MILK_WINDOW_WIDTH           MILK_FRAMEBUF_WIDTH * 3
-#define MILK_WINDOW_HEIGHT          MILK_FRAMEBUF_HEIGHT * 3
+#define MILK_WINDOW_WIDTH           (MILK_FRAMEBUF_WIDTH * 3)
+#define MILK_WINDOW_HEIGHT          (MILK_FRAMEBUF_HEIGHT * 3)
 
 #define MILK_SPRSHEET_FILENAME      "sprsheet.bmp"
 #define MILK_FONT_FILENAME          "font.bmp"
