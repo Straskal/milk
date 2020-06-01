@@ -239,31 +239,6 @@ TEST_CASE(milkClipRect_SetsClipRect)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkClear_SetsPixelsWithinClipRect)
-{
-	SETUP(milk);
-	milkClipRect(&milk->video, 0, 0, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
-	milkClear(&milk->video, 0xff0000);
-	milkClipRect(&milk->video, 10, 20, 200, 100);
-
-	ACT(milkClear(&milk->video, 0x00ff00));
-
-	for (int i = 0; i < MILK_FRAMEBUF_HEIGHT; i++)
-	{
-		for (int j = 0; j < MILK_FRAMEBUF_HEIGHT; j++)
-		{
-			Color32 color = milk->video.framebuffer[FRAMEBUFFER_POS(j, i)];
-
-			if (WITHIN_CLIP_RECT(milk->video.clipRect, j, i))
-				ASSERT_EQ(0x00ff00, color);
-			else
-				ASSERT_EQ(0xff0000, color);
-		}
-	}
-
-	TEARDOWN(milk);
-}
-
 TEST_CASE(milkPixelSet_WhenPixelWithinClipRect_SetsPixel)
 {
 	SETUP(milk);
