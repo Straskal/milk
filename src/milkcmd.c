@@ -327,7 +327,10 @@ void milkCmdUpdate(MilkCmd *cmd, Milk *milk)
 		else
 		{
 			if (!cmd->isGameInitialized)
+			{
 				milkInvokeInit(&milk->code);
+				cmd->isGameInitialized = true;
+			}
 
 			cmd->state = GAME;
 			cmd->system.stopTextInput();

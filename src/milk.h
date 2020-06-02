@@ -174,27 +174,30 @@ typedef struct video
 
 typedef struct sampleData
 {
-    uint32_t length; /* Readonly */
-    uint8_t *buffer; /* Readonly */
+    uint32_t length;
+    uint8_t *buffer;
 } SampleData;
 
-typedef struct audioQueueItem
+typedef enum sampleSlotState
 {
-    SampleData *sampleData;
-    uint32_t    remainingLength;
-    uint8_t    *position;
-    uint8_t     volume;
-    bool        isLooping;
-    bool        isFree;
+    STOPPED,
+    PLAYING,
+    PAUSED
+} SampleSlotState;
 
-    struct audioQueueItem *next;
-} AudioQueueItem;
+typedef struct sampleSlot
+{
+    SampleData     *sampleData;
+    SampleSlotState state;
+    uint32_t        remainingLength;
+    uint8_t        *position;
+    uint8_t         volume;
+} SampleSlot;
 
 typedef struct audio
 {
     SampleData      samples[MILK_AUDIO_MAX_SOUNDS];
-    AudioQueueItem  queueItems[MILK_AUDIO_QUEUE_MAX];
-    AudioQueueItem *queue;
+    SampleSlot      slots[MILK_AUDIO_QUEUE_MAX];
     uint32_t        frequency;
     uint8_t         masterVolume;
     uint8_t         channels;
@@ -239,12 +242,11 @@ void milkFree(Milk *milk);
 void milkLog(Milk *milk, const char *text, LogType type);
 void milkClearLogs(Milk *milk);
 
-void milkLoadSpritesheet(Video *video);
-void milkLoadFont(Video *video);
-
 bool milkButton(Input *input, ButtonState button);
 bool milkButtonPressed(Input *input, ButtonState button);
 
+void milkLoadSpritesheet(Video *video);
+void milkLoadFont(Video *video);
 void milkResetDrawState(Video *video);
 void milkClipRect(Video *video, int x, int y, int w, int h);
 void milkClear(Video *video, Color32 color);
@@ -255,7 +257,9 @@ void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Color32 color);
 
 void milkLoadSound(Audio *audio, int idx, const char *filename);
-void milkSound(Audio *audio, int idx, int volume, bool loop);
+void milkPlaySound(Audio *audio, int sampleIdx, int slotIdx, int volume);
+void milkStopSound(Audio *audio, int slotIdx);
+SampleSlotState milkSlotState(Audio *audio, int slotIdx);
 void milkVolume(Audio *audio, int volume);
 void milkAudioQueueToStream(Audio *audio, uint8_t *stream, int len);
 

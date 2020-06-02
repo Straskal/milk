@@ -27,7 +27,9 @@ milk.rectfill   = _G.rectfill
 milk.spr        = _G.spr
 milk.sprfont    = _G.sprfont
 milk.loadsnd    = _G.loadsnd
-milk.snd        = _G.snd
+milk.plsnd      = _G.plsnd
+milk.stsnd      = _G.stsnd
+milk.slot       = _G.slot
 milk.vol        = _G.vol
 
 function _G._init()

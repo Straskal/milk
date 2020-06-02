@@ -73,15 +73,13 @@ static void _initAudio(Audio *audio)
 
 	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
 	{
-		audio->queueItems[i].sampleData = NULL;
-		audio->queueItems[i].remainingLength = 0;
-		audio->queueItems[i].position = NULL;
-		audio->queueItems[i].volume = 0;
-		audio->queueItems[i].isLooping = false;
-		audio->queueItems[i].isFree = true;
+		audio->slots[i].sampleData = NULL;
+		audio->slots[i].state = STOPPED;
+		audio->slots[i].remainingLength = 0;
+		audio->slots[i].position = NULL;
+		audio->slots[i].volume = 0;
 	}
 
-	audio->queue = (AudioQueueItem *)calloc(1, sizeof(AudioQueueItem));
 	audio->masterVolume = MILK_AUDIO_MAX_VOLUME;
 	audio->frequency = 0;
 	audio->channels = 0;
@@ -111,7 +109,6 @@ void milkFree(Milk *milk)
 	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
 		free(milk->audio.samples[i].buffer);
 
-	free(milk->audio.queue);
 	free(milk);
 }
 
@@ -383,24 +380,6 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Co
  *******************************************************************************
  */
 
-static void _removeSampleFromQueue(AudioQueueItem *queue, SampleData *sampleData)
-{
-	AudioQueueItem *curr = queue->next;
-	AudioQueueItem *prev = queue;
-
-	while (curr != NULL)
-	{
-		if (curr->sampleData == sampleData)
-		{
-			curr->isFree = true;
-			prev->next = curr->next;
-		}
-
-		prev = curr;
-		curr = curr->next;
-	}
-}
-
 void milkLoadSound(Audio *audio, int idx, const char *filename)
 {
 	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
@@ -409,84 +388,54 @@ void milkLoadSound(Audio *audio, int idx, const char *filename)
 	audio->lock();
 
 	if (audio->samples[idx].buffer != NULL)
-	{
-		_removeSampleFromQueue(audio->queue, &audio->samples[idx]);
 		free(audio->samples[idx].buffer);
-	}
 
 	audio->loadWAV(audio, filename, idx);
 	audio->unlock();
 }
 
-static bool _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
+void milkPlaySound(Audio *audio, int sampleIdx, int slotIdx, int volume)
 {
-	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
-	{
-		if (audio->queueItems[i].isFree)
-		{
-			audio->queueItems[i].isFree = false; /* Queue item is not free any more. */
-			*queueItem = &audio->queueItems[i];
-			return true;
-		}
-	}
-	return false;
-}
-
-static void _removeLoopingSampleFromQueue(Audio *audio)
-{
-	AudioQueueItem *curr = audio->queue->next;
-	AudioQueueItem *prev = audio->queue;
-
-	while (curr != NULL)
-	{
-		if (curr->isLooping)
-		{
-			curr->isFree = true;
-			prev->next = curr->next;
-			break;
-		}
-		prev = curr;
-		curr = curr->next;
-	}
-}
-
-static void _queueSample(Audio *audio, AudioQueueItem *new)
-{
-	AudioQueueItem *curr = audio->queue;
-
-	while (curr->next != NULL)
-		curr = curr->next;
-
-	curr->next = new;
-}
-
-void milkSound(Audio *audio, int idx, int volume, bool loop)
-{
-	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
+	if (sampleIdx < 0
+		|| sampleIdx > MILK_AUDIO_MAX_SOUNDS
+		|| slotIdx < 0
+		|| slotIdx > MILK_AUDIO_QUEUE_MAX)
 		return;
 
-	SampleData *sampleData = &audio->samples[idx];
-	if (sampleData->length == 0)
+	SampleData *sampleData = &audio->samples[sampleIdx];
+
+	if (sampleData->length <= 0)
 		return;
 
 	audio->lock();
-	AudioQueueItem *queueItem;
 
-	if (_getFreeQueueItem(audio, &queueItem))
-	{
-		if (loop) /* Stop current loop in favor of the new looping sound. */
-			_removeLoopingSampleFromQueue(audio);
+	SampleSlot *slot = &audio->slots[slotIdx];
+	slot->sampleData = sampleData;
+	slot->state = PLAYING;
+	slot->position = sampleData->buffer;
+	slot->remainingLength = sampleData->length;
+	slot->volume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
 
-		queueItem->sampleData = sampleData;
-		queueItem->position = sampleData->buffer;
-		queueItem->remainingLength = sampleData->length;
-		queueItem->volume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
-		queueItem->isLooping = loop;
-		queueItem->next = NULL;
-
-		_queueSample(audio, queueItem);
-	}
 	audio->unlock();
+}
+
+void milkStopSound(Audio *audio, int slotIdx)
+{
+	if (slotIdx < 0 || slotIdx > MILK_AUDIO_QUEUE_MAX)
+		return;
+
+	audio->lock();
+	audio->slots[slotIdx].sampleData = NULL;
+	audio->slots[slotIdx].state = STOPPED;
+	audio->unlock();
+}
+
+SampleSlotState milkSlotState(Audio *audio, int slotIdx)
+{
+	if (slotIdx < 0 || slotIdx > MILK_AUDIO_QUEUE_MAX)
+		return STOPPED;
+
+	return audio->slots[slotIdx].state;
 }
 
 void milkVolume(Audio *audio, int volume)
@@ -514,37 +463,36 @@ static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, d
 	}
 }
 
+#define LOOP_INDEX			0
 #define NORMALIZE_VOLUME(v) (double)(v / MILK_AUDIO_MAX_VOLUME)
 
 void milkAudioQueueToStream(Audio *audio, uint8_t *stream, int len)
 {
 	memset(stream, 0, len);
-	AudioQueueItem *currentItem = audio->queue->next;
-	AudioQueueItem *previousItem = audio->queue;
 
-	while (currentItem != NULL)
+	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
 	{
-		if (currentItem->remainingLength > 0) /* If the queue item still has remaining samples to spend, then mix it and update its length. */
+		SampleSlot *slot = &audio->slots[i];
+
+		if (slot->sampleData == NULL || slot->state != PLAYING)
+			continue;
+
+		if (slot->remainingLength > 0)
 		{
-			uint32_t bytesToWrite = ((uint32_t)len > currentItem->remainingLength) ? currentItem->remainingLength : (uint32_t)len;
-			_mixSample(stream, currentItem->position, bytesToWrite, NORMALIZE_VOLUME(currentItem->volume));
-			currentItem->position += bytesToWrite;
-			currentItem->remainingLength -= bytesToWrite;
-			previousItem = currentItem;
-			currentItem = currentItem->next;
+			uint32_t bytesToWrite = ((uint32_t)len > slot->remainingLength) ? slot->remainingLength : (uint32_t)len;
+			_mixSample(stream, slot->position, bytesToWrite, NORMALIZE_VOLUME(slot->volume));
+			slot->position += bytesToWrite;
+			slot->remainingLength -= bytesToWrite;
 		}
-		else if (currentItem->isLooping) /* Else if the sound loops (music), then reset it's buffer position and length to the beginning. */
+		else if (i == LOOP_INDEX)
 		{
-			currentItem->position = currentItem->sampleData->buffer;
-			currentItem->remainingLength = currentItem->sampleData->length;
+			slot->position = slot->sampleData->buffer;
+			slot->remainingLength = slot->sampleData->length;
 		}
-		else /* Else the sound is completely finished and can be removed from the queue, freeing up space for another sound. */
+		else
 		{
-			AudioQueueItem *next = currentItem->next;
-			currentItem->isFree = true;
-			previousItem->next = next;
-			currentItem->next = NULL;
-			currentItem = next;
+			slot->sampleData = NULL;
+			slot->state = STOPPED;
 		}
 	}
 }

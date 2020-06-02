@@ -194,19 +194,37 @@ static int l_loadsnd(lua_State *L)
 	return 0;
 }
 
-static int l_snd(lua_State *L)
+static int l_plsnd(lua_State *L)
 {
-	milkSound(&_globalMilk->audio,
+	milkPlaySound(&_globalMilk->audio,
 		(int)lua_tointeger(L, 1),
-		(uint8_t)luaL_optinteger(L, 2, 128),
-		lua_isboolean(L, 3) ? lua_toboolean(L, 3) : false
+		(int)lua_tointeger(L, 2),
+		(int)lua_tointeger(L, 3)
 	);
 	return 0;
 }
 
+static int l_stsnd(lua_State *L)
+{
+	milkStopSound(&_globalMilk->audio,
+		(int)lua_tointeger(L, 1)
+	);
+	return 0;
+}
+
+static int l_slot(lua_State *L)
+{
+	lua_pushinteger(L,
+		milkSlotState(&_globalMilk->audio, (int)lua_tointeger(L, 1))
+	);
+	return 1;
+}
+
 static int l_vol(lua_State *L)
 {
-	milkVolume(&_globalMilk->audio, (uint8_t)lua_tointeger(L, 1));
+	milkVolume(&_globalMilk->audio,
+		(uint8_t)lua_tointeger(L, 1)
+	);
 	return 0;
 }
 
@@ -218,16 +236,18 @@ static void _pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_
 
 static void _pushApi(lua_State *L)
 {
-	_pushApiFunction(L, "btn", l_btn);
-	_pushApiFunction(L, "btnp", l_btnp);
-	_pushApiFunction(L, "clip", l_clip);
-	_pushApiFunction(L, "clrs", l_clrs);
-	_pushApiFunction(L, "pset", l_pset);
-	_pushApiFunction(L, "rect", l_rect);
+	_pushApiFunction(L, "btn",		l_btn);
+	_pushApiFunction(L, "btnp",		l_btnp);
+	_pushApiFunction(L, "clip",		l_clip);
+	_pushApiFunction(L, "clrs",		l_clrs);
+	_pushApiFunction(L, "pset",		l_pset);
+	_pushApiFunction(L, "rect",		l_rect);
 	_pushApiFunction(L, "rectfill", l_rectfill);
-	_pushApiFunction(L, "spr", l_spr);
-	_pushApiFunction(L, "sprfont", l_sprfont);
-	_pushApiFunction(L, "loadsnd", l_loadsnd);
-	_pushApiFunction(L, "snd", l_snd);
-	_pushApiFunction(L, "vol", l_vol);
+	_pushApiFunction(L, "spr",		l_spr);
+	_pushApiFunction(L, "sprfont",	l_sprfont);
+	_pushApiFunction(L, "loadsnd",	l_loadsnd);
+	_pushApiFunction(L, "plsnd",	l_plsnd);
+	_pushApiFunction(L, "stsnd",	l_stsnd);
+	_pushApiFunction(L, "slot",		l_slot);
+	_pushApiFunction(L, "vol",		l_vol);
 }
