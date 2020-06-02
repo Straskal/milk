@@ -60,7 +60,7 @@ static void _initVideo(Video *video)
 	memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
 	memset(&video->spritesheet, 0x00, sizeof(video->spritesheet));
 	memset(&video->font,		0x00, sizeof(video->font));
-	milkResetDrawState(video);
+	resetDrawState(video);
 }
 
 static void _initAudio(Audio *audio)
@@ -90,7 +90,7 @@ static void _initCode(Code *code)
 	code->state = NULL;
 }
 
-Milk *milkCreate()
+Milk *createMilk()
 {
 	Milk *milk = (Milk *)malloc(sizeof(Milk));
 	milk->shouldQuit = false;
@@ -104,7 +104,7 @@ Milk *milkCreate()
 	return milk;
 }
 
-void milkFree(Milk *milk)
+void freeMilk(Milk *milk)
 {
 	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
 		free(milk->audio.samples[i].buffer);
@@ -132,7 +132,7 @@ static LogMessage *_getNextFreeLogMessage(Logs *logs)
 		return &logs->messages[logs->count++];
 }
 
-void milkLog(Milk *milk, const char *text, LogType type)
+void logMessage(Logs *logs, const char *text, LogType type)
 {
 	size_t len = strlen(text);
 
@@ -140,35 +140,19 @@ void milkLog(Milk *milk, const char *text, LogType type)
 		len = MILK_LOG_MAX_LENGTH;
 
 	if (type == ERROR)
-		milk->logs.errorCount++;
+		logs->errorCount++;
 
-	LogMessage *newLogMessage = _getNextFreeLogMessage(&milk->logs);
+	LogMessage *newLogMessage = _getNextFreeLogMessage(logs);
 	memset(newLogMessage->text, 0, MILK_LOG_MAX_LENGTH);
 	strncpy(newLogMessage->text, text, len);
 	newLogMessage->length = len;
 	newLogMessage->type = type;
 }
 
-void milkClearLogs(Milk *milk)
+void clearLogs(Logs *logs)
 {
-	milk->logs.count = 0;
-	milk->logs.errorCount = 0;
-}
-
-/*
- *******************************************************************************
- * Art
- *******************************************************************************
- */
-
-void milkLoadSpritesheet(Video *video)
-{
-	video->loadBMP(MILK_SPRSHEET_FILENAME, video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
-}
-
-void milkLoadFont(Video *video)
-{
-	video->loadBMP(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
+	logs->count = 0;
+	logs->errorCount = 0;
 }
 
 /*
@@ -177,12 +161,12 @@ void milkLoadFont(Video *video)
  *******************************************************************************
  */
 
-bool milkButton(Input *input, ButtonState button)
+bool isButtonDown(Input *input, ButtonState button)
 {
 	return (input->gamepad.buttonState & button) == button;
 }
 
-bool milkButtonPressed(Input *input, ButtonState button)
+bool isButtonPressed(Input *input, ButtonState button)
 {
 	return (input->gamepad.buttonState & button) == button && (input->gamepad.previousButtonState & button) != button;
 }
@@ -195,7 +179,17 @@ bool milkButtonPressed(Input *input, ButtonState button)
  *******************************************************************************
  */
 
-void milkResetDrawState(Video *video)
+void loadSpritesheet(Video *video)
+{
+	video->loadBMP(MILK_SPRSHEET_FILENAME, video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
+}
+
+void loadFont(Video *video)
+{
+	video->loadBMP(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
+}
+
+void resetDrawState(Video *video)
 {
 	video->colorKey = 0;
 	video->clipRect.top = 0;
@@ -224,7 +218,7 @@ static float _clampf(float value, float min, float max)
 	return value;
 }
 
-void milkClipRect(Video *video, int x, int y, int w, int h)
+void setClippingRect(Video *video, int x, int y, int w, int h)
 {
 	video->clipRect.left =		_clamp(x, 0, MILK_FRAMEBUF_WIDTH);
 	video->clipRect.right =		_clamp(x + w, 0, MILK_FRAMEBUF_WIDTH);
@@ -235,7 +229,7 @@ void milkClipRect(Video *video, int x, int y, int w, int h)
 #define FRAMEBUFFER_POS(x, y)			((MILK_FRAMEBUF_WIDTH * y) + x)
 #define WITHIN_CLIP_RECT(clip, x, y)	(clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
 
-void milkClear(Video *video, Color32 color)
+void clearFramebuffer(Video *video, Color32 color)
 {
 	Rect clip = video->clipRect;
 
@@ -246,7 +240,7 @@ void milkClear(Video *video, Color32 color)
 	}
 }
 
-void milkPixelSet(Video *video, int x, int y, Color32 color)
+void blitPixel(Video *video, int x, int y, Color32 color)
 {
 	if (WITHIN_CLIP_RECT(video->clipRect, x, y))
 		video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
@@ -255,16 +249,16 @@ void milkPixelSet(Video *video, int x, int y, Color32 color)
 static void _horizontalLine(Video *video, int x, int y, int w, Color32 color)
 {
 	for (int i = x; i <= x + w; i++)
-		milkPixelSet(video, i, y, color);
+		blitPixel(video, i, y, color);
 }
 
 static void _verticalLine(Video *video, int x, int y, int h, Color32 color)
 {
 	for (int i = y; i <= y + h; i++)
-		milkPixelSet(video, x, i, color);
+		blitPixel(video, x, i, color);
 }
 
-void milkRect(Video *video, int x, int y, int w, int h, Color32 color)
+void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color)
 {
 	_horizontalLine(video, x, y, w, color);
 	_horizontalLine(video, x, y + h, w, color);
@@ -272,12 +266,12 @@ void milkRect(Video *video, int x, int y, int w, int h, Color32 color)
 	_verticalLine(video, x + w, y, h, color);
 }
 
-void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
+void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color)
 {
 	for (int i = y; i < y + h; i++)
 	{
 		for (int j = x; j < x + w; j++)
-			milkPixelSet(video, j, i, color);
+			blitPixel(video, j, i, color);
 	}
 }
 
@@ -317,12 +311,12 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 			Color32 col = pixels[yNearest * pitch + xNearest];
 
 			if (col != video->colorKey)
-				milkPixelSet(video, xFramebuffer, yFramebuffer, color != NULL ? *color : col);
+				blitPixel(video, xFramebuffer, yFramebuffer, color != NULL ? *color : col);
 		}
 	}
 }
 
-void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip)
+void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip)
 {
 	if (idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
 		return;
@@ -340,7 +334,7 @@ void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 #define IS_ASCII(c)		((c & 0xff80) == 0)
 #define IS_NEWLINE(c)	(c == '\n')
 
-void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Color32 color)
+void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Color32 color)
 {
 	if (str == NULL)
 		return;
@@ -380,7 +374,7 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Co
  *******************************************************************************
  */
 
-void milkLoadSound(Audio *audio, int idx, const char *filename)
+void loadSound(Audio *audio, int idx, const char *filename)
 {
 	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
 		return;
@@ -394,7 +388,7 @@ void milkLoadSound(Audio *audio, int idx, const char *filename)
 	audio->unlock();
 }
 
-void milkPlaySound(Audio *audio, int sampleIdx, int slotIdx, int volume)
+void playSound(Audio *audio, int sampleIdx, int slotIdx, int volume)
 {
 	if (sampleIdx < 0
 		|| sampleIdx > MILK_AUDIO_MAX_SOUNDS
@@ -417,7 +411,7 @@ void milkPlaySound(Audio *audio, int sampleIdx, int slotIdx, int volume)
 	audio->unlock();
 }
 
-void milkStopSound(Audio *audio, int slotIdx)
+void stopSound(Audio *audio, int slotIdx)
 {
 	if (slotIdx < 0 || slotIdx > MILK_AUDIO_QUEUE_MAX)
 		return;
@@ -428,7 +422,7 @@ void milkStopSound(Audio *audio, int slotIdx)
 	audio->unlock();
 }
 
-SampleSlotState milkSlotState(Audio *audio, int slotIdx)
+SampleSlotState getSampleState(Audio *audio, int slotIdx)
 {
 	if (slotIdx < 0 || slotIdx > MILK_AUDIO_QUEUE_MAX)
 		return STOPPED;
@@ -436,7 +430,7 @@ SampleSlotState milkSlotState(Audio *audio, int slotIdx)
 	return audio->slots[slotIdx].state;
 }
 
-void milkVolume(Audio *audio, int volume)
+void setMasterVolume(Audio *audio, int volume)
 {
 	audio->masterVolume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
 }
@@ -464,7 +458,7 @@ static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, d
 #define LOOP_INDEX			0
 #define NORMALIZE_VOLUME(v) (double)(v / MILK_AUDIO_MAX_VOLUME)
 
-void milkAudioQueueToStream(Audio *audio, uint8_t *stream, int len)
+void mixSamplesIntoStream(Audio *audio, uint8_t *stream, int len)
 {
 	memset(stream, 0, len);
 

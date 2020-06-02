@@ -39,7 +39,7 @@
  *******************************************************************************
  */
 
-TEST_CASE(milkCreate_InitializesFramebuffer)
+TEST_CASE(createMilk_InitializesFramebuffer)
 {
 	SETUP(milk);
 
@@ -49,7 +49,7 @@ TEST_CASE(milkCreate_InitializesFramebuffer)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkCreate_InitializesSpritesheet)
+TEST_CASE(createMilk_InitializesSpritesheet)
 {
 	SETUP(milk);
 
@@ -59,7 +59,7 @@ TEST_CASE(milkCreate_InitializesSpritesheet)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkCreate_InitializesFont)
+TEST_CASE(createMilk_InitializesFont)
 {
 	SETUP(milk);
 
@@ -69,14 +69,14 @@ TEST_CASE(milkCreate_InitializesFont)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkCreate_InitializesColorKey)
+TEST_CASE(createMilk_InitializesColorKey)
 {
 	SETUP(milk);
 	ASSERT_EQ(0x00, milk->video.colorKey);
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkCreate_InitializesClipRect)
+TEST_CASE(createMilk_InitializesClipRect)
 {
 	SETUP(milk);
 	ASSERT_EQ(0, milk->video.clipRect.top);
@@ -86,7 +86,7 @@ TEST_CASE(milkCreate_InitializesClipRect)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkCreate_InitializesSamples)
+TEST_CASE(createMilk_InitializesSamples)
 {
 	SETUP(milk);
 
@@ -99,7 +99,7 @@ TEST_CASE(milkCreate_InitializesSamples)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkCreate_InitializesAudioQueue)
+TEST_CASE(createMilk_InitializesAudioQueue)
 {
 	//SETUP(milk);
 
@@ -117,7 +117,7 @@ TEST_CASE(milkCreate_InitializesAudioQueue)
 	//TEARDOWN(milk);
 }
 
-TEST_CASE(milkCreate_InitializesAudioSettings)
+TEST_CASE(createMilk_InitializesAudioSettings)
 {
 	SETUP(milk);
 	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, milk->audio.masterVolume);
@@ -132,47 +132,47 @@ TEST_CASE(milkCreate_InitializesAudioSettings)
  *******************************************************************************
  */
 
-TEST_CASE(milkButton_WhenButtonDown_ReturnsTrue)
+TEST_CASE(isButtonDown_WhenButtonDown_ReturnsTrue)
 {
 	SETUP(milk);
 	milk->input.gamepad.buttonState |= BTN_DOWN;
 
-	bool isDown = ACT(milkButton(&milk->input, BTN_DOWN));
+	bool isDown = ACT(isButtonDown(&milk->input, BTN_DOWN));
 
 	ASSERT_TRUE(isDown);
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkButton_WhenButtonUp_ReturnsFalse)
+TEST_CASE(isButtonDown_WhenButtonUp_ReturnsFalse)
 {
 	SETUP(milk);
 	milk->input.gamepad.buttonState = 0;
 
-	bool isDown = ACT(milkButton(&milk->input, BTN_DOWN));
+	bool isDown = ACT(isButtonDown(&milk->input, BTN_DOWN));
 
 	ASSERT_FALSE(isDown);
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkButtonPressed_WhenPressed_ReturnsTrue)
+TEST_CASE(isButtonPressed_WhenPressed_ReturnsTrue)
 {
 	SETUP(milk);
 	milk->input.gamepad.buttonState |= BTN_DOWN;
 	milk->input.gamepad.previousButtonState = 0;
 
-	bool isPressed = ACT(milkButtonPressed(&milk->input, BTN_DOWN));
+	bool isPressed = ACT(isButtonPressed(&milk->input, BTN_DOWN));
 
 	ASSERT_TRUE(isPressed);
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkButtonPressed_WhenHeld_ReturnsFalse)
+TEST_CASE(isButtonPressed_WhenHeld_ReturnsFalse)
 {
 	SETUP(milk);
 	milk->input.gamepad.buttonState |= BTN_DOWN;
 	milk->input.gamepad.previousButtonState |= BTN_DOWN;
 
-	bool isPressed = ACT(milkButtonPressed(&milk->input, BTN_DOWN));
+	bool isPressed = ACT(isButtonPressed(&milk->input, BTN_DOWN));
 
 	ASSERT_FALSE(isPressed);
 	TEARDOWN(milk);
@@ -184,18 +184,18 @@ TEST_CASE(milkButtonPressed_WhenHeld_ReturnsFalse)
  *******************************************************************************
  */
 
-TEST_CASE(milkResetDrawState_ResetsColorKey)
+TEST_CASE(resetDrawState_ResetsColorKey)
 {
 	SETUP(milk);
 	milk->video.colorKey = 57;
 
-	ACT(milkResetDrawState(&milk->video));
+	ACT(resetDrawState(&milk->video));
 
 	ASSERT_EQ(0x00, milk->video.colorKey);
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkResetDrawState_ResetsClipRect)
+TEST_CASE(resetDrawState_ResetsClipRect)
 {
 	SETUP(milk);
 
@@ -204,7 +204,7 @@ TEST_CASE(milkResetDrawState_ResetsClipRect)
 	milk->video.clipRect.left = 10;
 	milk->video.clipRect.right = 10;
 
-	ACT(milkResetDrawState(&milk->video));
+	ACT(resetDrawState(&milk->video));
 
 	ASSERT_EQ(0, milk->video.clipRect.top);
 	ASSERT_EQ(MILK_FRAMEBUF_HEIGHT, milk->video.clipRect.bottom);
@@ -213,11 +213,11 @@ TEST_CASE(milkResetDrawState_ResetsClipRect)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkClipRect_ClampsClipRectToFramebufferSize)
+TEST_CASE(setClippingRect_ClampsClipRectToFramebufferSize)
 {
 	SETUP(milk);
 
-	ACT(milkClipRect(&milk->video, -10, -10, 500, 500));
+	ACT(setClippingRect(&milk->video, -10, -10, 500, 500));
 
 	ASSERT_EQ(0, milk->video.clipRect.top);
 	ASSERT_EQ(MILK_FRAMEBUF_HEIGHT, milk->video.clipRect.bottom);
@@ -226,11 +226,11 @@ TEST_CASE(milkClipRect_ClampsClipRectToFramebufferSize)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkClipRect_SetsClipRect)
+TEST_CASE(setClippingRect_SetsClipRect)
 {
 	SETUP(milk);
 
-	ACT(milkClipRect(&milk->video, 10, 20, 200, 100));
+	ACT(setClippingRect(&milk->video, 10, 20, 200, 100));
 
 	ASSERT_EQ(20, milk->video.clipRect.top);
 	ASSERT_EQ(120, milk->video.clipRect.bottom);
@@ -239,21 +239,21 @@ TEST_CASE(milkClipRect_SetsClipRect)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkPixelSet_WhenPixelWithinClipRect_SetsPixel)
+TEST_CASE(blitPixel_WhenPixelWithinClipRect_SetsPixel)
 {
 	SETUP(milk);
-	milkClear(&milk->video, 0x00);
-	ACT(milkPixelSet(&milk->video, 15, 30, 0x00ff00));
+	clearFramebuffer(&milk->video, 0x00);
+	ACT(blitPixel(&milk->video, 15, 30, 0x00ff00));
 	ASSERT_EQ(0x00ff00, milk->video.framebuffer[FRAMEBUFFER_POS(15, 30)]);
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkPixelSet_WhenPixelIsNotWithinClipRect_DoesNotSetPixel)
+TEST_CASE(blitPixel_WhenPixelIsNotWithinClipRect_DoesNotSetPixel)
 {
 	SETUP(milk);
-	milkClear(&milk->video, 0x00);
-	milkClipRect(&milk->video, 10, 20, 200, 100);
-	ACT(milkPixelSet(&milk->video, 1, 1, 0xff0000));
+	clearFramebuffer(&milk->video, 0x00);
+	setClippingRect(&milk->video, 10, 20, 200, 100);
+	ACT(blitPixel(&milk->video, 1, 1, 0xff0000));
 	ASSERT_NEQ(0xff0000, milk->video.framebuffer[FRAMEBUFFER_POS(1, 1)]);
 	TEARDOWN(milk);
 }
@@ -272,7 +272,7 @@ static void _mockUnlock()
 {
 }
 
-TEST_CASE(milkSound_WhenIndexOutOfBounds_DoesNothing)
+TEST_CASE(playSound_WhenIndexOutOfBounds_DoesNothing)
 {
 	//SETUP(milk);
 	//ACT(milkSound(&milk->audio, -1, 0, 0));
@@ -280,7 +280,7 @@ TEST_CASE(milkSound_WhenIndexOutOfBounds_DoesNothing)
 	//TEARDOWN(milk);
 }
 
-TEST_CASE(milkSound_WhenSampleAtIndexNotLoaded_DoesNothing)
+TEST_CASE(playSound_WhenSampleAtIndexNotLoaded_DoesNothing)
 {
 	//SETUP(milk);
 	//ACT(milkSound(&milk->audio, 0, 0, 0));
@@ -288,7 +288,7 @@ TEST_CASE(milkSound_WhenSampleAtIndexNotLoaded_DoesNothing)
 	//TEARDOWN(milk);
 }
 
-TEST_CASE(milkSound_WhenMaxNumberOfConcurrentSoundsPlaying_DoesNothing)
+TEST_CASE(playSound_WhenMaxNumberOfConcurrentSoundsPlaying_DoesNothing)
 {
 	//SETUP(milk);
 	//milk->audio.lock = _mockLock;
@@ -303,7 +303,7 @@ TEST_CASE(milkSound_WhenMaxNumberOfConcurrentSoundsPlaying_DoesNothing)
 	//TEARDOWN(milk);
 }
 
-TEST_CASE(milkSound_QueuesNewSample)
+TEST_CASE(playSound_QueuesNewSample)
 {
 //	SETUP(milk);
 //	milk->audio.lock = _mockLock;
@@ -328,7 +328,7 @@ TEST_CASE(milkSound_QueuesNewSample)
 //	FREE_MILK(milk);
 }
 
-TEST_CASE(milkSound_WhenLoop_ExistingLoopingSampleIsRemovedFromQueueBeforeQueueingNewSample)
+TEST_CASE(playSound_WhenLoop_ExistingLoopingSampleIsRemovedFromQueueBeforeQueueingNewSample)
 {
 //	SETUP(milk);
 //	milk->audio.lock = _mockLock;
@@ -350,7 +350,7 @@ TEST_CASE(milkSound_WhenLoop_ExistingLoopingSampleIsRemovedFromQueueBeforeQueuei
 //	FREE_MILK(milk);
 }
 
-TEST_CASE(milkSound_ClampsVolumeToMin)
+TEST_CASE(playSound_ClampsVolumeToMin)
 {
 //	SETUP(milk);
 //	milk->audio.lock = _mockLock;
@@ -370,7 +370,7 @@ TEST_CASE(milkSound_ClampsVolumeToMin)
 //	FREE_MILK(milk);
 }
 
-TEST_CASE(milkSound_ClampsVolumeToMax)
+TEST_CASE(playSound_ClampsVolumeToMax)
 {
 //	SETUP(milk);
 //	milk->audio.lock = _mockLock;
@@ -390,23 +390,23 @@ TEST_CASE(milkSound_ClampsVolumeToMax)
 //	FREE_MILK(milk);
 }
 
-TEST_CASE(milkVolume_ClampsToMinValue)
+TEST_CASE(playSound_ClampsToMinValue)
 {
 	SETUP(milk);
-	ACT(milkVolume(&milk->audio, -10));
+	ACT(setMasterVolume(&milk->audio, -10));
 	ASSERT_EQ(0, milk->audio.masterVolume);
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkVolume_ClampsToMaxValue)
+TEST_CASE(playSound_ClampsToMaxValue)
 {
 	SETUP(milk);
-	ACT(milkVolume(&milk->audio, MILK_AUDIO_MAX_VOLUME + 10));
+	ACT(setMasterVolume(&milk->audio, MILK_AUDIO_MAX_VOLUME + 10));
 	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, milk->audio.masterVolume);
 	TEARDOWN(milk);
 }
 
-TEST_CASE(milkAudioQueueToStream_WhenQueueIsEmpty_DoesNotMixIntoStream)
+TEST_CASE(mixSampleIntoStream_WhenQueueIsEmpty_DoesNotMixIntoStream)
 {
 	//SETUP(milk);
 	//uint8_t stream[10];
@@ -418,7 +418,7 @@ TEST_CASE(milkAudioQueueToStream_WhenQueueIsEmpty_DoesNotMixIntoStream)
 	//TEARDOWN(milk);
 }
 
-TEST_CASE(milkAudioQueueToStream_WhenQueueItemsAreNotFinished_MixesSamplesIntoStream)
+TEST_CASE(mixSampleIntoStream_WhenQueueItemsAreNotFinished_MixesSamplesIntoStream)
 {
 //	SETUP(milk);
 //	milk->audio.lock = _mockLock;
@@ -440,7 +440,7 @@ TEST_CASE(milkAudioQueueToStream_WhenQueueItemsAreNotFinished_MixesSamplesIntoSt
 //	FREE_MILK(milk);
 }
 
-TEST_CASE(milkAudioQueueToStream_WhenSamplesIsFinishedAndLooping_ResetsSampleAndMixesIntoStream)
+TEST_CASE(mixSampleIntoStream_WhenSamplesIsFinishedAndLooping_ResetsSampleAndMixesIntoStream)
 {
 //	SETUP(milk);
 //	milk->audio.lock = _mockLock;
@@ -463,7 +463,7 @@ TEST_CASE(milkAudioQueueToStream_WhenSamplesIsFinishedAndLooping_ResetsSampleAnd
 //	FREE_MILK(milk);
 }
 
-TEST_CASE(milkAudioQueueToStream_WhenSamplesIsFinished_RemovesSampleFromQueue)
+TEST_CASE(mixSampleIntoStream_WhenSamplesIsFinished_RemovesSampleFromQueue)
 {
 //	SETUP(milk);
 //	milk->audio.lock = _mockLock;

@@ -37,9 +37,9 @@
  *******************************************************************************
  */
 #define TEST_CASE(test)					static void test()
-#define SETUP(milk)						Milk *milk = milkCreate()
+#define SETUP(milk)						Milk *milk = createMilk()
 #define ACT(action)                     action /* For a bit of flavor ;) */
-#define FREE_MILK(milk)					milkFree(milk);
+#define FREE_MILK(milk)					freeMilk(milk);
 #define TEARDOWN(milk)					teardown: FREE_MILK(milk)
 #define CUSTOM_TEARDOWN					teardown
 

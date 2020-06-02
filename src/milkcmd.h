@@ -63,14 +63,14 @@ typedef enum cmdState
 
 typedef struct milkCmd
 {
-    System  system;
-	CmdState state;
-    int lastErrorCount;
-    size_t commandCandidateLength;
-    size_t previousCommandLength;
-    char commandCandidate[MILK_COMMAND_LEN];
-    char previousCommand[MILK_COMMAND_LEN];
-    bool isGameInitialized;
+    System      system;
+	CmdState    state;
+    int         lastErrorCount;
+    size_t      commandCandidateLength;
+    size_t      previousCommandLength;
+    char        commandCandidate[MILK_COMMAND_LEN];
+    char        previousCommand[MILK_COMMAND_LEN];
+    bool        isGameInitialized;
 } MilkCmd;
 
 MilkCmd *milkCmdCreate();

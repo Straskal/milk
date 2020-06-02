@@ -30,48 +30,23 @@
 
 /*
  *******************************************************************************
- * Configuration
- *
- * Specs:
- * - 256x224 px resolution
- * - 256x256 px spritesheet, each sprite being 16x16 px (256 sprites total)
- * - 128x48  px bitmap font in ASCII order, starting from ASCII character 32 (space)
- * - 16 loaded sounds into memory
- * - 16 concurrent sounds, 1 of which can be looping.
+ * Current configuration:
+ * - 256x224 px resolution.
+ * - 256x256 px spritesheet, each sprite being 16x16 px (256 sprites total).
+ * - 128x48  px bitmap font in ASCII order, starting from ASCII character 32 (space).
+ * - Allows up to 16 sounds loaded into memory.
+ * - Allows up to 16 concurrent sounds via sample slots. Index 0 loops.
  *******************************************************************************
- */
 
-#define MILK_FRAMERATE              (1000.0f / 50.0f)
-#define MILK_FRAMEBUF_WIDTH         256
-#define MILK_FRAMEBUF_HEIGHT        224
-#define MILK_WINDOW_WIDTH           (MILK_FRAMEBUF_WIDTH * 3)
-#define MILK_WINDOW_HEIGHT          (MILK_FRAMEBUF_HEIGHT * 3)
-
-#define MILK_SPRSHEET_FILENAME      "sprsheet.bmp"
-#define MILK_FONT_FILENAME          "font.bmp"
-#define MILK_SPRSHEET_SQRSIZE       256
-#define MILK_SPRSHEET_SPR_SQRSIZE   16
-#define MILK_FONT_WIDTH             128
-#define MILK_FONT_HEIGHT            48
-#define MILK_CHAR_SQRSIZE           8
-
-#define MILK_AUDIO_FREQUENCY        44100
-#define MILK_AUDIO_CHANNELS         2 /* Stereo */
-#define MILK_AUDIO_SAMPLES          4096
-#define MILK_AUDIO_MAX_SOUNDS       16
-#define MILK_AUDIO_QUEUE_MAX        16
-#define MILK_AUDIO_MAX_VOLUME       128
-
-#define MILK_MAX_LOGS               16
-#define MILK_LOG_MAX_LENGTH         512
-
-/*
  *******************************************************************************
  * Logging
  *
  * As of right now, logging is pretty bare bones. Logs are only shown in the command line.
  *******************************************************************************
  */
+
+#define MILK_MAX_LOGS       16
+#define MILK_LOG_MAX_LENGTH 512
 
 typedef enum logType
 {
@@ -91,6 +66,19 @@ typedef struct logs
     int         count;
     int         errorCount;
 } Logs;
+
+void logMessage(Logs *logs, const char *text, LogType type);
+void clearLogs(Logs *logs);
+
+#ifndef MILK_CMD
+#define LOG_INFO(logs, text)    (void *)1;
+#define LOG_WARN(logs, text)    (void *)1;
+#define LOG_ERROR(logs, text)   (void *)1;
+#else
+#define LOG_INFO(milk, text)    logMessage(&milk->logs, text, INFO)
+#define LOG_WARN(milk, text)    logMessage(&milk->logs, text, WARN)
+#define LOG_ERROR(milk, text)   logMessage(&milk->logs, text, ERROR)
+#endif
 
 /*
  *******************************************************************************
@@ -124,6 +112,9 @@ typedef struct input
     Gamepad gamepad;
 } Input;
 
+bool isButtonDown(Input *input, ButtonState button);
+bool isButtonPressed(Input *input, ButtonState button);
+
 /*
  *******************************************************************************
  * Video
@@ -138,6 +129,20 @@ typedef struct input
  * All drawing functions only operate within the bounds of the clipping rectangle, which is reset to the framebuffer size at the beginning of each frame.
  *******************************************************************************
  */
+
+#define MILK_FRAMERATE              (1000.0f / 50.0f)
+#define MILK_FRAMEBUF_WIDTH         256
+#define MILK_FRAMEBUF_HEIGHT        224
+#define MILK_WINDOW_WIDTH           (MILK_FRAMEBUF_WIDTH * 3)
+#define MILK_WINDOW_HEIGHT          (MILK_FRAMEBUF_HEIGHT * 3)
+
+#define MILK_SPRSHEET_FILENAME      "sprsheet.bmp"
+#define MILK_FONT_FILENAME          "font.bmp"
+#define MILK_SPRSHEET_SQRSIZE       256
+#define MILK_SPRSHEET_SPR_SQRSIZE   16
+#define MILK_FONT_WIDTH             128
+#define MILK_FONT_HEIGHT            48
+#define MILK_CHAR_SQRSIZE           8
 
 typedef uint32_t Color32;
 
@@ -160,6 +165,17 @@ typedef struct video
     void(*loadBMP)(const char *, Color32 *, size_t);
 } Video;
 
+void loadSpritesheet(Video *video);
+void loadFont(Video *video);
+void resetDrawState(Video *video);
+void setClippingRect(Video *video, int x, int y, int w, int h);
+void clearFramebuffer(Video *video, Color32 color);
+void blitPixel(Video *video, int x, int y, Color32 color);
+void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color);
+void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color);
+void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip);
+void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Color32 color);
+
 /*
  *******************************************************************************
  * Audio
@@ -171,6 +187,13 @@ typedef struct video
  * Many queue items can reference the same sample data, and sample data should be treated as readonly.
  *******************************************************************************
  */
+
+#define MILK_AUDIO_FREQUENCY        44100
+#define MILK_AUDIO_CHANNELS         2 /* Stereo */
+#define MILK_AUDIO_SAMPLES          4096
+#define MILK_AUDIO_MAX_SOUNDS       16
+#define MILK_AUDIO_QUEUE_MAX        16
+#define MILK_AUDIO_MAX_VOLUME       128
 
 typedef struct sampleData
 {
@@ -207,6 +230,13 @@ typedef struct audio
     void(*unlock)();
 } Audio;
 
+void loadSound(Audio *audio, int idx, const char *filename);
+void playSound(Audio *audio, int sampleIdx, int slotIdx, int volume);
+void stopSound(Audio *audio, int slotIdx);
+SampleSlotState getSampleState(Audio *audio, int slotIdx);
+void setMasterVolume(Audio *audio, int volume);
+void mixSamplesIntoStream(Audio *audio, uint8_t *stream, int len);
+
 /*
  *******************************************************************************
  * Code
@@ -236,31 +266,7 @@ typedef struct milk
     bool    shouldQuit;
 } Milk;
 
-Milk *milkCreate();
-void milkFree(Milk *milk);
-
-void milkLog(Milk *milk, const char *text, LogType type);
-void milkClearLogs(Milk *milk);
-
-bool milkButton(Input *input, ButtonState button);
-bool milkButtonPressed(Input *input, ButtonState button);
-
-void milkLoadSpritesheet(Video *video);
-void milkLoadFont(Video *video);
-void milkResetDrawState(Video *video);
-void milkClipRect(Video *video, int x, int y, int w, int h);
-void milkClear(Video *video, Color32 color);
-void milkPixelSet(Video *video, int x, int y, Color32 color);
-void milkRect(Video *video, int x, int y, int w, int h, Color32 color);
-void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color);
-void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip);
-void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Color32 color);
-
-void milkLoadSound(Audio *audio, int idx, const char *filename);
-void milkPlaySound(Audio *audio, int sampleIdx, int slotIdx, int volume);
-void milkStopSound(Audio *audio, int slotIdx);
-SampleSlotState milkSlotState(Audio *audio, int slotIdx);
-void milkVolume(Audio *audio, int volume);
-void milkAudioQueueToStream(Audio *audio, uint8_t *stream, int len);
+Milk *createMilk();
+void freeMilk(Milk *milk);
 
 #endif

@@ -81,20 +81,20 @@ static void _cmdReload(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 			milkUnloadCode(milk);
 			milkLoadCode(milk);
 			cmd->isGameInitialized = false;
-			milkLog(milk, "Scripts have been reloaded", INFO);
+			logMessage(&milk->logs, "Scripts have been reloaded", INFO);
 		}
 		else if (strcmp(args[0], CMD_RELOAD_SPRITES) == 0)
 		{
-			milkLoadSpritesheet(&milk->video);
-			milkLog(milk, "Sprites have been reloaded", INFO);
+			loadSpritesheet(&milk->video);
+			logMessage(&milk->logs, "Sprites have been reloaded", INFO);
 		}
 		else if (strcmp(args[0], CMD_RELOAD_FONT) == 0)
 		{
-			milkLoadFont(&milk->video);
-			milkLog(milk, "Font has been reloaded", INFO);
+			loadFont(&milk->video);
+			logMessage(&milk->logs, "Font has been reloaded", INFO);
 		}
 	}
-	else milkLog(milk, "'reload' expects an argument", WARN);
+	else logMessage(&milk->logs, "'reload' expects an argument", WARN);
 }
 
 static void _cmdClear(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
@@ -103,7 +103,7 @@ static void _cmdClear(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 	(void *)args;
 	(void *)nargs;
 
-	milkClearLogs(milk);
+	clearLogs(&milk->logs);
 	cmd->lastErrorCount = 0;
 }
 
@@ -183,13 +183,13 @@ static void _updateCommandLine(MilkCmd *cmd, Milk *milk)
 		cmd->commandCandidate[cmd->commandCandidateLength] = '\0';
 	}
 
-	if (milkButtonPressed(&milk->input, BTN_UP) && cmd->previousCommandLength > 0)
+	if (isButtonPressed(&milk->input, BTN_UP) && cmd->previousCommandLength > 0)
 	{
 		strcpy(cmd->commandCandidate, cmd->previousCommand);
 		cmd->commandCandidateLength = cmd->previousCommandLength;
 	}
 
-	if (milkButtonPressed(&milk->input, BTN_DOWN))
+	if (isButtonPressed(&milk->input, BTN_DOWN))
 		_resetCommandCandidate(cmd);
 
 	if (cmd->system.enter() && cmd->commandCandidateLength > 0)
@@ -206,7 +206,7 @@ static void _updateCommandLine(MilkCmd *cmd, Milk *milk)
 			strcpy(cmd->previousCommand, cmd->commandCandidate);
 			cmd->previousCommandLength = cmd->commandCandidateLength;
 		}
-		else milkLog(milk, "Unknown command", WARN);
+		else logMessage(&milk->logs, "Unknown command", WARN);
 
 		_resetCommandCandidate(cmd);
 	}
@@ -273,21 +273,21 @@ static void _drawLogLines(Milk *milk)
 	_getLogLines(&milk->logs, lines, &numLines);
 
 	for (int i = 0; i < numLines; i++)
-		milkSpriteFont(&milk->video, 8, LOG_START_HEIGHT + ((MILK_CHAR_SQRSIZE + 2) * i), lines[i].text, 1, lines[i].color);
+		blitSpritefont(&milk->video, 8, LOG_START_HEIGHT + ((MILK_CHAR_SQRSIZE + 2) * i), lines[i].text, 1, lines[i].color);
 }
 
 static void _drawCommandLine(MilkCmd *cmdLine, Milk *milk)
 {
 	size_t cmdLength = cmdLine->commandCandidateLength;
 
-	milkClear(&milk->video, 0x1a1a1a);
-	milkSpriteFont(&milk->video, 8, 10, "MILK\n------------------------------", 1, CMD_COLOR);
-	milkSpriteFont(&milk->video, 8, 40, ">:", 1, CMD_COLOR);
-	milkSpriteFont(&milk->video, 24, 40, cmdLine->commandCandidate, 1, CMD_COLOR);
+	clearFramebuffer(&milk->video, 0x1a1a1a);
+	blitSpritefont(&milk->video, 8, 10, "MILK\n------------------------------", 1, CMD_COLOR);
+	blitSpritefont(&milk->video, 8, 40, ">:", 1, CMD_COLOR);
+	blitSpritefont(&milk->video, 24, 40, cmdLine->commandCandidate, 1, CMD_COLOR);
 
 	/* Draw blinking position marker. */
 	if (_ticks % 32 > 16)
-		milkSpriteFont(&milk->video, 24 + cmdLength * 8, 42, "_", 1, CMD_COLOR);
+		blitSpritefont(&milk->video, 24 + cmdLength * 8, 42, "_", 1, CMD_COLOR);
 }
 
 MilkCmd *milkCmdCreate()
@@ -315,7 +315,7 @@ static void _errorCheck(MilkCmd *cmd, Milk *milk)
 
 void milkCmdUpdate(MilkCmd *cmd, Milk *milk)
 {
-	milkResetDrawState(&milk->video);
+	resetDrawState(&milk->video);
 
 	if (cmd->system.escape())
 	{

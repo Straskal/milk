@@ -45,7 +45,7 @@ void milkLoadCode(Milk *milk)
 		_pushApi(L);
 
 		if (luaL_dofile(L, "main.lua"))
-			milkLog(milk, lua_tostring(L, -1), ERROR);
+			LOG_ERROR(milk, lua_tostring(L, -1));
 	}
 }
 
@@ -65,7 +65,7 @@ void milkInvokeInit(Code *code)
 	lua_getglobal(L, "_init"); /* Invoke _init callback. */
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
-		milkLog(_globalMilk, lua_tostring(L, -1), ERROR);
+		LOG_ERROR(milk, lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }
@@ -76,7 +76,7 @@ void milkInvokeUpdate(Code *code)
 	lua_getglobal(L, "_update");
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
-		milkLog(_globalMilk, lua_tostring(L, -1), ERROR);
+		LOG_ERROR(milk, lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }
@@ -87,7 +87,7 @@ void milkInvokeDraw(Code *code)
 	lua_getglobal(L, "_draw");
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
-		milkLog(_globalMilk, lua_tostring(L, -1), ERROR);
+		LOG_ERROR(milk, lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }
@@ -95,7 +95,7 @@ void milkInvokeDraw(Code *code)
 static int l_btn(lua_State *L)
 {
 	lua_pushboolean(L,
-		milkButton(&_globalMilk->input, (ButtonState)(1 << lua_tointeger(L, 1)))
+		isButtonDown(&_globalMilk->input, (ButtonState)(1 << lua_tointeger(L, 1)))
 	);
 	return 1;
 }
@@ -103,14 +103,14 @@ static int l_btn(lua_State *L)
 static int l_btnp(lua_State *L)
 {
 	lua_pushboolean(L,
-		milkButtonPressed(&_globalMilk->input, (ButtonState)(1 << lua_tointeger(L, 1)))
+		isButtonPressed(&_globalMilk->input, (ButtonState)(1 << lua_tointeger(L, 1)))
 	);
 	return 1;
 }
 
 static int l_clip(lua_State *L)
 {
-	milkClipRect(&_globalMilk->video,
+	setClippingRect(&_globalMilk->video,
 		(int)lua_tointeger(L, 1),
 		(int)lua_tointeger(L, 2),
 		(int)lua_tointeger(L, 3),
@@ -121,13 +121,13 @@ static int l_clip(lua_State *L)
 
 static int l_clrs(lua_State *L)
 {
-	milkClear(&_globalMilk->video, (Color32)luaL_optinteger(L, 1, 0x000000));
+	clearFramebuffer(&_globalMilk->video, (Color32)luaL_optinteger(L, 1, 0x000000));
 	return 0;
 }
 
 static int l_pset(lua_State *L)
 {
-	milkPixelSet(&_globalMilk->video,
+	blitPixel(&_globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(Color32)lua_tointeger(L, 3)
@@ -137,7 +137,7 @@ static int l_pset(lua_State *L)
 
 static int l_rect(lua_State *L)
 {
-	milkRect(&_globalMilk->video,
+	blitRectangle(&_globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
@@ -149,7 +149,7 @@ static int l_rect(lua_State *L)
 
 static int l_rectfill(lua_State *L)
 {
-	milkRectFill(&_globalMilk->video,
+	blitFilledRectangle(&_globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
@@ -161,7 +161,7 @@ static int l_rectfill(lua_State *L)
 
 static int l_spr(lua_State *L)
 {
-	milkSprite(&_globalMilk->video,
+	blitSprite(&_globalMilk->video,
 		(int)lua_tointeger(L, 1),
 		(int)floor(lua_tonumber(L, 2)),
 		(int)floor(lua_tonumber(L, 3)),
@@ -175,7 +175,7 @@ static int l_spr(lua_State *L)
 
 static int l_sprfont(lua_State *L)
 {
-	milkSpriteFont(&_globalMilk->video,
+	blitSpritefont(&_globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		lua_tostring(L, 3),
@@ -187,7 +187,7 @@ static int l_sprfont(lua_State *L)
 
 static int l_loadsnd(lua_State *L)
 {
-	milkLoadSound(&_globalMilk->audio,
+	loadSound(&_globalMilk->audio,
 		(int)lua_tointeger(L, 1),
 		lua_tostring(L, 2)
 	);
@@ -196,7 +196,7 @@ static int l_loadsnd(lua_State *L)
 
 static int l_plsnd(lua_State *L)
 {
-	milkPlaySound(&_globalMilk->audio,
+	playSound(&_globalMilk->audio,
 		(int)lua_tointeger(L, 1),
 		(int)lua_tointeger(L, 2),
 		(int)lua_tointeger(L, 3)
@@ -206,7 +206,7 @@ static int l_plsnd(lua_State *L)
 
 static int l_stsnd(lua_State *L)
 {
-	milkStopSound(&_globalMilk->audio,
+	stopSound(&_globalMilk->audio,
 		(int)lua_tointeger(L, 1)
 	);
 	return 0;
@@ -215,14 +215,14 @@ static int l_stsnd(lua_State *L)
 static int l_slot(lua_State *L)
 {
 	lua_pushinteger(L,
-		milkSlotState(&_globalMilk->audio, (int)lua_tointeger(L, 1))
+		getSampleState(&_globalMilk->audio, (int)lua_tointeger(L, 1))
 	);
 	return 1;
 }
 
 static int l_vol(lua_State *L)
 {
-	milkVolume(&_globalMilk->audio,
+	setMasterVolume(&_globalMilk->audio,
 		(uint8_t)lua_tointeger(L, 1)
 	);
 	return 0;

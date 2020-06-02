@@ -49,7 +49,7 @@ static void _unlockAudioDevice()
 
 static void _mixCallback(void *userdata, uint8_t *stream, int len)
 {
-	milkAudioQueueToStream((Audio *)userdata, stream, len);
+	mixSamplesIntoStream((Audio *)userdata, stream, len);
 }
 
 static void _loadWave(Audio *audio, const char *filename, int idx)
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 
-		milk = milkCreate();
+		milk = createMilk();
 		milkCmd = milkCmdCreate();
 		window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MILK_WINDOW_WIDTH, MILK_WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
 		renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
@@ -223,8 +223,8 @@ int main(int argc, char *argv[])
 		milk->video.loadBMP = _milkLoadBmp;
 		milk->audio.loadWAV = _loadWave;
 
-		milkLoadSpritesheet(&milk->video);
-		milkLoadFont(&milk->video);
+		loadSpritesheet(&milk->video);
+		loadFont(&milk->video);
 		milkLoadCode(milk);
 	}
 
@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	milkCmdFree(milkCmd);
-	milkFree(milk);
+	freeMilk(milk);
 	SDL_Quit();
 	return 0;
 }
