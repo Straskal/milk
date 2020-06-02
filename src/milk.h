@@ -233,6 +233,8 @@ typedef struct audio
 void loadSound(Audio *audio, int idx, const char *filename);
 void playSound(Audio *audio, int sampleIdx, int slotIdx, int volume);
 void stopSound(Audio *audio, int slotIdx);
+void pauseSound(Audio *audio, int slotIdx);
+void resumeSound(Audio *audio, int slotIdx);
 SampleSlotState getSampleState(Audio *audio, int slotIdx);
 void setMasterVolume(Audio *audio, int volume);
 void mixSamplesIntoStream(Audio *audio, uint8_t *stream, int len);

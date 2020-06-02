@@ -204,6 +204,22 @@ static int l_plsnd(lua_State *L)
 	return 0;
 }
 
+static int l_pssnd(lua_State *L)
+{
+	pauseSound(&_globalMilk->audio,
+		(int)lua_tointeger(L, 1)
+	);
+	return 0;
+}
+
+static int l_rssnd(lua_State *L)
+{
+	resumeSound(&_globalMilk->audio,
+		(int)lua_tointeger(L, 1)
+	);
+	return 0;
+}
+
 static int l_stsnd(lua_State *L)
 {
 	stopSound(&_globalMilk->audio,
@@ -248,6 +264,8 @@ static void _pushApi(lua_State *L)
 	_pushApiFunction(L, "loadsnd",	l_loadsnd);
 	_pushApiFunction(L, "plsnd",	l_plsnd);
 	_pushApiFunction(L, "stsnd",	l_stsnd);
+	_pushApiFunction(L, "pssnd",	l_pssnd);
+	_pushApiFunction(L, "rssnd",	l_rssnd);
 	_pushApiFunction(L, "slot",		l_slot);
 	_pushApiFunction(L, "vol",		l_vol);
 }

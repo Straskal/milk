@@ -29,6 +29,8 @@ milk.sprfont    = _G.sprfont
 milk.loadsnd    = _G.loadsnd
 milk.plsnd      = _G.plsnd
 milk.stsnd      = _G.stsnd
+milk.pssnd      = _G.pssnd
+milk.rssnd      = _G.rssnd
 milk.slot       = _G.slot
 milk.vol        = _G.vol
 

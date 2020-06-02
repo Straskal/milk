@@ -422,6 +422,32 @@ void stopSound(Audio *audio, int slotIdx)
 	audio->unlock();
 }
 
+void pauseSound(Audio *audio, int slotIdx)
+{
+	if (slotIdx < 0 || slotIdx > MILK_AUDIO_QUEUE_MAX)
+		return;
+
+	if (audio->slots[slotIdx].state == PLAYING)
+	{
+		audio->lock();
+		audio->slots[slotIdx].state = PAUSED;
+		audio->unlock();
+	}
+}
+
+void resumeSound(Audio *audio, int slotIdx)
+{
+	if (slotIdx < 0 || slotIdx > MILK_AUDIO_QUEUE_MAX)
+		return;
+
+	if (audio->slots[slotIdx].state == PAUSED)
+	{
+		audio->lock();
+		audio->slots[slotIdx].state = PLAYING;
+		audio->unlock();
+	}
+}
+
 SampleSlotState getSampleState(Audio *audio, int slotIdx)
 {
 	if (slotIdx < 0 || slotIdx > MILK_AUDIO_QUEUE_MAX)
