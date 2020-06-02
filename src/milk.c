@@ -408,14 +408,12 @@ void milkPlaySound(Audio *audio, int sampleIdx, int slotIdx, int volume)
 		return;
 
 	audio->lock();
-
 	SampleSlot *slot = &audio->slots[slotIdx];
 	slot->sampleData = sampleData;
 	slot->state = PLAYING;
 	slot->position = sampleData->buffer;
 	slot->remainingLength = sampleData->length;
 	slot->volume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
-
 	audio->unlock();
 }
 
