@@ -26,12 +26,13 @@ milk.rect       = _G.rect
 milk.rectfill   = _G.rectfill
 milk.spr        = _G.spr
 milk.sprfont    = _G.sprfont
-milk.loadsnd    = _G.loadsnd
-milk.plsnd      = _G.plsnd
-milk.stsnd      = _G.stsnd
-milk.pssnd      = _G.pssnd
-milk.rssnd      = _G.rssnd
-milk.slot       = _G.slot
+milk.allocsnd   = _G.allocsnd
+milk.freesnd    = _G.freesnd
+milk.play       = _G.play
+milk.stop       = _G.stop
+milk.pause      = _G.pause
+milk.resume     = _G.resume
+milk.sndslot    = _G.sndslot
 milk.vol        = _G.vol
 
 function _G._init()

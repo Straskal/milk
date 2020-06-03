@@ -32,7 +32,6 @@
 
 #define SDL_FIRST_AVAILABLE_RENDERER -1
 #define MILK_FRAMEBUF_PITCH (MILK_FRAMEBUF_WIDTH * 4)
-#define MILK_CMD /* We want to compile with the command line. */
 
 static int _gAudioDevice; /* Global audio device so we can access from our methods below. */
 

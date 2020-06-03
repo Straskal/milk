@@ -33,15 +33,14 @@
 
 /*
  *******************************************************************************
- * Helpers
+ * Helpers. Some of which are just for synactic sugar.
  *******************************************************************************
  */
 #define TEST_CASE(test)					static void test()
 #define SETUP(milk)						Milk *milk = createMilk()
-#define ACT(action)                     action /* For a bit of flavor ;) */
+#define ACT(action)                     action
 #define FREE_MILK(milk)					freeMilk(milk);
-#define TEARDOWN(milk)					teardown: FREE_MILK(milk)
-#define CUSTOM_TEARDOWN					teardown
+#define TEARDOWN    					teardown
 
 /*
  *******************************************************************************

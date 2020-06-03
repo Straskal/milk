@@ -37,7 +37,9 @@
  * - Allows up to 16 sounds loaded into memory.
  * - Allows up to 16 concurrent sounds via sample slots. Index 0 loops.
  *******************************************************************************
+ */
 
+/*
  *******************************************************************************
  * Logging
  *
@@ -70,14 +72,14 @@ typedef struct logs
 void logMessage(Logs *logs, const char *text, LogType type);
 void clearLogs(Logs *logs);
 
-#ifndef MILK_CMD
-#define LOG_INFO(logs, text)    (void *)1;
-#define LOG_WARN(logs, text)    (void *)1;
-#define LOG_ERROR(logs, text)   (void *)1;
-#else
+#ifdef MILK_CMD
 #define LOG_INFO(milk, text)    logMessage(&milk->logs, text, INFO)
 #define LOG_WARN(milk, text)    logMessage(&milk->logs, text, WARN)
 #define LOG_ERROR(milk, text)   logMessage(&milk->logs, text, ERROR)
+#else
+#define LOG_INFO(logs, text)    (void *)1;
+#define LOG_WARN(logs, text)    (void *)1;
+#define LOG_ERROR(logs, text)   (void *)1;
 #endif
 
 /*
@@ -191,8 +193,8 @@ void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Co
 #define MILK_AUDIO_FREQUENCY        44100
 #define MILK_AUDIO_CHANNELS         2 /* Stereo */
 #define MILK_AUDIO_SAMPLES          4096
-#define MILK_AUDIO_MAX_SOUNDS       16
-#define MILK_AUDIO_QUEUE_MAX        16
+#define MILK_MAX_LOADED_SAMPLES     16
+#define MILK_MAX_CONCUR_SOUNDS      16
 #define MILK_AUDIO_MAX_VOLUME       128
 
 typedef struct sampleData
@@ -219,8 +221,8 @@ typedef struct sampleSlot
 
 typedef struct audio
 {
-    SampleData      samples[MILK_AUDIO_MAX_SOUNDS];
-    SampleSlot      slots[MILK_AUDIO_QUEUE_MAX];
+    SampleData      samples[MILK_MAX_LOADED_SAMPLES];
+    SampleSlot      slots[MILK_MAX_CONCUR_SOUNDS];
     uint32_t        frequency;
     uint8_t         masterVolume;
     uint8_t         channels;

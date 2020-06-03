@@ -65,7 +65,7 @@ void milkInvokeInit(Code *code)
 	lua_getglobal(L, "_init"); /* Invoke _init callback. */
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
-		LOG_ERROR(milk, lua_tostring(L, -1));
+		LOG_ERROR(_globalMilk, lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }
@@ -76,7 +76,7 @@ void milkInvokeUpdate(Code *code)
 	lua_getglobal(L, "_update");
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
-		LOG_ERROR(milk, lua_tostring(L, -1));
+		LOG_ERROR(_globalMilk, lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }
@@ -87,7 +87,7 @@ void milkInvokeDraw(Code *code)
 	lua_getglobal(L, "_draw");
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
-		LOG_ERROR(milk, lua_tostring(L, -1));
+		LOG_ERROR(_globalMilk, lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }

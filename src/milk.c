@@ -30,6 +30,30 @@
 #include <stdio.h>
 #include <string.h>
 
+ /*
+  *******************************************************************************
+  * Helpers
+  *******************************************************************************
+  */
+
+static int _clamp(int value, int min, int max)
+{
+	if (value < min)
+		value = min;
+	if (value > max)
+		value = max;
+	return value;
+}
+
+static float _clampf(float value, float min, float max)
+{
+	if (value < min)
+		value = min;
+	if (value > max)
+		value = max;
+	return value;
+}
+
 /*
  *******************************************************************************
  * Initialization and shutdown
@@ -65,13 +89,13 @@ static void _initVideo(Video *video)
 
 static void _initAudio(Audio *audio)
 {
-	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
+	for (int i = 0; i < MILK_MAX_LOADED_SAMPLES; i++)
 	{
 		audio->samples[i].buffer = NULL;
 		audio->samples[i].length = 0;
 	}
 
-	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+	for (int i = 0; i < MILK_MAX_CONCUR_SOUNDS; i++)
 	{
 		audio->slots[i].sampleData = NULL;
 		audio->slots[i].state = STOPPED;
@@ -106,7 +130,7 @@ Milk *createMilk()
 
 void freeMilk(Milk *milk)
 {
-	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
+	for (int i = 0; i < MILK_MAX_LOADED_SAMPLES; i++)
 		free(milk->audio.samples[i].buffer);
 
 	free(milk);
@@ -191,39 +215,19 @@ void loadFont(Video *video)
 
 void resetDrawState(Video *video)
 {
-	video->colorKey = 0;
+	video->colorKey = 0x00;
 	video->clipRect.top = 0;
 	video->clipRect.left = 0;
 	video->clipRect.bottom = MILK_FRAMEBUF_HEIGHT;
 	video->clipRect.right = MILK_FRAMEBUF_WIDTH;
 }
 
-static int _clamp(int value, int min, int max)
-{
-	if (value < min)
-		value = min;
-	if (value > max)
-		value = max;
-
-	return value;
-}
-
-static float _clampf(float value, float min, float max)
-{
-	if (value < min)
-		value = min;
-	if (value > max)
-		value = max;
-
-	return value;
-}
-
 void setClippingRect(Video *video, int x, int y, int w, int h)
 {
-	video->clipRect.left =		_clamp(x, 0, MILK_FRAMEBUF_WIDTH);
-	video->clipRect.right =		_clamp(x + w, 0, MILK_FRAMEBUF_WIDTH);
-	video->clipRect.top =		_clamp(y, 0, MILK_FRAMEBUF_HEIGHT);
-	video->clipRect.bottom =	_clamp(y + h, 0, MILK_FRAMEBUF_HEIGHT);
+	video->clipRect.left = _clamp(x, 0, MILK_FRAMEBUF_WIDTH);
+	video->clipRect.right = _clamp(x + w, 0, MILK_FRAMEBUF_WIDTH);
+	video->clipRect.top = _clamp(y, 0, MILK_FRAMEBUF_HEIGHT);
+	video->clipRect.bottom = _clamp(y + h, 0, MILK_FRAMEBUF_HEIGHT);
 }
 
 #define FRAMEBUFFER_POS(x, y)			((MILK_FRAMEBUF_WIDTH * y) + x)
@@ -293,8 +297,8 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 	scale = _clampf(scale, MIN_SCALE, MAX_SCALE);
 	int width = (int)floor((double)w * scale);
 	int height = (int)floor((double)h * scale);
-	int xRatio = (int)((w << 16) / width) + 1;
-	int yRatio = (int)((h << 16) / height) + 1;
+	int xRatio = (int)(((w << 16) / width) + 0.5f);
+	int yRatio = (int)(((h << 16) / height) + 0.5f);
 	int xPixelStart = (flip & FLIP_X) == FLIP_X ? width - 1 : 0;
 	int xDirection = (flip & FLIP_Y) == FLIP_Y ? -1 : 1;
 	int yPixelStart = (flip & FLIP_X) == FLIP_X ? height - 1 : 0;
@@ -324,6 +328,7 @@ void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 	const int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
 	const int rowSize = MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE;
 	const int colSize = MILK_SPRSHEET_SPR_SQRSIZE;
+
 	int row = (int)floor(idx / numColumns);
 	int col = (int)floor(idx % numColumns);
 	Color32 *pixels = &video->spritesheet[row * rowSize + col * colSize];
@@ -342,6 +347,7 @@ void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Co
 	const int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
 	const int rowSize = MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE;
 	const int colSize = MILK_CHAR_SQRSIZE;
+
 	int charSize = (int)floor((double)MILK_CHAR_SQRSIZE * scale);
 	int xCurrent = x;
 	int yCurrent = y;
@@ -374,8 +380,8 @@ void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Co
  *******************************************************************************
  */
 
-#define SAMPLEIDX_OO_BOUNDS(idx)	(idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
-#define SLOTIDX_OO_BOUNDS(idx)		(idx < 0 || idx > MILK_AUDIO_QUEUE_MAX)
+#define SAMPLEIDX_OO_BOUNDS(idx)	(idx < 0 || idx > MILK_MAX_LOADED_SAMPLES)
+#define SLOTIDX_OO_BOUNDS(idx)		(idx < 0 || idx > MILK_MAX_CONCUR_SOUNDS)
 
 void loadSound(Audio *audio, int idx, const char *filename)
 {
@@ -397,11 +403,11 @@ void unloadSound(Audio *audio, int idx)
 		return;
 
 	audio->lock();
-	SampleData *sampleData = audio->samples[idx].buffer;
+	SampleData *sampleData = &audio->samples[idx];
 
 	if (sampleData != NULL)
 	{
-		for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+		for (int i = 0; i < MILK_MAX_CONCUR_SOUNDS; i++)
 		{
 			if (audio->slots[i].sampleData == sampleData)
 			{
@@ -513,7 +519,7 @@ void mixSamplesIntoStream(Audio *audio, uint8_t *stream, int len)
 {
 	memset(stream, 0, len);
 
-	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+	for (int i = 0; i < MILK_MAX_CONCUR_SOUNDS; i++)
 	{
 		SampleSlot *slot = &audio->slots[i];
 
