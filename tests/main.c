@@ -55,8 +55,14 @@ static Test _tests[] =
 	INIT_TEST(playSound_SetsSlot),
 	INIT_TEST(playSound_ClampsVolumeToMin),
 	INIT_TEST(playSound_ClampsVolumeToMax),
-	INIT_TEST(playSound_ClampsToMinValue),
-	INIT_TEST(playSound_ClampsToMaxValue),
+	INIT_TEST(setMasterVolume_ClampsToMinValue),
+	INIT_TEST(setMasterVolume_ClampsToMaxValue),
+	INIT_TEST(stopSound_WhenIndexOutOfBounds_DoesNothing),
+	INIT_TEST(stopSound_StopsSound),
+	INIT_TEST(pauseSound_WhenIndexOutOfBounds_DoesNothing),
+	INIT_TEST(pauseSound_PausesSound),
+	INIT_TEST(resumeSound_WhenIndexOutOfBounds_DoesNothing),
+	INIT_TEST(resumeSound_resumesSound)
 };
 
 #define TEST_COUNT sizeof(_tests) / sizeof(Test)

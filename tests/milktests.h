@@ -350,7 +350,7 @@ TEST_CASE(playSound_ClampsVolumeToMax)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(playSound_ClampsToMinValue)
+TEST_CASE(setMasterVolume_ClampsToMinValue)
 {
 	SETUP(milk);
 	ACT(setMasterVolume(&milk->audio, -10));
@@ -358,11 +358,78 @@ TEST_CASE(playSound_ClampsToMinValue)
 	TEARDOWN(milk);
 }
 
-TEST_CASE(playSound_ClampsToMaxValue)
+TEST_CASE(setMasterVolume_ClampsToMaxValue)
 {
 	SETUP(milk);
 	ACT(setMasterVolume(&milk->audio, MILK_AUDIO_MAX_VOLUME + 10));
 	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, milk->audio.masterVolume);
+	TEARDOWN(milk);
+}
+
+TEST_CASE(stopSound_WhenIndexOutOfBounds_DoesNothing)
+{
+	SETUP(milk);
+	ACT(stopSound(&milk->audio, -10));
+	ACT(stopSound(&milk->audio, MILK_AUDIO_QUEUE_MAX + 10));
+	TEARDOWN(milk);
+}
+
+TEST_CASE(stopSound_StopsSound)
+{
+	SETUP(milk);
+	milk->audio.lock = _mockLock;
+	milk->audio.unlock = _mockUnlock;
+	milk->audio.slots[0].sampleData = &milk->audio.samples[0];
+	milk->audio.slots[0].state = PLAYING;
+
+	ACT(stopSound(&milk->audio, 0));
+
+	ASSERT_NULL(milk->audio.slots[0].sampleData);
+	ASSERT_EQ(STOPPED, milk->audio.slots[0].state);
+	TEARDOWN(milk);
+}
+
+TEST_CASE(pauseSound_WhenIndexOutOfBounds_DoesNothing)
+{
+	SETUP(milk);
+	ACT(pauseSound(&milk->audio, -10));
+	ACT(pauseSound(&milk->audio, MILK_AUDIO_QUEUE_MAX + 10));
+	TEARDOWN(milk);
+}
+
+TEST_CASE(pauseSound_PausesSound)
+{
+	SETUP(milk);
+	milk->audio.lock = _mockLock;
+	milk->audio.unlock = _mockUnlock;
+	milk->audio.slots[0].sampleData = &milk->audio.samples[0];
+	milk->audio.slots[0].state = PLAYING;
+
+	ACT(pauseSound(&milk->audio, 0));
+
+	ASSERT_EQ(PAUSED, milk->audio.slots[0].state);
+	TEARDOWN(milk);
+}
+
+TEST_CASE(resumeSound_WhenIndexOutOfBounds_DoesNothing)
+{
+	SETUP(milk);
+	ACT(resumeSound(&milk->audio, -10));
+	ACT(resumeSound(&milk->audio, MILK_AUDIO_QUEUE_MAX + 10));
+	TEARDOWN(milk);
+}
+
+TEST_CASE(resumeSound_resumesSound)
+{
+	SETUP(milk);
+	milk->audio.lock = _mockLock;
+	milk->audio.unlock = _mockUnlock;
+	milk->audio.slots[0].sampleData = &milk->audio.samples[0];
+	milk->audio.slots[0].state = PAUSED;
+
+	ACT(resumeSound(&milk->audio, 0));
+
+	ASSERT_EQ(PLAYING, milk->audio.slots[0].state);
 	TEARDOWN(milk);
 }
 
