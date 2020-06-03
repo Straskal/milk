@@ -231,6 +231,7 @@ typedef struct audio
 } Audio;
 
 void loadSound(Audio *audio, int idx, const char *filename);
+void unloadSound(Audio *audio, int idx);
 void playSound(Audio *audio, int sampleIdx, int slotIdx, int volume);
 void stopSound(Audio *audio, int slotIdx);
 void pauseSound(Audio *audio, int slotIdx);

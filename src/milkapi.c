@@ -185,7 +185,7 @@ static int l_sprfont(lua_State *L)
 	return 1;
 }
 
-static int l_loadsnd(lua_State *L)
+static int l_allocsnd(lua_State *L)
 {
 	loadSound(&_globalMilk->audio,
 		(int)lua_tointeger(L, 1),
@@ -194,7 +194,15 @@ static int l_loadsnd(lua_State *L)
 	return 0;
 }
 
-static int l_plsnd(lua_State *L)
+static int l_freesnd(lua_State *L)
+{
+	unloadSound(&_globalMilk->audio,
+		(int)lua_tointeger(L, 1)
+	);
+	return 0;
+}
+
+static int l_play(lua_State *L)
 {
 	playSound(&_globalMilk->audio,
 		(int)lua_tointeger(L, 1),
@@ -204,7 +212,7 @@ static int l_plsnd(lua_State *L)
 	return 0;
 }
 
-static int l_pssnd(lua_State *L)
+static int l_pause(lua_State *L)
 {
 	pauseSound(&_globalMilk->audio,
 		(int)lua_tointeger(L, 1)
@@ -212,7 +220,7 @@ static int l_pssnd(lua_State *L)
 	return 0;
 }
 
-static int l_rssnd(lua_State *L)
+static int l_resume(lua_State *L)
 {
 	resumeSound(&_globalMilk->audio,
 		(int)lua_tointeger(L, 1)
@@ -220,7 +228,7 @@ static int l_rssnd(lua_State *L)
 	return 0;
 }
 
-static int l_stsnd(lua_State *L)
+static int l_stop(lua_State *L)
 {
 	stopSound(&_globalMilk->audio,
 		(int)lua_tointeger(L, 1)
@@ -228,7 +236,7 @@ static int l_stsnd(lua_State *L)
 	return 0;
 }
 
-static int l_slot(lua_State *L)
+static int l_sndslot(lua_State *L)
 {
 	lua_pushinteger(L,
 		getSampleState(&_globalMilk->audio, (int)lua_tointeger(L, 1))
@@ -261,11 +269,12 @@ static void _pushApi(lua_State *L)
 	_pushApiFunction(L, "rectfill", l_rectfill);
 	_pushApiFunction(L, "spr",		l_spr);
 	_pushApiFunction(L, "sprfont",	l_sprfont);
-	_pushApiFunction(L, "loadsnd",	l_loadsnd);
-	_pushApiFunction(L, "plsnd",	l_plsnd);
-	_pushApiFunction(L, "stsnd",	l_stsnd);
-	_pushApiFunction(L, "pssnd",	l_pssnd);
-	_pushApiFunction(L, "rssnd",	l_rssnd);
-	_pushApiFunction(L, "slot",		l_slot);
+	_pushApiFunction(L, "allocsnd",	l_allocsnd);
+	_pushApiFunction(L, "freesnd",	l_freesnd);
+	_pushApiFunction(L, "play",		l_play);
+	_pushApiFunction(L, "stop",		l_stop);
+	_pushApiFunction(L, "pause",	l_pause);
+	_pushApiFunction(L, "resume",	l_resume);
+	_pushApiFunction(L, "sndslot",	l_sndslot);
 	_pushApiFunction(L, "vol",		l_vol);
 }

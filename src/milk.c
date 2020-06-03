@@ -374,9 +374,12 @@ void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Co
  *******************************************************************************
  */
 
+#define SAMPLEIDX_OO_BOUNDS(idx)	(idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
+#define SLOTIDX_OO_BOUNDS(idx)		(idx < 0 || idx > MILK_AUDIO_QUEUE_MAX)
+
 void loadSound(Audio *audio, int idx, const char *filename)
 {
-	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
+	if (SAMPLEIDX_OO_BOUNDS(idx))
 		return;
 
 	audio->lock();
@@ -388,12 +391,34 @@ void loadSound(Audio *audio, int idx, const char *filename)
 	audio->unlock();
 }
 
+void unloadSound(Audio *audio, int idx)
+{
+	if (SAMPLEIDX_OO_BOUNDS(idx))
+		return;
+
+	audio->lock();
+	SampleData *sampleData = audio->samples[idx].buffer;
+
+	if (sampleData != NULL)
+	{
+		for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+		{
+			if (audio->slots[i].sampleData == sampleData)
+			{
+				audio->slots[i].sampleData = NULL;
+				audio->slots[i].state = STOPPED;
+			}
+		}
+
+		free(audio->samples[idx].buffer);
+		audio->samples[idx].buffer = NULL;
+	}
+	audio->unlock();
+}
+
 void playSound(Audio *audio, int sampleIdx, int slotIdx, int volume)
 {
-	if (sampleIdx < 0
-		|| sampleIdx > MILK_AUDIO_MAX_SOUNDS
-		|| slotIdx < 0
-		|| slotIdx > MILK_AUDIO_QUEUE_MAX)
+	if (SAMPLEIDX_OO_BOUNDS(sampleIdx) || SLOTIDX_OO_BOUNDS(slotIdx))
 		return;
 
 	SampleData *sampleData = &audio->samples[sampleIdx];
@@ -413,7 +438,7 @@ void playSound(Audio *audio, int sampleIdx, int slotIdx, int volume)
 
 void stopSound(Audio *audio, int slotIdx)
 {
-	if (slotIdx < 0 || slotIdx > MILK_AUDIO_QUEUE_MAX)
+	if (SLOTIDX_OO_BOUNDS(slotIdx))
 		return;
 
 	audio->lock();
@@ -424,7 +449,7 @@ void stopSound(Audio *audio, int slotIdx)
 
 void pauseSound(Audio *audio, int slotIdx)
 {
-	if (slotIdx < 0 || slotIdx > MILK_AUDIO_QUEUE_MAX)
+	if (SLOTIDX_OO_BOUNDS(slotIdx))
 		return;
 
 	if (audio->slots[slotIdx].state == PLAYING)
@@ -437,7 +462,7 @@ void pauseSound(Audio *audio, int slotIdx)
 
 void resumeSound(Audio *audio, int slotIdx)
 {
-	if (slotIdx < 0 || slotIdx > MILK_AUDIO_QUEUE_MAX)
+	if (SLOTIDX_OO_BOUNDS(slotIdx))
 		return;
 
 	if (audio->slots[slotIdx].state == PAUSED)
@@ -450,7 +475,7 @@ void resumeSound(Audio *audio, int slotIdx)
 
 SampleSlotState getSampleState(Audio *audio, int slotIdx)
 {
-	if (slotIdx < 0 || slotIdx > MILK_AUDIO_QUEUE_MAX)
+	if (SLOTIDX_OO_BOUNDS(slotIdx))
 		return STOPPED;
 
 	return audio->slots[slotIdx].state;

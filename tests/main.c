@@ -34,7 +34,7 @@ static Test _tests[] =
 	INIT_TEST(createMilk_InitializesColorKey),
 	INIT_TEST(createMilk_InitializesClipRect),
 	INIT_TEST(createMilk_InitializesSamples),
-	INIT_TEST(createMilk_InitializesAudioQueue),
+	INIT_TEST(createMilk_InitializesAudioSlots),
 	INIT_TEST(createMilk_InitializesAudioSettings),
 
 	INIT_TEST(isButtonDown_WhenButtonDown_ReturnsTrue),
@@ -51,17 +51,12 @@ static Test _tests[] =
 
 	INIT_TEST(playSound_WhenIndexOutOfBounds_DoesNothing),
 	INIT_TEST(playSound_WhenSampleAtIndexNotLoaded_DoesNothing),
-	INIT_TEST(playSound_WhenMaxNumberOfConcurrentSoundsPlaying_DoesNothing),
-	INIT_TEST(playSound_QueuesNewSample),
-	INIT_TEST(playSound_WhenLoop_ExistingLoopingSampleIsRemovedFromQueueBeforeQueueingNewSample),
+	INIT_TEST(playSound_WhenSampleLengthIsZero_DoesNothing),
+	INIT_TEST(playSound_SetsSlot),
 	INIT_TEST(playSound_ClampsVolumeToMin),
 	INIT_TEST(playSound_ClampsVolumeToMax),
 	INIT_TEST(playSound_ClampsToMinValue),
 	INIT_TEST(playSound_ClampsToMaxValue),
-	INIT_TEST(mixSampleIntoStream_WhenQueueIsEmpty_DoesNotMixIntoStream),
-	INIT_TEST(mixSampleIntoStream_WhenQueueItemsAreNotFinished_MixesSamplesIntoStream),
-	INIT_TEST(mixSampleIntoStream_WhenSamplesIsFinishedAndLooping_ResetsSampleAndMixesIntoStream),
-	INIT_TEST(mixSampleIntoStream_WhenSamplesIsFinished_RemovesSampleFromQueue)
 };
 
 #define TEST_COUNT sizeof(_tests) / sizeof(Test)
