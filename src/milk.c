@@ -279,8 +279,8 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
 	}
 }
 
-#define MIN_SCALE 0.5f
-#define MAX_SCALE 5.0f
+#define MIN_SCALE			0.5f
+#define MAX_SCALE			5.0f
 #define IS_FLIPPED_X(flip)	((flip & 1) == 1)
 #define IS_FLIPPED_Y(flip)	((flip & 2) == 2)
 
