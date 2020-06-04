@@ -13,8 +13,7 @@ function introState.update()
 end
 
 function introState.draw()
-    milk.sprfont(10, 10, "this is the intro state.")
-    milk.sprfont(20, 20, tostring(milk.sndslot(0)))
+    milk.spr(0, 20, 20, 2, 1, 5, 1)
 end
 
 return introState

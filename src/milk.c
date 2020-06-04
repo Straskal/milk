@@ -83,7 +83,7 @@ static void _initVideo(Video *video)
 {
 	memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
 	memset(&video->spritesheet, 0x00, sizeof(video->spritesheet));
-	memset(&video->font,		0x00, sizeof(video->font));
+	memset(&video->font, 0x00, sizeof(video->font));
 	resetDrawState(video);
 }
 
@@ -142,7 +142,7 @@ void freeMilk(Milk *milk)
  *******************************************************************************
  */
 
-/* When milk's log array is full, we shift down all of the logs before inserting the next one.*/
+ /* When milk's log array is full, we shift down all of the logs before inserting the next one.*/
 static LogMessage *_getNextFreeLogMessage(Logs *logs)
 {
 	if (logs->count == MILK_MAX_LOGS)
@@ -279,10 +279,10 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
 	}
 }
 
-#define MIN_SCALE	0.5f
-#define MAX_SCALE	5.0f
-#define FLIP_X		1
-#define FLIP_Y		2
+#define MIN_SCALE 0.5f
+#define MAX_SCALE 5.0f
+#define IS_FLIPPED_X(flip)	((flip & 1) == 1)
+#define IS_FLIPPED_Y(flip)	((flip & 2) == 2)
 
 /*
  * Main helper function to blit pixel images onto the framebuffer.
@@ -294,17 +294,17 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
  */
 static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip, Color32 *color)
 {
-	scale = _clampf(scale, MIN_SCALE, MAX_SCALE);
-	int width = (int)floor((double)w * scale);
+	scale =	_clampf(scale, MIN_SCALE, MAX_SCALE);
+	int width =	(int)floor((double)w * scale);
 	int height = (int)floor((double)h * scale);
 	int xRatio = (int)(((w << 16) / width) + 0.5f);
 	int yRatio = (int)(((h << 16) / height) + 0.5f);
-	int xPixelStart = (flip & FLIP_X) == FLIP_X ? width - 1 : 0;
-	int xDirection = (flip & FLIP_Y) == FLIP_Y ? -1 : 1;
-	int yPixelStart = (flip & FLIP_X) == FLIP_X ? height - 1 : 0;
-	int yDirection = (flip & FLIP_Y) == FLIP_Y ? -1 : 1;
-	int xPixel, yPixel;
-	int xFramebuffer, yFramebuffer;
+	int xPixelStart = IS_FLIPPED_X(flip) ? width - 1 : 0;
+	int yPixelStart = IS_FLIPPED_Y(flip) ? height - 1 : 0;
+	int xDirection = IS_FLIPPED_X(flip) ? -1 : 1;
+	int yDirection = IS_FLIPPED_Y(flip) ? -1 : 1;
+
+	int xPixel, yPixel, xFramebuffer, yFramebuffer;
 
 	for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yDirection)
 	{
@@ -320,22 +320,26 @@ static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h,
 	}
 }
 
+#define SPRSHEET_IDX_OO_BOUNDS(idx)	(idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
+#define SPRSHEET_COLUMNS			MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE
+#define SPRSHEET_ROW_SIZE			MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE
+#define SPRSHEET_COL_SIZE			MILK_SPRSHEET_SPR_SQRSIZE
+
 void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip)
 {
-	if (idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
+	if (SPRSHEET_IDX_OO_BOUNDS(idx))
 		return;
 
-	const int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
-	const int rowSize = MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE;
-	const int colSize = MILK_SPRSHEET_SPR_SQRSIZE;
-
-	int row = (int)floor(idx / numColumns);
-	int col = (int)floor(idx % numColumns);
-	Color32 *pixels = &video->spritesheet[row * rowSize + col * colSize];
+	int row = (int)floor(idx / SPRSHEET_COLUMNS);
+	int col = (int)floor(idx % SPRSHEET_COLUMNS);
+	Color32 *pixels = &video->spritesheet[row * SPRSHEET_ROW_SIZE + col * SPRSHEET_COL_SIZE];
 
 	_blitRect(video, pixels, x, y, w * MILK_SPRSHEET_SPR_SQRSIZE, h * MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE, scale, flip, NULL);
 }
 
+#define FONT_COLUMNS	MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE
+#define FONT_ROW_SIZE	MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE
+#define FONT_COL_SIZE	MILK_CHAR_SQRSIZE
 #define IS_ASCII(c)		((c & 0xff80) == 0)
 #define IS_NEWLINE(c)	(c == '\n')
 
@@ -343,10 +347,6 @@ void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Co
 {
 	if (str == NULL)
 		return;
-
-	const int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
-	const int rowSize = MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE;
-	const int colSize = MILK_CHAR_SQRSIZE;
 
 	int charSize = (int)floor((double)MILK_CHAR_SQRSIZE * scale);
 	int xCurrent = x;
@@ -358,9 +358,9 @@ void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Co
 		{
 			char ch = *(str++);
 			if (!IS_ASCII(ch)) ch = '?'; /* If the character is not ASCII, then we're just gonna be all like whaaaaaat? Problem solved. */
-			int row = (int)floor((ch - 32) / numColumns); /* bitmap font starts at ASCII character 32 (SPACE) */
-			int col = (int)floor((ch - 32) % numColumns);
-			Color32 *pixels = &video->font[(row * rowSize + col * colSize)];
+			int row = (int)floor((ch - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
+			int col = (int)floor((ch - 32) % FONT_COLUMNS);
+			Color32 *pixels = &video->font[(row * FONT_ROW_SIZE + col * FONT_COL_SIZE)];
 
 			_blitRect(video, pixels, xCurrent, yCurrent, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0, &color);
 			xCurrent += charSize;
