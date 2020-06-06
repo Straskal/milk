@@ -337,11 +337,11 @@ void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 	_blitRect(video, pixels, x, y, w * MILK_SPRSHEET_SPR_SQRSIZE, h * MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE, scale, flip, NULL);
 }
 
-#define FONT_COLUMNS	MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE
-#define FONT_ROW_SIZE	MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE
-#define FONT_COL_SIZE	MILK_CHAR_SQRSIZE
-#define IS_ASCII(c)		((c & 0xff80) == 0)
-#define IS_NEWLINE(c)	(c == '\n')
+#define FONT_COLUMNS		(MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE)
+#define FONT_ROW_SIZE		(MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE)
+#define FONT_COL_SIZE		MILK_CHAR_SQRSIZE
+#define IS_ASCII(c)			((c & 0xff80) == 0)
+#define IS_NEWLINE(c)		(c == '\n')
 
 void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Color32 color)
 {
@@ -351,15 +351,15 @@ void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Co
 	int charSize = (int)floor((double)MILK_CHAR_SQRSIZE * scale);
 	int xCurrent = x;
 	int yCurrent = y;
+	char curr;
 
-	while (*str)
+	while ((curr = *str++) != '\0')
 	{
-		if (!IS_NEWLINE(*str))
+		if (!IS_NEWLINE(curr))
 		{
-			char ch = *(str++);
-			if (!IS_ASCII(ch)) ch = '?'; /* If the character is not ASCII, then we're just gonna be all like whaaaaaat? Problem solved. */
-			int row = (int)floor((ch - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
-			int col = (int)floor((ch - 32) % FONT_COLUMNS);
+			if (!IS_ASCII(curr)) curr = '?'; /* If the character is not ASCII, then we're just gonna be all like whaaaaaat? Problem solved. */
+			int row = (int)floor((curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
+			int col = (int)floor((curr - 32) % FONT_COLUMNS);
 			Color32 *pixels = &video->font[(row * FONT_ROW_SIZE + col * FONT_COL_SIZE)];
 
 			_blitRect(video, pixels, xCurrent, yCurrent, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0, &color);
@@ -369,7 +369,6 @@ void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Co
 		{
 			xCurrent = x;
 			yCurrent += charSize;
-			str++;
 		}
 	}
 }
