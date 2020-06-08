@@ -23,7 +23,7 @@
  */
 
 #include "milk.h"
-#include "milkapi.h"
+#include "api.h"
 #include "font.h"
 
 #include <math.h>
@@ -43,6 +43,7 @@ static int _clamp(int value, int min, int max)
 		value = min;
 	if (value > max)
 		value = max;
+
 	return value;
 }
 
@@ -52,6 +53,7 @@ static float _clampf(float value, float min, float max)
 		value = min;
 	if (value > max)
 		value = max;
+
 	return value;
 }
 
@@ -84,7 +86,7 @@ static void _initVideo(Video *video)
 {
 	memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
 	memset(&video->spritesheet, 0x00, sizeof(video->spritesheet));
-	memset(&video->font, 0x00, sizeof(video->font));
+	memcpy(&video->font, FONT_DATA, sizeof(video->font));
 	resetDrawState(video);
 }
 
@@ -209,10 +211,9 @@ void loadSpritesheet(Video *video, const char *path)
 	video->loadBMP(path, video->spritesheet, sizeof(video->spritesheet) / sizeof(Color32));
 }
 
-void loadFont(Video *video)
+void loadFont(Video *video, const char *path)
 {
-	//video->loadBMPFromMem(FONT_DATA, sizeof(FONT_DATA), video->font, sizeof(video->font) / sizeof(Color32));
-	memcpy(video->font, FONT_DATA, sizeof(video->font));
+	video->loadBMP(path, video->font, sizeof(video->font) / sizeof(Color32));
 }
 
 void resetDrawState(Video *video)
@@ -294,7 +295,7 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
  * "Nearest neighbor scaling replaces every pixel with the nearest pixel in the output.
  *  When upscaling an image, multiple pixels of the same color will be duplicated throughout the image." - Some random explanation on google.
  */
-static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip, Color32 *color)
+static void _blitRect(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip, Color32 *color)
 {
 	scale =	_clampf(scale, MIN_SCALE, MAX_SCALE);
 	int width =	(int)floor((double)w * scale);
@@ -345,7 +346,7 @@ void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 #define IS_ASCII(c)			((c & 0xff80) == 0)
 #define IS_NEWLINE(c)		(c == '\n')
 
-void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Color32 color)
+void blitSpritefont(Video *video, const Color32 *pixels, int x, int y, const char *str, float scale, Color32 color)
 {
 	if (str == NULL)
 		return;
@@ -362,9 +363,9 @@ void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Co
 			if (!IS_ASCII(curr)) curr = '?'; /* If the character is not ASCII, then we're just gonna be all like whaaaaaat? Problem solved. */
 			int row = (int)floor((curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
 			int col = (int)floor((curr - 32) % FONT_COLUMNS);
-			Color32 *pixels = &video->font[(row * FONT_ROW_SIZE + col * FONT_COL_SIZE)];
+			const Color32 *pixelStart = &pixels[(row * FONT_ROW_SIZE + col * FONT_COL_SIZE)];
 
-			_blitRect(video, pixels, xCurrent, yCurrent, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0, &color);
+			_blitRect(video, pixelStart, xCurrent, yCurrent, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0, &color);
 			xCurrent += charSize;
 		}
 		else

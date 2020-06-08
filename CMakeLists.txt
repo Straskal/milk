@@ -32,15 +32,16 @@ find_package(Lua53 REQUIRED)
 set(MILK_SRC_FILES
 	src/milk.c
 	src/milk.h
+	src/font.c
 	src/font.h
 )
 
 set(MILK_MAIN_SRC_FILES
-	src/main.c
-	src/milkapi.c
-	src/milkapi.h
-	src/milkcmd.c
-	src/milkcmd.h
+	src/api.c
+	src/api.h
+	src/bootstrap/main.c
+	src/editor/cmd.c
+	src/editor/cmd.h
 )
 
 add_executable(milk
@@ -80,6 +81,8 @@ enable_testing()
 add_executable(milktests
 	src/milk.c
 	src/milk.h
+	src/font.c
+	src/font.h
 	tests/main.c
 	tests/milktests.h
 	tests/milkassert.h

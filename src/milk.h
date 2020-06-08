@@ -160,11 +160,10 @@ typedef struct video
     Rect    clipRect;
 
     void(*loadBMP)(const char *, Color32 *, size_t);
-    void(*loadBMPFromMem)(const uint8_t *, size_t, Color32 *, size_t);
 } Video;
 
 void loadSpritesheet(Video *video, const char *path);
-void loadFont(Video *video);
+void loadFont(Video *video, const char *path);
 void resetDrawState(Video *video);
 void setClippingRect(Video *video, int x, int y, int w, int h);
 void clearFramebuffer(Video *video, Color32 color);
@@ -172,7 +171,7 @@ void blitPixel(Video *video, int x, int y, Color32 color);
 void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color);
 void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color);
 void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip);
-void blitSpritefont(Video *video, int x, int y, const char *str, float scale, Color32 color);
+void blitSpritefont(Video *video, const Color32 *pixels, int x, int y, const char *str, float scale, Color32 color);
 
 /*
  *******************************************************************************

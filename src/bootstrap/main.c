@@ -23,8 +23,8 @@
  */
 
 #include "milk.h"
-#include "milkapi.h"
-#include "milkcmd.h"
+#include "api.h"
+#include "editor/cmd.h"
 
 #include <memory.h>
 #include <stdio.h>
@@ -70,7 +70,7 @@ static void _loadWave(Audio *audio, const char *filename, int idx)
 	sampleData->length = (uint32_t)floor(conversion.len * conversion.len_ratio);
 }
 
-static void _milkLoadBmp(const char *filename, Color32 *dest, size_t len)
+static void _loadBmp(const char *filename, Color32 *dest, size_t len)
 {
 	SDL_Surface *bmp = SDL_LoadBMP(filename);
 	if (bmp == NULL)
@@ -79,24 +79,6 @@ static void _milkLoadBmp(const char *filename, Color32 *dest, size_t len)
 	uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
 
 	for (size_t i = 0; i < len; i++)
-	{
-		int b = *bmpPixels++;
-		int g = *bmpPixels++;
-		int r = *bmpPixels++;
-
-		dest[i] = (r << 16) | (g << 8) | (b);
-	}
-
-	SDL_FreeSurface(bmp);
-}
-
-static void _milkLoadBmpFromMemory(const uint8_t *data, size_t dataLen, Color32 *dest, size_t destLen)
-{
-	SDL_RWops *rwops = SDL_RWFromConstMem(data, dataLen);
-	SDL_Surface *bmp = SDL_LoadBMP_RW(rwops, 1);
-	uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
-
-	for (size_t i = 0; i < destLen; i++)
 	{
 		int b = *bmpPixels++;
 		int g = *bmpPixels++;
@@ -162,6 +144,9 @@ static int _enter()
  */
 int main(int argc, char *argv[])
 {
+	(void *)argc;
+	(void *)argv;
+
 	Milk *milk;
 	MilkCmd *milkCmd;
 	SDL_Window *window;
@@ -240,11 +225,9 @@ int main(int argc, char *argv[])
 		 *******************************************************************************
 		 */
 
-		milk->video.loadBMP = _milkLoadBmp;
-		milk->video.loadBMPFromMem = _milkLoadBmpFromMemory;
+		milk->video.loadBMP = _loadBmp;
 		milk->audio.loadWAV = _loadWave;
 
-		loadFont(&milk->video);
 		milkLoadCode(milk);
 	}
 

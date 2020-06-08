@@ -22,7 +22,7 @@
  *  SOFTWARE.
  */
 
-#include "milkapi.h"
+#include "api.h"
 #include "milk.h"
 
 #include <lua.h>
@@ -116,6 +116,14 @@ static int l_loadspr(lua_State *L)
 	return 0;
 }
 
+static int l_loadfont(lua_State *L)
+{
+	loadFont(&_globalMilk->video,
+		lua_tostring(L, 1)
+	);
+	return 0;
+}
+
 static int l_clip(lua_State *L)
 {
 	setClippingRect(&_globalMilk->video,
@@ -183,7 +191,7 @@ static int l_spr(lua_State *L)
 
 static int l_sprfont(lua_State *L)
 {
-	blitSpritefont(&_globalMilk->video,
+	blitSpritefont(&_globalMilk->video, _globalMilk->video.font,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		lua_tostring(L, 3),
@@ -271,6 +279,7 @@ static void _pushApi(lua_State *L)
 	_pushApiFunction(L, "btn",		l_btn);
 	_pushApiFunction(L, "btnp",		l_btnp);
 	_pushApiFunction(L, "loadspr",	l_loadspr);
+	_pushApiFunction(L, "loadfont", l_loadfont);
 	_pushApiFunction(L, "clip",		l_clip);
 	_pushApiFunction(L, "clrs",		l_clrs);
 	_pushApiFunction(L, "pset",		l_pset);
