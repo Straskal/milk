@@ -3,6 +3,7 @@ local milk = require("scripts.milk")
 local introState = {}
 
 function introState.enter()
+    milk.loadspr("sprsheet.bmp")
     milk.allocsnd(0, "sounds/music.wav")
 end
 

@@ -19,6 +19,7 @@ milk.btny       = 8
 -- API
 milk.btn        = _G.btn
 milk.btnp       = _G.btnp
+milk.loadspr    = _G.loadspr
 milk.clip       = _G.clip
 milk.clrs       = _G.clrs
 milk.pset       = _G.pset

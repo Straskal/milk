@@ -33,13 +33,6 @@
 #define CMD_MAX_ARGS 8
 #define CMD_DELIM " "
 
-#define CMD_RELOAD "reload"
-#define CMD_RELOAD_SCRIPTS "scripts"
-#define CMD_RELOAD_SPRITES "sprites"
-#define CMD_RELOAD_FONT "font"
-#define CMD_CLEAR "clear"
-#define CMD_QUIT "quit"
-
 #define CMD_COLOR 0xffffff
 #define CMD_COLOR_INFO 0x5c5c5c
 #define CMD_COLOR_ERROR 0xbf4040
@@ -73,28 +66,12 @@ typedef struct commandLogLine
 static void _cmdReload(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 {
 	(void *)cmd;
-
-	if (nargs == 1)
-	{
-		if (strcmp(args[0], CMD_RELOAD_SCRIPTS) == 0)
-		{
-			milkUnloadCode(milk);
-			milkLoadCode(milk);
-			cmd->isGameInitialized = false;
-			logMessage(&milk->logs, "Scripts have been reloaded", INFO);
-		}
-		else if (strcmp(args[0], CMD_RELOAD_SPRITES) == 0)
-		{
-			loadSpritesheet(&milk->video);
-			logMessage(&milk->logs, "Sprites have been reloaded", INFO);
-		}
-		else if (strcmp(args[0], CMD_RELOAD_FONT) == 0)
-		{
-			loadFont(&milk->video);
-			logMessage(&milk->logs, "Font has been reloaded", INFO);
-		}
-	}
-	else logMessage(&milk->logs, "'reload' expects an argument", WARN);
+	(void *)args;
+	(void *)nargs;
+	milkUnloadCode(milk);
+	milkLoadCode(milk);
+	cmd->isGameInitialized = false;
+	logMessage(&milk->logs, "Scripts have been reloaded", INFO);
 }
 
 static void _cmdClear(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
@@ -102,7 +79,6 @@ static void _cmdClear(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 	(void *)cmd;
 	(void *)args;
 	(void *)nargs;
-
 	clearLogs(&milk->logs);
 	cmd->lastErrorCount = 0;
 }
@@ -112,15 +88,14 @@ static void _cmdQuit(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 	(void *)cmd;
 	(void *)args;
 	(void *)nargs;
-
-	milk->shouldQuit = 1;
+	milk->shouldQuit = true;
 }
 
 static CommandImpl _commands[] =
 {
-	{ CMD_RELOAD, _cmdReload },
-	{ CMD_CLEAR, _cmdClear },
-	{ CMD_QUIT, _cmdQuit }
+	{ "rel", _cmdReload },
+	{ "clr", _cmdClear },
+	{ "quit", _cmdQuit }
 };
 
 #define NUM_COMMANDS sizeof(_commands) / sizeof(CommandImpl)

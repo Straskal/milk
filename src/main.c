@@ -244,7 +244,6 @@ int main(int argc, char *argv[])
 		milk->video.loadBMPFromMem = _milkLoadBmpFromMemory;
 		milk->audio.loadWAV = _loadWave;
 
-		loadSpritesheet(&milk->video);
 		loadFont(&milk->video);
 		milkLoadCode(milk);
 	}

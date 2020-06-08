@@ -108,6 +108,14 @@ static int l_btnp(lua_State *L)
 	return 1;
 }
 
+static int l_loadspr(lua_State *L)
+{
+	loadSpritesheet(&_globalMilk->video,
+		lua_tostring(L, 1)
+	);
+	return 0;
+}
+
 static int l_clip(lua_State *L)
 {
 	setClippingRect(&_globalMilk->video,
@@ -262,6 +270,7 @@ static void _pushApi(lua_State *L)
 {
 	_pushApiFunction(L, "btn",		l_btn);
 	_pushApiFunction(L, "btnp",		l_btnp);
+	_pushApiFunction(L, "loadspr",	l_loadspr);
 	_pushApiFunction(L, "clip",		l_clip);
 	_pushApiFunction(L, "clrs",		l_clrs);
 	_pushApiFunction(L, "pset",		l_pset);

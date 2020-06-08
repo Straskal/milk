@@ -204,14 +204,15 @@ bool isButtonPressed(Input *input, ButtonState button)
  *******************************************************************************
  */
 
-void loadSpritesheet(Video *video)
+void loadSpritesheet(Video *video, const char *path)
 {
-	video->loadBMP(MILK_SPRSHEET_FILENAME, video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
+	video->loadBMP(path, video->spritesheet, sizeof(video->spritesheet) / sizeof(Color32));
 }
 
 void loadFont(Video *video)
 {
-	video->loadBMPFromMem(FONT_DATA, sizeof(FONT_DATA), video->font, sizeof(video->font) / sizeof(Color32));
+	//video->loadBMPFromMem(FONT_DATA, sizeof(FONT_DATA), video->font, sizeof(video->font) / sizeof(Color32));
+	memcpy(video->font, FONT_DATA, sizeof(video->font));
 }
 
 void resetDrawState(Video *video)

@@ -37,9 +37,7 @@
  * - Allows up to 16 sounds loaded into memory.
  * - Allows up to 16 concurrent sounds via sample slots. Index 0 loops.
  *******************************************************************************
- */
 
-/*
  *******************************************************************************
  * Logging
  *
@@ -49,6 +47,16 @@
 
 #define MILK_MAX_LOGS       16
 #define MILK_LOG_MAX_LENGTH 512
+
+#ifndef MILK_CMD
+#define LOG_INFO(logs, text)    (void *)0;
+#define LOG_WARN(logs, text)    (void *)0;
+#define LOG_ERROR(logs, text)   (void *)0;
+#else
+#define LOG_INFO(milk, text)    logMessage(&milk->logs, text, INFO)
+#define LOG_WARN(milk, text)    logMessage(&milk->logs, text, WARN)
+#define LOG_ERROR(milk, text)   logMessage(&milk->logs, text, ERROR)
+#endif
 
 typedef enum logType
 {
@@ -71,16 +79,6 @@ typedef struct logs
 
 void logMessage(Logs *logs, const char *text, LogType type);
 void clearLogs(Logs *logs);
-
-#ifdef MILK_CMD
-#define LOG_INFO(milk, text)    logMessage(&milk->logs, text, INFO)
-#define LOG_WARN(milk, text)    logMessage(&milk->logs, text, WARN)
-#define LOG_ERROR(milk, text)   logMessage(&milk->logs, text, ERROR)
-#else
-#define LOG_INFO(logs, text)    (void *)1;
-#define LOG_WARN(logs, text)    (void *)1;
-#define LOG_ERROR(logs, text)   (void *)1;
-#endif
 
 /*
  *******************************************************************************
@@ -137,9 +135,6 @@ bool isButtonPressed(Input *input, ButtonState button);
 #define MILK_FRAMEBUF_HEIGHT        224
 #define MILK_WINDOW_WIDTH           (MILK_FRAMEBUF_WIDTH * 3)
 #define MILK_WINDOW_HEIGHT          (MILK_FRAMEBUF_HEIGHT * 3)
-
-#define MILK_SPRSHEET_FILENAME      "sprsheet.bmp"
-#define MILK_FONT_FILENAME          "font.bmp"
 #define MILK_SPRSHEET_SQRSIZE       256
 #define MILK_SPRSHEET_SPR_SQRSIZE   16
 #define MILK_FONT_WIDTH             128
@@ -168,7 +163,7 @@ typedef struct video
     void(*loadBMPFromMem)(const uint8_t *, size_t, Color32 *, size_t);
 } Video;
 
-void loadSpritesheet(Video *video);
+void loadSpritesheet(Video *video, const char *path);
 void loadFont(Video *video);
 void resetDrawState(Video *video);
 void setClippingRect(Video *video, int x, int y, int w, int h);
