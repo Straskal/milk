@@ -32,6 +32,7 @@ find_package(Lua53 REQUIRED)
 set(MILK_SRC_FILES
 	src/milk.c
 	src/milk.h
+	src/font.h
 )
 
 set(MILK_MAIN_SRC_FILES

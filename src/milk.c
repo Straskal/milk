@@ -24,6 +24,7 @@
 
 #include "milk.h"
 #include "milkapi.h"
+#include "font.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -210,7 +211,7 @@ void loadSpritesheet(Video *video)
 
 void loadFont(Video *video)
 {
-	video->loadBMP(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
+	video->loadBMPFromMem(FONT_DATA, sizeof(FONT_DATA), video->font, sizeof(video->font) / sizeof(Color32));
 }
 
 void resetDrawState(Video *video)

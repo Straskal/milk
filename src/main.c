@@ -73,9 +73,30 @@ static void _loadWave(Audio *audio, const char *filename, int idx)
 static void _milkLoadBmp(const char *filename, Color32 *dest, size_t len)
 {
 	SDL_Surface *bmp = SDL_LoadBMP(filename);
+	if (bmp == NULL)
+		return;
+
 	uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
 
 	for (size_t i = 0; i < len; i++)
+	{
+		int b = *bmpPixels++;
+		int g = *bmpPixels++;
+		int r = *bmpPixels++;
+
+		dest[i] = (r << 16) | (g << 8) | (b);
+	}
+
+	SDL_FreeSurface(bmp);
+}
+
+static void _milkLoadBmpFromMemory(const uint8_t *data, size_t dataLen, Color32 *dest, size_t destLen)
+{
+	SDL_RWops *rwops = SDL_RWFromConstMem(data, dataLen);
+	SDL_Surface *bmp = SDL_LoadBMP_RW(rwops, 1);
+	uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
+
+	for (size_t i = 0; i < destLen; i++)
 	{
 		int b = *bmpPixels++;
 		int g = *bmpPixels++;
@@ -220,6 +241,7 @@ int main(int argc, char *argv[])
 		 */
 
 		milk->video.loadBMP = _milkLoadBmp;
+		milk->video.loadBMPFromMem = _milkLoadBmpFromMemory;
 		milk->audio.loadWAV = _loadWave;
 
 		loadSpritesheet(&milk->video);

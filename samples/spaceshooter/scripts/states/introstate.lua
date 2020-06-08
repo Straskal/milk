@@ -13,7 +13,7 @@ function introState.update()
 end
 
 function introState.draw()
-    milk.spr(0, 20, 20, 2, 1, 5, 1)
+    milk.spr(0, 0, 0, 16, 16, 1, 0)
 end
 
 return introState

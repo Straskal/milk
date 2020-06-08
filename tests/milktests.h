@@ -306,8 +306,6 @@ TEST_CASE(playSound_WhenIndexOutOfBounds_DoesNothing)
 	SETUP(milk);
 	ACT(playSound(&milk->audio, -1, 0, 0));
 	ACT(playSound(&milk->audio, MILK_MAX_LOADED_SAMPLES + 1, 0, 0));
-
-TEARDOWN:
 	FREE_MILK(milk);
 }
 
@@ -316,9 +314,6 @@ TEST_CASE(playSound_WhenSampleAtIndexNotLoaded_DoesNothing)
 	SETUP(milk);
 	ACT(playSound(&milk->audio, 0, -1, 0));
 	ACT(playSound(&milk->audio, MILK_MAX_CONCUR_SOUNDS + 1, 0, 0));
-
-TEARDOWN:
-	FREE_MILK(milk);
 }
 
 TEST_CASE(playSound_WhenSampleLengthIsZero_DoesNothing)
@@ -342,13 +337,13 @@ TEST_CASE(playSound_SetsSlot)
 	milk->audio.lock = _mockLock;
 	milk->audio.unlock = _mockUnlock;
 	uint8_t buffer[1];
-	milk->audio.samples[0].buffer = &buffer;
+	milk->audio.samples[0].buffer = buffer;
 	milk->audio.samples[0].length = 1;
 
 	ACT(playSound(&milk->audio, 0, 0, 50));
 
 	ASSERT_EQ(&milk->audio.samples[0], milk->audio.slots[0].sampleData);
-	ASSERT_EQ(&buffer, milk->audio.slots[0].position);
+	ASSERT_EQ(buffer, milk->audio.slots[0].position);
 	ASSERT_EQ(1, milk->audio.slots[0].remainingLength);
 	ASSERT_EQ(PLAYING, milk->audio.slots[0].state);
 	ASSERT_EQ(50, milk->audio.slots[0].volume);
@@ -418,8 +413,6 @@ TEST_CASE(stopSound_WhenIndexOutOfBounds_DoesNothing)
 	SETUP(milk);
 	ACT(stopSound(&milk->audio, -10));
 	ACT(stopSound(&milk->audio, MILK_MAX_CONCUR_SOUNDS + 10));
-
-TEARDOWN:
 	FREE_MILK(milk);
 }
 
@@ -445,8 +438,6 @@ TEST_CASE(pauseSound_WhenIndexOutOfBounds_DoesNothing)
 	SETUP(milk);
 	ACT(pauseSound(&milk->audio, -10));
 	ACT(pauseSound(&milk->audio, MILK_MAX_CONCUR_SOUNDS + 10));
-
-TEARDOWN:
 	FREE_MILK(milk);
 }
 
@@ -471,8 +462,6 @@ TEST_CASE(resumeSound_WhenIndexOutOfBounds_DoesNothing)
 	SETUP(milk);
 	ACT(resumeSound(&milk->audio, -10));
 	ACT(resumeSound(&milk->audio, MILK_MAX_CONCUR_SOUNDS + 10));
-
-TEARDOWN:
 	FREE_MILK(milk);
 }
 

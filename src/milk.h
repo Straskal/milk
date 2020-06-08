@@ -165,6 +165,7 @@ typedef struct video
     Rect    clipRect;
 
     void(*loadBMP)(const char *, Color32 *, size_t);
+    void(*loadBMPFromMem)(const uint8_t *, size_t, Color32 *, size_t);
 } Video;
 
 void loadSpritesheet(Video *video);
