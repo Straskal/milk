@@ -421,6 +421,16 @@ void blitSpritefont(Video *video, const Color32 *pixels, int x, int y, const cha
 #define SLOTIDX_OO_BOUNDS(idx)		(idx < 0 || idx > MILK_MAX_CONCUR_SOUNDS)
 
 
+void _resetSampleSlot(SampleSlot *slot)
+{
+	slot->sampleData = NULL;
+	slot->state = STOPPED;
+	slot->remainingLength = 0;
+	slot->position = NULL;
+	slot->volume = 0;
+}
+
+
 void loadSound(Audio *audio, int idx, const char *filename)
 {
 	if (SAMPLEIDX_OO_BOUNDS(idx))
@@ -449,10 +459,7 @@ void unloadSound(Audio *audio, int idx)
 		for (int i = 0; i < MILK_MAX_CONCUR_SOUNDS; i++)
 		{
 			if (audio->slots[i].sampleData == sampleData)
-			{
-				audio->slots[i].sampleData = NULL;
-				audio->slots[i].state = STOPPED;
-			}
+				_resetSampleSlot(&audio->slots[i]);
 		}
 
 		free(audio->samples[idx].buffer);
@@ -489,8 +496,7 @@ void stopSound(Audio *audio, int slotIdx)
 		return;
 
 	audio->lock();
-	audio->slots[slotIdx].sampleData = NULL;
-	audio->slots[slotIdx].state = STOPPED;
+	_resetSampleSlot(&audio->slots[slotIdx]);
 	audio->unlock();
 }
 
@@ -525,10 +531,7 @@ void resumeSound(Audio *audio, int slotIdx)
 
 SampleSlotState getSampleState(Audio *audio, int slotIdx)
 {
-	if (SLOTIDX_OO_BOUNDS(slotIdx))
-		return STOPPED;
-
-	return audio->slots[slotIdx].state;
+	return SLOTIDX_OO_BOUNDS(slotIdx) ? STOPPED : audio->slots[slotIdx].state;
 }
 
 

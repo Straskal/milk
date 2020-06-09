@@ -5,7 +5,6 @@ local btndown   = milk.btndown
 local btnleft   = milk.btnleft
 local btnright  = milk.btnright
 local btna      = milk.btna
-local btnb      = milk.btnb
 local spr       = milk.spr
 
 local function update(self)
@@ -16,8 +15,7 @@ local function update(self)
     if milk.btn(btndown) then mvy = self.speed end
     if milk.btn(btnleft) then mvx = -self.speed end
     if milk.btn(btnright) then mvx = self.speed end
-    if milk.btnp(btna) then milk.snd(0, 128, true) end
-    if milk.btnp(btnb) then milk.snd(1, 128) end
+    if milk.btnp(btna) then milk.play(1, 1, 128) end
 
     self.xPos = self.xPos + mvx
     self.yPos = self.yPos + mvy

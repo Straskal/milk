@@ -5,10 +5,6 @@ local starColumns = {1,2,5,6,7,12}
 local warpFactor = 3
 
 local function init()
-	milk.loadsnd(0, "sounds/music.wav")
-	milk.loadsnd(1, "sounds/punch.wav")
-	milk.loadsnd(2, "sounds/fireball_shoot.wav")
-
 	for i = 1, #starColumns do
 		for _ = 1, 10 do
 			local star = {
