@@ -201,7 +201,7 @@ static int l_sprfont(lua_State *L)
 	return 1;
 }
 
-static int l_allocsnd(lua_State *L)
+static int l_loadsnd(lua_State *L)
 {
 	loadSound(&_globalMilk->audio,
 		(int)lua_tointeger(L, 1),
@@ -287,7 +287,7 @@ static void _pushApi(lua_State *L)
 	_pushApiFunction(L, "rectfill", l_rectfill);
 	_pushApiFunction(L, "spr",		l_spr);
 	_pushApiFunction(L, "sprfont",	l_sprfont);
-	_pushApiFunction(L, "allocsnd",	l_allocsnd);
+	_pushApiFunction(L, "loadsnd",	l_loadsnd);
 	_pushApiFunction(L, "freesnd",	l_freesnd);
 	_pushApiFunction(L, "play",		l_play);
 	_pushApiFunction(L, "stop",		l_stop);
