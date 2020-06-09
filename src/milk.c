@@ -245,10 +245,10 @@ void resetDrawState(Video *video)
 
 void setClippingRect(Video *video, int x, int y, int w, int h)
 {
-	video->clipRect.left = _clamp(x, 0, MILK_FRAMEBUF_WIDTH);
-	video->clipRect.right = _clamp(x + w, 0, MILK_FRAMEBUF_WIDTH);
-	video->clipRect.top = _clamp(y, 0, MILK_FRAMEBUF_HEIGHT);
-	video->clipRect.bottom = _clamp(y + h, 0, MILK_FRAMEBUF_HEIGHT);
+	video->clipRect.left =		_clamp(x,		0, MILK_FRAMEBUF_WIDTH);
+	video->clipRect.right =		_clamp(x + w,	0, MILK_FRAMEBUF_WIDTH);
+	video->clipRect.top =		_clamp(y,		0, MILK_FRAMEBUF_HEIGHT);
+	video->clipRect.bottom =	_clamp(y + h,	0, MILK_FRAMEBUF_HEIGHT);
 }
 
 
@@ -291,10 +291,10 @@ static void _verticalLine(Video *video, int x, int y, int h, Color32 color)
 
 void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color)
 {
-	_horizontalLine(video, x, y, w, color);
-	_horizontalLine(video, x, y + h, w, color);
-	_verticalLine(video, x, y, h, color);
-	_verticalLine(video, x + w, y, h, color);
+	_horizontalLine	(video, x,		y,		w,		color); /* Top edge */
+	_horizontalLine	(video, x,		y + h,	w,		color); /* Bottom edge */
+	_verticalLine	(video, x,		y,		h,		color); /* Left edge */
+	_verticalLine	(video, x + w,	y,		h,		color); /* Right edge */
 }
 
 
@@ -325,14 +325,16 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
 static void _blitRect(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip, Color32 *color)
 {
 	scale =	_clampf(scale, MIN_SCALE, MAX_SCALE);
-	int width =	(int)floor((double)w * scale);
-	int height = (int)floor((double)h * scale);
-	int xRatio = (int)(((w << 16) / width) + 0.5f);
-	int yRatio = (int)(((h << 16) / height) + 0.5f);
-	int xPixelStart = IS_FLIPPED_X(flip) ? width - 1 : 0;
-	int yPixelStart = IS_FLIPPED_Y(flip) ? height - 1 : 0;
-	int xDirection = IS_FLIPPED_X(flip) ? -1 : 1;
-	int yDirection = IS_FLIPPED_Y(flip) ? -1 : 1;
+
+	int width =		(int)floor((double)w * scale);
+	int height =	(int)floor((double)h * scale);
+	int xRatio =	(int)(((w << 16) / width) + 0.5f);
+	int yRatio =	(int)(((h << 16) / height) + 0.5f);
+
+	int xPixelStart =	IS_FLIPPED_X(flip) ? width - 1 : 0;
+	int yPixelStart =	IS_FLIPPED_Y(flip) ? height - 1 : 0;
+	int xDirection =	IS_FLIPPED_X(flip) ? -1 : 1;
+	int yDirection =	IS_FLIPPED_Y(flip) ? -1 : 1;
 
 	int xPixel, yPixel, xFramebuffer, yFramebuffer;
 
