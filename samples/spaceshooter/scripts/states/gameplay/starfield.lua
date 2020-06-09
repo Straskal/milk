@@ -1,7 +1,7 @@
 local milk = require("scripts.milk")
 
 local stars = {}
-local starColumns = {1,2,5,6,7,12}
+local starColumns = {1, 2, 5, 6, 7, 12}
 local warpFactor = 3
 
 local function init()
@@ -36,7 +36,7 @@ local function draw()
 end
 
 return {
-    init    	= init,
-    update  	= update,
-	draw	    = draw,
+	init = init,
+	update = update,
+	draw = draw
 }
