@@ -355,6 +355,7 @@ static void _blitRect(Video *video, const Color32 *pixels, int x, int y, int w, 
 #define SPRSHEET_COLUMNS			MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE
 #define SPRSHEET_ROW_SIZE			MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE
 #define SPRSHEET_COL_SIZE			MILK_SPRSHEET_SPR_SQRSIZE
+#define SPRSHEET_POS(x, y)			(y * SPRSHEET_ROW_SIZE + x * SPRSHEET_COL_SIZE)
 
 
 void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip)
@@ -364,7 +365,7 @@ void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 
 	int row = (int)floor(idx / SPRSHEET_COLUMNS);
 	int col = (int)floor(idx % SPRSHEET_COLUMNS);
-	Color32 *pixels = &video->spritesheet[row * SPRSHEET_ROW_SIZE + col * SPRSHEET_COL_SIZE];
+	Color32 *pixels = &video->spritesheet[SPRSHEET_POS(col, row)];
 
 	_blitRect(video, pixels, x, y, w * MILK_SPRSHEET_SPR_SQRSIZE, h * MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE, scale, flip, NULL);
 }
@@ -393,9 +394,9 @@ void blitSpritefont(Video *video, const Color32 *pixels, int x, int y, const cha
 		if (!IS_NEWLINE(curr))
 		{
 			if (!IS_ASCII(curr)) curr = '?'; /* If the character is not ASCII, then we're just gonna be all like whaaaaaat? Problem solved. */
-			int x = (int)floor((curr - 32) % FONT_COLUMNS);
-			int y = (int)floor((curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
-			const Color32 *pixelStart = &pixels[FONT_POS(x, y)];
+			int row = (int)floor((curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
+			int col = (int)floor((curr - 32) % FONT_COLUMNS);
+			const Color32 *pixelStart = &pixels[FONT_POS(col, row)];
 
 			_blitRect(video, pixelStart, xCurrent, yCurrent, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0, &color);
 			xCurrent += charSize;
