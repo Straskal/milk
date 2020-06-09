@@ -373,6 +373,7 @@ void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 #define FONT_COLUMNS		(MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE)
 #define FONT_ROW_SIZE		(MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE)
 #define FONT_COL_SIZE		MILK_CHAR_SQRSIZE
+#define FONT_POS(x, y)		(y * FONT_ROW_SIZE + x * FONT_COL_SIZE)
 #define IS_ASCII(c)			((c & 0xff80) == 0)
 #define IS_NEWLINE(c)		(c == '\n')
 
@@ -392,9 +393,9 @@ void blitSpritefont(Video *video, const Color32 *pixels, int x, int y, const cha
 		if (!IS_NEWLINE(curr))
 		{
 			if (!IS_ASCII(curr)) curr = '?'; /* If the character is not ASCII, then we're just gonna be all like whaaaaaat? Problem solved. */
-			int row = (int)floor((curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
-			int col = (int)floor((curr - 32) % FONT_COLUMNS);
-			const Color32 *pixelStart = &pixels[(row * FONT_ROW_SIZE + col * FONT_COL_SIZE)];
+			int x = (int)floor((curr - 32) % FONT_COLUMNS);
+			int y = (int)floor((curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
+			const Color32 *pixelStart = &pixels[FONT_POS(x, y)];
 
 			_blitRect(video, pixelStart, xCurrent, yCurrent, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0, &color);
 			xCurrent += charSize;
