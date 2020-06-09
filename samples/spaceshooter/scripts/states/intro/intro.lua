@@ -3,7 +3,7 @@ local gameplay = require("scripts.states.gameplay.gameplay")
 local starField = require("scripts.states.gameplay.starfield")
 
 local TITLE = "STAR GAME:"
-local TITLE2 = "The Return of The Bad Buys"
+local TITLE2 = "Return of The Bad Bois"
 
 local intro = {}
 

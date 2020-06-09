@@ -439,7 +439,7 @@ void loadSound(Audio *audio, int idx, const char *filename)
 	audio->lock();
 
 	if (audio->samples[idx].buffer != NULL)
-		free(audio->samples[idx].buffer);
+		unloadSound(audio, idx);
 
 	audio->loadWAV(audio, filename, idx);
 	audio->unlock();
