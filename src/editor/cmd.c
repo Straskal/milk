@@ -24,7 +24,7 @@
 
 #include "editor/cmd.h"
 #include "api.h"
-#include "font.h"
+#include "embed/font.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -249,7 +249,7 @@ static void _drawLogLines(Milk *milk)
 	_getLogLines(&milk->logs, lines, &numLines);
 
 	for (int i = 0; i < numLines; i++)
-		blitSpritefont(&milk->video, FONT_DATA, 8, LOG_START_HEIGHT + ((MILK_CHAR_SQRSIZE + 2) * i), lines[i].text, 1, lines[i].color);
+		blitSpritefont(&milk->video, DEFAULT_FONT_DATA, 8, LOG_START_HEIGHT + ((MILK_CHAR_SQRSIZE + 2) * i), lines[i].text, 1, lines[i].color);
 }
 
 static void _drawCommandLine(MilkCmd *cmdLine, Milk *milk)
@@ -257,13 +257,13 @@ static void _drawCommandLine(MilkCmd *cmdLine, Milk *milk)
 	size_t cmdLength = cmdLine->commandCandidateLength;
 
 	clearFramebuffer(&milk->video, 0x1a1a1a);
-	blitSpritefont(&milk->video, FONT_DATA, 8, 10, "MILK\n------------------------------", 1, CMD_COLOR);
-	blitSpritefont(&milk->video, FONT_DATA, 8, 40, ">:", 1, CMD_COLOR);
-	blitSpritefont(&milk->video, FONT_DATA, 24, 40, cmdLine->commandCandidate, 1, CMD_COLOR);
+	blitSpritefont(&milk->video, DEFAULT_FONT_DATA, 8, 10, "MILK\n------------------------------", 1, CMD_COLOR);
+	blitSpritefont(&milk->video, DEFAULT_FONT_DATA, 8, 40, ">:", 1, CMD_COLOR);
+	blitSpritefont(&milk->video, DEFAULT_FONT_DATA, 24, 40, cmdLine->commandCandidate, 1, CMD_COLOR);
 
 	/* Draw blinking position marker. */
 	if (_ticks % 32 > 16)
-		blitSpritefont(&milk->video, FONT_DATA, 24 + cmdLength * 8, 42, "_", 1, CMD_COLOR);
+		blitSpritefont(&milk->video, DEFAULT_FONT_DATA, 24 + cmdLength * 8, 42, "_", 1, CMD_COLOR);
 }
 
 MilkCmd *milkCmdCreate()

@@ -24,7 +24,7 @@
 
 #include "milk.h"
 #include "api.h"
-#include "font.h"
+#include "embed/font.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -86,7 +86,7 @@ static void _initVideo(Video *video)
 {
 	memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
 	memset(&video->spritesheet, 0x00, sizeof(video->spritesheet));
-	memcpy(&video->font, FONT_DATA, sizeof(video->font));
+	memcpy(&video->font, DEFAULT_FONT_DATA, sizeof(video->font));
 	resetDrawState(video);
 }
 

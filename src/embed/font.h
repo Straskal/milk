@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-extern const uint32_t FONT_DATA[];
+extern const uint32_t DEFAULT_FONT_DATA[];
 
 #endif
