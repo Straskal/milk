@@ -535,6 +535,7 @@ void setMasterVolume(Audio *audio, int volume)
 	audio->masterVolume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
 }
 
+
 #define _16_BIT_MAX 32767
 
 
