@@ -9,7 +9,7 @@ local gameplay = {
 
 local function flyIn()
     if gameplay.flyingIn then
-        gameplay.player.yPos = gameplay.player.yPos - 1
+        gameplay.player.yPos = gameplay.player.yPos - 0.5
     end
     if (gameplay.player.yPos < 224 - 64) then
         gameplay.flyingIn = false

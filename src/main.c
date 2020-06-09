@@ -24,7 +24,7 @@
 
 #include "milk.h"
 #include "api.h"
-#include "editor/cmd.h"
+#include "cmd.h"
 
 #include <memory.h>
 #include <stdio.h>

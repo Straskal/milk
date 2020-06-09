@@ -22,8 +22,8 @@
  *  SOFTWARE.
  */
 
-#include "editor/cmd.h"
 #include "api.h"
+#include "cmd.h"
 #include "embed/font.h"
 
 #include <assert.h>

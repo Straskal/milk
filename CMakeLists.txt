@@ -39,9 +39,9 @@ set(MILK_SRC_FILES
 set(MILK_MAIN_SRC_FILES
 	src/api.c
 	src/api.h
-	src/bootstrap/main.c
-	src/editor/cmd.c
-	src/editor/cmd.h
+	src/main.c
+	src/cmd.c
+	src/cmd.h
 )
 
 add_executable(milk
