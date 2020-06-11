@@ -37,6 +37,7 @@
  *******************************************************************************
  */
 
+
 static int _clamp(int value, int min, int max)
 {
 	if (value < min)
@@ -194,6 +195,7 @@ void clearLogs(Logs *logs)
 	logs->errorCount = 0;
 }
 
+
 /*
  *******************************************************************************
  * Input
@@ -211,6 +213,7 @@ bool isButtonPressed(Input *input, ButtonState button)
 {
 	return (input->gamepad.buttonState & button) == button && (input->gamepad.previousButtonState & button) != button;
 }
+
 
 /*
  *******************************************************************************

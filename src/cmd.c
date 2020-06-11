@@ -94,9 +94,9 @@ static void _cmdQuit(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 
 static CommandImpl _commands[] =
 {
-	{ "rel", _cmdReload },
-	{ "clr", _cmdClear },
-	{ "quit", _cmdQuit }
+	{ "reload",	_cmdReload },
+	{ "clear",	_cmdClear },
+	{ "quit",	_cmdQuit }
 };
 
 #define NUM_COMMANDS sizeof(_commands) / sizeof(CommandImpl)
