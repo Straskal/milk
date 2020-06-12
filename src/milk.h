@@ -31,7 +31,6 @@
 typedef int16_t     i16;
 typedef int32_t     i32;
 typedef uint8_t     u8;
-typedef uint16_t    u16;
 typedef uint32_t    u32;
 
 /*
@@ -240,7 +239,7 @@ void pauseSound(Audio *audio, int slotIdx);
 void resumeSound(Audio *audio, int slotIdx);
 SampleSlotState getSampleState(Audio *audio, int slotIdx);
 void setMasterVolume(Audio *audio, int volume);
-void mixSamplesIntoStream(Audio *audio, uint8_t *stream, size_t len);
+void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len);
 
 /*
  *******************************************************************************

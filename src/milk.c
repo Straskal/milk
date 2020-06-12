@@ -539,7 +539,7 @@ void setMasterVolume(Audio *audio, int volume)
 #define _16_BIT_MAX 32767
 
 
-static void mixSample(uint8_t *destination, const uint8_t *source, uint32_t length, double volume)
+static void mixSample(u8 *destination, const u8 *source, u32 length, double volume)
 {
 	i16 sourceSample;
     i16 destSample;
@@ -566,7 +566,7 @@ static void mixSample(uint8_t *destination, const uint8_t *source, uint32_t leng
 #define NORMALIZE_VOLUME(v) ((double)v / MAX_VOLUME)
 
 
-void mixSamplesIntoStream(Audio *audio, uint8_t *stream, size_t len)
+void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)
 {
 	memset(stream, 0, len);
 

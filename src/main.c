@@ -48,7 +48,7 @@ static void unlockAudioDevice()
 
 static void mixCallback(void *userdata, uint8_t *stream, int len)
 {
-	mixSamplesIntoStream((Audio *)userdata, stream, len);
+	mixSamplesIntoStream((Audio *)userdata, stream, (size_t)len);
 }
 
 static void loadWave(Audio *audio, const char *filename, int idx)
