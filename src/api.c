@@ -125,10 +125,10 @@ static int l_loadfont(lua_State *L)
 static int l_clip(lua_State *L)
 {
 	setClippingRect(&_globalMilk->video,
-		(int)lua_tointeger(L, 1),
-		(int)lua_tointeger(L, 2),
-		(int)lua_tointeger(L, 3),
-		(int)lua_tointeger(L, 4)
+		(u32)lua_tointeger(L, 1),
+		(u32)lua_tointeger(L, 2),
+		(u32)lua_tointeger(L, 3),
+		(u32)lua_tointeger(L, 4)
 	);
 	return 0;
 }
@@ -154,8 +154,8 @@ static int l_rect(lua_State *L)
 	blitRectangle(&_globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
-		(int)lua_tointeger(L, 3),
-		(int)lua_tointeger(L, 4),
+		(u32)lua_tointeger(L, 3),
+		(u32)lua_tointeger(L, 4),
 		(Color32)lua_tointeger(L, 5)
 	);
 	return 0;
@@ -166,8 +166,8 @@ static int l_rectfill(lua_State *L)
 	blitFilledRectangle(&_globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
-		(int)lua_tointeger(L, 3),
-		(int)lua_tointeger(L, 4),
+		(u32)lua_tointeger(L, 3),
+		(u32)lua_tointeger(L, 4),
 		(Color32)lua_tointeger(L, 5)
 	);
 	return 0;
@@ -179,8 +179,8 @@ static int l_spr(lua_State *L)
 		(int)lua_tointeger(L, 1),
 		(int)floor(lua_tonumber(L, 2)),
 		(int)floor(lua_tonumber(L, 3)),
-		(int)luaL_optinteger(L, 4, 1),
-		(int)luaL_optinteger(L, 5, 1),
+		(u32)luaL_optinteger(L, 4, 1),
+		(u32)luaL_optinteger(L, 5, 1),
 		(float)luaL_optnumber(L, 6, 1.0),
 		(int)luaL_optinteger(L, 7, 0)
 	);

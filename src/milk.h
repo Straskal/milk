@@ -28,6 +28,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+typedef int16_t     i16;
+typedef int32_t     i32;
 typedef uint8_t     u8;
 typedef uint16_t    u16;
 typedef uint32_t    u32;
@@ -171,9 +173,9 @@ void resetDrawState(Video *video);
 void setClippingRect(Video *video, u32 x, u32 y, u32 w, u32 h);
 void clearFramebuffer(Video *video, Color32 color);
 void blitPixel(Video *video, int x, int y, Color32 color);
-void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color);
-void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color);
-void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, uint8_t flip);
+void blitRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color);
+void blitFilledRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color);
+void blitSprite(Video *video, int idx, int x, int y, u32 w, u32 h, float scale, uint8_t flip);
 void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, float scale, Color32 color);
 
 /*
@@ -238,7 +240,7 @@ void pauseSound(Audio *audio, int slotIdx);
 void resumeSound(Audio *audio, int slotIdx);
 SampleSlotState getSampleState(Audio *audio, int slotIdx);
 void setMasterVolume(Audio *audio, int volume);
-void mixSamplesIntoStream(Audio *audio, uint8_t *stream, int len);
+void mixSamplesIntoStream(Audio *audio, uint8_t *stream, size_t len);
 
 /*
  *******************************************************************************
