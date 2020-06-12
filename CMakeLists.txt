@@ -2,7 +2,7 @@
 # SDL2: https://www.libsdl.org/download-2.0.php
 # Lua 5.3: https://www.lua.org/download.html which leads to https://sourceforge.net/projects/luabinaries/files/5.3.5/
 
-cmake_minimum_required(VERSION 3.6.3)
+cmake_minimum_required(VERSION 3.12.4)
 project(libmilk)
 set(C_STANDARD 99)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
