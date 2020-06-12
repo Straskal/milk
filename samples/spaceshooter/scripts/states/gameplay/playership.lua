@@ -20,8 +20,8 @@ local function update(self)
     self.xPos = self.xPos + mvx
     self.yPos = self.yPos + mvy
 
-    if milk.ticks % 24 < 12 then self.sprite = 4
-    else self.sprite = 5 end
+    if milk.ticks % 24 < 12 then self.sprite = 0
+    else self.sprite = 1 end
 end
 
 local function draw(self)

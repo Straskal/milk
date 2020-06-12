@@ -110,8 +110,8 @@ static int l_btnp(lua_State *L)
 
 static int l_loadspr(lua_State *L)
 {
-	loadSpritesheet(&_globalMilk->video,
-		lua_tostring(L, 1)
+	loadSpriteSheet(&_globalMilk->video,
+	                lua_tostring(L, 1)
 	);
 	return 0;
 }
@@ -191,12 +191,12 @@ static int l_spr(lua_State *L)
 
 static int l_sprfont(lua_State *L)
 {
-	blitSpritefont(&_globalMilk->video, _globalMilk->video.font,
-		(int)floor(lua_tonumber(L, 1)),
-		(int)floor(lua_tonumber(L, 2)),
-		lua_tostring(L, 3),
-		(float)luaL_optnumber(L, 4, 1.0),
-		(Color32)luaL_optinteger(L, 5, 0xffffff)
+	blitSpriteFont(&_globalMilk->video, _globalMilk->video.font,
+	               (int) floor(lua_tonumber(L, 1)),
+	               (int) floor(lua_tonumber(L, 2)),
+	               lua_tostring(L, 3),
+	               (float) luaL_optnumber(L, 4, 1.0),
+	               (Color32) luaL_optinteger(L, 5, 0xffffff)
 	);
 	return 1;
 }

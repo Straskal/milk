@@ -26,32 +26,32 @@
 #include "api.h"
 #include "cmd.h"
 
-#include <memory.h>
+#include <math.h>
 #include <stdio.h>
 #include <SDL.h>
 
 #define SDL_FIRST_AVAILABLE_RENDERER -1
-#define MILK_FRAMEBUF_PITCH (MILK_FRAMEBUF_WIDTH * 4)
+#define MILK_FRAMEBUF_PITCH (FRAMEBUFFER_HEIGHT * 4)
 
-static int _gAudioDevice; /* Global audio device so we can access from our methods below. */
+static int gAudioDevice; /* Global audio device so we can access from our methods below. */
 
  /* Functions to lock and unlock the audio device so you can safely manipulate the milk's audio queue without another thread grabbing for it. */
-static void _lockAudioDevice()
+static void lockAudioDevice()
 {
-	SDL_LockAudioDevice(_gAudioDevice);
+	SDL_LockAudioDevice(gAudioDevice);
 }
 
-static void _unlockAudioDevice()
+static void unlockAudioDevice()
 {
-	SDL_UnlockAudioDevice(_gAudioDevice);
+	SDL_UnlockAudioDevice(gAudioDevice);
 }
 
-static void _mixCallback(void *userdata, uint8_t *stream, int len)
+static void mixCallback(void *userdata, uint8_t *stream, int len)
 {
 	mixSamplesIntoStream((Audio *)userdata, stream, len);
 }
 
-static void _loadWave(Audio *audio, const char *filename, int idx)
+static void loadWave(Audio *audio, const char *filename, int idx)
 {
 	SampleData *sampleData = &audio->samples[idx];
 
@@ -70,7 +70,7 @@ static void _loadWave(Audio *audio, const char *filename, int idx)
 	sampleData->length = (uint32_t)floor(conversion.len * conversion.len_ratio);
 }
 
-static void _loadBmp(const char *filename, Color32 *dest, size_t len)
+static void loadBmp(const char *filename, Color32 *dest, size_t len)
 {
 	SDL_Surface *bmp = SDL_LoadBMP(filename);
 	if (bmp == NULL)
@@ -80,22 +80,22 @@ static void _loadBmp(const char *filename, Color32 *dest, size_t len)
 
 	for (size_t i = 0; i < len; i++)
 	{
-		int b = *bmpPixels++;
-		int g = *bmpPixels++;
-		int r = *bmpPixels++;
+		uint32_t b = *bmpPixels++;
+		uint32_t g = *bmpPixels++;
+		uint32_t r = *bmpPixels++;
 
-		dest[i] = (r << 16) | (g << 8) | (b);
+		dest[i] = (r << 16u) | (g << 8u) | (b);
 	}
 
 	SDL_FreeSurface(bmp);
 }
 
-static void _startTextInput()
+static void startTextInput()
 {
 	SDL_StartTextInput();
 }
 
-static void _stopTextInput()
+static void stopTextInput()
 {
 	SDL_StopTextInput();
 }
@@ -107,8 +107,8 @@ static void _stopTextInput()
  */
 int main(int argc, char *argv[])
 {
-	(void *)argc;
-	(void *)argv;
+	(void)argc;
+	(void)argv;
 
 	Milk *milk;
 	MilkCmd *milkCmd;
@@ -134,11 +134,11 @@ int main(int argc, char *argv[])
 
 		milk = createMilk();
 		milkCmd = createCmd();
-		window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MILK_WINDOW_WIDTH, MILK_WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
+		window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
 		renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
-		frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
+		frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, FRAMEBUFFER_HEIGHT, FRAMEBUFFER_WIDTH);
 
-		SDL_RenderSetLogicalSize(renderer, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
+		SDL_RenderSetLogicalSize(renderer, FRAMEBUFFER_HEIGHT, FRAMEBUFFER_WIDTH);
 	}
 
 	{
@@ -148,20 +148,20 @@ int main(int argc, char *argv[])
 		 *******************************************************************************
 		 */
 
-		wantedSpec.freq = MILK_AUDIO_FREQUENCY;
+		wantedSpec.freq = AUDIO_FREQUENCY;
 		wantedSpec.format = AUDIO_S16LSB;
-		wantedSpec.channels = MILK_AUDIO_CHANNELS;
-		wantedSpec.samples = MILK_AUDIO_SAMPLES;
-		wantedSpec.callback = _mixCallback;
+		wantedSpec.channels = AUDIO_CHANNELS;
+		wantedSpec.samples = AUDIO_SAMPLES;
+		wantedSpec.callback = mixCallback;
 		wantedSpec.userdata = (void *)&milk->audio;
 
 		audioDevice = SDL_OpenAudioDevice(NULL, 0, &wantedSpec, &actualSpec, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE | SDL_AUDIO_ALLOW_CHANNELS_CHANGE);
-		_gAudioDevice = audioDevice;
+		gAudioDevice = audioDevice;
 
 		milk->audio.channels = actualSpec.channels;
 		milk->audio.frequency = actualSpec.freq;
-		milk->audio.lock = _lockAudioDevice;
-		milk->audio.unlock = _unlockAudioDevice;
+		milk->audio.lock = lockAudioDevice;
+		milk->audio.unlock = unlockAudioDevice;
 
 		SDL_PauseAudioDevice(audioDevice, 0); /* Pause(0) starts the device. lawl. */
 	}
@@ -173,8 +173,8 @@ int main(int argc, char *argv[])
 		 *******************************************************************************
 		 */
 
-		milkCmd->input.startTextInput = _startTextInput;
-		milkCmd->input.stopTextInput = _stopTextInput;
+		milkCmd->input.startTextInput = startTextInput;
+		milkCmd->input.stopTextInput = stopTextInput;
 	}
 
 	{
@@ -184,8 +184,8 @@ int main(int argc, char *argv[])
 		 *******************************************************************************
 		 */
 
-		milk->video.loadBMP = _loadBmp;
-		milk->audio.loadWAV = _loadWave;
+		milk->video.loadBMP = loadBmp;
+		milk->audio.loadWAV = loadWave;
 
 		milkLoadCode(milk);
 	}
@@ -259,8 +259,8 @@ int main(int argc, char *argv[])
 
 		Uint32 elapsedTicks = SDL_GetTicks() - frameStartTicks;
 
-		if (elapsedTicks < MILK_FRAMERATE)
-			SDL_Delay((Uint32)(MILK_FRAMERATE - elapsedTicks));
+		if (elapsedTicks < FRAMERATE)
+			SDL_Delay((Uint32)(FRAMERATE - elapsedTicks));
 	}
 
 	milkUnloadCode(milk);

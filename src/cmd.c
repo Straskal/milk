@@ -41,7 +41,7 @@
 
 #define LOG_START_HEIGHT 56
 #define LOG_END_HEIGHT	(224 - 32)
-#define MAX_LINES		((LOG_END_HEIGHT - LOG_START_HEIGHT) / MILK_CHAR_SQRSIZE)
+#define MAX_LINES		((LOG_END_HEIGHT - LOG_START_HEIGHT) / CHAR_SQRSIZE)
 #define CHARS_PER_LINE	31
 
 #define HAS_INPUT(inputState, input) ((inputState & input) == input)
@@ -229,7 +229,7 @@ static void _getLogLines(Logs *logs, CommandLogLine *lines, int *numLines)
 		if (currentLine == MAX_LINES - 1)
 			break;
 
-		char tempText[MILK_LOG_MAX_LENGTH + 3] = ">:";
+		char tempText[MAX_LOG_LENGTH + 3] = ">:";
 		strcpy(&tempText[2], logs->messages[i].text);
 		char *splitByNewline = strtok(tempText, "\n"); /* Split message by newline. */
 
@@ -266,7 +266,8 @@ static void _drawLogLines(Milk *milk)
 	_getLogLines(&milk->logs, lines, &numLines);
 
 	for (int i = 0; i < numLines; i++)
-		blitSpritefont(&milk->video, DEFAULT_FONT_DATA, 8, LOG_START_HEIGHT + ((MILK_CHAR_SQRSIZE + 2) * i), lines[i].text, 1, lines[i].color);
+		blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, LOG_START_HEIGHT + ((CHAR_SQRSIZE + 2) * i),
+		               lines[i].text, 1, lines[i].color);
 }
 
 
@@ -275,13 +276,13 @@ static void _drawCommandLine(MilkCmd *cmdLine, Milk *milk)
 	size_t cmdLength = cmdLine->commandCandidateLength;
 
 	clearFramebuffer(&milk->video, 0x1a1a1a);
-	blitSpritefont(&milk->video, DEFAULT_FONT_DATA, 8, 10, "MILK\n------------------------------", 1, CMD_COLOR);
-	blitSpritefont(&milk->video, DEFAULT_FONT_DATA, 8, 40, ">:", 1, CMD_COLOR);
-	blitSpritefont(&milk->video, DEFAULT_FONT_DATA, 24, 40, cmdLine->commandCandidate, 1, CMD_COLOR);
+	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, 10, "MILK\n------------------------------", 1, CMD_COLOR);
+	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, 40, ">:", 1, CMD_COLOR);
+	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 24, 40, cmdLine->commandCandidate, 1, CMD_COLOR);
 
 	/* Draw blinking position marker. */
 	if (_ticks % 32 > 16)
-		blitSpritefont(&milk->video, DEFAULT_FONT_DATA, 24 + cmdLength * 8, 42, "_", 1, CMD_COLOR);
+		blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 24 + cmdLength * 8, 42, "_", 1, CMD_COLOR);
 }
 
 

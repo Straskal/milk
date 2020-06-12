@@ -31,7 +31,7 @@
 
 #include <string.h>
 
-#define FRAMEBUFFER_POS(x, y)			((MILK_FRAMEBUF_WIDTH * y) + x)
+#define FRAMEBUFFER_POS(x, y)			((FRAMEBUFFER_HEIGHT * y) + x)
 #define WITHIN_CLIP_RECT(clip, x, y)	(clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
 
  /*
@@ -44,7 +44,7 @@ TEST_CASE(createMilk_InitializesFramebuffer)
 {
 	SETUP(milk);
 
-	for (int i = 0; i < MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT; i++)
+	for (int i = 0; i < FRAMEBUFFER_HEIGHT * FRAMEBUFFER_WIDTH; i++)
 		ASSERT_EQ(0x00, milk->video.framebuffer[i]);
 
 TEARDOWN:
@@ -55,8 +55,8 @@ TEST_CASE(createMilk_InitializesSpritesheet)
 {
 	SETUP(milk);
 
-	for (int i = 0; i < MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE; i++)
-		ASSERT_EQ(0x00, milk->video.spritesheet[i]);
+	for (int i = 0; i < SPRITE_SHEET_SQRSIZE * SPRITE_SHEET_SQRSIZE; i++)
+		ASSERT_EQ(0x00, milk->video.spriteSheet[i]);
 
 TEARDOWN:
 	FREE_MILK(milk);
@@ -66,8 +66,8 @@ TEST_CASE(createMilk_InitializesFont)
 {
 	SETUP(milk);
 
-	for (int i = 0; i < MILK_FONT_WIDTH * MILK_FONT_HEIGHT; i++)
-		ASSERT_EQ(0x00, milk->video.font[i]);
+	for (int i = 0; i < FONT_WIDTH * FONT_HEIGHT; i++)
+		ASSERT_EQ(DEFAULT_FONT_DATA[i], milk->video.font[i]);
 
 TEARDOWN:
 	FREE_MILK(milk);
@@ -87,8 +87,8 @@ TEST_CASE(createMilk_InitializesClipRect)
 	SETUP(milk);
 	ASSERT_EQ(0, milk->video.clipRect.top);
 	ASSERT_EQ(0, milk->video.clipRect.left);
-	ASSERT_EQ(MILK_FRAMEBUF_HEIGHT, milk->video.clipRect.bottom);
-	ASSERT_EQ(MILK_FRAMEBUF_WIDTH, milk->video.clipRect.right);
+	ASSERT_EQ(FRAMEBUFFER_WIDTH, milk->video.clipRect.bottom);
+	ASSERT_EQ(FRAMEBUFFER_HEIGHT, milk->video.clipRect.right);
 
 TEARDOWN:
 	FREE_MILK(milk);
@@ -98,7 +98,7 @@ TEST_CASE(createMilk_InitializesSamples)
 {
 	SETUP(milk);
 
-	for (int i = 0; i < MILK_MAX_LOADED_SAMPLES; i++)
+	for (int i = 0; i < MAX_LOADED_SAMPLES; i++)
 	{
 		ASSERT_NULL(milk->audio.samples[i].buffer);
 		ASSERT_EQ(0, milk->audio.samples[i].length);
@@ -112,7 +112,7 @@ TEST_CASE(createMilk_InitializesAudioSlots)
 {
 	SETUP(milk);
 
-	for (int i = 0; i < MILK_MAX_CONCUR_SOUNDS; i++)
+	for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
 	{
 		ASSERT_NULL(milk->audio.slots[i].sampleData);
 		ASSERT_EQ(STOPPED, milk->audio.slots[i].state);
@@ -128,7 +128,7 @@ TEARDOWN:
 TEST_CASE(createMilk_InitializesAudioSettings)
 {
 	SETUP(milk);
-	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, milk->audio.masterVolume);
+	ASSERT_EQ(MAX_VOLUME, milk->audio.masterVolume);
 	ASSERT_EQ(0, milk->audio.frequency);
 	ASSERT_EQ(0, milk->audio.channels);
 
@@ -227,9 +227,9 @@ TEST_CASE(resetDrawState_ResetsClipRect)
 	ACT(resetDrawState(&milk->video));
 
 	ASSERT_EQ(0, milk->video.clipRect.top);
-	ASSERT_EQ(MILK_FRAMEBUF_HEIGHT, milk->video.clipRect.bottom);
+	ASSERT_EQ(FRAMEBUFFER_WIDTH, milk->video.clipRect.bottom);
 	ASSERT_EQ(0, milk->video.clipRect.left);
-	ASSERT_EQ(MILK_FRAMEBUF_WIDTH, milk->video.clipRect.right);
+	ASSERT_EQ(FRAMEBUFFER_HEIGHT, milk->video.clipRect.right);
 
 TEARDOWN:
 	FREE_MILK(milk);
@@ -242,9 +242,9 @@ TEST_CASE(setClippingRect_ClampsClipRectToFramebufferSize)
 	ACT(setClippingRect(&milk->video, -10, -10, 500, 500));
 
 	ASSERT_EQ(0, milk->video.clipRect.top);
-	ASSERT_EQ(MILK_FRAMEBUF_HEIGHT, milk->video.clipRect.bottom);
+	ASSERT_EQ(FRAMEBUFFER_WIDTH, milk->video.clipRect.bottom);
 	ASSERT_EQ(0, milk->video.clipRect.left);
-	ASSERT_EQ(MILK_FRAMEBUF_WIDTH, milk->video.clipRect.right);
+	ASSERT_EQ(FRAMEBUFFER_HEIGHT, milk->video.clipRect.right);
 
 TEARDOWN:
 	FREE_MILK(milk);
@@ -306,7 +306,7 @@ TEST_CASE(playSound_WhenIndexOutOfBounds_DoesNothing)
 {
 	SETUP(milk);
 	ACT(playSound(&milk->audio, -1, 0, 0));
-	ACT(playSound(&milk->audio, MILK_MAX_LOADED_SAMPLES + 1, 0, 0));
+	ACT(playSound(&milk->audio, MAX_LOADED_SAMPLES + 1, 0, 0));
 	FREE_MILK(milk);
 }
 
@@ -314,7 +314,7 @@ TEST_CASE(playSound_WhenSampleAtIndexNotLoaded_DoesNothing)
 {
 	SETUP(milk);
 	ACT(playSound(&milk->audio, 0, -1, 0));
-	ACT(playSound(&milk->audio, MILK_MAX_CONCUR_SOUNDS + 1, 0, 0));
+	ACT(playSound(&milk->audio, MAX_SAMPLE_SLOTS + 1, 0, 0));
 }
 
 TEST_CASE(playSound_WhenSampleLengthIsZero_DoesNothing)
@@ -379,9 +379,9 @@ TEST_CASE(playSound_ClampsVolumeToMax)
 	milk->audio.unlock = _mockUnlock;
 	milk->audio.samples[0].length = 1;
 
-	ACT(playSound(&milk->audio, 0, 0, MILK_AUDIO_MAX_VOLUME + 10));
+	ACT(playSound(&milk->audio, 0, 0, MAX_VOLUME + 10));
 
-	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, milk->audio.slots[0].volume);
+	ASSERT_EQ(MAX_VOLUME, milk->audio.slots[0].volume);
 
 	milk->audio.samples[0].buffer = NULL;
 
@@ -402,8 +402,8 @@ TEARDOWN:
 TEST_CASE(setMasterVolume_ClampsToMaxValue)
 {
 	SETUP(milk);
-	ACT(setMasterVolume(&milk->audio, MILK_AUDIO_MAX_VOLUME + 10));
-	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, milk->audio.masterVolume);
+	ACT(setMasterVolume(&milk->audio, MAX_VOLUME + 10));
+	ASSERT_EQ(MAX_VOLUME, milk->audio.masterVolume);
 
 TEARDOWN:
 	FREE_MILK(milk);
@@ -413,7 +413,7 @@ TEST_CASE(stopSound_WhenIndexOutOfBounds_DoesNothing)
 {
 	SETUP(milk);
 	ACT(stopSound(&milk->audio, -10));
-	ACT(stopSound(&milk->audio, MILK_MAX_CONCUR_SOUNDS + 10));
+	ACT(stopSound(&milk->audio, MAX_SAMPLE_SLOTS + 10));
 	FREE_MILK(milk);
 }
 
@@ -438,7 +438,7 @@ TEST_CASE(pauseSound_WhenIndexOutOfBounds_DoesNothing)
 {
 	SETUP(milk);
 	ACT(pauseSound(&milk->audio, -10));
-	ACT(pauseSound(&milk->audio, MILK_MAX_CONCUR_SOUNDS + 10));
+	ACT(pauseSound(&milk->audio, MAX_SAMPLE_SLOTS + 10));
 	FREE_MILK(milk);
 }
 
@@ -462,7 +462,7 @@ TEST_CASE(resumeSound_WhenIndexOutOfBounds_DoesNothing)
 {
 	SETUP(milk);
 	ACT(resumeSound(&milk->audio, -10));
-	ACT(resumeSound(&milk->audio, MILK_MAX_CONCUR_SOUNDS + 10));
+	ACT(resumeSound(&milk->audio, MAX_SAMPLE_SLOTS + 10));
 	FREE_MILK(milk);
 }
 

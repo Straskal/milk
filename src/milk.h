@@ -45,8 +45,8 @@
  *******************************************************************************
  */
 
-#define MILK_MAX_LOGS       16
-#define MILK_LOG_MAX_LENGTH 512
+#define MAX_LOGS       16
+#define MAX_LOG_LENGTH 512
 
 #ifndef MILK_CMD
 #define LOG_INFO(logs, text)    (void *)0;
@@ -65,14 +65,13 @@ typedef enum logType
 
 typedef struct logMessage
 {
-    size_t  length;
     LogType type;
-    char    text[MILK_LOG_MAX_LENGTH];
+    char    text[MAX_LOG_LENGTH];
 } LogMessage;
 
 typedef struct logs
 {
-    LogMessage  messages[MILK_MAX_LOGS];
+    LogMessage  messages[MAX_LOGS];
     int         count;
     int         errorCount;
 } Logs;
@@ -90,15 +89,15 @@ void clearLogs(Logs *logs);
 
 typedef enum buttonState
 {
-    BTN_START   = 1 << 0,
-    BTN_UP      = 1 << 1,
-    BTN_DOWN    = 1 << 2,
-    BTN_LEFT    = 1 << 3,
-    BTN_RIGHT   = 1 << 4,
-    BTN_A       = 1 << 5,
-    BTN_B       = 1 << 6,
-    BTN_X       = 1 << 7,
-    BTN_Y       = 1 << 8,
+    BTN_START   = 1u << 0u,
+    BTN_UP      = 1u << 1u,
+    BTN_DOWN    = 1u << 2u,
+    BTN_LEFT    = 1u << 3u,
+    BTN_RIGHT   = 1u << 4u,
+    BTN_A       = 1u << 5u,
+    BTN_B       = 1u << 6u,
+    BTN_X       = 1u << 7u,
+    BTN_Y       = 1u << 8u,
 } ButtonState;
 
 typedef struct gamepad
@@ -129,16 +128,16 @@ bool isButtonPressed(Input *input, ButtonState button);
  *******************************************************************************
  */
 
-#define MILK_FRAMERATE              (1000.0f / 50.0f)
-#define MILK_FRAMEBUF_WIDTH         256
-#define MILK_FRAMEBUF_HEIGHT        224
-#define MILK_WINDOW_WIDTH           (MILK_FRAMEBUF_WIDTH * 3)
-#define MILK_WINDOW_HEIGHT          (MILK_FRAMEBUF_HEIGHT * 3)
-#define MILK_SPRSHEET_SQRSIZE       256
-#define MILK_SPRSHEET_SPR_SQRSIZE   16
-#define MILK_FONT_WIDTH             128
-#define MILK_FONT_HEIGHT            48
-#define MILK_CHAR_SQRSIZE           8
+#define FRAMERATE               (1000.0f / 50.0f)
+#define FRAMEBUFFER_HEIGHT      256
+#define FRAMEBUFFER_WIDTH       224
+#define WINDOW_WIDTH            (FRAMEBUFFER_HEIGHT * 3)
+#define WINDOW_HEIGHT           (FRAMEBUFFER_WIDTH * 3)
+#define SPRITE_SHEET_SQRSIZE    256
+#define SPRITE_SQRSIZE          16
+#define FONT_WIDTH              128
+#define FONT_HEIGHT             48
+#define CHAR_SQRSIZE            8
 
 typedef uint32_t Color32;
 
@@ -152,16 +151,16 @@ typedef struct rect
 
 typedef struct video
 {
-    Color32 framebuffer[MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT];
-    Color32 spritesheet[MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE];
-    Color32 font[MILK_FONT_WIDTH * MILK_FONT_HEIGHT];
+    Color32 framebuffer[FRAMEBUFFER_HEIGHT * FRAMEBUFFER_WIDTH];
+    Color32 spriteSheet[SPRITE_SHEET_SQRSIZE * SPRITE_SHEET_SQRSIZE];
+    Color32 font[FONT_WIDTH * FONT_HEIGHT];
     Color32 colorKey;
     Rect    clipRect;
 
     void(*loadBMP)(const char *, Color32 *, size_t);
 } Video;
 
-void loadSpritesheet(Video *video, const char *path);
+void loadSpriteSheet(Video *video, const char *path);
 void loadFont(Video *video, const char *path);
 void resetDrawState(Video *video);
 void setClippingRect(Video *video, int x, int y, int w, int h);
@@ -170,7 +169,7 @@ void blitPixel(Video *video, int x, int y, Color32 color);
 void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color);
 void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color);
 void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip);
-void blitSpritefont(Video *video, const Color32 *pixels, int x, int y, const char *str, float scale, Color32 color);
+void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, float scale, Color32 color);
 
 /*
  *******************************************************************************
@@ -184,12 +183,12 @@ void blitSpritefont(Video *video, const Color32 *pixels, int x, int y, const cha
  *******************************************************************************
  */
 
-#define MILK_AUDIO_FREQUENCY        44100
-#define MILK_AUDIO_CHANNELS         2 /* Stereo */
-#define MILK_AUDIO_SAMPLES          4096
-#define MILK_MAX_LOADED_SAMPLES     16
-#define MILK_MAX_CONCUR_SOUNDS      16
-#define MILK_AUDIO_MAX_VOLUME       128
+#define AUDIO_FREQUENCY     44100
+#define AUDIO_CHANNELS      2 /* Stereo */
+#define AUDIO_SAMPLES       4096
+#define MAX_LOADED_SAMPLES  16
+#define MAX_SAMPLE_SLOTS    16
+#define MAX_VOLUME          128
 
 typedef struct sampleData
 {
@@ -215,8 +214,8 @@ typedef struct sampleSlot
 
 typedef struct audio
 {
-    SampleData      samples[MILK_MAX_LOADED_SAMPLES];
-    SampleSlot      slots[MILK_MAX_CONCUR_SOUNDS];
+    SampleData      samples[MAX_LOADED_SAMPLES];
+    SampleSlot      slots[MAX_SAMPLE_SLOTS];
     uint32_t        frequency;
     uint8_t         masterVolume;
     uint8_t         channels;
