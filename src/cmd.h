@@ -41,20 +41,21 @@
  */
 
 
-typedef enum cmdButtonState
+typedef enum cmdInputState
 {
-    INPUT_CHAR =      1u << 0u,
-    INPUT_BACK =      1u << 1u,
-    INPUT_ENTER =     1u << 2u,
-    INPUT_ESCAPE =    1u << 3u
-} CmdButtonState;
+	INPUT_NONE =    0u << 0u,
+    INPUT_CHAR =    1u << 0u,
+    INPUT_BACK =    1u << 1u,
+    INPUT_ENTER =   1u << 2u,
+    INPUT_ESCAPE =  1u << 3u
+} CmdInputState;
 
 
 typedef struct cmdInput
 {
     void(*startTextInput)();
     void(*stopTextInput)();
-    CmdButtonState state;
+    CmdInputState state;
     char currentChar;
 } CmdInput;
 
@@ -78,8 +79,8 @@ typedef struct milkCmd
     CmdInput    input;
 	CmdState    state;
     int         lastErrorCount;
-    size_t      commandCandidateLength;
-    size_t      previousCommandLength;
+    int         commandCandidateLength;
+    int         previousCommandLength;
     char        commandCandidate[MILK_COMMAND_LEN];
     char        previousCommand[MILK_COMMAND_LEN];
     bool        isGameInitialized;

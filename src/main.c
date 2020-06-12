@@ -33,7 +33,7 @@
 #define SDL_FIRST_AVAILABLE_RENDERER -1
 #define MILK_FRAMEBUF_PITCH (FRAMEBUFFER_HEIGHT * 4)
 
-static int gAudioDevice; /* Global audio device so we can access from our methods below. */
+static SDL_AudioDeviceID gAudioDevice; /* Global audio device so we can access from our methods below. */
 
  /* Functions to lock and unlock the audio device so you can safely manipulate the milk's audio queue without another thread grabbing for it. */
 static void lockAudioDevice()
@@ -197,8 +197,8 @@ int main(int argc, char *argv[])
 		CmdInput *cmdInput = &milkCmd->input;
 
 		{
-			ButtonState btnState = 0;
-			CmdButtonState cmdBtnState = 0;
+			ButtonState btnState = BTN_NONE;
+			CmdInputState cmdInputState = INPUT_NONE;
 
 			input->gamepad.previousButtonState = input->gamepad.buttonState;
 
@@ -215,19 +215,23 @@ int main(int argc, char *argv[])
 						switch (event.key.keysym.sym)
 						{
 							case SDLK_BACKSPACE:
-								cmdBtnState |= INPUT_BACK;
+								cmdInputState |= INPUT_BACK;
 								break;
 							case SDLK_RETURN:
-								cmdBtnState |= INPUT_ENTER;
+								cmdInputState |= INPUT_ENTER;
 								break;
 							case SDLK_ESCAPE:
-								cmdBtnState |= INPUT_ESCAPE;
+								cmdInputState |= INPUT_ESCAPE;
+								break;
+							default:
 								break;
 						}
 						break;
 					case SDL_TEXTINPUT:
-						cmdBtnState |= INPUT_CHAR;
+						cmdInputState |= INPUT_CHAR;
 						cmdInput->currentChar = event.text.text[0];
+						break;
+					default:
 						break;
 				}
 			}
@@ -245,7 +249,7 @@ int main(int argc, char *argv[])
 			if (kbState[SDL_SCANCODE_V]) btnState |= BTN_Y;
 
 			input->gamepad.buttonState = btnState;
-			cmdInput->state = cmdBtnState;
+			cmdInput->state = cmdInputState;
 		}
 
 		{

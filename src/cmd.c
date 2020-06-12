@@ -26,8 +26,6 @@
 #include "cmd.h"
 #include "embed/font.h"
 
-#include <assert.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -46,8 +44,8 @@
 
 #define HAS_INPUT(inputState, input) ((inputState & input) == input)
 
-static unsigned int _ticks = 0;
 
+static unsigned int ticks = 0;
 
 typedef struct commandImpl
 {
@@ -70,11 +68,11 @@ typedef struct commandLogLine
  */
 
 
-static void _cmdReload(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
+static void cmdReload(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 {
-	(void *)cmd;
-	(void *)args;
-	(void *)nargs;
+	(void)cmd;
+	(void)args;
+	(void)nargs;
 	milkUnloadCode(milk);
 	milkLoadCode(milk);
 	cmd->isGameInitialized = false;
@@ -82,30 +80,30 @@ static void _cmdReload(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 }
 
 
-static void _cmdClear(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
+static void cmdClear(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 {
-	(void *)cmd;
-	(void *)args;
-	(void *)nargs;
+	(void)cmd;
+	(void)args;
+	(void)nargs;
 	clearLogs(&milk->logs);
 	cmd->lastErrorCount = 0;
 }
 
 
-static void _cmdQuit(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
+static void cmdQuit(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 {
-	(void *)cmd;
-	(void *)args;
-	(void *)nargs;
+	(void)cmd;
+	(void)args;
+	(void)nargs;
 	milk->shouldQuit = true;
 }
 
 
 static CommandImpl _commands[] =
 {
-	{ "reload",	_cmdReload },
-	{ "clear",	_cmdClear },
-	{ "quit",	_cmdQuit }
+	{ "reload",	cmdReload },
+	{ "clear",	cmdClear },
+	{ "quit",	cmdQuit }
 };
 
 #define NUM_COMMANDS sizeof(_commands) / sizeof(CommandImpl)
@@ -118,7 +116,7 @@ static CommandImpl _commands[] =
  */
 
 
-static CommandImpl *_findCommand(const char *cmd)
+static CommandImpl *findCommand(const char *cmd)
 {
 	for (size_t i = 0; i < NUM_COMMANDS; i++)
 	{
@@ -129,13 +127,13 @@ static CommandImpl *_findCommand(const char *cmd)
 }
 
 
-static CommandImpl *_parseCommand(char *cmd, char *args[], int *nargs)
+static CommandImpl *parseCommand(char *cmd, char *args[], int *nargs)
 {
 	*nargs = 0;
 	char tempCmd[MILK_COMMAND_LEN];
 	strcpy(tempCmd, cmd);
 	char *token = strtok(tempCmd, CMD_DELIM); /* Get command name. */
-	CommandImpl *command = _findCommand(token);
+	CommandImpl *command = findCommand(token);
 
 	if (command != NULL) /* Parse args. */
 	{
@@ -151,7 +149,7 @@ static CommandImpl *_parseCommand(char *cmd, char *args[], int *nargs)
 }
 
 
-static void _resetCommandCandidate(MilkCmd *cmdLine)
+static void resetCommandCandidate(MilkCmd *cmdLine)
 {
 	cmdLine->commandCandidateLength = 0;
 
@@ -160,9 +158,9 @@ static void _resetCommandCandidate(MilkCmd *cmdLine)
 }
 
 
-static void _updateCommandLine(MilkCmd *cmd, Milk *milk)
+static void updateCommandLine(MilkCmd *cmd, Milk *milk)
 {
-	CmdButtonState btnState = cmd->input.state;
+	CmdInputState btnState = cmd->input.state;
 
 	if (HAS_INPUT(btnState, INPUT_BACK) && cmd->commandCandidateLength > 0)
 		cmd->commandCandidate[--cmd->commandCandidateLength] = '\0';
@@ -180,14 +178,14 @@ static void _updateCommandLine(MilkCmd *cmd, Milk *milk)
 	}
 
 	if (isButtonPressed(&milk->input, BTN_DOWN))
-		_resetCommandCandidate(cmd);
+		resetCommandCandidate(cmd);
 
 	if (HAS_INPUT(btnState, INPUT_ENTER) && cmd->commandCandidateLength > 0)
 	{
 		char *args[CMD_MAX_ARGS];
 		int nargs;
 
-		CommandImpl *cmdImpl = _parseCommand(cmd->commandCandidate, args, &nargs);
+		CommandImpl *cmdImpl = parseCommand(cmd->commandCandidate, args, &nargs);
 		if (cmdImpl != NULL)
 		{
 			cmdImpl->execute(cmd, milk, args, nargs);
@@ -198,12 +196,12 @@ static void _updateCommandLine(MilkCmd *cmd, Milk *milk)
 		}
 		else logMessage(&milk->logs, "Unknown command", WARN);
 
-		_resetCommandCandidate(cmd);
+		resetCommandCandidate(cmd);
 	}
 }
 
 
-static Color32 _getLogColor(LogType type)
+static Color32 getLogColor(LogType type)
 {
 	switch (type)
 	{
@@ -220,7 +218,7 @@ static Color32 _getLogColor(LogType type)
 
 
 /* This is poopy. Need to refactor. */
-static void _getLogLines(Logs *logs, CommandLogLine *lines, int *numLines)
+static void getLogLines(Logs *logs, CommandLogLine *lines, int *numLines)
 {
 	int currentLine = 0;
 
@@ -244,7 +242,7 @@ static void _getLogLines(Logs *logs, CommandLogLine *lines, int *numLines)
 				size_t lineLength = remainingLength > CHARS_PER_LINE - 1 ? CHARS_PER_LINE - 1 : remainingLength;
 				strncpy(lines[currentLine].text, messageText, lineLength);
 				lines[currentLine].text[lineLength] = '\0';
-				lines[currentLine].color = _getLogColor(logs->messages[i].type);
+				lines[currentLine].color = getLogColor(logs->messages[i].type);
 				messageLength -= lineLength;
 				messageText += lineLength;
 				currentLine++;
@@ -258,12 +256,12 @@ static void _getLogLines(Logs *logs, CommandLogLine *lines, int *numLines)
 }
 
 
-static void _drawLogLines(Milk *milk)
+static void drawLogLines(Milk *milk)
 {
 	CommandLogLine lines[MAX_LINES];
 	int numLines;
 
-	_getLogLines(&milk->logs, lines, &numLines);
+	getLogLines(&milk->logs, lines, &numLines);
 
 	for (int i = 0; i < numLines; i++)
 		blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, LOG_START_HEIGHT + ((CHAR_SQRSIZE + 2) * i),
@@ -271,9 +269,9 @@ static void _drawLogLines(Milk *milk)
 }
 
 
-static void _drawCommandLine(MilkCmd *cmdLine, Milk *milk)
+static void drawCommandLine(MilkCmd *cmdLine, Milk *milk)
 {
-	size_t cmdLength = cmdLine->commandCandidateLength;
+	int cmdLength = cmdLine->commandCandidateLength;
 
 	clearFramebuffer(&milk->video, 0x1a1a1a);
 	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, 10, "MILK\n------------------------------", 1, CMD_COLOR);
@@ -281,7 +279,7 @@ static void _drawCommandLine(MilkCmd *cmdLine, Milk *milk)
 	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 24, 40, cmdLine->commandCandidate, 1, CMD_COLOR);
 
 	/* Draw blinking position marker. */
-	if (_ticks % 32 > 16)
+	if (ticks % 32 > 16)
 		blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 24 + cmdLength * 8, 42, "_", 1, CMD_COLOR);
 }
 
@@ -290,7 +288,7 @@ MilkCmd *createCmd()
 {
 	MilkCmd *cmd = calloc(1, sizeof(MilkCmd));
 	cmd->state = COMMAND;
-	_resetCommandCandidate(cmd);
+	resetCommandCandidate(cmd);
 	return cmd;
 }
 
@@ -301,7 +299,7 @@ void freeCmd(MilkCmd *cmd)
 }
 
 
-static void _errorCheck(MilkCmd *cmd, Milk *milk)
+static void errorCheck(MilkCmd *cmd, Milk *milk)
 {
 	if (cmd->lastErrorCount < milk->logs.errorCount)
 	{
@@ -314,7 +312,7 @@ static void _errorCheck(MilkCmd *cmd, Milk *milk)
 
 void updateCmd(MilkCmd *cmd, Milk *milk)
 {
-	CmdButtonState btnState = cmd->input.state;
+	CmdInputState btnState = cmd->input.state;
 	resetDrawState(&milk->video);
 
 	if (HAS_INPUT(btnState, INPUT_ESCAPE))
@@ -339,11 +337,11 @@ void updateCmd(MilkCmd *cmd, Milk *milk)
 	switch (cmd->state)
 	{
 		case COMMAND:
-			_updateCommandLine(cmd, milk);
+			updateCommandLine(cmd, milk);
 			break;
 		case GAME:
 			milkInvokeUpdate(&milk->code);
-			_errorCheck(cmd, milk);
+			errorCheck(cmd, milk);
 			break;
 	}
 }
@@ -354,13 +352,13 @@ void drawCmd(MilkCmd *cmd, Milk *milk)
 	switch (cmd->state)
 	{
 		case COMMAND:
-			_drawCommandLine(cmd, milk);
-			_drawLogLines(milk);
+			drawCommandLine(cmd, milk);
+			drawLogLines(milk);
 			break;
 		case GAME:
 			milkInvokeDraw(&milk->code);
-			_errorCheck(cmd, milk);
+			errorCheck(cmd, milk);
 			break;
 	}
-	_ticks++;
+	ticks++;
 }

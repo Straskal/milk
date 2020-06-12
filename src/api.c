@@ -23,13 +23,11 @@
  */
 
 #include "api.h"
-#include "milk.h"
 
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
 #include <math.h>
-#include <stdio.h>
 
 static Milk *_globalMilk;
 static void _pushApi(lua_State *L);

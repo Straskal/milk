@@ -28,6 +28,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+typedef uint8_t     u8;
+typedef uint16_t    u16;
+typedef uint32_t    u32;
+
 /*
  *******************************************************************************
  * Current configuration:
@@ -89,6 +93,7 @@ void clearLogs(Logs *logs);
 
 typedef enum buttonState
 {
+	BTN_NONE    = 0u << 0u,
     BTN_START   = 1u << 0u,
     BTN_UP      = 1u << 1u,
     BTN_DOWN    = 1u << 2u,
@@ -139,14 +144,14 @@ bool isButtonPressed(Input *input, ButtonState button);
 #define FONT_HEIGHT             48
 #define CHAR_SQRSIZE            8
 
-typedef uint32_t Color32;
+typedef u32 Color32;
 
 typedef struct rect
 {
-    int top;
-    int bottom;
-    int left;
-    int right;
+    u32 top;
+	u32 bottom;
+	u32 left;
+	u32 right;
 } Rect;
 
 typedef struct video
@@ -163,12 +168,12 @@ typedef struct video
 void loadSpriteSheet(Video *video, const char *path);
 void loadFont(Video *video, const char *path);
 void resetDrawState(Video *video);
-void setClippingRect(Video *video, int x, int y, int w, int h);
+void setClippingRect(Video *video, u32 x, u32 y, u32 w, u32 h);
 void clearFramebuffer(Video *video, Color32 color);
 void blitPixel(Video *video, int x, int y, Color32 color);
 void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color);
 void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color);
-void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip);
+void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, uint8_t flip);
 void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, float scale, Color32 color);
 
 /*
@@ -214,11 +219,11 @@ typedef struct sampleSlot
 
 typedef struct audio
 {
-    SampleData      samples[MAX_LOADED_SAMPLES];
-    SampleSlot      slots[MAX_SAMPLE_SLOTS];
-    uint32_t        frequency;
-    uint8_t         masterVolume;
-    uint8_t         channels;
+    SampleData  samples[MAX_LOADED_SAMPLES];
+    SampleSlot  slots[MAX_SAMPLE_SLOTS];
+    int         frequency;
+	int         masterVolume;
+	int         channels;
 
     void(*loadWAV)(struct audio *, const char *, int);
     void(*lock)();

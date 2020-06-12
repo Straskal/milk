@@ -158,7 +158,7 @@ TEARDOWN:
 TEST_CASE(isButtonDown_WhenButtonUp_ReturnsFalse)
 {
 	SETUP(milk);
-	milk->input.gamepad.buttonState = 0;
+	milk->input.gamepad.buttonState = BTN_NONE;
 
 	bool isDown = ACT(isButtonDown(&milk->input, BTN_DOWN));
 
@@ -172,7 +172,7 @@ TEST_CASE(isButtonPressed_WhenPressed_ReturnsTrue)
 {
 	SETUP(milk);
 	milk->input.gamepad.buttonState |= BTN_DOWN;
-	milk->input.gamepad.previousButtonState = 0;
+	milk->input.gamepad.previousButtonState = BTN_DOWN;
 
 	bool isPressed = ACT(isButtonPressed(&milk->input, BTN_DOWN));
 

@@ -39,7 +39,7 @@
 #define TEST_CASE(test)					static void test()
 #define SETUP(milk)						Milk *milk = createMilk()
 #define ACT(action)                     action
-#define FREE_MILK(milk)					freeMilk(milk);
+#define FREE_MILK(milk)					freeMilk(milk)
 #define TEARDOWN    					teardown
 
 /*
@@ -80,7 +80,6 @@ Test *gCurrentTest = NULL;
 #define ASSERT_EQ(expected, actual)		BASE_ASSERT((expected) == (actual))
 #define ASSERT_NEQ(expected, actual)	BASE_ASSERT((expected) != (actual))
 #define ASSERT_NULL(val)				BASE_ASSERT((val) == (NULL))
-#define ASSERT_NNULL(val)				BASE_ASSERT((val) != (NULL))
 
 /*
  *******************************************************************************
@@ -115,13 +114,14 @@ int runTests(Test *tests, size_t count)
 	printf("=======================================\n\n");
 
     for (size_t i = 0; i < count; i++)
-        if (tests[i].failedAssert != NULL)
-        {
-            printf("	- %s\n", tests[i].name);
-            printf("		%s\n", tests[i].failedAssert);
-        }
-
-	return !(passedCount == count);
+    {
+	    if (tests[i].failedAssert != NULL)
+	    {
+		    printf("	- %s\n", tests[i].name);
+		    printf("		%s\n", tests[i].failedAssert);
+	    }
+    }
+	return passedCount == count ? 0 : -1;
 }
 
 #endif

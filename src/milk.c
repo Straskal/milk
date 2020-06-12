@@ -36,26 +36,10 @@
  */
 
 
-static int clamp(int value, int min, int max)
-{
-	if (value < min)
-		value = min;
-	if (value > max)
-		value = max;
+#define MIN(x, y)           (x > y ? y : x)
+#define MAX(x, y)           (x > y ? x : y)
+#define CLAMP(v, low, up)   (MAX(low, MIN(v, up)))
 
-	return value;
-}
-
-
-static float clampFloat(float value, float min, float max)
-{
-	if (value < min)
-		value = min;
-	if (value > max)
-		value = max;
-
-	return value;
-}
 
 /*
  *******************************************************************************
@@ -68,7 +52,7 @@ static void initLogs(Logs *logs)
 {
 	for (int i = 0; i < MAX_LOGS; i++)
 	{
-		logs->messages[i].type = 0;
+		logs->messages[i].type = INFO;
 		memset(logs->messages[i].text, 0, MAX_LOG_LENGTH);
 	}
 
@@ -79,8 +63,8 @@ static void initLogs(Logs *logs)
 
 static void initInput(Input *input)
 {
-	input->gamepad.buttonState = 0;
-	input->gamepad.previousButtonState = 0;
+	input->gamepad.buttonState = BTN_NONE;
+	input->gamepad.previousButtonState = BTN_NONE;
 }
 
 
@@ -241,13 +225,12 @@ void resetDrawState(Video *video)
 	video->clipRect.right = FRAMEBUFFER_HEIGHT;
 }
 
-
-void setClippingRect(Video *video, int x, int y, int w, int h)
+void setClippingRect(Video *video, u32 x, u32 y, u32 w, u32 h)
 {
-	video->clipRect.left =		clamp(x, 0, FRAMEBUFFER_HEIGHT);
-	video->clipRect.right =		clamp(x + w, 0, FRAMEBUFFER_HEIGHT);
-	video->clipRect.top =		clamp(y, 0, FRAMEBUFFER_WIDTH);
-	video->clipRect.bottom =	clamp(y + h, 0, FRAMEBUFFER_WIDTH);
+	video->clipRect.left =		MAX(x, FRAMEBUFFER_WIDTH);
+	video->clipRect.right =		MAX(x + w, FRAMEBUFFER_WIDTH);
+	video->clipRect.top =		MAX(y, FRAMEBUFFER_HEIGHT);
+	video->clipRect.bottom =	MAX(y + h, FRAMEBUFFER_HEIGHT);
 }
 
 
@@ -259,9 +242,9 @@ void clearFramebuffer(Video *video, Color32 color)
 {
 	Rect clip = video->clipRect;
 
-	for (int i = clip.top; i < clip.bottom; i++)
+	for (u32 i = clip.top; i < clip.bottom; i++)
 	{
-		for (int j = clip.left; j < clip.right; j++)
+		for (u32 j = clip.left; j < clip.right; j++)
 			video->framebuffer[FRAMEBUFFER_POS(j, i)] = color;
 	}
 }
@@ -269,7 +252,7 @@ void clearFramebuffer(Video *video, Color32 color)
 
 void blitPixel(Video *video, int x, int y, Color32 color)
 {
-	if (WITHIN_CLIP_RECT(video->clipRect, x, y))
+	if (x > 0 && y > 0 && WITHIN_CLIP_RECT(video->clipRect, (u32)x, (u32)y))
 		video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
@@ -323,19 +306,20 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
  */
 static void blitRect(Video *video, const Color32 *pixels, int x, int y, uint32_t w, uint32_t h, uint32_t pitch, float scale, uint8_t flip, const Color32 *color)
 {
-	scale = clampFloat(scale, MIN_SCALE, MAX_SCALE);
+	scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
 
-	uint32_t width =	floorf(w * scale);
-	uint32_t height =	floorf(h * scale);
-	uint32_t xRatio =	floorf((float)(w << 16u) / width + 0.5f);
-	uint32_t yRatio =	floorf((float)(h << 16u) / height + 0.5f);
+	int width =	    (int)floorf(w * scale);
+	int height =	(int)floorf(h * scale);
+	int xRatio =	(int)floorf((float)(w << 16u) / (float)width + 0.5f);
+	int yRatio =	(int)floorf((float)(h << 16u) / (float)height + 0.5f);
 
-	int xPixelStart =	IS_FLIPPED_X(flip) ? width - 1 : 0;
-	int yPixelStart =	IS_FLIPPED_Y(flip) ? height - 1 : 0;
+	uint32_t xPixelStart =	IS_FLIPPED_X(flip) ? width - 1u : 0u;
+	uint32_t yPixelStart =	IS_FLIPPED_Y(flip) ? height - 1u : 0u;
 	int xDirection =	IS_FLIPPED_X(flip) ? -1 : 1;
 	int yDirection =	IS_FLIPPED_Y(flip) ? -1 : 1;
 
-	uint32_t xPixel, yPixel, xFramebuffer, yFramebuffer;
+	uint32_t xPixel, yPixel;
+	int xFramebuffer, yFramebuffer;
 
 	for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yDirection)
 	{
@@ -359,7 +343,7 @@ static void blitRect(Video *video, const Color32 *pixels, int x, int y, uint32_t
 #define SPRSHEET_POS(x, y)			(y * SPRSHEET_ROW_SIZE + x * SPRSHEET_COL_SIZE)
 
 
-void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip)
+void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, uint8_t flip)
 {
 	if (SPRSHEET_IDX_OO_BOUNDS(idx))
 		return;
@@ -378,7 +362,7 @@ void blitSprite(Video *video, int idx, int x, int y, int w, int h, float scale, 
 #define FONT_ROW_SIZE		((int)(FONT_WIDTH * CHAR_SQRSIZE))
 #define FONT_COL_SIZE		CHAR_SQRSIZE
 #define FONT_POS(x, y)		(y * FONT_ROW_SIZE + x * FONT_COL_SIZE)
-#define IS_ASCII(c)			((c & 0xff80u) == 0)
+#define IS_ASCII(c)			(c < 127)
 #define IS_NEWLINE(c)		(c == '\n')
 
 
@@ -390,7 +374,7 @@ void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const cha
 	int charSize = (int)floor((double)CHAR_SQRSIZE * scale);
 	int xCurrent = x;
 	int yCurrent = y;
-	unsigned char curr;
+	char curr;
 
 	while ((curr = *str++) != '\0')
 	{
@@ -490,7 +474,7 @@ void playSound(Audio *audio, int sampleIdx, int slotIdx, int volume)
 	slot->state = PLAYING;
 	slot->position = sampleData->buffer;
 	slot->remainingLength = sampleData->length;
-	slot->volume = (uint8_t)clamp(volume, 0, MAX_VOLUME);
+	slot->volume = CLAMP(volume, 0, MAX_VOLUME);
 	audio->unlock();
 }
 
@@ -542,7 +526,7 @@ SampleSlotState getSampleState(Audio *audio, int slotIdx)
 
 void setMasterVolume(Audio *audio, int volume)
 {
-	audio->masterVolume = (uint8_t)clamp(volume, 0, MAX_VOLUME);
+	audio->masterVolume = CLAMP(volume, 0, MAX_VOLUME);
 }
 
 
@@ -563,7 +547,7 @@ static void mixSample(uint8_t *destination, const uint8_t *source, uint32_t leng
 		uint32_t dst1 = destination[1];
 		sourceSample = src1 << 8u | (uint32_t)(src0 * volume);
 		destSample = dst1 << 8u | dst0;
-		uint32_t mixedSample = clamp(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
+		uint32_t mixedSample = CLAMP(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
 		destination[0] = mixedSample & 0xffu;
 		destination[1] = (mixedSample >> 8u) & 0xffu;
 		source += 2;
