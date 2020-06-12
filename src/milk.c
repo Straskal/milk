@@ -349,7 +349,7 @@ static void blitRect(Video *video, const Color32 *pixels, int x, int y, u32 w, u
 #define SPRSHEET_POS(x, y)			(y * SPRSHEET_ROW_SIZE + x * SPRSHEET_COL_SIZE)
 
 
-void blitSprite(Video *video, int idx, int x, int y, u32 w, u32 h, float scale, uint8_t flip)
+void blitSprite(Video *video, int idx, int x, int y, u32 w, u32 h, float scale, u8 flip)
 {
 	if (SPRSHEET_IDX_OO_BOUNDS(idx))
 		return;

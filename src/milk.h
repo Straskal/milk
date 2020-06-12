@@ -174,7 +174,7 @@ void clearFramebuffer(Video *video, Color32 color);
 void blitPixel(Video *video, int x, int y, Color32 color);
 void blitRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color);
 void blitFilledRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color);
-void blitSprite(Video *video, int idx, int x, int y, u32 w, u32 h, float scale, uint8_t flip);
+void blitSprite(Video *video, int idx, int x, int y, u32 w, u32 h, float scale, u8 flip);
 void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, float scale, Color32 color);
 
 /*
