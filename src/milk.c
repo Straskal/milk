@@ -388,8 +388,8 @@ void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const cha
 			if (!IS_ASCII(curr)) curr = '?';
             u32 width = CHAR_SQRSIZE;
             u32 height = CHAR_SQRSIZE;
-			int row = (int)floorf((float)(curr - 32) / (float)FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
-			int col = (int)floorf((float)((curr - 32) % FONT_COLUMNS));
+			int row = (int)floor((double)(curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
+			int col = (int)floor((double)((curr - 32) % FONT_COLUMNS));
 			const Color32 *pixelStart = &pixels[FONT_POS(col, row)];
 
 			blitRect(video, pixelStart, xCurrent, yCurrent, width, height, FONT_WIDTH, scale, 0, &color);
