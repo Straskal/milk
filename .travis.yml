@@ -16,8 +16,6 @@ matrix:
             - gcc-5
             - g++-5
             - libsdl2-dev
-            - libsdl2-image-dev
-            - libsdl2-mixer-dev
             - libegl1-mesa-dev
             - libgles2-mesa-dev
             - liblua5.3-dev
@@ -32,8 +30,6 @@ matrix:
         homebrew:
           packages:
             - sdl2
-            - sdl2_image
-            - sdl2_mixer
             - lua@5.3
           update: true
 
