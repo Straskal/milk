@@ -1,16 +1,12 @@
-local milk = require("milk")
+local milk = require("scripts.milk")
 
 local stars = {}
-local starColumns = {1,2,5,6,7,12}
+local starColumns = {1, 2, 5, 6, 7, 12}
 local warpFactor = 3
 
 local function init()
-	milk.loadsnd(0, "music.wav")
-	milk.loadsnd(1, "punch.wav")
-	milk.loadsnd(2, "fireball_shoot.wav")
-
 	for i = 1, #starColumns do
-		for j = 1, 10 do
+		for _ = 1, 10 do
 			local star = {
 				x = math.random(256),
 				y = math.random(224),
@@ -40,7 +36,7 @@ local function draw()
 end
 
 return {
-    init    	= init,
-    update  	= update,
-	draw	    = draw,
+	init = init,
+	update = update,
+	draw = draw
 }

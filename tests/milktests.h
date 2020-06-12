@@ -4,18 +4,18 @@
  *  Copyright(c) 2018 - 2020 Stephen Traskal
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software andassociated documentation files(the "Software"), to deal
+ *  of this software and associated documentation files(the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, andto permit persons to whom the Software is
+ *  copies of the Software, and to permit persons to whom the Software is
  *  furnished to do so, subject to the following conditions :
  *
- *  The above copyright notice andthis permission notice shall be included in all
+ *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
  *
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
  *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -27,103 +27,113 @@
 
 #include "milk.h"
 #include "milkassert.h"
+#include "embed/font.h"
 
 #include <string.h>
 
-#define FRAMEBUFFER_POS(x, y)			((MILK_FRAMEBUF_WIDTH * y) + x)
+#define FRAMEBUFFER_POS(x, y)			((FRAMEBUFFER_HEIGHT * y) + x)
 #define WITHIN_CLIP_RECT(clip, x, y)	(clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
 
-/*
- *******************************************************************************
- * Initialization and shutdown
- *******************************************************************************
- */
+ /*
+  *******************************************************************************
+  * Initialization and shutdown
+  *******************************************************************************
+  */
 
-TEST_CASE(milkCreate_InitializesFramebuffer)
+TEST_CASE(createMilk_InitializesFramebuffer)
 {
 	SETUP(milk);
 
-	for (int i = 0; i < MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT; i++)
+	for (int i = 0; i < FRAMEBUFFER_HEIGHT * FRAMEBUFFER_WIDTH; i++)
 		ASSERT_EQ(0x00, milk->video.framebuffer[i]);
 
-	TEARDOWN(milk);
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkCreate_InitializesSpritesheet)
+TEST_CASE(createMilk_InitializesSpritesheet)
 {
 	SETUP(milk);
 
-	for (int i = 0; i < MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE; i++)
-		ASSERT_EQ(0x00, milk->video.spritesheet[i]);
+	for (int i = 0; i < SPRITE_SHEET_SQRSIZE * SPRITE_SHEET_SQRSIZE; i++)
+		ASSERT_EQ(0x00, milk->video.spriteSheet[i]);
 
-	TEARDOWN(milk);
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkCreate_InitializesFont)
+TEST_CASE(createMilk_InitializesFont)
 {
 	SETUP(milk);
 
-	for (int i = 0; i < MILK_FONT_WIDTH * MILK_FONT_HEIGHT; i++)
-		ASSERT_EQ(0x00, milk->video.font[i]);
+	for (int i = 0; i < FONT_WIDTH * FONT_HEIGHT; i++)
+		ASSERT_EQ(DEFAULT_FONT_DATA[i], milk->video.font[i]);
 
-	TEARDOWN(milk);
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkCreate_InitializesColorKey)
+TEST_CASE(createMilk_InitializesColorKey)
 {
 	SETUP(milk);
 	ASSERT_EQ(0x00, milk->video.colorKey);
-	TEARDOWN(milk);
+
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkCreate_InitializesClipRect)
+TEST_CASE(createMilk_InitializesClipRect)
 {
 	SETUP(milk);
 	ASSERT_EQ(0, milk->video.clipRect.top);
 	ASSERT_EQ(0, milk->video.clipRect.left);
-	ASSERT_EQ(MILK_FRAMEBUF_HEIGHT, milk->video.clipRect.bottom);
-	ASSERT_EQ(MILK_FRAMEBUF_WIDTH, milk->video.clipRect.right);
-	TEARDOWN(milk);
+	ASSERT_EQ(FRAMEBUFFER_WIDTH, milk->video.clipRect.bottom);
+	ASSERT_EQ(FRAMEBUFFER_HEIGHT, milk->video.clipRect.right);
+
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkCreate_InitializesSamples)
+TEST_CASE(createMilk_InitializesSamples)
 {
 	SETUP(milk);
 
-	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
+	for (int i = 0; i < MAX_LOADED_SAMPLES; i++)
 	{
 		ASSERT_NULL(milk->audio.samples[i].buffer);
 		ASSERT_EQ(0, milk->audio.samples[i].length);
 	}
 
-	TEARDOWN(milk);
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkCreate_InitializesAudioQueue)
+TEST_CASE(createMilk_InitializesAudioSlots)
 {
 	SETUP(milk);
 
-	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+	for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
 	{
-		ASSERT_NULL(milk->audio.queueItems[i].sampleData);
-		ASSERT_EQ(0, milk->audio.queueItems[i].remainingLength);
-		ASSERT_NULL(milk->audio.queueItems[i].position);
-		ASSERT_EQ(0, milk->audio.queueItems[i].volume);
-		ASSERT_FALSE(milk->audio.queueItems[i].isLooping);
-		ASSERT_TRUE(milk->audio.queueItems[i].isFree);
+		ASSERT_NULL(milk->audio.slots[i].sampleData);
+		ASSERT_EQ(STOPPED, milk->audio.slots[i].state);
+		ASSERT_EQ(0, milk->audio.slots[i].remainingLength);
+		ASSERT_NULL(milk->audio.slots[i].position);
+		ASSERT_EQ(0, milk->audio.slots[i].volume);
 	}
 
-	ASSERT_NNULL(milk->audio.queue);
-	TEARDOWN(milk);
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkCreate_InitializesAudioSettings)
+TEST_CASE(createMilk_InitializesAudioSettings)
 {
 	SETUP(milk);
-	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, milk->audio.masterVolume);
+	ASSERT_EQ(MAX_VOLUME, milk->audio.masterVolume);
 	ASSERT_EQ(0, milk->audio.frequency);
 	ASSERT_EQ(0, milk->audio.channels);
-	TEARDOWN(milk);
+
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
 /*
@@ -132,50 +142,58 @@ TEST_CASE(milkCreate_InitializesAudioSettings)
  *******************************************************************************
  */
 
-TEST_CASE(milkButton_WhenButtonDown_ReturnsTrue)
+TEST_CASE(isButtonDown_WhenButtonDown_ReturnsTrue)
 {
 	SETUP(milk);
 	milk->input.gamepad.buttonState |= BTN_DOWN;
 
-	bool isDown = ACT(milkButton(&milk->input, BTN_DOWN));
+	bool isDown = ACT(isButtonDown(&milk->input, BTN_DOWN));
 
 	ASSERT_TRUE(isDown);
-	TEARDOWN(milk);
+
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkButton_WhenButtonUp_ReturnsFalse)
+TEST_CASE(isButtonDown_WhenButtonUp_ReturnsFalse)
 {
 	SETUP(milk);
-	milk->input.gamepad.buttonState = 0;
+	milk->input.gamepad.buttonState = BTN_NONE;
 
-	bool isDown = ACT(milkButton(&milk->input, BTN_DOWN));
+	bool isDown = ACT(isButtonDown(&milk->input, BTN_DOWN));
 
 	ASSERT_FALSE(isDown);
-	TEARDOWN(milk);
+
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkButtonPressed_WhenPressed_ReturnsTrue)
+TEST_CASE(isButtonPressed_WhenPressed_ReturnsTrue)
 {
 	SETUP(milk);
 	milk->input.gamepad.buttonState |= BTN_DOWN;
-	milk->input.gamepad.previousButtonState = 0;
+	milk->input.gamepad.previousButtonState = BTN_DOWN;
 
-	bool isPressed = ACT(milkButtonPressed(&milk->input, BTN_DOWN));
+	bool isPressed = ACT(isButtonPressed(&milk->input, BTN_DOWN));
 
 	ASSERT_TRUE(isPressed);
-	TEARDOWN(milk);
+
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkButtonPressed_WhenHeld_ReturnsFalse)
+TEST_CASE(isButtonPressed_WhenHeld_ReturnsFalse)
 {
 	SETUP(milk);
 	milk->input.gamepad.buttonState |= BTN_DOWN;
 	milk->input.gamepad.previousButtonState |= BTN_DOWN;
 
-	bool isPressed = ACT(milkButtonPressed(&milk->input, BTN_DOWN));
+	bool isPressed = ACT(isButtonPressed(&milk->input, BTN_DOWN));
 
 	ASSERT_FALSE(isPressed);
-	TEARDOWN(milk);
+
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
 /*
@@ -184,18 +202,20 @@ TEST_CASE(milkButtonPressed_WhenHeld_ReturnsFalse)
  *******************************************************************************
  */
 
-TEST_CASE(milkResetDrawState_ResetsColorKey)
+TEST_CASE(resetDrawState_ResetsColorKey)
 {
 	SETUP(milk);
 	milk->video.colorKey = 57;
 
-	ACT(milkResetDrawState(&milk->video));
+	ACT(resetDrawState(&milk->video));
 
 	ASSERT_EQ(0x00, milk->video.colorKey);
-	TEARDOWN(milk);
+
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkResetDrawState_ResetsClipRect)
+TEST_CASE(resetDrawState_ResetsClipRect)
 {
 	SETUP(milk);
 
@@ -204,83 +224,68 @@ TEST_CASE(milkResetDrawState_ResetsClipRect)
 	milk->video.clipRect.left = 10;
 	milk->video.clipRect.right = 10;
 
-	ACT(milkResetDrawState(&milk->video));
+	ACT(resetDrawState(&milk->video));
 
 	ASSERT_EQ(0, milk->video.clipRect.top);
-	ASSERT_EQ(MILK_FRAMEBUF_HEIGHT, milk->video.clipRect.bottom);
+	ASSERT_EQ(FRAMEBUFFER_WIDTH, milk->video.clipRect.bottom);
 	ASSERT_EQ(0, milk->video.clipRect.left);
-	ASSERT_EQ(MILK_FRAMEBUF_WIDTH, milk->video.clipRect.right);
-	TEARDOWN(milk);
+	ASSERT_EQ(FRAMEBUFFER_HEIGHT, milk->video.clipRect.right);
+
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkClipRect_ClampsClipRectToFramebufferSize)
+TEST_CASE(setClippingRect_ClampsClipRectToFramebufferSize)
 {
 	SETUP(milk);
 
-	ACT(milkClipRect(&milk->video, -10, -10, 500, 500));
+	ACT(setClippingRect(&milk->video, -10, -10, 500, 500));
 
 	ASSERT_EQ(0, milk->video.clipRect.top);
-	ASSERT_EQ(MILK_FRAMEBUF_HEIGHT, milk->video.clipRect.bottom);
+	ASSERT_EQ(FRAMEBUFFER_WIDTH, milk->video.clipRect.bottom);
 	ASSERT_EQ(0, milk->video.clipRect.left);
-	ASSERT_EQ(MILK_FRAMEBUF_WIDTH, milk->video.clipRect.right);
-	TEARDOWN(milk);
+	ASSERT_EQ(FRAMEBUFFER_HEIGHT, milk->video.clipRect.right);
+
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkClipRect_SetsClipRect)
+TEST_CASE(setClippingRect_SetsClipRect)
 {
 	SETUP(milk);
 
-	ACT(milkClipRect(&milk->video, 10, 20, 200, 100));
+	ACT(setClippingRect(&milk->video, 10, 20, 200, 100));
 
 	ASSERT_EQ(20, milk->video.clipRect.top);
 	ASSERT_EQ(120, milk->video.clipRect.bottom);
 	ASSERT_EQ(10, milk->video.clipRect.left);
 	ASSERT_EQ(210, milk->video.clipRect.right);
-	TEARDOWN(milk);
+
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkClear_SetsPixelsWithinClipRect)
+TEST_CASE(blitPixel_WhenPixelWithinClipRect_SetsPixel)
 {
 	SETUP(milk);
-	milkClipRect(&milk->video, 0, 0, MILK_FRAMEBUF_WIDTH, MILK_FRAMEBUF_HEIGHT);
-	milkClear(&milk->video, 0xff0000);
-	milkClipRect(&milk->video, 10, 20, 200, 100);
-
-	ACT(milkClear(&milk->video, 0x00ff00));
-
-	for (int i = 0; i < MILK_FRAMEBUF_HEIGHT; i++)
-	{
-		for (int j = 0; j < MILK_FRAMEBUF_HEIGHT; j++)
-		{
-			Color32 color = milk->video.framebuffer[FRAMEBUFFER_POS(j, i)];
-
-			if (WITHIN_CLIP_RECT(milk->video.clipRect, j, i))
-				ASSERT_EQ(0x00ff00, color);
-			else
-				ASSERT_EQ(0xff0000, color);
-		}
-	}
-
-	TEARDOWN(milk);
-}
-
-TEST_CASE(milkPixelSet_WhenPixelWithinClipRect_SetsPixel)
-{
-	SETUP(milk);
-	milkClear(&milk->video, 0x00);
-	ACT(milkPixelSet(&milk->video, 15, 30, 0x00ff00));
+	clearFramebuffer(&milk->video, 0x00);
+	ACT(blitPixel(&milk->video, 15, 30, 0x00ff00));
 	ASSERT_EQ(0x00ff00, milk->video.framebuffer[FRAMEBUFFER_POS(15, 30)]);
-	TEARDOWN(milk);
+
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
-TEST_CASE(milkPixelSet_WhenPixelIsNotWithinClipRect_DoesNotSetPixel)
+TEST_CASE(blitPixel_WhenPixelIsNotWithinClipRect_DoesNotSetPixel)
 {
 	SETUP(milk);
-	milkClear(&milk->video, 0x00);
-	milkClipRect(&milk->video, 10, 20, 200, 100);
-	ACT(milkPixelSet(&milk->video, 1, 1, 0xff0000));
+	clearFramebuffer(&milk->video, 0x00);
+	setClippingRect(&milk->video, 10, 20, 200, 100);
+	ACT(blitPixel(&milk->video, 1, 1, 0xff0000));
 	ASSERT_NEQ(0xff0000, milk->video.framebuffer[FRAMEBUFFER_POS(1, 1)]);
-	TEARDOWN(milk);
+
+TEARDOWN:
+	FREE_MILK(milk);
 }
 
 /*
@@ -297,215 +302,183 @@ static void _mockUnlock()
 {
 }
 
-TEST_CASE(milkSound_WhenIndexOutOfBounds_DoesNothing)
+TEST_CASE(playSound_WhenIndexOutOfBounds_DoesNothing)
 {
 	SETUP(milk);
-	ACT(milkSound(&milk->audio, -1, 0, 0));
-	ASSERT_NULL(milk->audio.queue->next);
-	TEARDOWN(milk);
-}
-
-TEST_CASE(milkSound_WhenSampleAtIndexNotLoaded_DoesNothing)
-{
-	SETUP(milk);
-	ACT(milkSound(&milk->audio, 0, 0, 0));
-	ASSERT_NULL(milk->audio.queue->next);
-	TEARDOWN(milk);
-}
-
-TEST_CASE(milkSound_WhenMaxNumberOfConcurrentSoundsPlaying_DoesNothing)
-{
-	SETUP(milk);
-	milk->audio.lock = _mockLock;
-	milk->audio.unlock = _mockUnlock;
-
-	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
-		milk->audio.queueItems[i].isFree = false;
-
-	ACT(milkSound(&milk->audio, 0, 0, 0));
-
-	ASSERT_NULL(milk->audio.queue->next);
-	TEARDOWN(milk);
-}
-
-TEST_CASE(milkSound_QueuesNewSample)
-{
-	SETUP(milk);
-	milk->audio.lock = _mockLock;
-	milk->audio.unlock = _mockUnlock;
-	uint8_t buffer[] = {7, 7, 7};
-	milk->audio.samples[0].buffer = buffer;
-	milk->audio.samples[0].length = 3;
-
-	ACT(milkSound(&milk->audio, 0, 50, false));
-
-	AudioQueueItem *queuedItem = milk->audio.queue->next;
-	ASSERT_NNULL(queuedItem);
-	ASSERT_EQ(&milk->audio.samples[0], queuedItem->sampleData);
-	ASSERT_EQ(buffer, queuedItem->position);
-	ASSERT_EQ(3, queuedItem->remainingLength);
-	ASSERT_EQ(50, queuedItem->volume);
-	ASSERT_FALSE(queuedItem->isLooping);
-	ASSERT_NULL(queuedItem->next);
-
-CUSTOM_TEARDOWN:
-	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+	ACT(playSound(&milk->audio, -1, 0, 0));
+	ACT(playSound(&milk->audio, MAX_LOADED_SAMPLES + 1, 0, 0));
 	FREE_MILK(milk);
 }
 
-TEST_CASE(milkSound_WhenLoop_ExistingLoopingSampleIsRemovedFromQueueBeforeQueueingNewSample)
+TEST_CASE(playSound_WhenSampleAtIndexNotLoaded_DoesNothing)
+{
+	SETUP(milk);
+	ACT(playSound(&milk->audio, 0, -1, 0));
+	ACT(playSound(&milk->audio, MAX_SAMPLE_SLOTS + 1, 0, 0));
+}
+
+TEST_CASE(playSound_WhenSampleLengthIsZero_DoesNothing)
+{
+	SETUP(milk);
+	milk->audio.samples[0].length = 0;
+
+	ACT(playSound(&milk->audio, 0, 0, 0));
+
+	ASSERT_NEQ(&milk->audio.samples[0], milk->audio.slots[0].sampleData);
+
+	milk->audio.samples[0].buffer = NULL;
+
+TEARDOWN:
+	FREE_MILK(milk);
+}
+
+TEST_CASE(playSound_SetsSlot)
 {
 	SETUP(milk);
 	milk->audio.lock = _mockLock;
 	milk->audio.unlock = _mockUnlock;
-	uint8_t buffer[] = { 7, 7, 7 };
+	uint8_t buffer[1];
 	milk->audio.samples[0].buffer = buffer;
-	milk->audio.samples[0].length = 3;
-	milkSound(&milk->audio, 0, 50, true);
+	milk->audio.samples[0].length = 1;
 
-	ACT(milkSound(&milk->audio, 0, 50, true));
+	ACT(playSound(&milk->audio, 0, 0, 50));
 
-	AudioQueueItem *queuedItem = milk->audio.queue->next;
-	ASSERT_NNULL(queuedItem);
-	ASSERT_TRUE(queuedItem->isLooping);
-	ASSERT_NULL(queuedItem->next);
+	ASSERT_EQ(&milk->audio.samples[0], milk->audio.slots[0].sampleData);
+	ASSERT_EQ(buffer, milk->audio.slots[0].position);
+	ASSERT_EQ(1, milk->audio.slots[0].remainingLength);
+	ASSERT_EQ(PLAYING, milk->audio.slots[0].state);
+	ASSERT_EQ(50, milk->audio.slots[0].volume);
 
-CUSTOM_TEARDOWN:
-	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+	milk->audio.samples[0].buffer = NULL;
+
+TEARDOWN:
 	FREE_MILK(milk);
 }
 
-TEST_CASE(milkSound_ClampsVolumeToMin)
+TEST_CASE(playSound_ClampsVolumeToMin)
 {
 	SETUP(milk);
 	milk->audio.lock = _mockLock;
 	milk->audio.unlock = _mockUnlock;
-	uint8_t buffer[] = { 7, 7, 7 };
-	milk->audio.samples[0].buffer = buffer;
-	milk->audio.samples[0].length = 3;
+	milk->audio.samples[0].length = 1;
 
-	ACT(milkSound(&milk->audio, 0, -10, true));
+	ACT(playSound(&milk->audio, 0, 0, -10));
 
-	AudioQueueItem *queuedItem = milk->audio.queue->next;
-	ASSERT_NNULL(queuedItem);
-	ASSERT_EQ(0, queuedItem->volume);
+	ASSERT_EQ(0, milk->audio.slots[0].volume);
 
-CUSTOM_TEARDOWN:
-	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+	milk->audio.samples[0].buffer = NULL;
+
+TEARDOWN:
 	FREE_MILK(milk);
 }
 
-TEST_CASE(milkSound_ClampsVolumeToMax)
+TEST_CASE(playSound_ClampsVolumeToMax)
 {
 	SETUP(milk);
 	milk->audio.lock = _mockLock;
 	milk->audio.unlock = _mockUnlock;
-	uint8_t buffer[] = { 7, 7, 7 };
-	milk->audio.samples[0].buffer = buffer;
-	milk->audio.samples[0].length = 3;
+	milk->audio.samples[0].length = 1;
 
-	ACT(milkSound(&milk->audio, 0, MILK_AUDIO_MAX_VOLUME + 10, true));
+	ACT(playSound(&milk->audio, 0, 0, MAX_VOLUME + 10));
 
-	AudioQueueItem *queuedItem = milk->audio.queue->next;
-	ASSERT_NNULL(queuedItem);
-	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, queuedItem->volume);
+	ASSERT_EQ(MAX_VOLUME, milk->audio.slots[0].volume);
 
-CUSTOM_TEARDOWN:
-	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+	milk->audio.samples[0].buffer = NULL;
+
+TEARDOWN:
 	FREE_MILK(milk);
 }
 
-TEST_CASE(milkVolume_ClampsToMinValue)
+TEST_CASE(setMasterVolume_ClampsToMinValue)
 {
 	SETUP(milk);
-	ACT(milkVolume(&milk->audio, -10));
+	ACT(setMasterVolume(&milk->audio, -10));
 	ASSERT_EQ(0, milk->audio.masterVolume);
-	TEARDOWN(milk);
-}
 
-TEST_CASE(milkVolume_ClampsToMaxValue)
-{
-	SETUP(milk);
-	ACT(milkVolume(&milk->audio, MILK_AUDIO_MAX_VOLUME + 10));
-	ASSERT_EQ(MILK_AUDIO_MAX_VOLUME, milk->audio.masterVolume);
-	TEARDOWN(milk);
-}
-
-TEST_CASE(milkAudioQueueToStream_WhenQueueIsEmpty_DoesNotMixIntoStream)
-{
-	SETUP(milk);
-	uint8_t stream[10];
-	ACT(milkAudioQueueToStream(&milk->audio, stream, 10));
-
-	for (int i = 0; i < 10; i++)
-		ASSERT_EQ(0, stream[i]);
-
-	TEARDOWN(milk);
-}
-
-TEST_CASE(milkAudioQueueToStream_WhenQueueItemsAreNotFinished_MixesSamplesIntoStream)
-{
-	SETUP(milk);
-	milk->audio.lock = _mockLock;
-	milk->audio.unlock = _mockUnlock;
-
-	uint8_t buffer[] = { 7, 7, 7, 7 };
-	milk->audio.samples[0].buffer = buffer;
-	milk->audio.samples[0].length = 4;
-	milkSound(&milk->audio, 0, 128, true);
-
-	uint8_t stream[10];
-	ACT(milkAudioQueueToStream(&milk->audio, stream, 10));
-
-	for (int i = 0; i < 4; i++)
-		ASSERT_EQ(7, stream[i]);
-
-CUSTOM_TEARDOWN:
-	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+TEARDOWN:
 	FREE_MILK(milk);
 }
 
-TEST_CASE(milkAudioQueueToStream_WhenSamplesIsFinishedAndLooping_ResetsSampleAndMixesIntoStream)
+TEST_CASE(setMasterVolume_ClampsToMaxValue)
 {
 	SETUP(milk);
-	milk->audio.lock = _mockLock;
-	milk->audio.unlock = _mockUnlock;
+	ACT(setMasterVolume(&milk->audio, MAX_VOLUME + 10));
+	ASSERT_EQ(MAX_VOLUME, milk->audio.masterVolume);
 
-	uint8_t buffer[] = { 7, 7, 7, 7 };
-	milk->audio.samples[0].buffer = buffer;
-	milk->audio.samples[0].length = 4;
-	milkSound(&milk->audio, 0, 128, true);
-	milk->audio.queue->next->remainingLength = 0;
-
-	uint8_t stream[10];
-	ACT(milkAudioQueueToStream(&milk->audio, stream, 10));
-
-	for (int i = 0; i < 4; i++)
-		ASSERT_EQ(7, stream[i]);
-
-CUSTOM_TEARDOWN:
-	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+TEARDOWN:
 	FREE_MILK(milk);
 }
 
-TEST_CASE(milkAudioQueueToStream_WhenSamplesIsFinished_RemovesSampleFromQueue)
+TEST_CASE(stopSound_WhenIndexOutOfBounds_DoesNothing)
+{
+	SETUP(milk);
+	ACT(stopSound(&milk->audio, -10));
+	ACT(stopSound(&milk->audio, MAX_SAMPLE_SLOTS + 10));
+	FREE_MILK(milk);
+}
+
+TEST_CASE(stopSound_StopsSound)
 {
 	SETUP(milk);
 	milk->audio.lock = _mockLock;
 	milk->audio.unlock = _mockUnlock;
+	milk->audio.slots[0].sampleData = &milk->audio.samples[0];
+	milk->audio.slots[0].state = PLAYING;
 
-	uint8_t buffer[] = { 7, 7, 7, 7 };
-	milk->audio.samples[0].buffer = buffer;
-	milk->audio.samples[0].length = 4;
-	milkSound(&milk->audio, 0, 128, false);
-	milk->audio.queue->next->remainingLength = 0;
+	ACT(stopSound(&milk->audio, 0));
 
-	uint8_t stream[10];
-	ACT(milkAudioQueueToStream(&milk->audio, stream, 10));
-	ASSERT_NULL(milk->audio.queue->next);
+	ASSERT_NULL(milk->audio.slots[0].sampleData);
+	ASSERT_EQ(STOPPED, milk->audio.slots[0].state);
 
-CUSTOM_TEARDOWN:
-	milk->audio.samples[0].buffer = NULL; /* We don't want our call to FREE to attempt to free our mock buffer. */
+TEARDOWN:
+	FREE_MILK(milk);
+}
+
+TEST_CASE(pauseSound_WhenIndexOutOfBounds_DoesNothing)
+{
+	SETUP(milk);
+	ACT(pauseSound(&milk->audio, -10));
+	ACT(pauseSound(&milk->audio, MAX_SAMPLE_SLOTS + 10));
+	FREE_MILK(milk);
+}
+
+TEST_CASE(pauseSound_PausesSound)
+{
+	SETUP(milk);
+	milk->audio.lock = _mockLock;
+	milk->audio.unlock = _mockUnlock;
+	milk->audio.slots[0].sampleData = &milk->audio.samples[0];
+	milk->audio.slots[0].state = PLAYING;
+
+	ACT(pauseSound(&milk->audio, 0));
+
+	ASSERT_EQ(PAUSED, milk->audio.slots[0].state);
+
+TEARDOWN:
+	FREE_MILK(milk);
+}
+
+TEST_CASE(resumeSound_WhenIndexOutOfBounds_DoesNothing)
+{
+	SETUP(milk);
+	ACT(resumeSound(&milk->audio, -10));
+	ACT(resumeSound(&milk->audio, MAX_SAMPLE_SLOTS + 10));
+	FREE_MILK(milk);
+}
+
+TEST_CASE(resumeSound_resumesSound)
+{
+	SETUP(milk);
+	milk->audio.lock = _mockLock;
+	milk->audio.unlock = _mockUnlock;
+	milk->audio.slots[0].sampleData = &milk->audio.samples[0];
+	milk->audio.slots[0].state = PAUSED;
+
+	ACT(resumeSound(&milk->audio, 0));
+
+	ASSERT_EQ(PLAYING, milk->audio.slots[0].state);
+
+TEARDOWN:
 	FREE_MILK(milk);
 }
 

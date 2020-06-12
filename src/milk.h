@@ -4,18 +4,18 @@
  *  Copyright(c) 2018 - 2020 Stephen Traskal
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software andassociated documentation files(the "Software"), to deal
+ *  of this software and associated documentation files(the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, andto permit persons to whom the Software is
+ *  copies of the Software, and to permit persons to whom the Software is
  *  furnished to do so, subject to the following conditions :
  *
- *  The above copyright notice andthis permission notice shall be included in all
+ *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
  *
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
  *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -28,50 +28,40 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/*
- *******************************************************************************
- * Configuration
- *
- * Specs:
- * - 256x224 px resolution
- * - 256x256 px spritesheet, each sprite being 16x16 px (256 sprites total)
- * - 128x48  px bitmap font in ASCII order, starting from ASCII character 32 (space)
- * - 16 loaded sounds into memory
- * - 16 concurrent sounds, 1 of which can be looping.
- *******************************************************************************
- */
-
-#define MILK_FRAMERATE              (1000.0f / 50.0f)
-#define MILK_FRAMEBUF_WIDTH         256
-#define MILK_FRAMEBUF_HEIGHT        224
-#define MILK_WINDOW_WIDTH           MILK_FRAMEBUF_WIDTH * 3
-#define MILK_WINDOW_HEIGHT          MILK_FRAMEBUF_HEIGHT * 3
-
-#define MILK_SPRSHEET_FILENAME      "sprsheet.bmp"
-#define MILK_FONT_FILENAME          "font.bmp"
-#define MILK_SPRSHEET_SQRSIZE       256
-#define MILK_SPRSHEET_SPR_SQRSIZE   16
-#define MILK_FONT_WIDTH             128
-#define MILK_FONT_HEIGHT            48
-#define MILK_CHAR_SQRSIZE           8
-
-#define MILK_AUDIO_FREQUENCY        44100
-#define MILK_AUDIO_CHANNELS         2 /* Stereo */
-#define MILK_AUDIO_SAMPLES          4096
-#define MILK_AUDIO_MAX_SOUNDS       16
-#define MILK_AUDIO_QUEUE_MAX        16
-#define MILK_AUDIO_MAX_VOLUME       128
-
-#define MILK_MAX_LOGS               16
-#define MILK_LOG_MAX_LENGTH         512
+typedef int16_t     i16;
+typedef int32_t     i32;
+typedef uint8_t     u8;
+typedef uint32_t    u32;
 
 /*
+ *******************************************************************************
+ * Current configuration:
+ * - 256x224 px resolution.
+ * - 256x256 px spritesheet, each sprite being 16x16 px (256 sprites total).
+ * - 128x48  px bitmap font in ASCII order, starting from ASCII character 32 (space).
+ * - Allows up to 16 sounds loaded into memory.
+ * - Allows up to 16 concurrent sounds via sample slots. Index 0 loops.
+ *******************************************************************************
+
  *******************************************************************************
  * Logging
  *
  * As of right now, logging is pretty bare bones. Logs are only shown in the command line.
  *******************************************************************************
  */
+
+#define MAX_LOGS       16
+#define MAX_LOG_LENGTH 512
+
+#ifndef MILK_CMD
+#define LOG_INFO(logs, text)    (void *)0;
+#define LOG_WARN(logs, text)    (void *)0;
+#define LOG_ERROR(logs, text)   (void *)0;
+#else
+#define LOG_INFO(milk, text)    logMessage(&milk->logs, text, INFO)
+#define LOG_WARN(milk, text)    logMessage(&milk->logs, text, WARN)
+#define LOG_ERROR(milk, text)   logMessage(&milk->logs, text, ERROR)
+#endif
 
 typedef enum logType
 {
@@ -80,17 +70,19 @@ typedef enum logType
 
 typedef struct logMessage
 {
-    size_t  length;
     LogType type;
-    char    text[MILK_LOG_MAX_LENGTH];
+    char    text[MAX_LOG_LENGTH];
 } LogMessage;
 
 typedef struct logs
 {
-    LogMessage  messages[MILK_MAX_LOGS];
+    LogMessage  messages[MAX_LOGS];
     int         count;
     int         errorCount;
 } Logs;
+
+void logMessage(Logs *logs, const char *text, LogType type);
+void clearLogs(Logs *logs);
 
 /*
  *******************************************************************************
@@ -102,15 +94,16 @@ typedef struct logs
 
 typedef enum buttonState
 {
-    BTN_START   = 1 << 0,
-    BTN_UP      = 1 << 1,
-    BTN_DOWN    = 1 << 2,
-    BTN_LEFT    = 1 << 3,
-    BTN_RIGHT   = 1 << 4,
-    BTN_A       = 1 << 5,
-    BTN_B       = 1 << 6,
-    BTN_X       = 1 << 7,
-    BTN_Y       = 1 << 8,
+	BTN_NONE    = 0u << 0u,
+    BTN_START   = 1u << 0u,
+    BTN_UP      = 1u << 1u,
+    BTN_DOWN    = 1u << 2u,
+    BTN_LEFT    = 1u << 3u,
+    BTN_RIGHT   = 1u << 4u,
+    BTN_A       = 1u << 5u,
+    BTN_B       = 1u << 6u,
+    BTN_X       = 1u << 7u,
+    BTN_Y       = 1u << 8u,
 } ButtonState;
 
 typedef struct gamepad
@@ -124,6 +117,9 @@ typedef struct input
     Gamepad gamepad;
 } Input;
 
+bool isButtonDown(Input *input, ButtonState button);
+bool isButtonPressed(Input *input, ButtonState button);
+
 /*
  *******************************************************************************
  * Video
@@ -131,34 +127,55 @@ typedef struct input
  * Internally, milk draws to it's own framebuffer, which is drawn to the screen at the end of every frame.
  * The framebuffer is just an array of pixels (32 bit color 0xAARRGGBB).
  *
- * The spritesheet and font are both loaded into memory during startup.
- * They are stored in fixed size arrays, so they do not need to be freed when milk shuts down.
-
+ * The spritesheet and font are stored in fixed size arrays, so they do not need to be freed when milk shuts down.
+ *
  * Milk does not support transparency when drawing, but it does use a color key to consider as 'transparent', which defaults to black.
  * All drawing functions only operate within the bounds of the clipping rectangle, which is reset to the framebuffer size at the beginning of each frame.
  *******************************************************************************
  */
 
-typedef uint32_t Color32;
+#define FRAMERATE               (1000.0f / 50.0f)
+#define FRAMEBUFFER_HEIGHT      256
+#define FRAMEBUFFER_WIDTH       224
+#define WINDOW_WIDTH            (FRAMEBUFFER_HEIGHT * 3)
+#define WINDOW_HEIGHT           (FRAMEBUFFER_WIDTH * 3)
+#define SPRITE_SHEET_SQRSIZE    256
+#define SPRITE_SQRSIZE          16
+#define FONT_WIDTH              128
+#define FONT_HEIGHT             48
+#define CHAR_SQRSIZE            8
+
+typedef u32 Color32;
 
 typedef struct rect
 {
-    int top;
-    int bottom;
-    int left;
-    int right;
+    u32 top;
+	u32 bottom;
+	u32 left;
+	u32 right;
 } Rect;
 
 typedef struct video
 {
-    Color32 framebuffer[MILK_FRAMEBUF_WIDTH * MILK_FRAMEBUF_HEIGHT];
-    Color32 spritesheet[MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE];
-    Color32 font[MILK_FONT_WIDTH * MILK_FONT_HEIGHT];
+    Color32 framebuffer[FRAMEBUFFER_HEIGHT * FRAMEBUFFER_WIDTH];
+    Color32 spriteSheet[SPRITE_SHEET_SQRSIZE * SPRITE_SHEET_SQRSIZE];
+    Color32 font[FONT_WIDTH * FONT_HEIGHT];
     Color32 colorKey;
     Rect    clipRect;
 
     void(*loadBMP)(const char *, Color32 *, size_t);
 } Video;
+
+void loadSpriteSheet(Video *video, const char *path);
+void loadFont(Video *video, const char *path);
+void resetDrawState(Video *video);
+void setClippingRect(Video *video, u32 x, u32 y, u32 w, u32 h);
+void clearFramebuffer(Video *video, Color32 color);
+void blitPixel(Video *video, int x, int y, Color32 color);
+void blitRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color);
+void blitFilledRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color);
+void blitSprite(Video *video, int idx, int x, int y, u32 w, u32 h, float scale, u8 flip);
+void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, float scale, Color32 color);
 
 /*
  *******************************************************************************
@@ -166,43 +183,63 @@ typedef struct video
  *
  * Sounds are dynamically allocated SampleData, and must be freed when they are no longer being used.
  *
- * Milk uses a queue like structure to store the currently playing sound instances.
- * The root queue item is a dynamically allocated dummy object. All other queue items act as a 'store', and are allocated on startup.
- * Many queue items can reference the same sample data, and sample data should be treated as readonly.
+ * In order for a sound (sample data) to be played, it must be inserted into one of the sixteen sample slots.
+ * Many sample slots can reference the same sample data.
+ * Sample slot 0 loops.
  *******************************************************************************
  */
 
+#define AUDIO_FREQUENCY     44100
+#define AUDIO_CHANNELS      2 /* Stereo */
+#define AUDIO_SAMPLES       4096
+#define MAX_LOADED_SAMPLES  16
+#define MAX_SAMPLE_SLOTS    16
+#define MAX_VOLUME          128
+
 typedef struct sampleData
 {
-    uint32_t length; /* Readonly */
-    uint8_t *buffer; /* Readonly */
+    uint32_t length;
+    uint8_t *buffer;
 } SampleData;
 
-typedef struct audioQueueItem
+typedef enum sampleSlotState
 {
-    SampleData *sampleData;
-    uint32_t    remainingLength;
-    uint8_t    *position;
-    uint8_t     volume;
-    bool        isLooping;
-    bool        isFree;
+    STOPPED,
+    PLAYING,
+    PAUSED
+} SampleSlotState;
 
-    struct audioQueueItem *next;
-} AudioQueueItem;
+typedef struct sampleSlot
+{
+    SampleData     *sampleData;
+    SampleSlotState state;
+    uint32_t        remainingLength;
+    uint8_t        *position;
+    uint8_t         volume;
+} SampleSlot;
 
 typedef struct audio
 {
-    SampleData      samples[MILK_AUDIO_MAX_SOUNDS];
-    AudioQueueItem  queueItems[MILK_AUDIO_QUEUE_MAX];
-    AudioQueueItem *queue;
-    uint32_t        frequency;
-    uint8_t         masterVolume;
-    uint8_t         channels;
+    SampleData  samples[MAX_LOADED_SAMPLES];
+    SampleSlot  slots[MAX_SAMPLE_SLOTS];
+    int         frequency;
+	int         masterVolume;
+	int         channels;
 
     void(*loadWAV)(struct audio *, const char *, int);
     void(*lock)();
     void(*unlock)();
 } Audio;
+
+void loadSound(Audio *audio, int idx, const char *filename);
+void unloadSound(Audio *audio, int idx);
+void playSound(Audio *audio, int sampleIdx, int slotIdx, int volume);
+void stopSound(Audio *audio, int slotIdx);
+void pauseSound(Audio *audio, int slotIdx);
+void resumeSound(Audio *audio, int slotIdx);
+SampleSlotState getSampleState(Audio *audio, int slotIdx);
+void setMasterVolume(Audio *audio, int volume);
+void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len);
 
 /*
  *******************************************************************************
@@ -233,30 +270,7 @@ typedef struct milk
     bool    shouldQuit;
 } Milk;
 
-Milk *milkCreate();
-void milkFree(Milk *milk);
-
-void milkLog(Milk *milk, const char *text, LogType type);
-void milkClearLogs(Milk *milk);
-
-void milkLoadSpritesheet(Video *video);
-void milkLoadFont(Video *video);
-
-bool milkButton(Input *input, ButtonState button);
-bool milkButtonPressed(Input *input, ButtonState button);
-
-void milkResetDrawState(Video *video);
-void milkClipRect(Video *video, int x, int y, int w, int h);
-void milkClear(Video *video, Color32 color);
-void milkPixelSet(Video *video, int x, int y, Color32 color);
-void milkRect(Video *video, int x, int y, int w, int h, Color32 color);
-void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color);
-void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip);
-void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Color32 color);
-
-void milkLoadSound(Audio *audio, int idx, const char *filename);
-void milkSound(Audio *audio, int idx, int volume, bool loop);
-void milkVolume(Audio *audio, int volume);
-void milkAudioQueueToStream(Audio *audio, uint8_t *stream, int len);
+Milk *createMilk();
+void freeMilk(Milk *milk);
 
 #endif
