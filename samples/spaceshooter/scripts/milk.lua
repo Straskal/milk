@@ -19,6 +19,7 @@ milk.btny       = 8
 -- API
 milk.btn        = _G.btn
 milk.btnp       = _G.btnp
+milk.loadspr    = _G.loadspr
 milk.clip       = _G.clip
 milk.clrs       = _G.clrs
 milk.pset       = _G.pset
@@ -27,7 +28,12 @@ milk.rectfill   = _G.rectfill
 milk.spr        = _G.spr
 milk.sprfont    = _G.sprfont
 milk.loadsnd    = _G.loadsnd
-milk.snd        = _G.snd
+milk.freesnd    = _G.freesnd
+milk.play       = _G.play
+milk.stop       = _G.stop
+milk.pause      = _G.pause
+milk.resume     = _G.resume
+milk.sndslot    = _G.sndslot
 milk.vol        = _G.vol
 
 function _G._init()

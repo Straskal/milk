@@ -4,18 +4,18 @@
  *  Copyright(c) 2018 - 2020 Stephen Traskal
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software andassociated documentation files(the "Software"), to deal
+ *  of this software and associated documentation files(the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, andto permit persons to whom the Software is
+ *  copies of the Software, and to permit persons to whom the Software is
  *  furnished to do so, subject to the following conditions :
  *
- *  The above copyright notice andthis permission notice shall be included in all
+ *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
  *
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
  *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -23,20 +23,23 @@
  */
 
 #include "milk.h"
-#include "milkapi.h"
+#include "embed/font.h"
 
 #include <math.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 
-#define FRAMEBUFFER_POS(x, y) ((MILK_FRAMEBUF_WIDTH * y) + x) /* xy coords to framebuffer pixel index. */
-#define WITHIN_CLIP_RECT(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
-#define MIN_SCALE 0.5f
-#define MAX_SCALE 5.0f
+/*
+ *******************************************************************************
+ * Helpers
+ *******************************************************************************
+ */
 
-#define FLIPX 1
-#define FLIPY 2
+
+#define MIN(x, y)           ((x) > (y) ? (y) : (x))
+#define MAX(x, y)           ((x) > (y) ? (x) : (y))
+#define CLAMP(v, low, up)   (MAX(low, MIN(v, up)))
+
 
 /*
  *******************************************************************************
@@ -44,84 +47,88 @@
  *******************************************************************************
  */
 
-static void _initLogs(Logs *logs)
+
+static void initLogs(Logs *logs)
 {
-	for (int i = 0; i < MILK_MAX_LOGS; i++)
+	for (int i = 0; i < MAX_LOGS; i++)
 	{
-		logs->messages[i].length = 0;
-		logs->messages[i].type = 0;
-		memset(logs->messages[i].text, 0, MILK_LOG_MAX_LENGTH);
+		logs->messages[i].type = INFO;
+		memset(logs->messages[i].text, 0, MAX_LOG_LENGTH);
 	}
 
 	logs->count = 0;
 	logs->errorCount = 0;
 }
 
-static void _initInput(Input *input)
+
+static void initInput(Input *input)
 {
-	input->gamepad.buttonState = 0;
-	input->gamepad.previousButtonState = 0;
+	input->gamepad.buttonState = BTN_NONE;
+	input->gamepad.previousButtonState = BTN_NONE;
 }
 
-static void _initVideo(Video *video)
+
+static void initVideo(Video *video)
 {
 	memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
-	memset(&video->spritesheet, 0x00, sizeof(video->spritesheet));
-	memset(&video->font,		0x00, sizeof(video->font));
-	milkResetDrawState(video);
+	memset(&video->spriteSheet, 0x00, sizeof(video->spriteSheet));
+	memcpy(&video->font, DEFAULT_FONT_DATA, sizeof(video->font));
+	resetDrawState(video);
 }
 
-static void _initAudio(Audio *audio)
+
+static void initAudio(Audio *audio)
 {
-	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
+	for (int i = 0; i < MAX_LOADED_SAMPLES; i++)
 	{
 		audio->samples[i].buffer = NULL;
 		audio->samples[i].length = 0;
 	}
 
-	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
+	for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
 	{
-		audio->queueItems[i].sampleData = NULL;
-		audio->queueItems[i].remainingLength = 0;
-		audio->queueItems[i].position = NULL;
-		audio->queueItems[i].volume = 0;
-		audio->queueItems[i].isLooping = false;
-		audio->queueItems[i].isFree = true;
+		audio->slots[i].sampleData = NULL;
+		audio->slots[i].state = STOPPED;
+		audio->slots[i].remainingLength = 0;
+		audio->slots[i].position = NULL;
+		audio->slots[i].volume = 0;
 	}
 
-	audio->queue = (AudioQueueItem *)calloc(1, sizeof(AudioQueueItem));
-	audio->masterVolume = MILK_AUDIO_MAX_VOLUME;
+	audio->masterVolume = MAX_VOLUME;
 	audio->frequency = 0;
 	audio->channels = 0;
 }
 
-static void _initCode(Code *code)
+
+static void initCode(Code *code)
 {
 	code->state = NULL;
 }
 
-Milk *milkCreate()
+
+Milk *createMilk()
 {
 	Milk *milk = (Milk *)malloc(sizeof(Milk));
 	milk->shouldQuit = false;
 
-	_initLogs(&milk->logs);
-	_initInput(&milk->input);
-	_initVideo(&milk->video);
-	_initAudio(&milk->audio);
-	_initCode(&milk->code);
+	initLogs(&milk->logs);
+	initInput(&milk->input);
+	initVideo(&milk->video);
+	initAudio(&milk->audio);
+	initCode(&milk->code);
 
 	return milk;
 }
 
-void milkFree(Milk *milk)
+
+void freeMilk(Milk *milk)
 {
-	for (int i = 0; i < MILK_AUDIO_MAX_SOUNDS; i++)
+	for (int i = 0; i < MAX_LOADED_SAMPLES; i++)
 		free(milk->audio.samples[i].buffer);
 
-	free(milk->audio.queue);
 	free(milk);
 }
+
 
 /*
  *******************************************************************************
@@ -129,58 +136,45 @@ void milkFree(Milk *milk)
  *******************************************************************************
  */
 
-/* When milk's log array is full, we shift down all of the logs before inserting the next one.*/
-static LogMessage *_getNextFreeLogMessage(Logs *logs)
+
+ /* When milk's log array is full, we shift down all of the logs before inserting the next one.*/
+static LogMessage *getNextFreeLogMessage(Logs *logs)
 {
-	if (logs->count == MILK_MAX_LOGS)
+	if (logs->count == MAX_LOGS)
 	{
-		for (int i = 0; i < MILK_MAX_LOGS - 1; i++)
+		for (int i = 0; i < MAX_LOGS - 1; i++)
 			logs->messages[i] = logs->messages[i + 1];
 
-		return &logs->messages[MILK_MAX_LOGS - 1];
+		return &logs->messages[MAX_LOGS - 1];
 	}
 	else
 		return &logs->messages[logs->count++];
 }
 
-void milkLog(Milk *milk, const char *text, LogType type)
+
+void logMessage(Logs *logs, const char *text, LogType type)
 {
 	size_t len = strlen(text);
 
-	if (len > MILK_LOG_MAX_LENGTH)
-		len = MILK_LOG_MAX_LENGTH;
+	if (len > MAX_LOG_LENGTH)
+		len = MAX_LOG_LENGTH;
 
 	if (type == ERROR)
-		milk->logs.errorCount++;
+		logs->errorCount++;
 
-	LogMessage *newLogMessage = _getNextFreeLogMessage(&milk->logs);
-	memset(newLogMessage->text, 0, MILK_LOG_MAX_LENGTH);
+	LogMessage *newLogMessage = getNextFreeLogMessage(logs);
+	memset(newLogMessage->text, 0, MAX_LOG_LENGTH);
 	strncpy(newLogMessage->text, text, len);
-	newLogMessage->length = len;
 	newLogMessage->type = type;
 }
 
-void milkClearLogs(Milk *milk)
+
+void clearLogs(Logs *logs)
 {
-	milk->logs.count = 0;
-	milk->logs.errorCount = 0;
+	logs->count = 0;
+	logs->errorCount = 0;
 }
 
-/*
- *******************************************************************************
- * Art
- *******************************************************************************
- */
-
-void milkLoadSpritesheet(Video *video)
-{
-	video->loadBMP(MILK_SPRSHEET_FILENAME, video->spritesheet, MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SQRSIZE);
-}
-
-void milkLoadFont(Video *video)
-{
-	video->loadBMP(MILK_FONT_FILENAME, video->font, MILK_FONT_WIDTH * MILK_FONT_HEIGHT);
-}
 
 /*
  *******************************************************************************
@@ -188,15 +182,18 @@ void milkLoadFont(Video *video)
  *******************************************************************************
  */
 
-bool milkButton(Input *input, ButtonState button)
+
+bool isButtonDown(Input *input, ButtonState button)
 {
 	return (input->gamepad.buttonState & button) == button;
 }
 
-bool milkButtonPressed(Input *input, ButtonState button)
+
+bool isButtonPressed(Input *input, ButtonState button)
 {
 	return (input->gamepad.buttonState & button) == button && (input->gamepad.previousButtonState & button) != button;
 }
+
 
 /*
  *******************************************************************************
@@ -206,79 +203,104 @@ bool milkButtonPressed(Input *input, ButtonState button)
  *******************************************************************************
  */
 
-void milkResetDrawState(Video *video)
+
+void loadSpriteSheet(Video *video, const char *path)
 {
-	video->colorKey = 0;
+	video->loadBMP(path, video->spriteSheet, sizeof(video->spriteSheet) / sizeof(Color32));
+}
+
+
+void loadFont(Video *video, const char *path)
+{
+	video->loadBMP(path, video->font, sizeof(video->font) / sizeof(Color32));
+}
+
+
+void resetDrawState(Video *video)
+{
+	video->colorKey = 0x00;
 	video->clipRect.top = 0;
 	video->clipRect.left = 0;
-	video->clipRect.bottom = MILK_FRAMEBUF_HEIGHT;
-	video->clipRect.right = MILK_FRAMEBUF_WIDTH;
+	video->clipRect.bottom = FRAMEBUFFER_WIDTH;
+	video->clipRect.right = FRAMEBUFFER_HEIGHT;
 }
 
-static int _clamp(int value, int min, int max)
+void setClippingRect(Video *video, u32 x, u32 y, u32 w, u32 h)
 {
-	if (value < min)
-		value = min;
-
-	if (value > max)
-		value = max;
-
-	return value;
+	video->clipRect.left =		MAX(x, FRAMEBUFFER_WIDTH);
+	video->clipRect.right =		MAX(x + w, FRAMEBUFFER_WIDTH);
+	video->clipRect.top =		MAX(y, FRAMEBUFFER_HEIGHT);
+	video->clipRect.bottom =	MAX(y + h, FRAMEBUFFER_HEIGHT);
 }
 
-void milkClipRect(Video *video, int x, int y, int w, int h)
-{
-	video->clipRect.left = _clamp(x, 0, MILK_FRAMEBUF_WIDTH);
-	video->clipRect.right = _clamp(x + w, 0, MILK_FRAMEBUF_WIDTH);
-	video->clipRect.top = _clamp(y, 0, MILK_FRAMEBUF_HEIGHT);
-	video->clipRect.bottom = _clamp(y + h, 0, MILK_FRAMEBUF_HEIGHT);
-}
 
-void milkClear(Video *video, Color32 color)
+#define FRAMEBUFFER_POS(x, y)			((FRAMEBUFFER_HEIGHT * y) + x)
+#define WITHIN_CLIP_RECT(clip, x, y)	(clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
+
+
+void clearFramebuffer(Video *video, Color32 color)
 {
 	Rect clip = video->clipRect;
 
-	for (int i = clip.top; i < clip.bottom; i++)
+	for (u32 i = clip.top; i < clip.bottom; i++)
 	{
-		for (int j = clip.left; j < clip.right; j++)
+		for (u32 j = clip.left; j < clip.right; j++)
 			video->framebuffer[FRAMEBUFFER_POS(j, i)] = color;
 	}
 }
 
-void milkPixelSet(Video *video, int x, int y, Color32 color)
+
+void blitPixel(Video *video, int x, int y, Color32 color)
 {
-	if (WITHIN_CLIP_RECT(video->clipRect, x, y))
+	if (x > 0 && y > 0 && WITHIN_CLIP_RECT(video->clipRect, (u32)x, (u32)y))
 		video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
-static void _horizontalLine(Video *video, int x, int y, int w, Color32 color)
+
+static void horizontalLine(Video *video, int x, int y, u32 w, Color32 color)
 {
-	for (int i = x; i <= x + w; i++)
-		milkPixelSet(video, i, y, color);
+	for (int i = x; i <= (int)(x + w); i++)
+		blitPixel(video, i, y, color);
 }
 
-static void _verticalLine(Video *video, int x, int y, int h, Color32 color)
+
+static void verticalLine(Video *video, int x, int y, u32 h, Color32 color)
 {
-	for (int i = y; i <= y + h; i++)
-		milkPixelSet(video, x, i, color);
+	for (int i = y; i <= (int)(y + h); i++)
+		blitPixel(video, x, i, color);
 }
 
-void milkRect(Video *video, int x, int y, int w, int h, Color32 color)
+
+void blitRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color)
 {
-	_horizontalLine(video, x, y, w, color);
-	_horizontalLine(video, x, y + h, w, color);
-	_verticalLine(video, x, y, h, color);
-	_verticalLine(video, x + w, y, h, color);
+    int xLen = (int)(x + w);
+    int yLen = (int)(y + h);
+
+	horizontalLine	(video, x,		y,		w,		color); /* Top edge */
+	horizontalLine	(video, x,		yLen,	w,		color); /* Bottom edge */
+	verticalLine	(video, x,		y,		h,		color); /* Left edge */
+	verticalLine	(video, xLen,	y,		h,		color); /* Right edge */
 }
 
-void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
+
+void blitFilledRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color)
 {
-	for (int i = y; i < y + h; i++)
+    int xLen = (int)(x + w);
+    int yLen = (int)(y + h);
+
+	for (int i = y; i < yLen; i++)
 	{
-		for (int j = x; j < x + w; j++)
-			milkPixelSet(video, j, i, color);
+		for (int j = x; j < xLen; j++)
+			blitPixel(video, j, i, color);
 	}
 }
+
+
+#define MIN_SCALE			0.5f
+#define MAX_SCALE			5.0f
+#define IS_FLIPPED_X(flip)	((flip & 1u) == 1u)
+#define IS_FLIPPED_Y(flip)	((flip & 2u) == 2u)
+
 
 /*
  * Main helper function to blit pixel images onto the framebuffer.
@@ -286,98 +308,102 @@ void milkRectFill(Video *video, int x, int y, int w, int h, Color32 color)
  * This greatly simplifies the code, so it should stay this way unless it starts causing performance issues.
  *
  * "Nearest neighbor scaling replaces every pixel with the nearest pixel in the output.
- *  When upscaling an image, multiple pixels of the same color will be duplicated throughout the image." - Some random explanation on google.
+ *  When up scaling an image, multiple pixels of the same color will be duplicated throughout the image." - Some random explanation on google.
  */
-static void _blitRect(Video *video, Color32 *pixels, int x, int y, int w, int h, int pitch, float scale, int flip, Color32 *color)
+static void blitRect(Video *video, const Color32 *pixels, int x, int y, u32 w, u32 h, u32 pitch, float scale, u8 flip, const Color32 *color)
 {
-	if (scale <= MIN_SCALE)
-		scale = MIN_SCALE;
+	scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
 
-	if (scale > MAX_SCALE)
-		scale = MAX_SCALE;
+	int width =	    (int)floorf(w * scale);
+	int height =	(int)floorf(h * scale);
+	int xRatio =	(int)floorf((float)(w << 16u) / (float)width + 0.5f);
+	int yRatio =	(int)floorf((float)(h << 16u) / (float)height + 0.5f);
 
-	int width = (int)floor((double)w * scale);
-	int height = (int)floor((double)h * scale);
-	int xRatio = (int)((w << 16) / width) + 1;
-	int yRatio = (int)((h << 16) / height) + 1;
-	int xflip = (flip & FLIPX) == FLIPX;
-	int yflip = (flip & FLIPY) == FLIPY;
-	int xPixelStart = xflip ? width - 1 : 0;
-	int xDirection = xflip ? -1 : 1;
-	int yPixelStart = yflip ? height - 1 : 0;
-	int yDirection = yflip ? -1 : 1;
-	int xPixel, yPixel;
+    u32 xPixelStart =	IS_FLIPPED_X(flip) ? width - 1u : 0u;
+    u32 yPixelStart =	IS_FLIPPED_Y(flip) ? height - 1u : 0u;
+	int xDirection =	IS_FLIPPED_X(flip) ? -1 : 1;
+	int yDirection =	IS_FLIPPED_Y(flip) ? -1 : 1;
+
+	u32 xPixel, yPixel;
 	int xFramebuffer, yFramebuffer;
 
 	for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yDirection)
 	{
 		for (xFramebuffer = x, xPixel = xPixelStart; xFramebuffer < x + width; xFramebuffer++, xPixel += xDirection)
 		{
-			int xNearest = (xPixel * xRatio) >> 16;
-			int yNearest = (yPixel * yRatio) >> 16;
+            u32 xNearest = (xPixel * xRatio) >> 16u;
+            u32 yNearest = (yPixel * yRatio) >> 16u;
 			Color32 col = pixels[yNearest * pitch + xNearest];
 
 			if (col != video->colorKey)
-				milkPixelSet(video, xFramebuffer, yFramebuffer, color != NULL ? *color : col);
+				blitPixel(video, xFramebuffer, yFramebuffer, color != NULL ? *color : col);
 		}
 	}
 }
 
-void milkSprite(Video *video, int idx, int x, int y, int w, int h, float scale, int flip)
-{
-	const int numColumns = MILK_SPRSHEET_SQRSIZE / MILK_SPRSHEET_SPR_SQRSIZE;
-	const int rowSize = MILK_SPRSHEET_SQRSIZE * MILK_SPRSHEET_SPR_SQRSIZE;
-	const int colSize = MILK_SPRSHEET_SPR_SQRSIZE;
 
-	if (idx < 0 || MILK_SPRSHEET_SQRSIZE < idx)
+#define SPRSHEET_IDX_OO_BOUNDS(idx)	(idx < 0 || SPRITE_SHEET_SQRSIZE < idx)
+#define SPRSHEET_COLUMNS			((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
+#define SPRSHEET_ROW_SIZE			((int)(SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE))
+#define SPRSHEET_COL_SIZE			SPRITE_SQRSIZE
+#define SPRSHEET_POS(x, y)			(y * SPRSHEET_ROW_SIZE + x * SPRSHEET_COL_SIZE)
+
+
+void blitSprite(Video *video, int idx, int x, int y, u32 w, u32 h, float scale, u8 flip)
+{
+	if (SPRSHEET_IDX_OO_BOUNDS(idx))
 		return;
 
-	int row = (int)floor(idx / numColumns);
-	int col = (int)floor(idx % numColumns);
-	Color32 *pixels = &video->spritesheet[row * rowSize + col * colSize];
+    u32 width = w * SPRITE_SQRSIZE;
+    u32 height = h * SPRITE_SQRSIZE;
+	int row = (int)floorf((float)idx / (float)SPRSHEET_COLUMNS);
+	int col = (int)floorf((float)(idx % SPRSHEET_COLUMNS));
+	Color32 *pixels = &video->spriteSheet[SPRSHEET_POS(col, row)];
 
-	_blitRect(video, pixels, x, y, w * MILK_SPRSHEET_SPR_SQRSIZE, h * MILK_SPRSHEET_SPR_SQRSIZE, MILK_SPRSHEET_SQRSIZE, scale, flip, NULL);
+	blitRect(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, NULL);
 }
 
-void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Color32 color)
+
+#define FONT_COLUMNS		((int)(FONT_WIDTH / CHAR_SQRSIZE))
+#define FONT_ROW_SIZE		((int)(FONT_WIDTH * CHAR_SQRSIZE))
+#define FONT_COL_SIZE		CHAR_SQRSIZE
+#define FONT_POS(x, y)		(y * FONT_ROW_SIZE + x * FONT_COL_SIZE)
+#define IS_ASCII(c)			(c < 127)
+#define IS_NEWLINE(c)		(c == '\n')
+
+
+void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, float scale, Color32 color)
 {
-	#define IS_ASCII(c)		((c & 0xff80) == 0)
-	#define IS_NEWLINE(c)	(c == '\n')
-
-	const int numColumns = MILK_FONT_WIDTH / MILK_CHAR_SQRSIZE;
-	const int rowSize = MILK_FONT_WIDTH * MILK_CHAR_SQRSIZE;
-	const int colSize = MILK_CHAR_SQRSIZE;
-
 	if (str == NULL)
 		return;
 
-	int charSize = (int)floor((double)MILK_CHAR_SQRSIZE * scale);
+	int charSize = (int)floor((double)CHAR_SQRSIZE * scale);
 	int xCurrent = x;
 	int yCurrent = y;
+	char curr;
 
-	while (*str)
+	while ((curr = *str++) != '\0')
 	{
-		if (!IS_NEWLINE(*str))
+		if (!IS_NEWLINE(curr))
 		{
-			char ch = *(str++);
-			if (!IS_ASCII(ch)) ch = '?'; /* If the character is not ASCII, then we're just gonna be all like whaaaaaat? Problem solved. */
-			int row = (int)floor((ch - 32) / numColumns); /* bitmap font starts at ASCII character 32 (SPACE) */
-			int col = (int)floor((ch - 32) % numColumns);
-			Color32 *pixels = &video->font[(row * rowSize + col * colSize)];
-			_blitRect(video, pixels, xCurrent, yCurrent, MILK_CHAR_SQRSIZE, MILK_CHAR_SQRSIZE, MILK_FONT_WIDTH, scale, 0, &color);
+			if (!IS_ASCII(curr)) curr = '?';
+            u32 width = CHAR_SQRSIZE;
+            u32 height = CHAR_SQRSIZE;
+			int row = (int)floorf((float)(curr - 32) / (float)FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
+			int col = (int)floorf((float)((curr - 32) % FONT_COLUMNS));
+			const Color32 *pixelStart = &pixels[FONT_POS(col, row)];
+
+			blitRect(video, pixelStart, xCurrent, yCurrent, width, height, FONT_WIDTH, scale, 0, &color);
 			xCurrent += charSize;
 		}
 		else
 		{
 			xCurrent = x;
 			yCurrent += charSize;
-			str++;
 		}
 	}
-
-	#undef IS_ASCII
-	#undef IS_NEWLINE
 }
+
 
 /*
  *******************************************************************************
@@ -385,180 +411,188 @@ void milkSpriteFont(Video *video, int x, int y, const char *str, float scale, Co
  *******************************************************************************
  */
 
-static void _removeSampleFromQueue(AudioQueueItem *queue, SampleData *sampleData)
+
+#define SAMPLEIDX_OO_BOUNDS(idx)	(idx < 0 || idx > MAX_LOADED_SAMPLES)
+#define SLOTIDX_OO_BOUNDS(idx)		(idx < 0 || idx > MAX_SAMPLE_SLOTS)
+
+
+void resetSampleSlot(SampleSlot *slot)
 {
-	AudioQueueItem *curr = queue->next;
-	AudioQueueItem *prev = queue;
-
-	while (curr != NULL)
-	{
-		if (curr->sampleData == sampleData)
-		{
-			curr->isFree = true;
-			prev->next = curr->next;
-		}
-
-		prev = curr;
-		curr = curr->next;
-	}
+	slot->sampleData = NULL;
+	slot->state = STOPPED;
+	slot->remainingLength = 0;
+	slot->position = NULL;
+	slot->volume = 0;
 }
 
-void milkLoadSound(Audio *audio, int idx, const char *filename)
+
+void loadSound(Audio *audio, int idx, const char *filename)
 {
-	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
+	if (SAMPLEIDX_OO_BOUNDS(idx))
 		return;
 
 	audio->lock();
 
-	/* If we're loading a sound into a sample data that in use, then remove all instances playing in the queue, and then free it. */
 	if (audio->samples[idx].buffer != NULL)
-	{
-		_removeSampleFromQueue(audio->queue, &audio->samples[idx]);
-		free(audio->samples[idx].buffer);
-	}
+		unloadSound(audio, idx);
 
 	audio->loadWAV(audio, filename, idx);
 	audio->unlock();
 }
 
-static bool _getFreeQueueItem(Audio *audio, AudioQueueItem **queueItem)
+
+void unloadSound(Audio *audio, int idx)
 {
-	for (int i = 0; i < MILK_AUDIO_QUEUE_MAX; i++)
-	{
-		if (audio->queueItems[i].isFree)
-		{
-			audio->queueItems[i].isFree = false; /* Queue item is not free any more. */
-			*queueItem = &audio->queueItems[i];
-			return true;
-		}
-	}
-	return false;
-}
-
-static void _removeLoopingSampleFromQueue(Audio *audio)
-{
-	AudioQueueItem *curr = audio->queue->next;
-	AudioQueueItem *prev = audio->queue;
-
-	while (curr != NULL)
-	{
-		if (curr->isLooping)
-		{
-			curr->isFree = true;
-			prev->next = curr->next;
-			break;
-		}
-
-		prev = curr;
-		curr = curr->next;
-	}
-}
-
-static void _queueSample(Audio *audio, AudioQueueItem *new)
-{
-	AudioQueueItem *curr = audio->queue;
-
-	while (curr->next != NULL)
-		curr = curr->next;
-
-	curr->next = new;
-}
-
-void milkSound(Audio *audio, int idx, int volume, bool loop)
-{
-	if (idx < 0 || idx > MILK_AUDIO_MAX_SOUNDS)
-		return;
-
-	SampleData *sampleData = &audio->samples[idx];
-	if (sampleData->length == 0)
+	if (SAMPLEIDX_OO_BOUNDS(idx))
 		return;
 
 	audio->lock();
+	SampleData *sampleData = &audio->samples[idx];
 
-	AudioQueueItem *queueItem;
-	if (_getFreeQueueItem(audio, &queueItem))
+	if (sampleData != NULL)
 	{
-		if (loop) /* Stop current loop in favor of the new looping sound. */
-			_removeLoopingSampleFromQueue(audio);
+		for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
+		{
+			if (audio->slots[i].sampleData == sampleData)
+				resetSampleSlot(&audio->slots[i]);
+		}
 
-		queueItem->sampleData = sampleData;
-		queueItem->position = sampleData->buffer;
-		queueItem->remainingLength = sampleData->length;
-		queueItem->volume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
-		queueItem->isLooping = loop;
-		queueItem->next = NULL;
-
-		_queueSample(audio, queueItem);
+		free(audio->samples[idx].buffer);
+		audio->samples[idx].buffer = NULL;
 	}
 	audio->unlock();
 }
 
-void milkVolume(Audio *audio, int volume)
+
+void playSound(Audio *audio, int sampleIdx, int slotIdx, int volume)
 {
-	audio->masterVolume = (uint8_t)_clamp(volume, 0, MILK_AUDIO_MAX_VOLUME);
+	if (SAMPLEIDX_OO_BOUNDS(sampleIdx) || SLOTIDX_OO_BOUNDS(slotIdx))
+		return;
+
+	SampleData *sampleData = &audio->samples[sampleIdx];
+
+	if (sampleData->length <= 0)
+		return;
+
+	audio->lock();
+	SampleSlot *slot = &audio->slots[slotIdx];
+	slot->sampleData = sampleData;
+	slot->state = PLAYING;
+	slot->position = sampleData->buffer;
+	slot->remainingLength = sampleData->length;
+	slot->volume = CLAMP(volume, 0, MAX_VOLUME);
+	audio->unlock();
 }
 
-static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, double volume)
-{
-	#define _16_BIT_MAX 32767
 
-	int16_t sourceLeft;
-	int16_t sourceRight;
+void stopSound(Audio *audio, int slotIdx)
+{
+	if (SLOTIDX_OO_BOUNDS(slotIdx))
+		return;
+
+	audio->lock();
+	resetSampleSlot(&audio->slots[slotIdx]);
+	audio->unlock();
+}
+
+
+void pauseSound(Audio *audio, int slotIdx)
+{
+	if (SLOTIDX_OO_BOUNDS(slotIdx))
+		return;
+
+	if (audio->slots[slotIdx].state == PLAYING)
+	{
+		audio->lock();
+		audio->slots[slotIdx].state = PAUSED;
+		audio->unlock();
+	}
+}
+
+
+void resumeSound(Audio *audio, int slotIdx)
+{
+	if (SLOTIDX_OO_BOUNDS(slotIdx))
+		return;
+
+	if (audio->slots[slotIdx].state == PAUSED)
+	{
+		audio->lock();
+		audio->slots[slotIdx].state = PLAYING;
+		audio->unlock();
+	}
+}
+
+
+SampleSlotState getSampleState(Audio *audio, int slotIdx)
+{
+	return SLOTIDX_OO_BOUNDS(slotIdx) ? STOPPED : audio->slots[slotIdx].state;
+}
+
+
+void setMasterVolume(Audio *audio, int volume)
+{
+	audio->masterVolume = CLAMP(volume, 0, MAX_VOLUME);
+}
+
+
+#define _16_BIT_MAX 32767
+
+
+static void mixSample(u8 *destination, const u8 *source, u32 length, double volume)
+{
+	i16 sourceSample;
+    i16 destSample;
 	length /= 2;
 
 	while (length--)
 	{
-		sourceLeft = (int16_t)((source[1] << 8 | source[0]) * volume);
-		sourceRight = (int16_t)((destination[1] << 8 | destination[0]));
-		int mixedSample = sourceLeft + sourceRight;
-
-		if (mixedSample > _16_BIT_MAX)
-			mixedSample = _16_BIT_MAX;
-		else if (mixedSample < -_16_BIT_MAX - 1)
-			mixedSample = -_16_BIT_MAX - 1;
-
-		destination[0] = mixedSample & 0xff;
-		destination[1] = (mixedSample >> 8) & 0xff;
+        u32 src0 = source[0];
+        u32 src1 = source[1];
+        u32 dst0 = destination[0];
+        u32 dst1 = destination[1];
+		sourceSample = src1 << 8u | (uint32_t)(src0 * volume);
+		destSample = dst1 << 8u | dst0;
+        i32 mixedSample = CLAMP(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
+		destination[0] = mixedSample & 0xffu;
+		destination[1] = (mixedSample >> 8u) & 0xffu;
 		source += 2;
 		destination += 2;
 	}
-
-	#undef _16_BIT_MAX
 }
 
-void milkAudioQueueToStream(Audio *audio, uint8_t *stream, int len)
+
+#define LOOP_INDEX			0
+#define NORMALIZE_VOLUME(v) ((double)v / MAX_VOLUME)
+
+
+void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)
 {
-	#define NORMALIZE_VOLUME(v) (double)(v / MILK_AUDIO_MAX_VOLUME)
-
 	memset(stream, 0, len);
-	AudioQueueItem *currentItem = audio->queue->next;
-	AudioQueueItem *previousItem = audio->queue;
 
-	while (currentItem != NULL)
+	for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
 	{
-		if (currentItem->remainingLength > 0) /* If the queue item still has remaining samples to spend, then mix it and update its length. */
+		SampleSlot *slot = &audio->slots[i];
+
+		if (slot->sampleData == NULL || slot->state != PLAYING)
+			continue;
+
+		if (slot->remainingLength > 0)
 		{
-			uint32_t bytesToWrite = ((uint32_t)len > currentItem->remainingLength) ? currentItem->remainingLength : (uint32_t)len;
-			_mixSample(stream, currentItem->position, bytesToWrite, NORMALIZE_VOLUME(currentItem->volume));
-			currentItem->position += bytesToWrite;
-			currentItem->remainingLength -= bytesToWrite;
-			previousItem = currentItem;
-			currentItem = currentItem->next;
+            u32 bytesToWrite = MIN(slot->remainingLength, (u32)len);
+			mixSample(stream, slot->position, bytesToWrite, NORMALIZE_VOLUME(slot->volume));
+			slot->position += bytesToWrite;
+			slot->remainingLength -= bytesToWrite;
 		}
-		else if (currentItem->isLooping) /* Else if the sound loops (music), then reset it's buffer position and length to the beginning. */
+		else if (i == LOOP_INDEX)
 		{
-			currentItem->position = currentItem->sampleData->buffer;
-			currentItem->remainingLength = currentItem->sampleData->length;
+			slot->position = slot->sampleData->buffer;
+			slot->remainingLength = slot->sampleData->length;
 		}
-		else /* Else the sound is completely finished and can be removed from the queue, freeing up space for another sound. */
+		else
 		{
-			AudioQueueItem *next = currentItem->next;
-			currentItem->isFree = true;
-			previousItem->next = next;
-			currentItem->next = NULL;
-			currentItem = next;
+			slot->sampleData = NULL;
+			slot->state = STOPPED;
 		}
 	}
-
-	#undef NORMALIZE_VOLUME
 }
