@@ -315,8 +315,8 @@ static void blitRect(Video *video, const Color32 *pixels, int x, int y, uint32_t
 
 	uint32_t xPixelStart =	IS_FLIPPED_X(flip) ? width - 1u : 0u;
 	uint32_t yPixelStart =	IS_FLIPPED_Y(flip) ? height - 1u : 0u;
-	int xDirection =	IS_FLIPPED_X(flip) ? -1 : 1;
-	int yDirection =	IS_FLIPPED_Y(flip) ? -1 : 1;
+	int xDirection =	    IS_FLIPPED_X(flip) ? -1 : 1;
+	int yDirection =	    IS_FLIPPED_Y(flip) ? -1 : 1;
 
 	uint32_t xPixel, yPixel;
 	int xFramebuffer, yFramebuffer;
