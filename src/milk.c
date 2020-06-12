@@ -313,10 +313,10 @@ static void blitRect(Video *video, const Color32 *pixels, int x, int y, u32 w, u
 {
 	scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
 
-	int width =	    (int)floorf(w * scale);
-	int height =	(int)floorf(h * scale);
-	int xRatio =	(int)floorf((float)(w << 16u) / (float)width + 0.5f);
-	int yRatio =	(int)floorf((float)(h << 16u) / (float)height + 0.5f);
+	int width =	    (int)floor((double)(w * scale));
+	int height =	(int)floor((double)(h * scale));
+	int xRatio =	(int)floor((double)(w << 16u) / width + 0.5);
+	int yRatio =	(int)floor((double)(h << 16u) / height + 0.5);
 
     u32 xPixelStart =	IS_FLIPPED_X(flip) ? width - 1u : 0u;
     u32 yPixelStart =	IS_FLIPPED_Y(flip) ? height - 1u : 0u;
@@ -355,8 +355,8 @@ void blitSprite(Video *video, int idx, int x, int y, u32 w, u32 h, float scale, 
 
     u32 width = w * SPRITE_SQRSIZE;
     u32 height = h * SPRITE_SQRSIZE;
-	int row = (int)floorf((float)idx / (float)SPRSHEET_COLUMNS);
-	int col = (int)floorf((float)(idx % SPRSHEET_COLUMNS));
+	int row = (int)floor((double)idx / SPRSHEET_COLUMNS);
+	int col = (int)floor((double)(idx % SPRSHEET_COLUMNS));
 	Color32 *pixels = &video->spriteSheet[SPRSHEET_POS(col, row)];
 
 	blitRect(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, NULL);
