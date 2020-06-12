@@ -31,6 +31,7 @@
 
 #define MILK_COMMAND_LEN 25
 
+
 /*
  *******************************************************************************
  * System
@@ -39,15 +40,24 @@
  *******************************************************************************
  */
 
-typedef struct system
+
+typedef enum cmdButtonState
+{
+    INPUT_CHAR =      1 << 0,
+    INPUT_BACK =      1 << 1,
+    INPUT_ENTER =     1 << 2,
+    INPUT_ESCAPE =    1 << 3
+} CmdButtonState;
+
+
+typedef struct cmdInput
 {
     void(*startTextInput)();
     void(*stopTextInput)();
-    int(*readTextInput)(char *);
-    int(*backspace)();
-    int(*enter)();
-    int(*escape)();
-} System;
+    CmdButtonState state;
+    char currentChar;
+} CmdInput;
+
 
 /*
  *******************************************************************************
@@ -55,15 +65,17 @@ typedef struct system
  *******************************************************************************
  */
 
+
 typedef enum cmdState
 {
 	GAME,
 	COMMAND
 } CmdState;
 
+
 typedef struct milkCmd
 {
-    System      system;
+    CmdInput    input;
 	CmdState    state;
     int         lastErrorCount;
     size_t      commandCandidateLength;
@@ -73,9 +85,10 @@ typedef struct milkCmd
     bool        isGameInitialized;
 } MilkCmd;
 
-MilkCmd *milkCmdCreate();
-void milkCmdFree(MilkCmd *cmd);
-void milkCmdUpdate(MilkCmd *cmd, Milk *milk);
-void milkCmdDraw(MilkCmd *cmd, Milk *milk);
+
+MilkCmd *createCmd();
+void freeCmd(MilkCmd *cmd);
+void updateCmd(MilkCmd *cmd, Milk *milk);
+void drawCmd(MilkCmd *cmd, Milk *milk);
 
 #endif

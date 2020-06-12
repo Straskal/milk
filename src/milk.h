@@ -122,9 +122,8 @@ bool isButtonPressed(Input *input, ButtonState button);
  * Internally, milk draws to it's own framebuffer, which is drawn to the screen at the end of every frame.
  * The framebuffer is just an array of pixels (32 bit color 0xAARRGGBB).
  *
- * The spritesheet and font are both loaded into memory during startup.
- * They are stored in fixed size arrays, so they do not need to be freed when milk shuts down.
-
+ * The spritesheet and font are stored in fixed size arrays, so they do not need to be freed when milk shuts down.
+ *
  * Milk does not support transparency when drawing, but it does use a color key to consider as 'transparent', which defaults to black.
  * All drawing functions only operate within the bounds of the clipping rectangle, which is reset to the framebuffer size at the beginning of each frame.
  *******************************************************************************
@@ -179,9 +178,9 @@ void blitSpritefont(Video *video, const Color32 *pixels, int x, int y, const cha
  *
  * Sounds are dynamically allocated SampleData, and must be freed when they are no longer being used.
  *
- * Milk uses a queue like structure to store the currently playing sound instances.
- * The root queue item is a dynamically allocated dummy object. All other queue items act as a 'store', and are allocated on startup.
- * Many queue items can reference the same sample data, and sample data should be treated as readonly.
+ * In order for a sound (sample data) to be played, it must be inserted into one of the sixteen sample slots.
+ * Many sample slots can reference the same sample data.
+ * Sample slot 0 loops.
  *******************************************************************************
  */
 

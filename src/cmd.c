@@ -31,20 +31,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define CMD_MAX_ARGS 8
-#define CMD_DELIM " "
+#define CMD_MAX_ARGS	8
+#define CMD_DELIM		" "
 
-#define CMD_COLOR 0xffffff
-#define CMD_COLOR_INFO 0x5c5c5c
+#define CMD_COLOR		0xffffff
+#define CMD_COLOR_INFO	0x5c5c5c
 #define CMD_COLOR_ERROR 0xbf4040
-#define CMD_COLOR_WARN 0xffec27
+#define CMD_COLOR_WARN	0xffec27
 
 #define LOG_START_HEIGHT 56
-#define LOG_END_HEIGHT (224 - 32)
-#define MAX_LINES ((LOG_END_HEIGHT - LOG_START_HEIGHT) / MILK_CHAR_SQRSIZE)
-#define CHARS_PER_LINE 31
+#define LOG_END_HEIGHT	(224 - 32)
+#define MAX_LINES		((LOG_END_HEIGHT - LOG_START_HEIGHT) / MILK_CHAR_SQRSIZE)
+#define CHARS_PER_LINE	31
+
+#define HAS_INPUT(inputState, input) ((inputState & input) == input)
 
 static unsigned int _ticks = 0;
+
 
 typedef struct commandImpl
 {
@@ -52,17 +55,20 @@ typedef struct commandImpl
 	void(*execute)(MilkCmd *, Milk *, char **, int);
 } CommandImpl;
 
+
 typedef struct commandLogLine
 {
 	char text[CHARS_PER_LINE];
 	Color32 color;
 } CommandLogLine;
 
+
 /*
  *******************************************************************************
  * Commands
  *******************************************************************************
  */
+
 
 static void _cmdReload(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 {
@@ -75,6 +81,7 @@ static void _cmdReload(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 	logMessage(&milk->logs, "Scripts have been reloaded", INFO);
 }
 
+
 static void _cmdClear(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 {
 	(void *)cmd;
@@ -84,6 +91,7 @@ static void _cmdClear(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 	cmd->lastErrorCount = 0;
 }
 
+
 static void _cmdQuit(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 {
 	(void *)cmd;
@@ -91,6 +99,7 @@ static void _cmdQuit(MilkCmd *cmd, Milk *milk, char *args[], int nargs)
 	(void *)nargs;
 	milk->shouldQuit = true;
 }
+
 
 static CommandImpl _commands[] =
 {
@@ -101,11 +110,13 @@ static CommandImpl _commands[] =
 
 #define NUM_COMMANDS sizeof(_commands) / sizeof(CommandImpl)
 
+
 /*
  *******************************************************************************
  * Command line
  *******************************************************************************
  */
+
 
 static CommandImpl *_findCommand(const char *cmd)
 {
@@ -116,6 +127,7 @@ static CommandImpl *_findCommand(const char *cmd)
 	}
 	return NULL;
 }
+
 
 static CommandImpl *_parseCommand(char *cmd, char *args[], int *nargs)
 {
@@ -138,6 +150,7 @@ static CommandImpl *_parseCommand(char *cmd, char *args[], int *nargs)
 	return command;
 }
 
+
 static void _resetCommandCandidate(MilkCmd *cmdLine)
 {
 	cmdLine->commandCandidateLength = 0;
@@ -146,16 +159,17 @@ static void _resetCommandCandidate(MilkCmd *cmdLine)
 		cmdLine->commandCandidate[i] = 0;
 }
 
+
 static void _updateCommandLine(MilkCmd *cmd, Milk *milk)
 {
-	char ch;
+	CmdButtonState btnState = cmd->input.state;
 
-	if (cmd->system.backspace() && cmd->commandCandidateLength > 0)
+	if (HAS_INPUT(btnState, INPUT_BACK) && cmd->commandCandidateLength > 0)
 		cmd->commandCandidate[--cmd->commandCandidateLength] = '\0';
 
-	if (cmd->system.readTextInput(&ch) && cmd->commandCandidateLength < MILK_COMMAND_LEN - 1)
+	if (HAS_INPUT(btnState, INPUT_CHAR) && cmd->commandCandidateLength < MILK_COMMAND_LEN - 1)
 	{
-		cmd->commandCandidate[cmd->commandCandidateLength++] = ch;
+		cmd->commandCandidate[cmd->commandCandidateLength++] = cmd->input.currentChar;
 		cmd->commandCandidate[cmd->commandCandidateLength] = '\0';
 	}
 
@@ -168,7 +182,7 @@ static void _updateCommandLine(MilkCmd *cmd, Milk *milk)
 	if (isButtonPressed(&milk->input, BTN_DOWN))
 		_resetCommandCandidate(cmd);
 
-	if (cmd->system.enter() && cmd->commandCandidateLength > 0)
+	if (HAS_INPUT(btnState, INPUT_ENTER) && cmd->commandCandidateLength > 0)
 	{
 		char *args[CMD_MAX_ARGS];
 		int nargs;
@@ -188,6 +202,7 @@ static void _updateCommandLine(MilkCmd *cmd, Milk *milk)
 	}
 }
 
+
 static Color32 _getLogColor(LogType type)
 {
 	switch (type)
@@ -202,6 +217,7 @@ static Color32 _getLogColor(LogType type)
 			return CMD_COLOR_INFO;
 	}
 }
+
 
 /* This is poopy. Need to refactor. */
 static void _getLogLines(Logs *logs, CommandLogLine *lines, int *numLines)
@@ -241,6 +257,7 @@ static void _getLogLines(Logs *logs, CommandLogLine *lines, int *numLines)
 	*numLines = currentLine;
 }
 
+
 static void _drawLogLines(Milk *milk)
 {
 	CommandLogLine lines[MAX_LINES];
@@ -251,6 +268,7 @@ static void _drawLogLines(Milk *milk)
 	for (int i = 0; i < numLines; i++)
 		blitSpritefont(&milk->video, DEFAULT_FONT_DATA, 8, LOG_START_HEIGHT + ((MILK_CHAR_SQRSIZE + 2) * i), lines[i].text, 1, lines[i].color);
 }
+
 
 static void _drawCommandLine(MilkCmd *cmdLine, Milk *milk)
 {
@@ -266,7 +284,8 @@ static void _drawCommandLine(MilkCmd *cmdLine, Milk *milk)
 		blitSpritefont(&milk->video, DEFAULT_FONT_DATA, 24 + cmdLength * 8, 42, "_", 1, CMD_COLOR);
 }
 
-MilkCmd *milkCmdCreate()
+
+MilkCmd *createCmd()
 {
 	MilkCmd *cmd = calloc(1, sizeof(MilkCmd));
 	cmd->state = COMMAND;
@@ -274,10 +293,12 @@ MilkCmd *milkCmdCreate()
 	return cmd;
 }
 
-void milkCmdFree(MilkCmd *cmd)
+
+void freeCmd(MilkCmd *cmd)
 {
 	free(cmd);
 }
+
 
 static void _errorCheck(MilkCmd *cmd, Milk *milk)
 {
@@ -285,20 +306,22 @@ static void _errorCheck(MilkCmd *cmd, Milk *milk)
 	{
 		cmd->lastErrorCount = milk->logs.errorCount;
 		cmd->state = COMMAND;
-		cmd->system.startTextInput();
+		cmd->input.startTextInput();
 	}
 }
 
-void milkCmdUpdate(MilkCmd *cmd, Milk *milk)
+
+void updateCmd(MilkCmd *cmd, Milk *milk)
 {
+	CmdButtonState btnState = cmd->input.state;
 	resetDrawState(&milk->video);
 
-	if (cmd->system.escape())
+	if (HAS_INPUT(btnState, INPUT_ESCAPE))
 	{
 		if (cmd->state != COMMAND)
 		{
 			cmd->state = COMMAND;
-			cmd->system.startTextInput();
+			cmd->input.startTextInput();
 		}
 		else
 		{
@@ -307,9 +330,8 @@ void milkCmdUpdate(MilkCmd *cmd, Milk *milk)
 				milkInvokeInit(&milk->code);
 				cmd->isGameInitialized = true;
 			}
-
 			cmd->state = GAME;
-			cmd->system.stopTextInput();
+			cmd->input.stopTextInput();
 		}
 	}
 
@@ -325,7 +347,8 @@ void milkCmdUpdate(MilkCmd *cmd, Milk *milk)
 	}
 }
 
-void milkCmdDraw(MilkCmd *cmd, Milk *milk)
+
+void drawCmd(MilkCmd *cmd, Milk *milk)
 {
 	switch (cmd->state)
 	{
