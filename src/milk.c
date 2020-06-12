@@ -551,15 +551,15 @@ void setMasterVolume(Audio *audio, int volume)
 
 static void _mixSample(uint8_t *destination, uint8_t *source, uint32_t length, double volume)
 {
-	int16_t sourceLeft;
-	int16_t sourceRight;
+	int16_t sourceSample;
+	int16_t destSample;
 	length /= 2;
 
 	while (length--)
 	{
-		sourceLeft = (int16_t)((source[1] << 8 | source[0]) * volume);
-		sourceRight = (int16_t)((destination[1] << 8 | destination[0]));
-		int mixedSample = _clamp(sourceLeft + sourceRight, -_16_BIT_MAX - 1, _16_BIT_MAX);
+		sourceSample = (int16_t)((source[1] << 8 | source[0]) * volume);
+		destSample = (int16_t)((destination[1] << 8 | destination[0]));
+		int mixedSample = _clamp(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
 		destination[0] = mixedSample & 0xff;
 		destination[1] = (mixedSample >> 8) & 0xff;
 		source += 2;

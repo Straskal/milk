@@ -27,6 +27,7 @@
 
 #include "milk.h"
 #include "milkassert.h"
+#include "embed/font.h"
 
 #include <string.h>
 
