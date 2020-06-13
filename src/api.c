@@ -181,7 +181,7 @@ static int l_spr(lua_State *L)
 		(int)floor(lua_tonumber(L, 3)),
 		(u32)luaL_optinteger(L, 4, 1),
 		(u32)luaL_optinteger(L, 5, 1),
-		(float)luaL_optnumber(L, 6, 1.0),
+		(int)luaL_optnumber(L, 6, 1.0),
 		(int)luaL_optinteger(L, 7, 0)
 	);
 	return 0;
@@ -190,11 +190,11 @@ static int l_spr(lua_State *L)
 static int l_sprfont(lua_State *L)
 {
 	blitSpriteFont(&_globalMilk->video, _globalMilk->video.font,
-	               (int) floor(lua_tonumber(L, 1)),
-	               (int) floor(lua_tonumber(L, 2)),
-	               lua_tostring(L, 3),
-	               (float) luaL_optnumber(L, 4, 1.0),
-	               (Color32) luaL_optinteger(L, 5, 0xffffff)
+       (int) floor(lua_tonumber(L, 1)),
+       (int) floor(lua_tonumber(L, 2)),
+       lua_tostring(L, 3),
+       (int) luaL_optnumber(L, 4, 1.0),
+       (Color32) luaL_optinteger(L, 5, 0xffffff)
 	);
 	return 1;
 }

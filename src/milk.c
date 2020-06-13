@@ -109,13 +109,11 @@ Milk *createMilk()
 {
 	Milk *milk = (Milk *)malloc(sizeof(Milk));
 	milk->shouldQuit = false;
-
 	initLogs(&milk->logs);
 	initInput(&milk->input);
 	initVideo(&milk->video);
 	initAudio(&milk->audio);
 	initCode(&milk->code);
-
 	return milk;
 }
 
@@ -182,15 +180,18 @@ void clearLogs(Logs *logs)
  */
 
 
+#define IS_BIT_SET(val, bit) ((val & bit))
+
+
 bool isButtonDown(Input *input, ButtonState button)
 {
-	return (input->gamepad.buttonState & button) == button;
+    return IS_BIT_SET(input->gamepad.buttonState, button);
 }
 
 
 bool isButtonPressed(Input *input, ButtonState button)
 {
-	return (input->gamepad.buttonState & button) == button && (input->gamepad.previousButtonState & button) != button;
+	return IS_BIT_SET(input->gamepad.buttonState, button) && !IS_BIT_SET(input->gamepad.previousButtonState, button);
 }
 
 
@@ -241,9 +242,9 @@ void clearFramebuffer(Video *video, Color32 color)
 {
 	Rect clip = video->clipRect;
 
-	for (u32 i = clip.top; i < clip.bottom; i++)
+	for (int i = clip.top; i < clip.bottom; i++)
 	{
-		for (u32 j = clip.left; j < clip.right; j++)
+		for (int j = clip.left; j < clip.right; j++)
 			video->framebuffer[FRAMEBUFFER_POS(j, i)] = color;
 	}
 }
@@ -251,54 +252,48 @@ void clearFramebuffer(Video *video, Color32 color)
 
 void blitPixel(Video *video, int x, int y, Color32 color)
 {
-	if (x > 0 && y > 0 && WITHIN_CLIP_RECT(video->clipRect, (u32)x, (u32)y))
+	if (WITHIN_CLIP_RECT(video->clipRect, x, y))
 		video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
 
-static void horizontalLine(Video *video, int x, int y, u32 w, Color32 color)
+static void horizontalLine(Video *video, int x, int y, int w, Color32 color)
 {
-	for (int i = x; i <= (int)(x + w); i++)
+	for (int i = x; i <= x + w; i++)
 		blitPixel(video, i, y, color);
 }
 
 
-static void verticalLine(Video *video, int x, int y, u32 h, Color32 color)
+static void verticalLine(Video *video, int x, int y, int h, Color32 color)
 {
-	for (int i = y; i <= (int)(y + h); i++)
+	for (int i = y; i <= y + h; i++)
 		blitPixel(video, x, i, color);
 }
 
 
-void blitRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color)
+void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color)
 {
-    int xLen = (int)(x + w);
-    int yLen = (int)(y + h);
-
 	horizontalLine	(video, x,		y,		w,		color); /* Top edge */
-	horizontalLine	(video, x,		yLen,	w,		color); /* Bottom edge */
+	horizontalLine	(video, x,		y + h,	w,		color); /* Bottom edge */
 	verticalLine	(video, x,		y,		h,		color); /* Left edge */
-	verticalLine	(video, xLen,	y,		h,		color); /* Right edge */
+	verticalLine	(video, x + w,	y,		h,		color); /* Right edge */
 }
 
 
-void blitFilledRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color)
+void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color)
 {
-    int xLen = (int)(x + w);
-    int yLen = (int)(y + h);
-
-	for (int i = y; i < yLen; i++)
+	for (int i = y; i < y + h; i++)
 	{
-		for (int j = x; j < xLen; j++)
+		for (int j = x; j < x + w; j++)
 			blitPixel(video, j, i, color);
 	}
 }
 
 
-#define MIN_SCALE			0.5f
-#define MAX_SCALE			5.0f
-#define IS_FLIPPED_X(flip)	((flip & 1u) == 1u)
-#define IS_FLIPPED_Y(flip)	((flip & 2u) == 2u)
+#define MIN_SCALE			1
+#define MAX_SCALE			5
+#define IS_FLIPPED_X(flip)	((flip & 1))
+#define IS_FLIPPED_Y(flip)	((flip & 2))
 
 
 /*
@@ -309,29 +304,26 @@ void blitFilledRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color
  * "Nearest neighbor scaling replaces every pixel with the nearest pixel in the output.
  *  When up scaling an image, multiple pixels of the same color will be duplicated throughout the image." - Some random explanation on google.
  */
-static void blitRect(Video *video, const Color32 *pixels, int x, int y, u32 w, u32 h, u32 pitch, float scale, u8 flip, const Color32 *color)
+static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 *color)
 {
 	scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
 
-	int width =	    (int)floor((double)(w * scale));
-	int height =	(int)floor((double)(h * scale));
-	int xRatio =	(int)floor((double)(w << 16u) / width + 0.5);
-	int yRatio =	(int)floor((double)(h << 16u) / height + 0.5);
-
-    u32 xPixelStart =	IS_FLIPPED_X(flip) ? width - 1u : 0u;
-    u32 yPixelStart =	IS_FLIPPED_Y(flip) ? height - 1u : 0u;
+	int width =	        w * scale;
+	int height =	    h * scale;
+	int xRatio =	    (int)floor((double)(w << 16) / width + 0.5);
+	int yRatio =	    (int)floor((double)(h << 16) / height + 0.5);
+    int xPixelStart =	IS_FLIPPED_X(flip) ? width - 1 : 0;
+    int yPixelStart =	IS_FLIPPED_Y(flip) ? height - 1 : 0;
 	int xDirection =	IS_FLIPPED_X(flip) ? -1 : 1;
 	int yDirection =	IS_FLIPPED_Y(flip) ? -1 : 1;
 
-	u32 xPixel, yPixel;
-	int xFramebuffer, yFramebuffer;
-
+	int xPixel, yPixel, xFramebuffer, yFramebuffer;
 	for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yDirection)
 	{
 		for (xFramebuffer = x, xPixel = xPixelStart; xFramebuffer < x + width; xFramebuffer++, xPixel += xDirection)
 		{
-            u32 xNearest = (xPixel * xRatio) >> 16u;
-            u32 yNearest = (yPixel * yRatio) >> 16u;
+            int xNearest = (xPixel * xRatio) >> 16;
+            int yNearest = (yPixel * yRatio) >> 16;
 			Color32 col = pixels[yNearest * pitch + xNearest];
 
 			if (col != video->colorKey)
@@ -348,17 +340,16 @@ static void blitRect(Video *video, const Color32 *pixels, int x, int y, u32 w, u
 #define SPRSHEET_POS(x, y)			(y * SPRSHEET_ROW_SIZE + x * SPRSHEET_COL_SIZE)
 
 
-void blitSprite(Video *video, int idx, int x, int y, u32 w, u32 h, float scale, u8 flip)
+void blitSprite(Video *video, int idx, int x, int y, int w, int h, int scale, u8 flip)
 {
 	if (SPRSHEET_IDX_OO_BOUNDS(idx))
 		return;
 
-    u32 width = w * SPRITE_SQRSIZE;
-    u32 height = h * SPRITE_SQRSIZE;
+    int width = w * SPRITE_SQRSIZE;
+    int height = h * SPRITE_SQRSIZE;
 	int row = (int)floor((double)idx / SPRSHEET_COLUMNS);
 	int col = (int)floor((double)(idx % SPRSHEET_COLUMNS));
 	Color32 *pixels = &video->spriteSheet[SPRSHEET_POS(col, row)];
-
 	blitRect(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, NULL);
 }
 
@@ -371,7 +362,7 @@ void blitSprite(Video *video, int idx, int x, int y, u32 w, u32 h, float scale, 
 #define IS_NEWLINE(c)		(c == '\n')
 
 
-void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, float scale, Color32 color)
+void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, int scale, Color32 color)
 {
 	if (str == NULL)
 		return;
@@ -386,13 +377,10 @@ void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const cha
 		if (!IS_NEWLINE(curr))
 		{
 			if (!IS_ASCII(curr)) curr = '?';
-            u32 width = CHAR_SQRSIZE;
-            u32 height = CHAR_SQRSIZE;
 			int row = (int)floor((double)(curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
 			int col = (int)floor((double)((curr - 32) % FONT_COLUMNS));
 			const Color32 *pixelStart = &pixels[FONT_POS(col, row)];
-
-			blitRect(video, pixelStart, xCurrent, yCurrent, width, height, FONT_WIDTH, scale, 0, &color);
+			blitRect(video, pixelStart, xCurrent, yCurrent, CHAR_SQRSIZE, CHAR_SQRSIZE, FONT_WIDTH, scale, 0, &color);
 			xCurrent += charSize;
 		}
 		else
@@ -425,28 +413,28 @@ void resetSampleSlot(SampleSlot *slot)
 }
 
 
-void loadSound(Audio *audio, int idx, const char *filename)
+void loadSound(Audio *audio, int sampleIdx, const char *filename)
 {
-	if (SAMPLEIDX_OO_BOUNDS(idx))
+	if (SAMPLEIDX_OO_BOUNDS(sampleIdx))
 		return;
 
 	audio->lock();
 
-	if (audio->samples[idx].buffer != NULL)
-		unloadSound(audio, idx);
+	if (audio->samples[sampleIdx].buffer != NULL)
+		unloadSound(audio, sampleIdx);
 
-	audio->loadWAV(audio, filename, idx);
+	audio->loadWAV(audio, filename, sampleIdx);
 	audio->unlock();
 }
 
 
-void unloadSound(Audio *audio, int idx)
+void unloadSound(Audio *audio, int sampleIdx)
 {
-	if (SAMPLEIDX_OO_BOUNDS(idx))
+	if (SAMPLEIDX_OO_BOUNDS(sampleIdx))
 		return;
 
 	audio->lock();
-	SampleData *sampleData = &audio->samples[idx];
+	SampleData *sampleData = &audio->samples[sampleIdx];
 
 	if (sampleData != NULL)
 	{
@@ -456,14 +444,14 @@ void unloadSound(Audio *audio, int idx)
 				resetSampleSlot(&audio->slots[i]);
 		}
 
-		free(audio->samples[idx].buffer);
-		audio->samples[idx].buffer = NULL;
+		free(audio->samples[sampleIdx].buffer);
+		audio->samples[sampleIdx].buffer = NULL;
 	}
 	audio->unlock();
 }
 
 
-void playSound(Audio *audio, int sampleIdx, int slotIdx, int volume)
+void playSound(Audio *audio, int slotIdx, int sampleIdx, int volume)
 {
 	if (SAMPLEIDX_OO_BOUNDS(sampleIdx) || SLOTIDX_OO_BOUNDS(slotIdx))
 		return;
@@ -538,7 +526,7 @@ void setMasterVolume(Audio *audio, int volume)
 #define _16_BIT_MAX 32767
 
 
-static void mixSample(u8 *destination, const u8 *source, u32 length, double volume)
+static void mixSample(u8 *destination, const u8 *source, int length, double volume)
 {
 	i16 sourceSample;
     i16 destSample;
@@ -546,15 +534,11 @@ static void mixSample(u8 *destination, const u8 *source, u32 length, double volu
 
 	while (length--)
 	{
-        u32 src0 = source[0];
-        u32 src1 = source[1];
-        u32 dst0 = destination[0];
-        u32 dst1 = destination[1];
-		sourceSample = src1 << 8u | (uint32_t)(src0 * volume);
-		destSample = dst1 << 8u | dst0;
+		sourceSample = source[1] << 8 | (i16)(source[0] * volume);
+		destSample = destination[1] << 8 | destination[0];
         i32 mixedSample = CLAMP(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
-		destination[0] = mixedSample & 0xffu;
-		destination[1] = (mixedSample >> 8u) & 0xffu;
+		destination[0] = mixedSample & 0xff;
+		destination[1] = (mixedSample >> 8) & 0xff;
 		source += 2;
 		destination += 2;
 	}
@@ -578,7 +562,7 @@ void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)
 
 		if (slot->remainingLength > 0)
 		{
-            u32 bytesToWrite = MIN(slot->remainingLength, (u32)len);
+            int bytesToWrite = MIN(slot->remainingLength, (int)len);
 			mixSample(stream, slot->position, bytesToWrite, NORMALIZE_VOLUME(slot->volume));
 			slot->position += bytesToWrite;
 			slot->remainingLength -= bytesToWrite;
