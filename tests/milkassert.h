@@ -87,41 +87,55 @@ Test *gCurrentTest = NULL;
  *******************************************************************************
  */
 
-int runTests(Test *tests, size_t count)
+static void executeTests(Test *tests, int count)
 {
-	size_t passedCount = 0;
+    printf("Running tests\n\n\n");
 
-	printf("Running tests\n\n\n");
-
-	for (size_t i = 0; i < count; i++)
-	{
-		gCurrentTest = &tests[i];
-		tests[i].execute();
-	}
-
-	for (size_t i = 0; i < count; i++)
-		if (tests[i].failedAssert == NULL)
-			passedCount++;
-
-	printf("Passed %d/%d\n", passedCount, count);
-	printf("=======================================\n\n");
-
-	for (size_t i = 0; i < count; i++)
-		if (tests[i].failedAssert == NULL)
-			printf("	- %s\n", tests[i].name);
-
-	printf("\nFailed %d/%d\n", count - passedCount, count);
-	printf("=======================================\n\n");
-
-    for (size_t i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
     {
-	    if (tests[i].failedAssert != NULL)
-	    {
-		    printf("	- %s\n", tests[i].name);
-		    printf("		%s\n", tests[i].failedAssert);
-	    }
+        gCurrentTest = &tests[i];
+        tests[i].execute();
     }
-	return passedCount == count ? 0 : -1;
+}
+
+static int printPassRate(Test *tests, int count)
+{
+    int passRate = 0;
+    for (int i = 0; i < count; i++)
+        if (tests[i].failedAssert == NULL)
+            passRate++;
+
+    printf("Passed %d/%d\n", passRate, count);
+    printf("=======================================\n\n");
+
+    for (int i = 0; i < count; i++)
+        if (tests[i].failedAssert == NULL)
+            printf("	- %s\n", tests[i].name);
+
+    return passRate;
+}
+
+static void printFailedRate(Test *tests, int count, int passRate)
+{
+    printf("\nFailed %d/%d\n", count - passRate, count);
+    printf("=======================================\n\n");
+
+    for (int i = 0; i < count; i++)
+    {
+        if (tests[i].failedAssert != NULL)
+        {
+            printf("	- %s\n", tests[i].name);
+            printf("		%s\n", tests[i].failedAssert);
+        }
+    }
+}
+
+int runTests(Test *tests, int count)
+{
+    executeTests(tests, count);
+	int passRate = printPassRate(tests, count);
+	printFailedRate(tests, count, passRate);
+	return passRate < count ? -1 : 0;
 }
 
 #endif

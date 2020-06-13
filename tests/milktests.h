@@ -294,11 +294,11 @@ TEARDOWN:
  *******************************************************************************
  */
 
-static void _mockLock() /* Should find a nice way to track calls. */
+static void mockLock() /* Should find a nice way to track calls. */
 {
 }
 
-static void _mockUnlock()
+static void mockUnlock()
 {
 }
 
@@ -335,8 +335,8 @@ TEARDOWN:
 TEST_CASE(playSound_SetsSlot)
 {
 	SETUP(milk);
-	milk->audio.lock = _mockLock;
-	milk->audio.unlock = _mockUnlock;
+	milk->audio.lock = mockLock;
+	milk->audio.unlock = mockUnlock;
 	uint8_t buffer[1];
 	milk->audio.samples[0].buffer = buffer;
 	milk->audio.samples[0].length = 1;
@@ -358,8 +358,8 @@ TEARDOWN:
 TEST_CASE(playSound_ClampsVolumeToMin)
 {
 	SETUP(milk);
-	milk->audio.lock = _mockLock;
-	milk->audio.unlock = _mockUnlock;
+	milk->audio.lock = mockLock;
+	milk->audio.unlock = mockUnlock;
 	milk->audio.samples[0].length = 1;
 
 	ACT(playSound(&milk->audio, 0, 0, -10));
@@ -375,8 +375,8 @@ TEARDOWN:
 TEST_CASE(playSound_ClampsVolumeToMax)
 {
 	SETUP(milk);
-	milk->audio.lock = _mockLock;
-	milk->audio.unlock = _mockUnlock;
+	milk->audio.lock = mockLock;
+	milk->audio.unlock = mockUnlock;
 	milk->audio.samples[0].length = 1;
 
 	ACT(playSound(&milk->audio, 0, 0, MAX_VOLUME + 10));
@@ -420,8 +420,8 @@ TEST_CASE(stopSound_WhenIndexOutOfBounds_DoesNothing)
 TEST_CASE(stopSound_StopsSound)
 {
 	SETUP(milk);
-	milk->audio.lock = _mockLock;
-	milk->audio.unlock = _mockUnlock;
+	milk->audio.lock = mockLock;
+	milk->audio.unlock = mockUnlock;
 	milk->audio.slots[0].sampleData = &milk->audio.samples[0];
 	milk->audio.slots[0].state = PLAYING;
 
@@ -445,8 +445,8 @@ TEST_CASE(pauseSound_WhenIndexOutOfBounds_DoesNothing)
 TEST_CASE(pauseSound_PausesSound)
 {
 	SETUP(milk);
-	milk->audio.lock = _mockLock;
-	milk->audio.unlock = _mockUnlock;
+	milk->audio.lock = mockLock;
+	milk->audio.unlock = mockUnlock;
 	milk->audio.slots[0].sampleData = &milk->audio.samples[0];
 	milk->audio.slots[0].state = PLAYING;
 
@@ -469,8 +469,8 @@ TEST_CASE(resumeSound_WhenIndexOutOfBounds_DoesNothing)
 TEST_CASE(resumeSound_resumesSound)
 {
 	SETUP(milk);
-	milk->audio.lock = _mockLock;
-	milk->audio.unlock = _mockUnlock;
+	milk->audio.lock = mockLock;
+	milk->audio.unlock = mockUnlock;
 	milk->audio.slots[0].sampleData = &milk->audio.samples[0];
 	milk->audio.slots[0].state = PAUSED;
 

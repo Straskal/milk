@@ -43,11 +43,11 @@
 
 typedef enum cmdInputState
 {
-	INPUT_NONE =    0u << 0u,
-    INPUT_CHAR =    1u << 0u,
-    INPUT_BACK =    1u << 1u,
-    INPUT_ENTER =   1u << 2u,
-    INPUT_ESCAPE =  1u << 3u
+	INPUT_NONE =    0 << 0,
+    INPUT_CHAR =    1 << 0,
+    INPUT_BACK =    1 << 1,
+    INPUT_ENTER =   1 << 2,
+    INPUT_ESCAPE =  1 << 3
 } CmdInputState;
 
 

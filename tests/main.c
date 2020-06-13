@@ -65,12 +65,11 @@ static Test _tests[] =
 	INIT_TEST(resumeSound_resumesSound)
 };
 
-#define TEST_COUNT sizeof(_tests) / sizeof(Test)
+#define TEST_COUNT (sizeof(_tests) / sizeof(Test))
 
 int main(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;
-
 	return runTests(_tests, TEST_COUNT);
 }
