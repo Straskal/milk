@@ -1,8 +1,5 @@
-# You must download dependencies. If on Windows, then you have to manually set paths to dependencies. See line 20
-# SDL2: https://www.libsdl.org/download-2.0.php
-# Lua 5.3: https://www.lua.org/download.html which leads to https://sourceforge.net/projects/luabinaries/files/5.3.5/
-
 cmake_minimum_required(VERSION 3.12.4)
+
 project(libmilk)
 set(C_STANDARD 99)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
@@ -14,6 +11,8 @@ elseif(MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
 endif()
 
+# SDL2: 	https://www.libsdl.org/download-2.0.php
+# Lua 5.3: 	https://sourceforge.net/projects/luabinaries/files/5.3.5/
 if (WIN32)
 	if (MINGW)
 		# provide paths for minGW/minGW-w64 development libs
@@ -44,55 +43,23 @@ set(MILK_MAIN_SRC_FILES
 	src/cmd.h
 )
 
-add_executable(milk
-	${MILK_SRC_FILES}
-	${MILK_MAIN_SRC_FILES}
-)
-
-target_compile_definitions(milk
-	PUBLIC
-		MILK_CMD
-)
-
-target_include_directories(milk
-	PUBLIC
-		${SDL2_INCLUDE_DIR}
-		${LUA53_INCLUDE_DIR}
-		${MILK_SRC_DIR}
-)
-
-if (WIN32)
-	target_link_directories(milk
-		PUBLIC
-			${SDL2_INCLUDE_DIR}
-			${LUA53_INCLUDE_DIR}
-			${MILK_SRC_DIR}
-	)
-endif()
-
-target_link_libraries(milk
-	PUBLIC
-		${SDL2_LIBRARY}
-		${LUA53_LIBRARIES}
-)
+add_executable(milk ${MILK_SRC_FILES} ${MILK_MAIN_SRC_FILES})
+target_compile_definitions(milk PUBLIC MILK_CMD)
+target_include_directories(milk PUBLIC ${SDL2_INCLUDE_DIR} ${LUA53_INCLUDE_DIR} ${MILK_SRC_DIR})
+target_link_directories(milk PUBLIC ${SDL2_INCLUDE_DIR} ${LUA53_INCLUDE_DIR} ${MILK_SRC_DIR})
+target_link_libraries(milk PUBLIC ${SDL2_LIBRARY} ${LUA53_LIBRARIES})
 
 enable_testing()
 
-add_executable(milktests
-	src/milk.c
-	src/milk.h
-	src/embed/font.c
-	src/embed/font.h
+set(MILK_TEST_SRC_FILES
+	${MILK_SRC_FILES}
 	tests/main.c
 	tests/milktests.h
 	tests/milkassert.h
 )
 
-target_include_directories(milktests
-	PUBLIC
-		${MILK_SRC_DIR}
-)
-
+add_executable(milktests ${MILK_TEST_SRC_FILES})
+target_include_directories(milktests PUBLIC ${MILK_SRC_DIR})
 add_test(milktests milktests)
 
 if(WIN32)
