@@ -358,7 +358,7 @@ void blitSprite(Video *video, int idx, int x, int y, int w, int h, int scale, u8
 #define FONT_ROW_SIZE		((int)(FONT_WIDTH * CHAR_SQRSIZE))
 #define FONT_COL_SIZE		CHAR_SQRSIZE
 #define FONT_POS(x, y)		(y * FONT_ROW_SIZE + x * FONT_COL_SIZE)
-#define IS_ASCII(c)			(c < 127)
+#define IS_ASCII(c)			(c < 128)
 #define IS_NEWLINE(c)		(c == '\n')
 
 
