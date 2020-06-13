@@ -47,6 +47,7 @@
 
 static unsigned int ticks = 0;
 
+
 typedef struct commandImpl
 {
 	char *cmd;

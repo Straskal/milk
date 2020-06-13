@@ -38,7 +38,7 @@ typedef uint32_t    u32;
  *******************************************************************************
  * Current configuration:
  * - 256x224 px resolution.
- * - 256x256 px spritesheet, each sprite being 16x16 px (256 sprites total).
+ * - 256x256 px sprite sheet, each sprite being 16x16 px (256 sprites total).
  * - 128x48  px bitmap font in ASCII order, starting from ASCII character 32 (space).
  * - Allows up to 16 sounds loaded into memory.
  * - Allows up to 16 concurrent sounds via sample slots. Index 0 loops.
@@ -55,9 +55,9 @@ typedef uint32_t    u32;
 #define MAX_LOG_LENGTH 512
 
 #ifndef MILK_CMD
-#define LOG_INFO(logs, text)    (void *)0;
-#define LOG_WARN(logs, text)    (void *)0;
-#define LOG_ERROR(logs, text)   (void *)0;
+#define LOG_INFO(logs, text)    (void)0
+#define LOG_WARN(logs, text)    (void)0
+#define LOG_ERROR(logs, text)   (void)0
 #else
 #define LOG_INFO(milk, text)    logMessage(&milk->logs, text, INFO)
 #define LOG_WARN(milk, text)    logMessage(&milk->logs, text, WARN)
@@ -95,16 +95,16 @@ void clearLogs(Logs *logs);
 
 typedef enum buttonState
 {
-	BTN_NONE    = 0u << 0u,
-    BTN_START   = 1u << 0u,
-    BTN_UP      = 1u << 1u,
-    BTN_DOWN    = 1u << 2u,
-    BTN_LEFT    = 1u << 3u,
-    BTN_RIGHT   = 1u << 4u,
-    BTN_A       = 1u << 5u,
-    BTN_B       = 1u << 6u,
-    BTN_X       = 1u << 7u,
-    BTN_Y       = 1u << 8u,
+	BTN_NONE    = 0 << 0,
+    BTN_START   = 1 << 0,
+    BTN_UP      = 1 << 1,
+    BTN_DOWN    = 1 << 2,
+    BTN_LEFT    = 1 << 3,
+    BTN_RIGHT   = 1 << 4,
+    BTN_A       = 1 << 5,
+    BTN_B       = 1 << 6,
+    BTN_X       = 1 << 7,
+    BTN_Y       = 1 << 8,
 } ButtonState;
 
 typedef struct gamepad
@@ -150,10 +150,10 @@ typedef u32 Color32;
 
 typedef struct rect
 {
-    u32 top;
-	u32 bottom;
-	u32 left;
-	u32 right;
+    int top;
+    int bottom;
+    int left;
+    int right;
 } Rect;
 
 typedef struct video
@@ -173,10 +173,10 @@ void resetDrawState(Video *video);
 void setClippingRect(Video *video, int x, int y, int w, int h);
 void clearFramebuffer(Video *video, Color32 color);
 void blitPixel(Video *video, int x, int y, Color32 color);
-void blitRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color);
-void blitFilledRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color);
-void blitSprite(Video *video, int idx, int x, int y, u32 w, u32 h, float scale, u8 flip);
-void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, float scale, Color32 color);
+void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color);
+void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color);
+void blitSprite(Video *video, int idx, int x, int y, int w, int h, int scale, u8 flip);
+void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, int scale, Color32 color);
 
 /*
  *******************************************************************************
@@ -199,8 +199,8 @@ void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const cha
 
 typedef struct sampleData
 {
-    uint32_t length;
-    uint8_t *buffer;
+    u32 length;
+    u8 *buffer;
 } SampleData;
 
 typedef enum sampleSlotState
@@ -214,9 +214,9 @@ typedef struct sampleSlot
 {
     SampleData     *sampleData;
     SampleSlotState state;
-    uint32_t        remainingLength;
-    uint8_t        *position;
-    uint8_t         volume;
+    int             remainingLength;
+    u8             *position;
+    u8              volume;
 } SampleSlot;
 
 typedef struct audio
@@ -232,9 +232,9 @@ typedef struct audio
     void(*unlock)();
 } Audio;
 
-void loadSound(Audio *audio, int idx, const char *filename);
-void unloadSound(Audio *audio, int idx);
-void playSound(Audio *audio, int sampleIdx, int slotIdx, int volume);
+void loadSound(Audio *audio, int sampleIdx, const char *filename);
+void unloadSound(Audio *audio, int sampleIdx);
+void playSound(Audio *audio, int slotIdx, int sampleIdx, int volume);
 void stopSound(Audio *audio, int slotIdx);
 void pauseSound(Audio *audio, int slotIdx);
 void resumeSound(Audio *audio, int slotIdx);
