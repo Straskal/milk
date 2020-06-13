@@ -1,6 +1,6 @@
 dist: xenial
 
-language: cpp
+language: c
 
 matrix:
   include:
