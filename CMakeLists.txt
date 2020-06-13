@@ -14,6 +14,8 @@ elseif(MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
 endif()
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lm")
+
 if (WIN32)
 	if (MINGW)
 		# provide paths for minGW/minGW-w64 development libs
