@@ -136,10 +136,10 @@ bool isButtonPressed(Input *input, ButtonState button);
  */
 
 #define FRAMERATE               (1000.0f / 50.0f)
-#define FRAMEBUFFER_HEIGHT      256
-#define FRAMEBUFFER_WIDTH       224
-#define WINDOW_WIDTH            (FRAMEBUFFER_HEIGHT * 3)
-#define WINDOW_HEIGHT           (FRAMEBUFFER_WIDTH * 3)
+#define FRAMEBUFFER_WIDTH       256
+#define FRAMEBUFFER_HEIGHT      224
+#define WINDOW_WIDTH            (FRAMEBUFFER_WIDTH * 3)
+#define WINDOW_HEIGHT           (FRAMEBUFFER_HEIGHT * 3)
 #define SPRITE_SHEET_SQRSIZE    256
 #define SPRITE_SQRSIZE          16
 #define FONT_WIDTH              128
@@ -158,7 +158,7 @@ typedef struct rect
 
 typedef struct video
 {
-    Color32 framebuffer[FRAMEBUFFER_HEIGHT * FRAMEBUFFER_WIDTH];
+    Color32 framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
     Color32 spriteSheet[SPRITE_SHEET_SQRSIZE * SPRITE_SHEET_SQRSIZE];
     Color32 font[FONT_WIDTH * FONT_HEIGHT];
     Color32 colorKey;
@@ -170,7 +170,7 @@ typedef struct video
 void loadSpriteSheet(Video *video, const char *path);
 void loadFont(Video *video, const char *path);
 void resetDrawState(Video *video);
-void setClippingRect(Video *video, u32 x, u32 y, u32 w, u32 h);
+void setClippingRect(Video *video, int x, int y, int w, int h);
 void clearFramebuffer(Video *video, Color32 color);
 void blitPixel(Video *video, int x, int y, Color32 color);
 void blitRectangle(Video *video, int x, int y, u32 w, u32 h, Color32 color);

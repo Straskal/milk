@@ -31,7 +31,7 @@
 #include <SDL.h>
 
 #define SDL_FIRST_AVAILABLE_RENDERER -1
-#define MILK_FRAMEBUF_PITCH (FRAMEBUFFER_HEIGHT * 4)
+#define MILK_FRAMEBUF_PITCH (FRAMEBUFFER_WIDTH * 4)
 
 static SDL_AudioDeviceID gAudioDevice; /* Global audio device so we can access from our methods below. */
 
@@ -136,9 +136,9 @@ int main(int argc, char *argv[])
 		milkCmd = createCmd();
 		window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
 		renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
-		frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, FRAMEBUFFER_HEIGHT, FRAMEBUFFER_WIDTH);
+		frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 
-		SDL_RenderSetLogicalSize(renderer, FRAMEBUFFER_HEIGHT, FRAMEBUFFER_WIDTH);
+		SDL_RenderSetLogicalSize(renderer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 	}
 
 	{

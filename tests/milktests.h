@@ -31,7 +31,7 @@
 
 #include <string.h>
 
-#define FRAMEBUFFER_POS(x, y)			((FRAMEBUFFER_HEIGHT * y) + x)
+#define FRAMEBUFFER_POS(x, y)			((FRAMEBUFFER_WIDTH * y) + x)
 #define WITHIN_CLIP_RECT(clip, x, y)	(clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
 
  /*
@@ -44,7 +44,7 @@ TEST_CASE(createMilk_InitializesFramebuffer)
 {
 	SETUP(milk);
 
-	for (int i = 0; i < FRAMEBUFFER_HEIGHT * FRAMEBUFFER_WIDTH; i++)
+	for (int i = 0; i < FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT; i++)
 		ASSERT_EQ(0x00, milk->video.framebuffer[i]);
 
 TEARDOWN:
@@ -87,8 +87,8 @@ TEST_CASE(createMilk_InitializesClipRect)
 	SETUP(milk);
 	ASSERT_EQ(0, milk->video.clipRect.top);
 	ASSERT_EQ(0, milk->video.clipRect.left);
-	ASSERT_EQ(FRAMEBUFFER_WIDTH, milk->video.clipRect.bottom);
-	ASSERT_EQ(FRAMEBUFFER_HEIGHT, milk->video.clipRect.right);
+	ASSERT_EQ(FRAMEBUFFER_HEIGHT, milk->video.clipRect.bottom);
+	ASSERT_EQ(FRAMEBUFFER_WIDTH, milk->video.clipRect.right);
 
 TEARDOWN:
 	FREE_MILK(milk);
@@ -172,7 +172,7 @@ TEST_CASE(isButtonPressed_WhenPressed_ReturnsTrue)
 {
 	SETUP(milk);
 	milk->input.gamepad.buttonState |= BTN_DOWN;
-	milk->input.gamepad.previousButtonState = BTN_DOWN;
+	milk->input.gamepad.previousButtonState = BTN_NONE;
 
 	bool isPressed = ACT(isButtonPressed(&milk->input, BTN_DOWN));
 
@@ -227,9 +227,9 @@ TEST_CASE(resetDrawState_ResetsClipRect)
 	ACT(resetDrawState(&milk->video));
 
 	ASSERT_EQ(0, milk->video.clipRect.top);
-	ASSERT_EQ(FRAMEBUFFER_WIDTH, milk->video.clipRect.bottom);
+	ASSERT_EQ(FRAMEBUFFER_HEIGHT, milk->video.clipRect.bottom);
 	ASSERT_EQ(0, milk->video.clipRect.left);
-	ASSERT_EQ(FRAMEBUFFER_HEIGHT, milk->video.clipRect.right);
+	ASSERT_EQ(FRAMEBUFFER_WIDTH, milk->video.clipRect.right);
 
 TEARDOWN:
 	FREE_MILK(milk);
@@ -242,9 +242,9 @@ TEST_CASE(setClippingRect_ClampsClipRectToFramebufferSize)
 	ACT(setClippingRect(&milk->video, -10, -10, 500, 500));
 
 	ASSERT_EQ(0, milk->video.clipRect.top);
-	ASSERT_EQ(FRAMEBUFFER_WIDTH, milk->video.clipRect.bottom);
+	ASSERT_EQ(FRAMEBUFFER_HEIGHT, milk->video.clipRect.bottom);
 	ASSERT_EQ(0, milk->video.clipRect.left);
-	ASSERT_EQ(FRAMEBUFFER_HEIGHT, milk->video.clipRect.right);
+	ASSERT_EQ(FRAMEBUFFER_WIDTH, milk->video.clipRect.right);
 
 TEARDOWN:
 	FREE_MILK(milk);

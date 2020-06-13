@@ -14,13 +14,12 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - gcc-5
-            - g++-5
             - libsdl2-dev
             - libegl1-mesa-dev
             - libgles2-mesa-dev
             - liblua5.3-dev
       env:
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        - MATRIX_EVAL="CC=gcc-5"
 
     # OSX CLANG
     - os: osx

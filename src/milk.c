@@ -220,20 +220,20 @@ void resetDrawState(Video *video)
 	video->colorKey = 0x00;
 	video->clipRect.top = 0;
 	video->clipRect.left = 0;
-	video->clipRect.bottom = FRAMEBUFFER_WIDTH;
-	video->clipRect.right = FRAMEBUFFER_HEIGHT;
+	video->clipRect.bottom = FRAMEBUFFER_HEIGHT;
+	video->clipRect.right = FRAMEBUFFER_WIDTH;
 }
 
-void setClippingRect(Video *video, u32 x, u32 y, u32 w, u32 h)
+void setClippingRect(Video *video, int x, int y, int w, int h)
 {
-	video->clipRect.left =		MAX(x, FRAMEBUFFER_WIDTH);
-	video->clipRect.right =		MAX(x + w, FRAMEBUFFER_WIDTH);
-	video->clipRect.top =		MAX(y, FRAMEBUFFER_HEIGHT);
-	video->clipRect.bottom =	MAX(y + h, FRAMEBUFFER_HEIGHT);
+	video->clipRect.left =		CLAMP(x, 0, FRAMEBUFFER_WIDTH);
+	video->clipRect.right =		CLAMP(x + w, 0, FRAMEBUFFER_WIDTH);
+	video->clipRect.top =		CLAMP(y, 0, FRAMEBUFFER_HEIGHT);
+	video->clipRect.bottom =	CLAMP(y + h, 0, FRAMEBUFFER_HEIGHT);
 }
 
 
-#define FRAMEBUFFER_POS(x, y)			((FRAMEBUFFER_HEIGHT * y) + x)
+#define FRAMEBUFFER_POS(x, y)			((FRAMEBUFFER_WIDTH * y) + x)
 #define WITHIN_CLIP_RECT(clip, x, y)	(clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
 
 
