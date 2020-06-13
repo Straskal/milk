@@ -1,6 +1,6 @@
 dist: xenial
 
-language: cpp
+language: c
 
 matrix:
   include:
@@ -13,14 +13,13 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - gcc-5
-            - g++-5
+            - gcc-7
             - libsdl2-dev
             - libegl1-mesa-dev
             - libgles2-mesa-dev
             - liblua5.3-dev
       env:
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        - MATRIX_EVAL="CC=gcc-7"
 
     # OSX CLANG
     - os: osx

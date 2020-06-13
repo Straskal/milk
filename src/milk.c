@@ -220,20 +220,20 @@ void resetDrawState(Video *video)
 	video->colorKey = 0x00;
 	video->clipRect.top = 0;
 	video->clipRect.left = 0;
-	video->clipRect.bottom = FRAMEBUFFER_WIDTH;
-	video->clipRect.right = FRAMEBUFFER_HEIGHT;
+	video->clipRect.bottom = FRAMEBUFFER_HEIGHT;
+	video->clipRect.right = FRAMEBUFFER_WIDTH;
 }
 
-void setClippingRect(Video *video, u32 x, u32 y, u32 w, u32 h)
+void setClippingRect(Video *video, int x, int y, int w, int h)
 {
-	video->clipRect.left =		MAX(x, FRAMEBUFFER_WIDTH);
-	video->clipRect.right =		MAX(x + w, FRAMEBUFFER_WIDTH);
-	video->clipRect.top =		MAX(y, FRAMEBUFFER_HEIGHT);
-	video->clipRect.bottom =	MAX(y + h, FRAMEBUFFER_HEIGHT);
+	video->clipRect.left =		CLAMP(x, 0, FRAMEBUFFER_WIDTH);
+	video->clipRect.right =		CLAMP(x + w, 0, FRAMEBUFFER_WIDTH);
+	video->clipRect.top =		CLAMP(y, 0, FRAMEBUFFER_HEIGHT);
+	video->clipRect.bottom =	CLAMP(y + h, 0, FRAMEBUFFER_HEIGHT);
 }
 
 
-#define FRAMEBUFFER_POS(x, y)			((FRAMEBUFFER_HEIGHT * y) + x)
+#define FRAMEBUFFER_POS(x, y)			((FRAMEBUFFER_WIDTH * y) + x)
 #define WITHIN_CLIP_RECT(clip, x, y)	(clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
 
 
@@ -313,10 +313,10 @@ static void blitRect(Video *video, const Color32 *pixels, int x, int y, u32 w, u
 {
 	scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
 
-	int width =	    (int)floorf(w * scale);
-	int height =	(int)floorf(h * scale);
-	int xRatio =	(int)floorf((float)(w << 16u) / (float)width + 0.5f);
-	int yRatio =	(int)floorf((float)(h << 16u) / (float)height + 0.5f);
+	int width =	    (int)floor((double)(w * scale));
+	int height =	(int)floor((double)(h * scale));
+	int xRatio =	(int)floor((double)(w << 16u) / width + 0.5);
+	int yRatio =	(int)floor((double)(h << 16u) / height + 0.5);
 
     u32 xPixelStart =	IS_FLIPPED_X(flip) ? width - 1u : 0u;
     u32 yPixelStart =	IS_FLIPPED_Y(flip) ? height - 1u : 0u;
@@ -355,8 +355,8 @@ void blitSprite(Video *video, int idx, int x, int y, u32 w, u32 h, float scale, 
 
     u32 width = w * SPRITE_SQRSIZE;
     u32 height = h * SPRITE_SQRSIZE;
-	int row = (int)floorf((float)idx / (float)SPRSHEET_COLUMNS);
-	int col = (int)floorf((float)(idx % SPRSHEET_COLUMNS));
+	int row = (int)floor((double)idx / SPRSHEET_COLUMNS);
+	int col = (int)floor((double)(idx % SPRSHEET_COLUMNS));
 	Color32 *pixels = &video->spriteSheet[SPRSHEET_POS(col, row)];
 
 	blitRect(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, NULL);
@@ -388,8 +388,8 @@ void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const cha
 			if (!IS_ASCII(curr)) curr = '?';
             u32 width = CHAR_SQRSIZE;
             u32 height = CHAR_SQRSIZE;
-			int row = (int)floorf((float)(curr - 32) / (float)FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
-			int col = (int)floorf((float)((curr - 32) % FONT_COLUMNS));
+			int row = (int)floor((double)(curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
+			int col = (int)floor((double)((curr - 32) % FONT_COLUMNS));
 			const Color32 *pixelStart = &pixels[FONT_POS(col, row)];
 
 			blitRect(video, pixelStart, xCurrent, yCurrent, width, height, FONT_WIDTH, scale, 0, &color);
