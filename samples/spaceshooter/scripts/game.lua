@@ -1,18 +1,18 @@
 local milk = require("scripts.milk")
-local introState = require("scripts.states.intro.intro")
+local IntroState = require("scripts.intro.state")
 
 local game = {
     stateStack = {}
 }
 
 function game.init()
-    game.pushState(introState)
+    game.pushState(IntroState())
 end
 
 function game.update()
     local len = #game.stateStack
     for i = len, 1, -1 do
-        game.stateStack[i].update(game)
+        game.stateStack[i]:update(game)
     end
 end
 
@@ -21,29 +21,21 @@ function game.draw()
 
     local len = #game.stateStack
     for i = 1, len do
-        game.stateStack[i].draw(game)
+        game.stateStack[i]:draw(game)
     end
 end
 
 function game.pushState(state)
     table.insert(game.stateStack, state)
-    if state.enter then
-        state.enter(game)
-    end
+    state:enter(game)
 end
 
 function game.popState()
     local len = #game.stateStack
     if len > 0 then
-        if game.stateStack[len].exit then
-            game.stateStack[len].exit(game)
-        end
+        game.stateStack[len]:exit(game)
         table.remove(game.stateStack)
     end
-end
-
-function game.clearState()
-    game.stateStack = {}
 end
 
 return game
