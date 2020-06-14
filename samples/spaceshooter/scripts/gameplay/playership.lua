@@ -9,6 +9,8 @@ local btnright  = milk.btnright
 local btna      = milk.btna
 local spr       = milk.spr
 
+local ATTACK_TICK_BUFFER = 30
+
 local PlayerShip = class("PlayerShip")
 
 function PlayerShip:initialize()
@@ -17,11 +19,22 @@ function PlayerShip:initialize()
     self.speed = 1
     self.sprite = 0
     self.bulletPool = BulletPool()
+    self.bulletTimer = 0
 end
 
+local function attack(self)
+    if milk.ticks > self.bulletTimer then
+        milk.play(1, 1, 128)
+        self.bulletPool:create(self.x, self.y, -3)
+        self.bulletTimer = milk.ticks + ATTACK_TICK_BUFFER
+    end
+end
+
+-- luacheck: push ignore self
 function PlayerShip:load()
     milk.loadsnd(1, "sounds/fireball_shoot.wav")
 end
+-- luacheck: pop
 
 function PlayerShip:update(_)
     local mvx = 0
@@ -31,11 +44,7 @@ function PlayerShip:update(_)
     if milk.btn(btndown) then mvy = self.speed end
     if milk.btn(btnleft) then mvx = -self.speed end
     if milk.btn(btnright) then mvx = self.speed end
-
-    if milk.btnp(btna) then
-        milk.play(1, 1, 128)
-        self.bulletPool:create(self.x, self.y, -3)
-    end
+    if milk.btn(btna) then attack(self) end
 
     self.x = self.x + mvx
     self.y = self.y + mvy
