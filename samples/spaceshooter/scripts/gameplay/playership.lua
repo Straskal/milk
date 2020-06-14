@@ -1,5 +1,5 @@
 local milk = require "scripts.milk"
-local bullets = require "scripts.gameplay.bullets"
+local class = require "scripts.class"
 
 local btnup     = milk.btnup
 local btndown   = milk.btndown
@@ -8,25 +8,20 @@ local btnright  = milk.btnright
 local btna      = milk.btna
 local spr       = milk.spr
 
-local function init(self)
-    self = self or {}
-    self.bulletPool = bullets.init()
+local PlayerShip = class("PlayerShip")
+
+function PlayerShip:initialize()
     self.x = 0
     self.y = 0
     self.speed = 1
     self.sprite = 0
-    return self
 end
 
-local function animate(self)
-    if milk.ticks % 24 < 12 then
-        self.sprite = 0
-    else
-        self.sprite = 1
-    end
+function PlayerShip:load()
+    milk.loadsnd(1, "sounds/fireball_shoot.wav")
 end
 
-local function update(self)
+function PlayerShip:update(_)
     local mvx = 0
     local mvy = 0
 
@@ -37,21 +32,23 @@ local function update(self)
 
     if milk.btnp(btna) then
         milk.play(1, 1, 128)
-        self.bulletPool.create(2, self.x, self.y, -1)
     end
 
     self.x = self.x + mvx
     self.y = self.y + mvy
-
-    animate(self)
+    self:_animate()
 end
 
-local function draw(self)
+function PlayerShip:_animate()
+    if milk.ticks % 24 < 12 then
+        self.sprite = 0
+    else
+        self.sprite = 1
+    end
+end
+
+function PlayerShip:draw()
     spr(self.sprite, self.x, self.y)
 end
 
-return {
-    init = init,
-    update = update,
-    draw = draw
-}
+return PlayerShip
