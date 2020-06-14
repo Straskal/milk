@@ -7,12 +7,12 @@ local WARP_FACTOR = 3
 local StarField = class("StarField")
 
 function StarField:initialize()
-    self:_createStars()
+	self:_createStars()
 end
 
 function StarField:_createStars()
-    local stars = {}
-    for i = 1, #STAR_COLUMNS do
+	local stars = {}
+	for i = 1, #STAR_COLUMNS do
 		for _ = 1, 10 do
 			local star = {
 				x = math.random(256),
@@ -22,12 +22,12 @@ function StarField:_createStars()
 			}
 			table.insert(stars, star)
 		end
-    end
-    self.stars = stars
+	end
+	self.stars = stars
 end
 
 function StarField:update()
-    for i = 1, #self.stars do
+	for i = 1, #self.stars do
 		local star = self.stars[i]
 		star.y = star.y + star.z * WARP_FACTOR / 10
 		if star.y > 224 then
@@ -38,7 +38,7 @@ function StarField:update()
 end
 
 function StarField:draw()
-    for i = 1, #self.stars do
+	for i = 1, #self.stars do
 		milk.pset(self.stars[i].x, self.stars[i].y, self.stars[i].c)
 	end
 end
