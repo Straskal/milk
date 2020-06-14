@@ -1,5 +1,6 @@
 local milk = require "scripts.milk"
 local class = require "scripts.class"
+local BulletPool = require "scripts.gameplay.bullets"
 
 local btnup     = milk.btnup
 local btndown   = milk.btndown
@@ -15,6 +16,7 @@ function PlayerShip:initialize()
     self.y = 0
     self.speed = 1
     self.sprite = 0
+    self.bulletPool = BulletPool()
 end
 
 function PlayerShip:load()
@@ -32,10 +34,12 @@ function PlayerShip:update(_)
 
     if milk.btnp(btna) then
         milk.play(1, 1, 128)
+        self.bulletPool:create(self.x, self.y, -3)
     end
 
     self.x = self.x + mvx
     self.y = self.y + mvy
+    self.bulletPool:update()
     self:_animate()
 end
 
@@ -48,6 +52,7 @@ function PlayerShip:_animate()
 end
 
 function PlayerShip:draw()
+    self.bulletPool:draw()
     spr(self.sprite, self.x, self.y)
 end
 
