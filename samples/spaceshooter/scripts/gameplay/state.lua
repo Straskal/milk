@@ -1,12 +1,14 @@
 local milk = require "scripts.milk"
 local class = require "scripts.class"
 local GameState = require "scripts.state"
-local StarField = require "scripts.common.starfield"
+local GameplayActionList = require "scripts.gameplay.actionList"
 local PlayerShip = require "scripts.gameplay.playership"
+local StarField = require "scripts.common.starfield"
 
 local GameplayState = class("GameplayState", GameState)
 
 function GameplayState:initialize()
+    self.actionList = GameplayActionList(require("scripts.gameplay.level1.actions"))
     self.starField = StarField()
     self.playerShip = PlayerShip()
 end
@@ -21,12 +23,12 @@ end
 
 function GameplayState:update(_)
     self.starField:update()
-    self.playerShip:update()
+    self.actionList:update()
 end
 
 function GameplayState:draw()
     self.starField:draw()
-    self.playerShip:draw()
+    self.actionList:draw()
 end
 
 return GameplayState
