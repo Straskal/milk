@@ -1,4 +1,3 @@
-local milk = require("scripts.milk")
 local IntroState = require("scripts.intro.state")
 
 local game = {
@@ -17,8 +16,6 @@ function game.update()
 end
 
 function game.draw()
-    milk.clrs(0x1a1a1a)
-
     local len = #game.stateStack
     for i = 1, len do
         game.stateStack[i]:draw(game)

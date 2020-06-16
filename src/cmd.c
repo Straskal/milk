@@ -26,7 +26,6 @@
 #include "cmd.h"
 #include "embed/font.h"
 
-#include <stdlib.h>
 #include <string.h>
 
 #define CMD_MAX_ARGS	8
@@ -274,7 +273,7 @@ static void drawCommandLine(MilkCmd *cmdLine, Milk *milk)
 {
 	int cmdLength = cmdLine->commandCandidateLength;
 
-	clearFramebuffer(&milk->video, 0x1a1a1a);
+	clearFramebuffer(&milk->video, 0x000000);
 	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, 10, "MILK\n------------------------------", 1, CMD_COLOR);
 	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, 40, ">:", 1, CMD_COLOR);
 	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 24, 40, cmdLine->commandCandidate, 1, CMD_COLOR);

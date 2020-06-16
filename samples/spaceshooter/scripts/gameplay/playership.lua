@@ -1,15 +1,13 @@
 local milk = require "scripts.milk"
 local class = require "scripts.class"
-local BulletPool = require "scripts.gameplay.bullets"
 
-local btnup     = milk.btnup
-local btndown   = milk.btndown
-local btnleft   = milk.btnleft
-local btnright  = milk.btnright
-local btna      = milk.btna
-local spr       = milk.spr
+local btnup = milk.btnup
+local btndown = milk.btndown
+local btnleft = milk.btnleft
+local btnright = milk.btnright
+local btna = milk.btna
 
-local ATTACK_TICK_BUFFER = 30
+local ATTACK_TICK_BUFFER = 8
 
 local PlayerShip = class("PlayerShip")
 
@@ -18,51 +16,68 @@ function PlayerShip:initialize()
     self.y = 0
     self.speed = 1
     self.sprite = 0
-    self.bulletPool = BulletPool()
     self.bulletTimer = 0
+    self.hearts = 3
 end
 
-local function attack(self)
+local function attack(self, gameplay)
     if milk.ticks > self.bulletTimer then
         milk.play(1, 1, 128)
-        self.bulletPool:create(self.x, self.y, -3)
+        gameplay.bulletPool:create(self.x, self.y, -3)
         self.bulletTimer = milk.ticks + ATTACK_TICK_BUFFER
     end
 end
 
--- luacheck: push ignore self
-function PlayerShip:load()
-    milk.loadsnd(1, "sounds/fireball_shoot.wav")
-end
--- luacheck: pop
-
-function PlayerShip:update(_)
-    local mvx = 0
-    local mvy = 0
-
-    if milk.btn(btnup) then mvy = -self.speed end
-    if milk.btn(btndown) then mvy = self.speed end
-    if milk.btn(btnleft) then mvx = -self.speed end
-    if milk.btn(btnright) then mvx = self.speed end
-    if milk.btn(btna) then attack(self) end
-
-    self.x = self.x + mvx
-    self.y = self.y + mvy
-    self.bulletPool:update()
-    self:_animate()
-end
-
-function PlayerShip:_animate()
-    if milk.ticks % 24 < 12 then
+local function animate(self)
+    if milk.ticks % 12 < 6 then
         self.sprite = 0
     else
         self.sprite = 1
     end
 end
 
+-- luacheck: push ignore self
+function PlayerShip:load()
+    milk.loadsnd(1, "sounds/shoot.wav")
+end
+-- luacheck: pop
+
+function PlayerShip:checkCollision(other)
+    return
+        self.x > other.x - 8
+        and self.x < other.x + 8
+        and self.y < other.y + 8
+        and self.y > other.y - 8
+end
+
+function PlayerShip:update(gameplay)
+    local mvx = 0
+    local mvy = 0
+
+    if milk.btn(btnup) then
+        mvy = -self.speed
+    end
+    if milk.btn(btndown) then
+        mvy = self.speed
+    end
+    if milk.btn(btnleft) then
+        mvx = -self.speed
+    end
+    if milk.btn(btnright) then
+        mvx = self.speed
+    end
+    if milk.btn(btna) then
+        attack(self, gameplay)
+    end
+
+    self.x = self.x + mvx
+    self.y = self.y + mvy
+
+    animate(self)
+end
+
 function PlayerShip:draw()
-    self.bulletPool:draw()
-    spr(self.sprite, self.x, self.y)
+    milk.spr(self.sprite, self.x, self.y)
 end
 
 return PlayerShip

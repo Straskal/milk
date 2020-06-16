@@ -28,22 +28,25 @@ function IntroState:update(game)
     end
 end
 
-function IntroState:draw(game)
-    milk.clrs()
-    self.starField:draw()
-    self:_drawTitle()
-    self:_drawPressStart()
-end
-
-function IntroState:_drawTitle()
+local function drawTitle()
     milk.sprfont(128 - string.len(TITLE) * 8 * 2 / 2, 60, TITLE, 2, 0x00ff00)
     milk.sprfont(128 - string.len(SUBTITLE) * 8 / 2, 60 + 8 * 2.5, SUBTITLE, 1, 0x00ff00)
 end
 
-function IntroState:_drawPressStart()
+local function drawPressStart()
     if milk.ticks % 64 < 48 then
         milk.sprfont(128 - 88 / 2, 164, "press start")
     end
+end
+
+function IntroState:draw(game)
+    milk.clrs()
+    self.starField:draw()
+
+    milk.line(10, 10, 50, 50, 0xff0000)
+
+    drawTitle()
+    drawPressStart()
 end
 -- luacheck: pop
 
