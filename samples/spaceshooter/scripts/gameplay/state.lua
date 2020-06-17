@@ -23,6 +23,7 @@ end
 -- luacheck: push ignore self game
 function GameplayState:enter(game)
     milk.loadspr("art/sprsheet.bmp")
+    milk.loadsnd(0, "sounds/music.wav")
     milk.play(0, 0, 128)
     self.player:load()
 end

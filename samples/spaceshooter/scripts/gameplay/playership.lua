@@ -22,7 +22,7 @@ end
 
 local function attack(self, gameplay)
     if milk.ticks > self.bulletTimer then
-        milk.play(1, 1, 128)
+        milk.play(1, 1, 10)
         gameplay.bulletPool:create(self.x, self.y, -3)
         self.bulletTimer = milk.ticks + ATTACK_TICK_BUFFER
     end

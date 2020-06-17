@@ -6,6 +6,7 @@ local GameplayState = require "scripts.gameplay.state"
 
 local TITLE = "STAR GAME:"
 local SUBTITLE = "Return of The Bad Bois"
+local PROMPT = "press z"
 
 local IntroState = class("IntroState", GameState)
 
@@ -15,37 +16,57 @@ end
 
 --  luacheck: push ignore self game
 function IntroState:enter(game)
-    milk.loadsnd(0, "sounds/music.wav")
+    milk.loadsnd(0, "sounds/intro_music.wav")
     milk.play(0, 0, 128)
 end
 
 function IntroState:update(game)
     self.starField:update()
 
-    if milk.btnp(0) then
+    if milk.btnp(5) then
         game.popState()
         game.pushState(GameplayState())
     end
 end
 
+local function printCenteredHorizontal(val, y, scale, color)
+    local length = string.len(val)
+    local halfLength = length / 2
+    local halfResolution = 256 / 2
+    local characterSize = 8 * scale
+
+    milk.sprfont(halfResolution - halfLength * characterSize, y, val, scale, color)
+end
+
 local function drawTitle()
-    milk.sprfont(128 - string.len(TITLE) * 8 * 2 / 2, 60, TITLE, 2, 0x00ff00)
-    milk.sprfont(128 - string.len(SUBTITLE) * 8 / 2, 60 + 8 * 2.5, SUBTITLE, 1, 0x00ff00)
+    printCenteredHorizontal(TITLE, 60, 2, 0x00ff00)
+end
+
+local function drawSubtitle()
+    local subtitleLength = string.len(SUBTITLE)
+    local halfResolution = 256 / 2
+    local x = (halfResolution - (subtitleLength / 2) * 8) - 8
+
+    for i = 1, subtitleLength do
+        local character = SUBTITLE:sub(i, i)
+        local adjustedTime = milk.ticks + i * 4
+        local y = 85 + math.cos(adjustedTime / 20) * 4
+
+        milk.sprfont(x + 8 * i, y, character, 1, 0x008751)
+    end
 end
 
 local function drawPressStart()
     if milk.ticks % 64 < 48 then
-        milk.sprfont(128 - 88 / 2, 164, "press start")
+        printCenteredHorizontal(PROMPT, 164, 1)
     end
 end
 
 function IntroState:draw(game)
     milk.clrs()
     self.starField:draw()
-
-    milk.line(10, 10, 50, 50, 0xff0000)
-
     drawTitle()
+    drawSubtitle()
     drawPressStart()
 end
 -- luacheck: pop

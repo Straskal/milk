@@ -24,6 +24,7 @@
 
 #include "milk.h"
 #include "embed/font.h"
+#include <SDL.h>
 
 #include <math.h>
 #include <string.h>
@@ -256,6 +257,7 @@ void blitPixel(Video *video, int x, int y, Color32 color)
         video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
+
 /*
  * Modified Bresenham line drawing algorithm to handle straight lines, and doing more than just drawing lower left to upper right.
  */
@@ -373,19 +375,19 @@ static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, i
 {
     scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
 
-    int width = w * scale;
-    int height = h * scale;
-    int xRatio = (int) floor((double) (w << 16) / width + 0.5);
-    int yRatio = (int) floor((double) (h << 16) / height + 0.5);
-    int xPixelStart = IS_FLIPPED_X(flip) ? width - 1 : 0;
-    int yPixelStart = IS_FLIPPED_Y(flip) ? height - 1 : 0;
-    int xDirection = IS_FLIPPED_X(flip) ? -1 : 1;
-    int yDirection = IS_FLIPPED_Y(flip) ? -1 : 1;
+    int width =         w * scale;
+    int height =        h * scale;
+    int xRatio =        (int) floor((double) (w << 16) / width + 0.5);
+    int yRatio =        (int) floor((double) (h << 16) / height + 0.5);
+    int xPixelStart =   IS_FLIPPED_X(flip) ? width - 1 : 0;
+    int yPixelStart =   IS_FLIPPED_Y(flip) ? height - 1 : 0;
+    int xStep =         IS_FLIPPED_X(flip) ? -1 : 1;
+    int yStep =         IS_FLIPPED_Y(flip) ? -1 : 1;
 
     int xPixel, yPixel, xFramebuffer, yFramebuffer;
-    for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yDirection)
+    for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yStep)
     {
-        for (xFramebuffer = x, xPixel = xPixelStart; xFramebuffer < x + width; xFramebuffer++, xPixel += xDirection)
+        for (xFramebuffer = x, xPixel = xPixelStart; xFramebuffer < x + width; xFramebuffer++, xPixel += xStep)
         {
             int xNearest = (xPixel * xRatio) >> 16;
             int yNearest = (yPixel * yRatio) >> 16;
@@ -442,9 +444,8 @@ void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const cha
         if (!IS_NEWLINE(curr))
         {
             if (!IS_ASCII(curr)) curr = '?';
-            int row = (int) floor(
-                    (double) (curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
-            int col = (int) floor((double) ((curr - 32) % FONT_COLUMNS));
+            int row = (int) floor((double)(curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
+            int col = (int) floor((double)((curr - 32) % FONT_COLUMNS));
             const Color32 *pixelStart = &pixels[FONT_POS(col, row)];
             blitRect(video, pixelStart, xCurrent, yCurrent, CHAR_SQRSIZE, CHAR_SQRSIZE, FONT_WIDTH, scale, 0, &color);
             xCurrent += charSize;
@@ -592,7 +593,7 @@ void setMasterVolume(Audio *audio, int volume)
 #define _16_BIT_MAX 32767
 
 
-static void mixSample(u8 *destination, const u8 *source, int length, double volume)
+static void mixSample(u8 *destination, const u8 *source, int length, int volume)
 {
     i16 sourceSample;
     i16 destSample;
@@ -600,9 +601,10 @@ static void mixSample(u8 *destination, const u8 *source, int length, double volu
 
     while (length--)
     {
-        sourceSample = source[1] << 8 | (i16) (source[0] * volume);
+        sourceSample = source[1] << 8 | source[0];
+        sourceSample = (sourceSample * volume) / MAX_VOLUME;
         destSample = destination[1] << 8 | destination[0];
-        i16 mixedSample = CLAMP(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
+        i32 mixedSample = CLAMP(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
         destination[0] = mixedSample & 0xff;
         destination[1] = (mixedSample >> 8) & 0xff;
         source += 2;
@@ -611,8 +613,8 @@ static void mixSample(u8 *destination, const u8 *source, int length, double volu
 }
 
 
-#define LOOP_INDEX          0
-#define NORMALIZE_VOLUME(v) ((double)v / MAX_VOLUME)
+#define LOOP_INDEX 0
+#define ADJUST_VOLUME(s, v) (s = (s*v)/SDL_MIX_MAXVOLUME)
 
 
 void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)
@@ -629,7 +631,7 @@ void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)
         if (slot->remainingLength > 0)
         {
             int bytesToWrite = MIN(slot->remainingLength, (int) len);
-            mixSample(stream, slot->position, bytesToWrite, NORMALIZE_VOLUME(slot->volume));
+            mixSample(stream, slot->position, bytesToWrite, slot->volume);
             slot->position += bytesToWrite;
             slot->remainingLength -= bytesToWrite;
         }
