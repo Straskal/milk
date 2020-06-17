@@ -149,6 +149,18 @@ static int l_pset(lua_State *L)
 	return 0;
 }
 
+static int l_line(lua_State *L)
+{
+	blitLine(&globalMilk->video,
+		(int)lua_tointeger(L, 1),
+		(int)lua_tointeger(L, 2),
+		(int)lua_tointeger(L, 3),
+		(int)lua_tointeger(L, 4),
+		(Color32)lua_tointeger(L, 5)
+	);
+	return 0;
+}
+
 static int l_rect(lua_State *L)
 {
 	blitRectangle(&globalMilk->video,
@@ -182,7 +194,7 @@ static int l_spr(lua_State *L)
 		(int)luaL_optinteger(L, 4, 1),
 		(int)luaL_optinteger(L, 5, 1),
 		(int)luaL_optnumber(L, 6, 1.0),
-		(int)luaL_optinteger(L, 7, 0)
+		(u8)luaL_optinteger(L, 7, 0)
 	);
 	return 0;
 }
@@ -281,6 +293,7 @@ static void pushApi(lua_State *L)
 	pushApiFunction(L, "clip",		l_clip);
 	pushApiFunction(L, "clrs",		l_clrs);
 	pushApiFunction(L, "pset",		l_pset);
+	pushApiFunction(L, "line",		l_line);
 	pushApiFunction(L, "rect",		l_rect);
 	pushApiFunction(L, "rectfill", l_rectfill);
 	pushApiFunction(L, "spr",		l_spr);

@@ -128,7 +128,7 @@ bool isButtonPressed(Input *input, ButtonState button);
  * Internally, milk draws to it's own framebuffer, which is drawn to the screen at the end of every frame.
  * The framebuffer is just an array of pixels (32 bit color 0xAARRGGBB).
  *
- * The spritesheet and font are stored in fixed size arrays, so they do not need to be freed when milk shuts down.
+ * The sprite sheet and font are stored in fixed size arrays, so they do not need to be freed when milk shuts down.
  *
  * Milk does not support transparency when drawing, but it does use a color key to consider as 'transparent', which defaults to black.
  * All drawing functions only operate within the bounds of the clipping rectangle, which is reset to the framebuffer size at the beginning of each frame.
@@ -173,6 +173,7 @@ void resetDrawState(Video *video);
 void setClippingRect(Video *video, int x, int y, int w, int h);
 void clearFramebuffer(Video *video, Color32 color);
 void blitPixel(Video *video, int x, int y, Color32 color);
+void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color);
 void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color);
 void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color);
 void blitSprite(Video *video, int idx, int x, int y, int w, int h, int scale, u8 flip);
@@ -214,9 +215,9 @@ typedef struct sampleSlot
 {
     SampleData     *sampleData;
     SampleSlotState state;
+    int             volume;
     int             remainingLength;
     u8             *position;
-    u8              volume;
 } SampleSlot;
 
 typedef struct audio

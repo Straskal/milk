@@ -23,6 +23,7 @@ milk.loadspr    = _G.loadspr
 milk.clip       = _G.clip
 milk.clrs       = _G.clrs
 milk.pset       = _G.pset
+milk.line       = _G.line
 milk.rect       = _G.rect
 milk.rectfill   = _G.rectfill
 milk.spr        = _G.spr

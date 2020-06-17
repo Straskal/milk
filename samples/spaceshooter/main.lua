@@ -1,6 +1,10 @@
 local milk = require("scripts.milk")
 local game = require("scripts.game")
 
+if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" then
+	require("lldebugger").start()
+end
+
 function milk.init()
 	game.init()
 end
