@@ -46,7 +46,7 @@ local function checkPlayerEnemyCollision(self)
         if self.player:checkCollision(liveEnemies[i]) then
             self.enemies:destroy(liveEnemies[i])
             self.explosions:create(self.player.x, self.player.y)
-            self.player.hearts = self.player.hearts - 1
+            self.player:damage()
         end
     end
 end

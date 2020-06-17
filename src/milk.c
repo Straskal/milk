@@ -24,7 +24,6 @@
 
 #include "milk.h"
 #include "embed/font.h"
-#include <SDL.h>
 
 #include <math.h>
 #include <string.h>
@@ -614,7 +613,6 @@ static void mixSample(u8 *destination, const u8 *source, int length, int volume)
 
 
 #define LOOP_INDEX 0
-#define ADJUST_VOLUME(s, v) (s = (s*v)/SDL_MIX_MAXVOLUME)
 
 
 void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)

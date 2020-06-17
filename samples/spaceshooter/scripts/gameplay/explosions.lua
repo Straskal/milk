@@ -56,7 +56,7 @@ function ExplosionPool:create(x, y)
             break
         end
     end
-    milk.play(2, 2, 10)
+    milk.play(2, 2, 30)
 end
 
 return ExplosionPool
