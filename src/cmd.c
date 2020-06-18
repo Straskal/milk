@@ -38,7 +38,7 @@
 
 #define LOG_START_HEIGHT 56
 #define LOG_END_HEIGHT	(224 - 32)
-#define MAX_LINES		((LOG_END_HEIGHT - LOG_START_HEIGHT) / CHAR_SQRSIZE)
+#define MAX_LINES		((LOG_END_HEIGHT - LOG_START_HEIGHT) / CHAR_WIDTH)
 #define CHARS_PER_LINE	31
 
 #define HAS_INPUT(inputState, input) ((inputState & input) == input)
@@ -264,7 +264,7 @@ static void drawLogLines(Milk *milk)
 	getLogLines(&milk->logs, lines, &numLines);
 
 	for (int i = 0; i < numLines; i++)
-		blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, LOG_START_HEIGHT + ((CHAR_SQRSIZE + 2) * i),
+		blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, LOG_START_HEIGHT + ((CHAR_HEIGHT + 2) * i),
 		               lines[i].text, 1, lines[i].color);
 }
 
@@ -274,13 +274,13 @@ static void drawCommandLine(MilkCmd *cmdLine, Milk *milk)
 	int cmdLength = cmdLine->commandCandidateLength;
 
 	clearFramebuffer(&milk->video, 0x000000);
-	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, 10, "MILK\n------------------------------", 1, CMD_COLOR);
+	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, 10, "MILK [1.0.0]\n------------------------------", 1, CMD_COLOR);
 	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, 40, ">:", 1, CMD_COLOR);
 	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 24, 40, cmdLine->commandCandidate, 1, CMD_COLOR);
 
 	/* Draw blinking position marker. */
-	if (ticks % 32 > 16)
-		blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 24 + cmdLength * 8, 42, "_", 1, CMD_COLOR);
+    if (ticks % 64 < 48)
+        blitFilledRectangle(&milk->video, 24 + cmdLength * CHAR_WIDTH, 40, 8, 8, 0xc10a31);
 }
 
 

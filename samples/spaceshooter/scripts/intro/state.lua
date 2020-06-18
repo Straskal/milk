@@ -1,14 +1,13 @@
 local milk = require "scripts.milk"
-local class = require "scripts.class"
 local GameState = require "scripts.state"
 local StarField = require "scripts.common.starfield"
 local GameplayState = require "scripts.gameplay.state"
 
-local TITLE = "STAR GAME:"
+local TITLE = "STAR GAME II"
 local SUBTITLE = "Return of The Bad Bois"
-local PROMPT = "press z"
+local PROMPT = "press Z"
 
-local IntroState = class("IntroState", GameState)
+local IntroState = GameState:subclass("IntroState")
 
 function IntroState:initialize()
     self.starField = StarField()
@@ -50,7 +49,7 @@ local function drawSubtitle()
     for i = 1, subtitleLength do
         local character = SUBTITLE:sub(i, i)
         local adjustedTime = milk.ticks + i * 4
-        local y = 85 + math.cos(adjustedTime / 20) * 4
+        local y = 85 + math.sin(adjustedTime / 15) * 4
 
         milk.sprfont(x + 8 * i, y, character, 1, 0x008751)
     end

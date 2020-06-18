@@ -1,5 +1,4 @@
 local milk = require "scripts.milk"
-local class = require "scripts.class"
 local BulletPool = require "scripts.gameplay.bullets"
 local Enemies = require "scripts.gameplay.enemies"
 local ExplosionPool = require "scripts.gameplay.explosions"
@@ -7,7 +6,7 @@ local GameState = require "scripts.state"
 local PlayerShip = require "scripts.gameplay.playership"
 local StarField = require "scripts.common.starfield"
 
-local GameplayState = class("GameplayState", GameState)
+local GameplayState = GameState:subclass("GameplayState")
 
 function GameplayState:initialize()
     self.starField = StarField()

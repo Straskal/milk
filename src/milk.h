@@ -144,7 +144,8 @@ bool isButtonPressed(Input *input, ButtonState button);
 #define SPRITE_SQRSIZE          16
 #define FONT_WIDTH              128
 #define FONT_HEIGHT             48
-#define CHAR_SQRSIZE            8
+#define CHAR_WIDTH              8
+#define CHAR_HEIGHT             8
 
 typedef u32 Color32;
 

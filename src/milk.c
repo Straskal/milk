@@ -420,10 +420,9 @@ void blitSprite(Video *video, int idx, int x, int y, int w, int h, int scale, u8
 }
 
 
-#define FONT_COLUMNS         ((int)(FONT_WIDTH / CHAR_SQRSIZE))
-#define FONT_ROW_SIZE        ((int)(FONT_WIDTH * CHAR_SQRSIZE))
-#define FONT_COL_SIZE        CHAR_SQRSIZE
-#define FONT_POS(x, y)       (y * FONT_ROW_SIZE + x * FONT_COL_SIZE)
+#define FONT_COLUMNS         ((int)(FONT_WIDTH / CHAR_WIDTH))
+#define FONT_ROW_SIZE        ((int)(FONT_WIDTH * CHAR_HEIGHT))
+#define FONT_POS(x, y)       (y * FONT_ROW_SIZE + x * CHAR_WIDTH)
 #define IS_ASCII(c)          (0 < c)
 #define IS_NEWLINE(c)        (c == '\n')
 
@@ -433,7 +432,8 @@ void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const cha
     if (str == NULL)
         return;
 
-    int charSize = (int) floor((double) CHAR_SQRSIZE * scale);
+    int charWidth = (int) floor((double) CHAR_WIDTH * scale);
+    int charHeight = (int) floor((double) CHAR_HEIGHT * scale);
     int xCurrent = x;
     int yCurrent = y;
     char curr;
@@ -446,13 +446,13 @@ void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const cha
             int row = (int) floor((double)(curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
             int col = (int) floor((double)((curr - 32) % FONT_COLUMNS));
             const Color32 *pixelStart = &pixels[FONT_POS(col, row)];
-            blitRect(video, pixelStart, xCurrent, yCurrent, CHAR_SQRSIZE, CHAR_SQRSIZE, FONT_WIDTH, scale, 0, &color);
-            xCurrent += charSize;
+            blitRect(video, pixelStart, xCurrent, yCurrent, CHAR_WIDTH, CHAR_HEIGHT, FONT_WIDTH, scale, 0, &color);
+            xCurrent += charWidth;
         }
         else
         {
             xCurrent = x;
-            yCurrent += charSize;
+            yCurrent += charHeight;
         }
     }
 }
