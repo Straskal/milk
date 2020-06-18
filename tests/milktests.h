@@ -412,14 +412,36 @@ TEARDOWN:
 TEST_CASE(stopSound_WhenIndexOutOfBounds_DoesNothing)
 {
 	SETUP(milk);
+    milk->audio.lock = mockLock;
+    milk->audio.unlock = mockUnlock;
 	ACT(stopSound(&milk->audio, -10));
 	ACT(stopSound(&milk->audio, MAX_SAMPLE_SLOTS + 10));
 	FREE_MILK(milk);
 }
 
+TEST_CASE(stopSound_WhenIndexIsNegativeOne_StopsAllPlayingSounds)
+{
+    SETUP(milk);
+    milk->audio.lock = mockLock;
+    milk->audio.unlock = mockUnlock;
+
+    for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
+        milk->audio.slots[i].state = PLAYING;
+
+    ACT(stopSound(&milk->audio, -1));
+
+    for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
+        ASSERT_EQ(STOPPED, milk->audio.slots[i].state);
+
+    TEARDOWN:
+    FREE_MILK(milk);
+}
+
 TEST_CASE(stopSound_StopsSound)
 {
 	SETUP(milk);
+    milk->audio.lock = mockLock;
+    milk->audio.unlock = mockUnlock;
 	milk->audio.lock = mockLock;
 	milk->audio.unlock = mockUnlock;
 	milk->audio.slots[0].sampleData = &milk->audio.samples[0];
@@ -437,9 +459,29 @@ TEARDOWN:
 TEST_CASE(pauseSound_WhenIndexOutOfBounds_DoesNothing)
 {
 	SETUP(milk);
+    milk->audio.lock = mockLock;
+    milk->audio.unlock = mockUnlock;
 	ACT(pauseSound(&milk->audio, -10));
 	ACT(pauseSound(&milk->audio, MAX_SAMPLE_SLOTS + 10));
 	FREE_MILK(milk);
+}
+
+TEST_CASE(pauseSound_WhenIndexIsNegativeOne_PausesAllPlayingSounds)
+{
+    SETUP(milk);
+    milk->audio.lock = mockLock;
+    milk->audio.unlock = mockUnlock;
+
+    for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
+        milk->audio.slots[i].state = PLAYING;
+
+    ACT(pauseSound(&milk->audio, -1));
+
+    for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
+        ASSERT_EQ(PAUSED, milk->audio.slots[i].state);
+
+    TEARDOWN:
+    FREE_MILK(milk);
 }
 
 TEST_CASE(pauseSound_PausesSound)
@@ -461,9 +503,29 @@ TEARDOWN:
 TEST_CASE(resumeSound_WhenIndexOutOfBounds_DoesNothing)
 {
 	SETUP(milk);
+    milk->audio.lock = mockLock;
+    milk->audio.unlock = mockUnlock;
 	ACT(resumeSound(&milk->audio, -10));
 	ACT(resumeSound(&milk->audio, MAX_SAMPLE_SLOTS + 10));
 	FREE_MILK(milk);
+}
+
+TEST_CASE(resumeSound_WhenIndexIsNegativeOne_PausesAllPausedSounds)
+{
+    SETUP(milk);
+    milk->audio.lock = mockLock;
+    milk->audio.unlock = mockUnlock;
+
+    for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
+        milk->audio.slots[i].state = PAUSED;
+
+    ACT(resumeSound(&milk->audio, -1));
+
+    for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
+        ASSERT_EQ(PLAYING, milk->audio.slots[i].state);
+
+    TEARDOWN:
+    FREE_MILK(milk);
 }
 
 TEST_CASE(resumeSound_resumesSound)

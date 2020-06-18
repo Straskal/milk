@@ -322,6 +322,7 @@ void updateCmd(MilkCmd *cmd, Milk *milk)
 	{
 		if (cmd->state != COMMAND)
 		{
+		    pauseSound(&milk->audio, -1);
 			cmd->state = COMMAND;
 			cmd->input.startTextInput();
 		}
@@ -332,6 +333,7 @@ void updateCmd(MilkCmd *cmd, Milk *milk)
 				milkInvokeInit(&milk->code);
 				cmd->isGameInitialized = true;
 			}
+            resumeSound(&milk->audio, -1);
 			cmd->state = GAME;
 			cmd->input.stopTextInput();
 		}

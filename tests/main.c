@@ -58,10 +58,13 @@ static Test _tests[] =
 	INIT_TEST(setMasterVolume_ClampsToMinValue),
 	INIT_TEST(setMasterVolume_ClampsToMaxValue),
 	INIT_TEST(stopSound_WhenIndexOutOfBounds_DoesNothing),
+	INIT_TEST(stopSound_WhenIndexIsNegativeOne_StopsAllPlayingSounds),
 	INIT_TEST(stopSound_StopsSound),
 	INIT_TEST(pauseSound_WhenIndexOutOfBounds_DoesNothing),
+	INIT_TEST(pauseSound_WhenIndexIsNegativeOne_PausesAllPlayingSounds),
 	INIT_TEST(pauseSound_PausesSound),
 	INIT_TEST(resumeSound_WhenIndexOutOfBounds_DoesNothing),
+	INIT_TEST(resumeSound_WhenIndexIsNegativeOne_PausesAllPausedSounds),
 	INIT_TEST(resumeSound_resumesSound)
 };
 

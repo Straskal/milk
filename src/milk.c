@@ -523,40 +523,61 @@ void playSound(Audio *audio, int slotIdx, int sampleIdx, int volume)
 
 void stopSound(Audio *audio, int slotIdx)
 {
-    if (SLOTIDX_OO_BOUNDS(slotIdx))
-        return;
-
     audio->lock();
-    resetSampleSlot(&audio->slots[slotIdx]);
+    SampleSlot *slots = audio->slots;
+
+    if (slotIdx == -1)
+    {
+        for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
+        {
+            if (slots[i].state == PLAYING)
+                resetSampleSlot(&slots[i]);
+        }
+    }
+    else if (!SLOTIDX_OO_BOUNDS(slotIdx))
+        resetSampleSlot(&slots[slotIdx]);
+
     audio->unlock();
 }
 
 
 void pauseSound(Audio *audio, int slotIdx)
 {
-    if (SLOTIDX_OO_BOUNDS(slotIdx))
-        return;
+    audio->lock();
+    SampleSlot *slots = audio->slots;
 
-    if (audio->slots[slotIdx].state == PLAYING)
+    if (slotIdx == -1)
     {
-        audio->lock();
-        audio->slots[slotIdx].state = PAUSED;
-        audio->unlock();
+        for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
+        {
+            if (slots[i].state == PLAYING)
+                slots[i].state = PAUSED;
+        }
     }
+    else if (!SLOTIDX_OO_BOUNDS(slotIdx))
+        slots[slotIdx].state = PAUSED;
+
+    audio->unlock();
 }
 
 
 void resumeSound(Audio *audio, int slotIdx)
 {
-    if (SLOTIDX_OO_BOUNDS(slotIdx))
-        return;
+    audio->lock();
+    SampleSlot *slots = audio->slots;
 
-    if (audio->slots[slotIdx].state == PAUSED)
+    if (slotIdx == -1)
     {
-        audio->lock();
-        audio->slots[slotIdx].state = PLAYING;
-        audio->unlock();
+        for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
+        {
+            if (slots[i].state == PAUSED)
+                slots[i].state = PLAYING;
+        }
     }
+    else if (!SLOTIDX_OO_BOUNDS(slotIdx))
+        slots[slotIdx].state = PLAYING;
+
+    audio->unlock();
 }
 
 
