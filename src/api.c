@@ -281,7 +281,7 @@ static int l_vol(lua_State *L)
 static int l_exit(lua_State *L)
 {
     (void)L;
-    exitMilk(globalMilk);
+    globalMilk->shouldQuit = true;
     return 0;
 }
 

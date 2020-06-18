@@ -127,11 +127,6 @@ void freeMilk(Milk *milk)
     free(milk);
 }
 
-void exitMilk(Milk *milk)
-{
-    milk->shouldQuit = true;
-}
-
 
 /*
  *******************************************************************************
