@@ -36,6 +36,7 @@ milk.pause      = _G.pause
 milk.resume     = _G.resume
 milk.sndslot    = _G.sndslot
 milk.vol        = _G.vol
+milk.exit       = _G.exit
 
 function _G._init()
     if milk.init then milk.init() end

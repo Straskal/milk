@@ -275,5 +275,6 @@ typedef struct milk
 
 Milk *createMilk();
 void freeMilk(Milk *milk);
+void exitMilk(Milk *milk);
 
 #endif

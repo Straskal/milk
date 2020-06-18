@@ -278,6 +278,13 @@ static int l_vol(lua_State *L)
 	return 0;
 }
 
+static int l_exit(lua_State *L)
+{
+    (void)L;
+    exitMilk(globalMilk);
+    return 0;
+}
+
 static void pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_State *))
 {
 	lua_pushcfunction(L, api_func);
@@ -306,4 +313,5 @@ static void pushApi(lua_State *L)
 	pushApiFunction(L, "resume",	l_resume);
 	pushApiFunction(L, "sndslot",	l_sndslot);
 	pushApiFunction(L, "vol",		l_vol);
+	pushApiFunction(L, "exit",		l_exit);
 }
