@@ -38,6 +38,7 @@
 #define MIN(x, y)           ((x) > (y) ? (y) : (x))
 #define MAX(x, y)           ((x) > (y) ? (x) : (y))
 #define CLAMP(v, low, up)   (MAX(low, MIN(v, up)))
+#define SIGN(x)             ((x > 0) - (x < 0))
 
 
 /*
@@ -225,6 +226,7 @@ void resetDrawState(Video *video)
     video->clipRect.right = FRAMEBUFFER_WIDTH;
 }
 
+
 void setClippingRect(Video *video, int x, int y, int w, int h)
 {
     video->clipRect.left = CLAMP(x, 0, FRAMEBUFFER_WIDTH);
@@ -257,31 +259,14 @@ void blitPixel(Video *video, int x, int y, Color32 color)
 }
 
 
-/*
- * Modified Bresenham line drawing algorithm to handle straight lines, and doing more than just drawing lower left to upper right.
- */
-static void bresenham(Video *video, int x0, int y0, int x1, int y1, Color32 color)
+static void bresenhamLine(Video *video, int x0, int y0, int x1, int y1, Color32 color)
 {
-    int xStep, yStep;
     int xDistance = x1 - x0;
     int yDistance = y1 - y0;
-
-    if (yDistance < 0)
-    {
-        yDistance = -yDistance;
-        yStep = -1;
-    }
-    else yStep = 1;
-
-    if (xDistance < 0)
-    {
-        xDistance = -xDistance;
-        xStep = -1;
-    }
-    else xStep = 1;
-
-    yDistance <<= 1;
-    xDistance <<= 1;
+    int xStep = SIGN(xDistance);
+    int yStep = SIGN(yDistance);
+    xDistance = abs(xDistance) << 1;
+    yDistance = abs(xDistance) << 1;
     blitPixel(video, x0, y0, color);
 
     if (xDistance > yDistance)
@@ -319,7 +304,7 @@ static void bresenham(Video *video, int x0, int y0, int x1, int y1, Color32 colo
 
 void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color)
 {
-    bresenham(video, x0, y0, x1, y1, color);
+    bresenhamLine(video, x0, y0, x1, y1, color);
 }
 
 
@@ -362,15 +347,7 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
 #define IS_FLIPPED_Y(flip)   (flip & 2)
 
 
-/*
- * Main helper function to blit pixel images onto the framebuffer.
- * We're pretty much running nearest neighbor scaling on all blit pixels.
- * This greatly simplifies the code, so it should stay this way unless it starts causing performance issues.
- *
- * "Nearest neighbor scaling replaces every pixel with the nearest pixel in the output.
- *  When up scaling an image, multiple pixels of the same color will be duplicated throughout the image." - Some random explanation on google.
- */
-static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 *color)
+static void nearestNeighbor(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 *color)
 {
     scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
 
@@ -396,6 +373,12 @@ static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, i
                 blitPixel(video, xFramebuffer, yFramebuffer, color != NULL ? *color : col);
         }
     }
+}
+
+
+static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 *color)
+{
+    nearestNeighbor(video, pixels, x, y, w, h, pitch, scale, flip, color);
 }
 
 

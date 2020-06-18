@@ -26,6 +26,7 @@
 #include "cmd.h"
 #include "embed/font.h"
 
+#include <ctype.h>
 #include <string.h>
 
 #define CMD_MAX_ARGS	8
@@ -264,8 +265,10 @@ static void drawLogLines(Milk *milk)
 	getLogLines(&milk->logs, lines, &numLines);
 
 	for (int i = 0; i < numLines; i++)
-		blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, LOG_START_HEIGHT + ((CHAR_HEIGHT + 2) * i),
-		               lines[i].text, 1, lines[i].color);
+    {
+        blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, LOG_START_HEIGHT + ((CHAR_HEIGHT + 2) * i),
+                       lines[i].text, 1, lines[i].color);
+    }
 }
 
 
@@ -280,7 +283,7 @@ static void drawCommandLine(MilkCmd *cmdLine, Milk *milk)
 
 	/* Draw blinking position marker. */
     if (ticks % 64 < 48)
-        blitFilledRectangle(&milk->video, 24 + cmdLength * CHAR_WIDTH, 40, 8, 8, 0xc10a31);
+        blitFilledRectangle(&milk->video, 24 + cmdLength * CHAR_WIDTH, 40, 6, 8, 0xc10a31);
 }
 
 
