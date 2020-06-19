@@ -39,9 +39,8 @@ set(MILK_MAIN_SRC_FILES
 	src/api.c
 	src/api.h
 	src/main.c
-	src/cmd.c
-	src/cmd.h
-)
+	src/console.c
+	src/console.h)
 
 add_executable(milk ${MILK_SRC_FILES} ${MILK_MAIN_SRC_FILES})
 target_compile_definitions(milk PUBLIC MILK_CMD)

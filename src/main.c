@@ -24,7 +24,7 @@
 
 #include "milk.h"
 #include "api.h"
-#include "cmd.h"
+#include "console.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 	(void)argv;
 
 	Milk *milk;
-	MilkCmd *milkCmd;
+	Console *console;
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	SDL_Texture *frontBufferTexture;
@@ -133,8 +133,8 @@ int main(int argc, char *argv[])
 		}
 
 		milk = createMilk();
-		milkCmd = createCmd();
-		window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
+		console = createConsole();
+		window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI );
 		renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
 		frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 
@@ -173,8 +173,8 @@ int main(int argc, char *argv[])
 		 *******************************************************************************
 		 */
 
-		milkCmd->input.startTextInput = startTextInput;
-		milkCmd->input.stopTextInput = stopTextInput;
+		console->input.startTextInput = startTextInput;
+        console->input.stopTextInput = stopTextInput;
 	}
 
 	{
@@ -194,13 +194,14 @@ int main(int argc, char *argv[])
 	{
 		Uint32 frameStartTicks = SDL_GetTicks();
 		Input *input = &milk->input;
-		CmdInput *cmdInput = &milkCmd->input;
+		ConsoleInput *consoleInput = &console->input;
 
 		{
 			ButtonState btnState = BTN_NONE;
-			CmdInputState cmdInputState = INPUT_NONE;
+			ConsoleInputState consoleInputState = CONSOLE_INPUT_NONE;
 
 			input->gamepad.previousButtonState = input->gamepad.buttonState;
+			consoleInput->previousState = consoleInput->state;
 
 			/* Poll input events and update input state. */
 			SDL_Event event;
@@ -211,25 +212,19 @@ int main(int argc, char *argv[])
 					case SDL_QUIT:
 						milk->shouldQuit = true;
 						break;
-					case SDL_KEYDOWN:
-						switch (event.key.keysym.sym)
-						{
-							case SDLK_BACKSPACE:
-								cmdInputState |= INPUT_BACK;
-								break;
-							case SDLK_RETURN:
-								cmdInputState |= INPUT_ENTER;
-								break;
-							case SDLK_ESCAPE:
-								cmdInputState |= INPUT_ESCAPE;
-								break;
-							default:
-								break;
-						}
-						break;
+                    case SDL_KEYDOWN:
+                        switch (event.key.keysym.sym)
+                        {
+                            case SDLK_BACKSPACE:
+                                consoleInputState |= CONSOLE_INPUT_BACK;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
 					case SDL_TEXTINPUT:
-						cmdInputState |= INPUT_CHAR;
-						cmdInput->currentChar = event.text.text[0];
+                        consoleInputState |= CONSOLE_INPUT_CHAR;
+						consoleInput->currentChar = event.text.text[0];
 						break;
 					default:
 						break;
@@ -248,14 +243,17 @@ int main(int argc, char *argv[])
 			if (kbState[SDL_SCANCODE_C]) btnState |= BTN_X;
 			if (kbState[SDL_SCANCODE_V]) btnState |= BTN_Y;
 
+            if (kbState[SDL_SCANCODE_RETURN]) consoleInputState |= CONSOLE_INPUT_ENTER;
+            if (kbState[SDL_SCANCODE_ESCAPE]) consoleInputState |= CONSOLE_INPUT_ESCAPE;
+
 			input->gamepad.buttonState = btnState;
-			cmdInput->state = cmdInputState;
+			consoleInput->state = consoleInputState;
 		}
 
 		{
 			/* Main loop cycle. */
-			updateCmd(milkCmd, milk);
-			drawCmd(milkCmd, milk);
+			updateConsole(console, milk);
+			drawConsole(console, milk);
 			SDL_UpdateTexture(frontBufferTexture, NULL, (void *)milk->video.framebuffer, MILK_FRAMEBUF_PITCH);
 			SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
 			SDL_RenderPresent(renderer);
@@ -272,7 +270,7 @@ int main(int argc, char *argv[])
 	SDL_DestroyTexture(frontBufferTexture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
-	freeCmd(milkCmd);
+	freeConsole(console);
 	freeMilk(milk);
 	SDL_Quit();
 	return 0;
