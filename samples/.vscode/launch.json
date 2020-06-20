@@ -8,8 +8,10 @@
             "name": "Debug Custom Lua Environment",
             "type": "lua-local",
             "request": "launch",
+            "sourceRoot": "main.ts",
+            "cwd": "${workspaceFolder}/dist",
             "program": {
-                "command": "milk"
+                "command": "milk",
             },
             "args": []
         }

@@ -1,0 +1,17 @@
+{
+  "name": "spaceshooter",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "copyfiles art/* sounds/* dist & tstl",
+    "dev": "tstl --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "copyfiles": "^2.3.0",
+    "lua-types": "^2.8.0",
+    "typescript-to-lua": "^0.34.0"
+  }
+}
