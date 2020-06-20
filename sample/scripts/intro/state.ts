@@ -5,13 +5,15 @@ import { GameplayState } from "../gameplay/state";
 
 export class IntroState implements GameState {
 
+    private readonly presentedBy = "it'sgood's"
     private readonly title = "STAR GAME";
     private readonly subTitle = "Returns of The Bad Boiz";
     private readonly prompt = "press Z";
 
-    private starField = new StarField();
+    private starField = new StarField(0.1);
 
     public enter(_: Game): void {
+        loadspr("art/sprsheet.bmp");
         loadsnd(0, "sounds/intro_music.wav");
         play(0, 0, 128);
     }
@@ -29,6 +31,7 @@ export class IntroState implements GameState {
         clrs(0x00);
         
         this.starField.draw();
+        spr(193, 16, 224 - 16 * 4, 16, 4);
         this.drawTitle();
         this.drawSubtitle(game.ticks);
         this.drawPrompt(game.ticks);
@@ -46,6 +49,7 @@ export class IntroState implements GameState {
     }
 
     private drawTitle(): void {
+        this.printCenteredHorizontally(this.presentedBy, 45, 1, 0x00ffffff);
         this.printCenteredHorizontally(this.title, 60, 2, 0x00ff000);
     }
 
