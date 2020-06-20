@@ -1,15 +1,5 @@
 /** @noSelfInFile */
 
-declare const START = 0;
-declare const UP    = 1;
-declare const DOWN  = 2;
-declare const LEFT  = 3;
-declare const RIGHT = 4;
-declare const A     = 5;
-declare const B     = 6;
-declare const X     = 7;
-declare const Y     = 8;
-
 declare let _init: () => void;
 declare let _update: () => void;
 declare let _draw: () => void;
