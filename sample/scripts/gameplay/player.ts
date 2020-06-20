@@ -47,8 +47,7 @@ export class Player implements ICollidable {
         this.y += yVelocity;
     }
 
-    private animate(ticks: number): void 
-    {
+    private animate(ticks: number): void {
         this.sprite = ticks % 12 < 6 ? 0 : 1;
     }
 
