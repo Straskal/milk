@@ -17,8 +17,6 @@ export class Player implements ICollidable {
     private speed = 1;
     private sprite = 0;
     private bulletTimer = 0;
-    private stunnedTimer = 0;
-    private hearts = 3;
 
     public update(game: Game, gameplay: GameplayState): void {
         this.move();
