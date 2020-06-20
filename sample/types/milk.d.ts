@@ -18,3 +18,4 @@ declare function spr(index: number, x: number, y: number, width?: number, height
 declare function sprfont(x: number, y: number, text: string, scale?: number, color?: number): void;
 declare function loadsnd(index: number, fileName: string): void;
 declare function play(index: number, sampleSlot: number, volume: number): void;
+declare function exit(): void;

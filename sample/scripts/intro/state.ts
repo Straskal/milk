@@ -1,16 +1,18 @@
 import { GameState } from "../gameState";
 import { StarField } from "../common/starField";
 import { Game } from "../game";
-import { GameplayState } from "../gameplay/state";
+import { Menu } from "./menu";
+import { TacoStand } from "./tacoStand";
 
-export class IntroState implements GameState {
+const PRESENTED_BY = "it'sgood's"
+const TITLE = "STAR GAME";
+const SUBTITLE = "Return of The Bad Boiz";
 
-    private readonly presentedBy = "it'sgood's"
-    private readonly title = "STAR GAME";
-    private readonly subTitle = "Returns of The Bad Boiz";
-    private readonly prompt = "press Z";
+export class IntroState implements GameState {    
 
-    private starField = new StarField(0.1);
+    private _starField = new StarField(0.1);
+    private _tacoStand = new TacoStand();
+    private _menu = new Menu();
 
     public enter(_: Game): void {
         loadspr("art/sprsheet.bmp");
@@ -19,22 +21,20 @@ export class IntroState implements GameState {
     }
 
     public update(game: Game): void {
-        this.starField.update();
-
-        if (btnp(5)) {
-            game.popState();
-            game.pushState(new GameplayState());
-        }
+        this._starField.update();
+        this._tacoStand.update(game.ticks);
+        this._menu.update(game);
     }
 
     public draw(game: Game): void {
         clrs(0x00);
         
-        this.starField.draw();
-        spr(193, 16, 224 - 16 * 4, 16, 4);
+        this._starField.draw();
+        this._tacoStand.draw();
+        this._menu.draw(256 / 2, 150, game.ticks);
+
         this.drawTitle();
         this.drawSubtitle(game.ticks);
-        this.drawPrompt(game.ticks);
     }
 
     public exit(_: Game): void { }
@@ -49,28 +49,22 @@ export class IntroState implements GameState {
     }
 
     private drawTitle(): void {
-        this.printCenteredHorizontally(this.presentedBy, 45, 1, 0x00ffffff);
-        this.printCenteredHorizontally(this.title, 60, 2, 0x00ff000);
+        this.printCenteredHorizontally(PRESENTED_BY, 45, 1, 0x00ffffff);
+        this.printCenteredHorizontally(TITLE, 60, 2, 0x00ff000);
     }
 
     private drawSubtitle(ticks: number): void {
-        const length = string.len(this.subTitle);
+        const length = string.len(SUBTITLE);
         const halfLength = length / 2;
         const halfResolutionWidth = 256 / 2;
         const x = halfResolutionWidth - halfLength * 8;
 
         for (let i = 1; i <= length; i++) {
-            const character = string.sub(this.subTitle, i, i);
+            const character = string.sub(SUBTITLE, i, i);
             const adjustedTime = ticks + i * 4;
             const y = 85 + math.sin(adjustedTime / 15) * 4;
 
             sprfont(x + 8 * i, y, character, 1, 0x008751);
-        }
-    }
-
-    private drawPrompt(ticks: number): void {
-        if (ticks % 64 < 48) {
-            this.printCenteredHorizontally(this.prompt, 164, 1, 0xffffff);
         }
     }
 }
