@@ -1,13 +1,16 @@
 import { StarField } from "../common/starField";
 import { Game, GameState } from "../game";
 import { Menu } from "./menu";
-import { TacoStand } from "./tacoStand";
+import { TacoStand } from "../common/tacoStand";
 
 const PRESENTED_BY = "it'sgood's"
 const TITLE = "STAR GAME";
 const SUBTITLE = "Return of The Bad Boiz";
 
 export class IntroState implements GameState {    
+
+    public updateBelow = false;
+    public drawBelow = false;
 
     private _starField = new StarField(0.1);
     private _tacoStand = new TacoStand();

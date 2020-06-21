@@ -21,6 +21,9 @@ function addScore(game: Game, args: string[]) {
     }
 }
 
+/**
+ * Handle cheat commands from milk's console.
+ */
 export class CheatHandler {
 
     private readonly _handlers: HandlerRegistration[] = [

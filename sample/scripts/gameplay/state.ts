@@ -5,8 +5,12 @@ import { BulletPool } from "./bullets";
 import { EnemyPool } from "./enemies";
 import { ExplosionPool } from "./explosions";
 import { isColliding } from "./collision";
+import { PauseState } from "../pause/state";
 
 export class GameplayState implements GameState {
+
+    public updateBelow = false;
+    public drawBelow = false;
 
     private _starField = new StarField();
     private _player = new Player();
@@ -31,6 +35,9 @@ export class GameplayState implements GameState {
     }
 
     public update(game: Game): void {
+        if (btnp(0))
+            game.pushState(new PauseState());
+
         this._starField.update();
         this._player.update(game, this);
         this._enemyPool.update(game);
