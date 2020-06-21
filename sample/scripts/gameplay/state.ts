@@ -20,6 +20,10 @@ export class GameplayState implements GameState {
         return this._bulletPool;
     }
 
+    public addToScore(amount: number): void {
+        this._score += amount;
+    }
+
     public enter(_: Game): void {
         loadspr("art/sprsheet.bmp");
         loadsnd(0, "sounds/music.wav");

@@ -39,7 +39,7 @@
 #define UNUSED(v) ((void)v)
 
 
-static void cmdStop(Console *console, Milk *milk, char **arguments, int argumentCount)
+static void cmdReload(Console *console, Milk *milk, char **arguments, int argumentCount)
 {
     UNUSED(console);
     UNUSED(arguments);
@@ -49,7 +49,18 @@ static void cmdStop(Console *console, Milk *milk, char **arguments, int argument
     milkLoadCode(milk);
     console->isGameInitialized = false;
 
-    logMessage(&milk->logs, "scripts have been unloaded", INFO);
+    logMessage(&milk->logs, "scripts have been reloaded", INFO);
+}
+
+
+static void cmdCheat(Console *console, Milk *milk, char **arguments, int argumentCount)
+{
+    if (!console->isGameInitialized)
+        logMessage(&milk->logs, "Cheat requires the game to be running.", WARN);
+    else if (argumentCount == 0)
+        logMessage(&milk->logs, "Cheat expects <cmd> <args>", WARN);
+    else
+        milkInvokeCheat(&milk->code, arguments[0], argumentCount > 1 ? &arguments[1] : NULL, argumentCount - 1);
 }
 
 
@@ -83,9 +94,10 @@ typedef struct command
 
 static Command commands[] =
 {
-    { "stop",  cmdStop },
-    { "clear", cmdClear },
-    { "quit",  cmdQuit }
+    { "reload",     cmdReload },
+    { "cheat",      cmdCheat },
+    { "clear",      cmdClear },
+    { "quit",       cmdQuit }
 };
 
 
@@ -153,12 +165,12 @@ static Command *getCommand(const char *commandName)
 }
 
 
-static void getCommandParameters(char* candidateArguments, char **arguments, int *argumentCount)
+static void getCommandParameters(const char* candidateArguments, char **arguments, int *argumentCount)
 {
     candidateArguments = strtok(NULL, COMMAND_DELIMITER);
     while (candidateArguments != NULL && *argumentCount < MAX_COMMAND_ARGUMENTS)
     {
-        arguments[*argumentCount++] = candidateArguments;
+        strcpy(arguments[(*argumentCount)++], candidateArguments);
         candidateArguments = strtok(NULL, COMMAND_DELIMITER);
     }
 }
@@ -167,6 +179,7 @@ static void getCommandParameters(char* candidateArguments, char **arguments, int
 /* <command> <...args> */
 static Command *parseCommand(char *candidate, char **arguments, int *argumentCount)
 {
+    *argumentCount = 0;
     char candidateCopy[COMMAND_MAX_LENGTH];
     strcpy(candidateCopy, candidate);
     char *currentToken = getCommandName(candidateCopy);
@@ -243,6 +256,8 @@ static void handleEnter(Console *console, Milk *milk)
     {
         Command *command;
         char *arguments[MAX_COMMAND_ARGUMENTS];
+        for (int i = 0; i < MAX_COMMAND_ARGUMENTS; i++)
+            arguments[i] = calloc(COMMAND_MAX_LENGTH, sizeof(char));
         int argumentCount;
 
         if ((command = parseCommand(console->commandCandidate, arguments, &argumentCount)) != NULL)
@@ -250,6 +265,9 @@ static void handleEnter(Console *console, Milk *milk)
             command->execute(console, milk, arguments, argumentCount);
             strcpy(console->previousCommand, console->commandCandidate);
             console->previousCommandLength = console->commandCandidateLength;
+
+            for (int i = 0; i < MAX_COMMAND_ARGUMENTS; i++)
+                free(arguments[i]);
         }
         else logMessage(&milk->logs, "Unknown command", WARN);
 

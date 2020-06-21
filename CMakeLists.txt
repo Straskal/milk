@@ -75,14 +75,4 @@ if(WIN32)
 		${MILK_LIBS_DIR}
 		$<TARGET_FILE_DIR:milk>
 	)
-
-	add_custom_command(TARGET milk POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy
-		$<TARGET_FILE:milk> ${CMAKE_SOURCE_DIR}/samples/spaceshooter)
-
-	add_custom_command(TARGET milk POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-		${MILK_LIBS_DIR}
-		${CMAKE_SOURCE_DIR}/samples/spaceshooter
-	)
 endif()

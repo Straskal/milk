@@ -5,4 +5,5 @@ let game = new Game();
 _init = () => game.init();
 _update = () => game.update();
 _draw = () => game.draw();
+_cheat = (command, args) => game.cheat(command, args);
 

@@ -49,8 +49,12 @@ export class IntroState implements GameState {
     }
 
     private drawTitle(): void {
-        this.printCenteredHorizontally(PRESENTED_BY, 45, 1, 0x00ffffff);
-        this.printCenteredHorizontally(TITLE, 60, 2, 0x00ff000);
+        const length = string.len(TITLE);
+        const halfLength = length / 2;
+        const halfResolutionWidth = 256 / 2;
+
+        sprfont(halfResolutionWidth - halfLength * 16, 45, PRESENTED_BY, 1, 0x00ffffff);
+        sprfont(halfResolutionWidth - halfLength * 16, 60, TITLE, 2, 0x00ff000);
     }
 
     private drawSubtitle(ticks: number): void {

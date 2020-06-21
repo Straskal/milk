@@ -1,5 +1,6 @@
 import { GameState } from "./gameState";
 import { IntroState } from "./intro/state";
+import { GameplayState } from "./gameplay/state";
 
 export class Game {
 
@@ -26,6 +27,20 @@ export class Game {
             state.draw(this);
         }
         this._ticks++;
+    }
+
+    public cheat(command: string, args: string[]): void {
+        if (command == "addscore" && args.length == 1) {
+            const top = this._stateStack[this._stateStack.length - 1];
+            if (top instanceof GameplayState) {
+                const topAsGameplay = <GameplayState>top;
+                topAsGameplay.addToScore(<number>tonumber(args[0]));
+            }
+        }
+        else if (command == "boi") {
+            this.popState();
+            this.pushState(new GameplayState());
+        }
     }
 
     public pushState(state: GameState): void {

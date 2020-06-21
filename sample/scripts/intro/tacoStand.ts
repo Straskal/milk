@@ -26,11 +26,11 @@ export class TacoStand {
     }
 
     private drawTacoPlace(): void {
-        spr(193, 16, 160, 16, 4);
+        spr(209, 16, 176, 16, 3);
     }
 
     private drawSmoke(): void {
         
-        spr(this._smokeFrame, this._smokePosition, 175);
+        spr(this._smokeFrame, this._smokePosition, 183);
     }
 }

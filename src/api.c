@@ -36,10 +36,10 @@ void milkLoadCode(Milk *milk)
 {
 	if (milk->code.state == NULL)
 	{
-		globalMilk = milk;
 		lua_State *L = luaL_newstate();
+        globalMilk = milk;
+        milk->code.state = (void *)L;
 		luaL_openlibs(L);
-		milk->code.state = (void *)L;
 		pushApi(L);
 
 		if (luaL_dofile(L, "main.lua"))
@@ -60,7 +60,8 @@ void milkUnloadCode(Milk *milk)
 void milkInvokeInit(Code *code)
 {
 	lua_State *L = (lua_State *)code->state;
-	lua_getglobal(L, "_init"); /* Invoke _init callback. */
+	lua_getglobal(L, "_init");
+
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
 		LOG_ERROR(globalMilk, lua_tostring(L, -1));
@@ -72,6 +73,7 @@ void milkInvokeUpdate(Code *code)
 {
 	lua_State *L = (lua_State *)code->state;
 	lua_getglobal(L, "_update");
+
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
 		LOG_ERROR(globalMilk, lua_tostring(L, -1));
@@ -83,11 +85,41 @@ void milkInvokeDraw(Code *code)
 {
 	lua_State *L = (lua_State *)code->state;
 	lua_getglobal(L, "_draw");
+
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
 		LOG_ERROR(globalMilk, lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
+}
+
+void milkInvokeCheat(Code *code, const char *cheat, char **arguments, int argumentCount)
+{
+    lua_State *L = (lua_State *)code->state;
+
+    lua_getglobal(L, "_cheat");
+    if (lua_isnil(L, -1))
+    {
+        LOG_WARN(globalMilk, "_cheat is not implemented.");
+        lua_pop(L, 1); /* Pop nil, cheat command, & argument table. */
+        return;
+    }
+
+    lua_pushstring(L, cheat); /* Push cheat command. */
+    lua_newtable(L); /* Push and fill argument table. */
+
+    for (int i = 0; i < argumentCount; i++)
+    {
+        lua_pushnumber(L, i + 1);
+        lua_pushstring(L, arguments[i]);
+        lua_settable(L, -3);
+    }
+
+    if (lua_pcall(L, 2, 0, 0) != 0)
+    {
+        LOG_ERROR(globalMilk, lua_tostring(L, -1));
+        lua_pop(L, -1);
+    }
 }
 
 static int l_btn(lua_State *L)
