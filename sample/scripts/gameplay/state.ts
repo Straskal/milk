@@ -1,7 +1,6 @@
-import { GameState } from "../gameState";
 import { StarField } from "../common/starField";
 import { Player } from "./player";
-import { Game } from "../game";
+import { Game, GameState } from "../game";
 import { BulletPool } from "./bullets";
 import { EnemyPool } from "./enemies";
 import { ExplosionPool } from "./explosions";

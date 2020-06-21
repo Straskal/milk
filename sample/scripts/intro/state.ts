@@ -1,6 +1,5 @@
-import { GameState } from "../gameState";
 import { StarField } from "../common/starField";
-import { Game } from "../game";
+import { Game, GameState } from "../game";
 import { Menu } from "./menu";
 import { TacoStand } from "./tacoStand";
 

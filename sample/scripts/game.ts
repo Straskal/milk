@@ -1,11 +1,18 @@
-import { GameState } from "./gameState";
 import { IntroState } from "./intro/state";
-import { GameplayState } from "./gameplay/state";
+import { CheatHandler } from "./cheatHandler";
+
+export interface GameState {
+    enter(game: Game): void;
+    update(game: Game): void;
+    draw(game: Game): void;
+    exit(game: Game): void;
+}
 
 export class Game {
 
     private _ticks = 0;    
     private _stateStack: GameState[] = [];
+    private _cheatHandler = new CheatHandler(this);
 
     public get ticks() {
         return this._ticks;
@@ -30,17 +37,11 @@ export class Game {
     }
 
     public cheat(command: string, args: string[]): void {
-        if (command == "addscore" && args.length == 1) {
-            const top = this._stateStack[this._stateStack.length - 1];
-            if (top instanceof GameplayState) {
-                const topAsGameplay = <GameplayState>top;
-                topAsGameplay.addToScore(<number>tonumber(args[0]));
-            }
-        }
-        else if (command == "boi") {
-            this.popState();
-            this.pushState(new GameplayState());
-        }
+        this._cheatHandler.handleCheat(command, args);
+    }
+
+    public peek(): GameState {
+        return this._stateStack[this._stateStack.length - 1];
     }
 
     public pushState(state: GameState): void {

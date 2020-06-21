@@ -101,7 +101,7 @@ void milkInvokeCheat(Code *code, const char *cheat, char **arguments, int argume
     if (lua_isnil(L, -1))
     {
         LOG_WARN(globalMilk, "_cheat is not implemented.");
-        lua_pop(L, 1); /* Pop nil, cheat command, & argument table. */
+        lua_pop(L, 1);
         return;
     }
 
@@ -328,20 +328,20 @@ static void pushApi(lua_State *L)
 	pushApiFunction(L, "btn",		l_btn);
 	pushApiFunction(L, "btnp",		l_btnp);
 	pushApiFunction(L, "loadspr",	l_loadspr);
-	pushApiFunction(L, "loadfont", l_loadfont);
+	pushApiFunction(L, "loadfont",  l_loadfont);
 	pushApiFunction(L, "clip",		l_clip);
 	pushApiFunction(L, "clrs",		l_clrs);
 	pushApiFunction(L, "pset",		l_pset);
 	pushApiFunction(L, "line",		l_line);
 	pushApiFunction(L, "rect",		l_rect);
-	pushApiFunction(L, "rectfill", l_rectfill);
+	pushApiFunction(L, "rectfill",  l_rectfill);
 	pushApiFunction(L, "spr",		l_spr);
 	pushApiFunction(L, "sprfont",	l_sprfont);
 	pushApiFunction(L, "loadsnd",	l_loadsnd);
 	pushApiFunction(L, "freesnd",	l_freesnd);
 	pushApiFunction(L, "play",		l_play);
 	pushApiFunction(L, "stop",		l_stop);
-	pushApiFunction(L, "pause",	l_pause);
+	pushApiFunction(L, "pause",	    l_pause);
 	pushApiFunction(L, "resume",	l_resume);
 	pushApiFunction(L, "sndslot",	l_sndslot);
 	pushApiFunction(L, "vol",		l_vol);

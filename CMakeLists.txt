@@ -51,6 +51,7 @@ endif()
 target_link_libraries(milk PUBLIC ${SDL2_LIBRARY} ${LUA53_LIBRARIES})
 
 enable_testing()
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
 
 set(MILK_TEST_SRC_FILES
 	${MILK_SRC_FILES}
