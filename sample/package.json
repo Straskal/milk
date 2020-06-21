@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "copyfiles art/* sounds/* dist & tstl",
-    "dev": "tstl --watch"
+    "build": "copyfiles --up 1 assets/art/* assets/sounds/* build & tstl --project tsconfig.dev.json",
+    "dev": "tstl --project tsconfig.dev.json --watch",
+    "release": "copyfiles --up 1 assets/art/* assets/sounds/* dist & tstl --project tsconfig.release.json"
   },
   "keywords": [],
   "author": "",

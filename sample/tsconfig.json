@@ -6,12 +6,5 @@
       "typeRoots": ["node_modules/@types", "types/*"],
       "types": ["lua-types/5.3", ],
       "strict": true,
-      "sourceMap": true,
-      "outDir": "dist"
     },
-    "tstl": {
-      "luaTarget": "5.3",
-      "luaBundleEntry": "main.ts",
-      "sourceMapTraceback": true
-    }
   }

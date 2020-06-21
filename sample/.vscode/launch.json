@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Custom Lua Environment",
+            "name": "Debug",
             "type": "lua-local",
             "request": "launch",
             "sourceRoot": "main.ts",
-            "cwd": "${workspaceFolder}/dist",
+            "cwd": "${workspaceFolder}/build",
             "program": {
                 "command": "milk",
             },

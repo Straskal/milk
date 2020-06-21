@@ -1,0 +1,11 @@
+{
+    "extends": "./tsconfig",
+    "compilerOptions": {
+      "sourceMap": true,
+      "outDir": "build"
+    },
+    "tstl": {
+      "luaTarget": "5.3",
+      "sourceMapTraceback": true,
+    }
+  }
