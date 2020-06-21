@@ -468,7 +468,6 @@ void loadSound(Audio *audio, int sampleIdx, const char *filename)
         return;
 
     audio->lock();
-
     if (audio->samples[sampleIdx].buffer != NULL)
         unloadSound(audio, sampleIdx);
 
@@ -493,9 +492,10 @@ void unloadSound(Audio *audio, int sampleIdx)
                 resetSampleSlot(&audio->slots[i]);
         }
 
-        free(audio->samples[sampleIdx].buffer);
-        audio->samples[sampleIdx].buffer = NULL;
+        free(sampleData->buffer);
+        sampleData->buffer = NULL;
     }
+
     audio->unlock();
 }
 
@@ -505,18 +505,19 @@ void playSound(Audio *audio, int slotIdx, int sampleIdx, int volume)
     if (SAMPLEIDX_OO_BOUNDS(sampleIdx) || SLOTIDX_OO_BOUNDS(slotIdx))
         return;
 
+    audio->lock();
     SampleData *sampleData = &audio->samples[sampleIdx];
 
-    if (sampleData->length <= 0)
-        return;
+    if (sampleData->buffer != NULL)
+    {
+        SampleSlot *slot = &audio->slots[slotIdx];
+        slot->sampleData = sampleData;
+        slot->state = PLAYING;
+        slot->position = sampleData->buffer;
+        slot->remainingLength = sampleData->length;
+        slot->volume = CLAMP(volume, 0, MAX_VOLUME);
+    }
 
-    audio->lock();
-    SampleSlot *slot = &audio->slots[slotIdx];
-    slot->sampleData = sampleData;
-    slot->state = PLAYING;
-    slot->position = sampleData->buffer;
-    slot->remainingLength = sampleData->length;
-    slot->volume = CLAMP(volume, 0, MAX_VOLUME);
     audio->unlock();
 }
 

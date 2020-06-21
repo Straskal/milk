@@ -16,7 +16,7 @@ endif()
 if (WIN32)
 	if (MINGW)
 		# provide paths for minGW/minGW-w64 development libs
-		set(SDL2_PATH C:/ExternalLibs/SDL2-devel-2.0.10-mingw/SDL2-2.0.10/i686-w64-mingw32)
+		set(SDL2_PATH C:/ExternalLibs/SDL2-devel-2.0.12-mingw/i686-w64-mingw32)
 		set(ENV{LUA_DIR} C:/ExternalLibs/Lua53mingw)
 	elseif (MSVC)
 		# provide paths for visual c++ development libs
@@ -25,7 +25,7 @@ if (WIN32)
 	endif()
 endif()
 
-find_package(SDL2 2.0.10 EXACT REQUIRED)
+find_package(SDL2 REQUIRED)
 find_package(Lua53 REQUIRED)
 
 set(MILK_SRC_FILES

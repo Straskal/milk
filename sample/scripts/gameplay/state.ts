@@ -25,11 +25,10 @@ export class GameplayState implements GameState {
     }
 
     public enter(_: Game): void {
-        loadspr("art/sprsheet.bmp");
         loadsnd(0, "sounds/music.wav");
+        play(0, 0, 128);
         loadsnd(1, "sounds/shoot.wav");
         loadsnd(2, "sounds/explode.wav");
-        play(0, 0, 128);
     }
 
     public update(game: Game): void {

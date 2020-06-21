@@ -29,6 +29,7 @@
 #include "milkassert.h"
 #include "embed/font.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #define FRAMEBUFFER_POS(x, y)			((FRAMEBUFFER_WIDTH * y) + x)
@@ -320,15 +321,16 @@ TEST_CASE(playSound_WhenSampleAtIndexNotLoaded_DoesNothing)
 TEST_CASE(playSound_WhenSampleLengthIsZero_DoesNothing)
 {
 	SETUP(milk);
+    milk->audio.lock = mockLock;
+    milk->audio.unlock = mockUnlock;
 	milk->audio.samples[0].length = 0;
 
 	ACT(playSound(&milk->audio, 0, 0, 0));
 
 	ASSERT_NEQ(&milk->audio.samples[0], milk->audio.slots[0].sampleData);
 
-	milk->audio.samples[0].buffer = NULL;
-
 TEARDOWN:
+    milk->audio.samples[0].buffer = NULL;
 	FREE_MILK(milk);
 }
 
@@ -349,9 +351,8 @@ TEST_CASE(playSound_SetsSlot)
 	ASSERT_EQ(PLAYING, milk->audio.slots[0].state);
 	ASSERT_EQ(50, milk->audio.slots[0].volume);
 
-	milk->audio.samples[0].buffer = NULL;
-
 TEARDOWN:
+    milk->audio.samples[0].buffer = NULL;
 	FREE_MILK(milk);
 }
 
@@ -360,15 +361,14 @@ TEST_CASE(playSound_ClampsVolumeToMin)
 	SETUP(milk);
 	milk->audio.lock = mockLock;
 	milk->audio.unlock = mockUnlock;
-	milk->audio.samples[0].length = 1;
+    milk->audio.samples[0].buffer = calloc(1, sizeof(u8));
 
 	ACT(playSound(&milk->audio, 0, 0, -10));
 
 	ASSERT_EQ(0, milk->audio.slots[0].volume);
 
-	milk->audio.samples[0].buffer = NULL;
-
 TEARDOWN:
+    free(milk->audio.samples[0].buffer);
 	FREE_MILK(milk);
 }
 
@@ -377,15 +377,14 @@ TEST_CASE(playSound_ClampsVolumeToMax)
 	SETUP(milk);
 	milk->audio.lock = mockLock;
 	milk->audio.unlock = mockUnlock;
-	milk->audio.samples[0].length = 1;
+	milk->audio.samples[0].buffer = calloc(1, sizeof(u8));
 
 	ACT(playSound(&milk->audio, 0, 0, MAX_VOLUME + 10));
 
 	ASSERT_EQ(MAX_VOLUME, milk->audio.slots[0].volume);
 
-	milk->audio.samples[0].buffer = NULL;
-
 TEARDOWN:
+    free(milk->audio.samples[0].buffer);
 	FREE_MILK(milk);
 }
 
@@ -480,7 +479,7 @@ TEST_CASE(pauseSound_WhenIndexIsNegativeOne_PausesAllPlayingSounds)
     for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
         ASSERT_EQ(PAUSED, milk->audio.slots[i].state);
 
-    TEARDOWN:
+TEARDOWN:
     FREE_MILK(milk);
 }
 
@@ -524,7 +523,7 @@ TEST_CASE(resumeSound_WhenIndexIsNegativeOne_PausesAllPausedSounds)
     for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
         ASSERT_EQ(PLAYING, milk->audio.slots[i].state);
 
-    TEARDOWN:
+TEARDOWN:
     FREE_MILK(milk);
 }
 
