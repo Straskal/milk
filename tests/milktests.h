@@ -359,32 +359,34 @@ TEARDOWN:
 TEST_CASE(playSound_ClampsVolumeToMin)
 {
 	SETUP(milk);
+    uint8_t buffer[1];
 	milk->audio.lock = mockLock;
 	milk->audio.unlock = mockUnlock;
-    milk->audio.samples[0].buffer = calloc(1, sizeof(u8));
+    milk->audio.samples[0].buffer = buffer;
 
 	ACT(playSound(&milk->audio, 0, 0, -10));
 
 	ASSERT_EQ(0, milk->audio.slots[0].volume);
 
 TEARDOWN:
-    free(milk->audio.samples[0].buffer);
+    milk->audio.samples[0].buffer = NULL;
 	FREE_MILK(milk);
 }
 
 TEST_CASE(playSound_ClampsVolumeToMax)
 {
 	SETUP(milk);
+    uint8_t buffer[1];
 	milk->audio.lock = mockLock;
 	milk->audio.unlock = mockUnlock;
-	milk->audio.samples[0].buffer = calloc(1, sizeof(u8));
+	milk->audio.samples[0].buffer = buffer;
 
 	ACT(playSound(&milk->audio, 0, 0, MAX_VOLUME + 10));
 
 	ASSERT_EQ(MAX_VOLUME, milk->audio.slots[0].volume);
 
 TEARDOWN:
-    free(milk->audio.samples[0].buffer);
+    milk->audio.samples[0].buffer = NULL;
 	FREE_MILK(milk);
 }
 
