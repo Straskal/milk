@@ -23,6 +23,7 @@
  */
 
 #include "milk.h"
+#include "wav.h"
 #include "embed/font.h"
 
 #include <math.h>
@@ -471,7 +472,8 @@ void loadSound(Audio *audio, int sampleIdx, const char *filename)
     if (audio->samples[sampleIdx].buffer != NULL)
         unloadSound(audio, sampleIdx);
 
-    audio->loadWAV(audio, filename, sampleIdx);
+    SampleData *sampleData = &audio->samples[sampleIdx];
+    loadWavFile(filename, &sampleData->buffer, &sampleData->length);
     audio->unlock();
 }
 
@@ -494,6 +496,7 @@ void unloadSound(Audio *audio, int sampleIdx)
 
         free(sampleData->buffer);
         sampleData->buffer = NULL;
+        sampleData->length = 0;
     }
 
     audio->unlock();

@@ -25,15 +25,19 @@
 #include "milk.h"
 #include "api.h"
 #include "console.h"
+#include "wav.h"
 
 #include <math.h>
 #include <stdio.h>
 #include <SDL.h>
 
+
 #define SDL_FIRST_AVAILABLE_RENDERER -1
 #define MILK_FRAMEBUF_PITCH (FRAMEBUFFER_WIDTH * 4)
 
+
 static SDL_AudioDeviceID gAudioDevice; /* Global audio device so we can access from our methods below. */
+
 
  /* Functions to lock and unlock the audio device so you can safely manipulate the milk's audio queue without another thread grabbing for it. */
 static void lockAudioDevice()
@@ -41,34 +45,18 @@ static void lockAudioDevice()
 	SDL_LockAudioDevice(gAudioDevice);
 }
 
+
 static void unlockAudioDevice()
 {
 	SDL_UnlockAudioDevice(gAudioDevice);
 }
+
 
 static void mixCallback(void *userdata, uint8_t *stream, int len)
 {
 	mixSamplesIntoStream((Audio *)userdata, stream, (size_t)len);
 }
 
-static void loadWave(Audio *audio, const char *filename, int idx)
-{
-	SampleData *sampleData = &audio->samples[idx];
-
-	SDL_AudioSpec waveSpec;
-	SDL_LoadWAV(filename, &waveSpec, &sampleData->buffer, &sampleData->length);
-
-	SDL_AudioCVT conversion;
-	SDL_BuildAudioCVT(&conversion, waveSpec.format, waveSpec.channels, waveSpec.freq, AUDIO_S16LSB, audio->channels, audio->frequency);
-	conversion.len = sampleData->length;
-	conversion.buf = (Uint8 *)malloc((size_t)conversion.len * conversion.len_mult);
-	SDL_memcpy(conversion.buf, sampleData->buffer, sampleData->length);
-	SDL_FreeWAV(sampleData->buffer);
-	SDL_ConvertAudio(&conversion);
-
-	sampleData->buffer = conversion.buf;
-	sampleData->length = (uint32_t)floor(conversion.len * conversion.len_ratio);
-}
 
 static void loadBmp(const char *filename, Color32 *dest, size_t len)
 {
@@ -90,15 +78,18 @@ static void loadBmp(const char *filename, Color32 *dest, size_t len)
 	SDL_FreeSurface(bmp);
 }
 
+
 static void startTextInput()
 {
 	SDL_StartTextInput();
 }
 
+
 static void stopTextInput()
 {
 	SDL_StopTextInput();
 }
+
 
 /*
  *******************************************************************************
@@ -185,7 +176,6 @@ int main(int argc, char *argv[])
 		 */
 
 		milk->video.loadBMP = loadBmp;
-		milk->audio.loadWAV = loadWave;
 
 		milkLoadCode(milk);
 	}

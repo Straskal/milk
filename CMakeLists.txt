@@ -31,6 +31,8 @@ find_package(Lua53 REQUIRED)
 set(MILK_SRC_FILES
 	src/milk.c
 	src/milk.h
+	src/wav.c
+	src/wav.h
 	src/embed/font.c
 	src/embed/font.h
 )
