@@ -32,6 +32,5 @@ void milkUnloadCode(Milk *milk);
 void milkInvokeInit(Code *code);
 void milkInvokeUpdate(Code *code);
 void milkInvokeDraw(Code *code);
-void milkInvokeCheat(Code *code, const char *cheat, char **arguments, int argumentCount);
 
 #endif

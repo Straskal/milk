@@ -94,35 +94,6 @@ void milkInvokeDraw(Code *code)
 	}
 }
 
-void milkInvokeCheat(Code *code, const char *cheat, char **arguments, int argumentCount)
-{
-    lua_State *L = (lua_State *)code->state;
-
-    lua_getglobal(L, "_cheat");
-    if (lua_isnil(L, -1))
-    {
-        LOG_WARN("_cheat is not implemented.");
-        lua_pop(L, 1);
-        return;
-    }
-
-    lua_pushstring(L, cheat); /* Push cheat command. */
-    lua_newtable(L); /* Push and fill argument table. */
-
-    for (int i = 0; i < argumentCount; i++)
-    {
-        lua_pushnumber(L, i + 1);
-        lua_pushstring(L, arguments[i]);
-        lua_settable(L, -3);
-    }
-
-    if (lua_pcall(L, 2, 0, 0) != 0)
-    {
-        LOG_ERROR(lua_tostring(L, -1));
-        lua_pop(L, -1);
-    }
-}
-
 static int l_btn(lua_State *L)
 {
 	lua_pushboolean(L,

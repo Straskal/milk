@@ -3,7 +3,6 @@
 declare let _init: () => void;
 declare let _update: () => void;
 declare let _draw: () => void;
-declare let _cheat: (command: string, args: string[]) => void;
 
 declare function btn(button: number): boolean;
 declare function btnp(button: number): boolean;

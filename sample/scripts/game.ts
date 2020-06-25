@@ -29,7 +29,6 @@ export class Game {
     }
 
     public init(): void {
-        loadsnd(15, "sounds/pause_music.wav");
         this.pushState(new IntroState());
     }
 

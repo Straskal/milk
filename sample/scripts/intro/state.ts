@@ -18,7 +18,7 @@ export class IntroState implements GameState {
 
     public enter(_: Game): void {
         loadspr("art/sprsheet.bmp");
-        loadsnd(0, "sounds/intro_music.wav");
+        loadsnd(0, "sounds/12 HHavok-main.wav");
         play(0, 0, 128);
     }
 
