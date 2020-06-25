@@ -29,6 +29,8 @@ find_package(SDL2 REQUIRED)
 find_package(Lua53 REQUIRED)
 
 set(MILK_SRC_FILES
+	src/logs.c
+	src/logs.h
 	src/milk.c
 	src/milk.h
 	src/wav.c

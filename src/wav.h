@@ -37,6 +37,6 @@
  *  Milk can interleave mono signals, but that's about it.
  *  Will have to use audacity er sum'n to do other conversions until they are supported.
  */
-int loadWavFile(const char* filename, u8 **data, u32 *length);
+int loadWavFile(const char* filename, u8 **data, u32 *length, u8 *channelCount);
 
 #endif

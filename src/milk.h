@@ -22,7 +22,6 @@
  *  SOFTWARE.
  */
 
-
 #ifndef __MILK_H__
 #define __MILK_H__
 
@@ -37,7 +36,6 @@ typedef uint8_t     u8;
 typedef uint16_t    u16;
 typedef uint32_t    u32;
 
-
 /*
  *******************************************************************************
  * Current configuration:
@@ -48,48 +46,7 @@ typedef uint32_t    u32;
  * - Allows up to 16 concurrent sounds via sample slots. Index 0 loops.
  *******************************************************************************
 
- *******************************************************************************
- * Logging
- *
- * As of right now, logging is pretty bare bones. Logs are only shown in the command line.
- *******************************************************************************
- */
 
-#define MAX_LOGS       16
-#define MAX_LOG_LENGTH 512
-
-#ifndef MILK_CMD
-#define LOG_INFO(logs, text)    (void)0
-#define LOG_WARN(logs, text)    (void)0
-#define LOG_ERROR(logs, text)   (void)0
-#else
-#define LOG_INFO(milk, text)    logMessage(&milk->logs, text, INFO)
-#define LOG_WARN(milk, text)    logMessage(&milk->logs, text, WARN)
-#define LOG_ERROR(milk, text)   logMessage(&milk->logs, text, ERROR)
-#endif
-
-typedef enum logType
-{
-    INFO, WARN, ERROR
-} LogType;
-
-typedef struct logMessage
-{
-    LogType type;
-    char    text[MAX_LOG_LENGTH];
-} LogMessage;
-
-typedef struct logs
-{
-    LogMessage  messages[MAX_LOGS];
-    int         count;
-    int         errorCount;
-} Logs;
-
-void logMessage(Logs *logs, const char *text, LogType type);
-void clearLogs(Logs *logs);
-
-/*
  *******************************************************************************
  * Input
  *
@@ -207,6 +164,7 @@ typedef struct sampleData
 {
     u32 length;
     u8 *buffer;
+    u8  channelCount;
 } SampleData;
 
 typedef enum sampleSlotState
@@ -268,7 +226,6 @@ typedef struct code
 
 typedef struct milk
 {
-    Logs    logs;
 	Input   input;
     Video   video;
     Audio   audio;

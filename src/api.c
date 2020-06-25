@@ -23,6 +23,7 @@
  */
 
 #include "api.h"
+#include "logs.h"
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -43,7 +44,7 @@ void milkLoadCode(Milk *milk)
 		pushApi(L);
 
 		if (luaL_dofile(L, "main.lua"))
-			LOG_ERROR(milk, lua_tostring(L, -1));
+			LOG_ERROR(lua_tostring(L, -1));
 	}
 }
 
@@ -64,7 +65,7 @@ void milkInvokeInit(Code *code)
 
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
-		LOG_ERROR(globalMilk, lua_tostring(L, -1));
+		LOG_ERROR(lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }
@@ -76,7 +77,7 @@ void milkInvokeUpdate(Code *code)
 
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
-		LOG_ERROR(globalMilk, lua_tostring(L, -1));
+		LOG_ERROR(lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }
@@ -88,7 +89,7 @@ void milkInvokeDraw(Code *code)
 
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
-		LOG_ERROR(globalMilk, lua_tostring(L, -1));
+		LOG_ERROR(lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }
@@ -100,7 +101,7 @@ void milkInvokeCheat(Code *code, const char *cheat, char **arguments, int argume
     lua_getglobal(L, "_cheat");
     if (lua_isnil(L, -1))
     {
-        LOG_WARN(globalMilk, "_cheat is not implemented.");
+        LOG_WARN("_cheat is not implemented.");
         lua_pop(L, 1);
         return;
     }
@@ -117,7 +118,7 @@ void milkInvokeCheat(Code *code, const char *cheat, char **arguments, int argume
 
     if (lua_pcall(L, 2, 0, 0) != 0)
     {
-        LOG_ERROR(globalMilk, lua_tostring(L, -1));
+        LOG_ERROR(lua_tostring(L, -1));
         lua_pop(L, -1);
     }
 }

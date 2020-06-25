@@ -23,26 +23,35 @@
  */
 
 #include "wav.h"
+#include "logs.h"
 
 #include <stdio.h>
+#include <string.h>
 
+/* TODO: HANDLE ENDIANNESS */
+#define RIFF_MARKER     0x46464952
+#define WAVE_MARKER     0x45564157
+#define FORMAT_MARKER   0x20746d66
+#define DATA_MARKER     0x61746164
 
-#define PCM 1
-#define READ_CHUNK(file, chunk, type) (fread(chunk, sizeof(type), 1, file) != 1)
-#define IS_MONO(channels) (channels == 1)
-
+#define INVALID_RIFF_MARKER(header)         (header != RIFF_MARKER)
+#define INVALID_WAVE_MARKER(header)         (header != WAVE_MARKER)
+#define INVALID_FORMAT_MARKER(header)       (header != FORMAT_MARKER)
+#define INVALID_DATA_MARKER(header)         (header != DATA_MARKER)
+#define INVALID_FORMAT_TYPE(format)         (format != 1)
+#define INVALID_CHANNEL_COUNT(channelCount) (channelCount != 1 && channelCount != 2)
 
 typedef struct riffChunk
 {
-    u8      riff[4];
+    u32     riff;
     u32     fileSize;
-    u8      wave[4];
+    u32     wave;
 } RiffChunk;
 
 
 typedef struct formatChunk
 {
-    u8      marker[4];
+    u32     marker;
     u32     size;
     u16     type;
     u16     channels;
@@ -55,7 +64,7 @@ typedef struct formatChunk
 
 typedef struct dataChunk
 {
-    u8      marker[4];
+    u32     marker;
     u32     size;
 } DataChunk;
 
@@ -68,74 +77,57 @@ typedef struct wavHeader
 } WavHeader;
 
 
-/* Take a mono sound and interleave it between L and R stereo channels. */
-static void monoToStereo(const u8 *monoData, u8 *stereoData, int sampleCount)
-{
-    for (int i = 0; i < sampleCount; i += 2)
-    {
-        stereoData[i * 2] = monoData[i];
-        stereoData[i * 2 + 1] = monoData[i + 1];
-        stereoData[i * 2 + 2] = monoData[i];
-        stereoData[i * 2 + 3] = monoData[i + 1];
-    }
-}
-
-
-int loadWavFile(const char* filename, u8 **data, u32 *length)
+int loadWavFile(const char* filename, u8 **data, u32 *length, u8 *channelCount)
 {
     WavHeader header;
     FILE *file = NULL;
+    char errorMessage[256];
+    memset(errorMessage, 0, sizeof(errorMessage));
 
     if ((file = fopen(filename, "rb")) == NULL)
     {
-        printf("Could not open file\n");
+        sprintf(errorMessage, "Error opening file: %s.\n", filename);
+        LOG_ERROR(errorMessage);
         return -1;
     }
 
-    if (READ_CHUNK(file, &header.riff, RiffChunk))
+    if (fread(&header, sizeof(WavHeader), 1, file) != 1)
     {
-        printf("Error reading riff chunk.");
+        sprintf(errorMessage, "Error reading file: %s.\n", filename);
+        LOG_ERROR(errorMessage);
         return -1;
     }
 
-    if (READ_CHUNK(file, &header.format, FormatChunk))
+    if (INVALID_FORMAT_TYPE(header.format.type)
+        || INVALID_RIFF_MARKER(header.riff.riff)
+        || INVALID_WAVE_MARKER(header.riff.wave)
+        || INVALID_FORMAT_MARKER(header.format.marker)
+        || INVALID_DATA_MARKER(header.data.marker))
     {
-        printf("Error reading riff chunk.");
+        sprintf(errorMessage, "Invalid WAV format: %s.\n", filename);
+        LOG_ERROR(errorMessage);
         return -1;
     }
 
-    if (header.format.type != PCM)
+    if (INVALID_CHANNEL_COUNT(header.format.channels))
     {
-        printf("Wav format type must be PCM.");
-        return -1;
-    }
-
-    if (READ_CHUNK(file, &header.data, DataChunk))
-    {
-        printf("Error reading data chunk.");
+        sprintf(errorMessage, "Invalid WAV channels: %s.\n", filename);
+        LOG_ERROR(errorMessage);
         return -1;
     }
 
     u32 sampleSize = header.format.channels * header.format.bitsPerSample / 8;
     u32 sampleCount = header.data.size / sampleSize;
     size_t signalSize = sampleSize * sampleCount;
-
     *data = (u8 *)calloc(1, signalSize);
     *length = (u32)signalSize;
+    *channelCount = header.format.channels;
 
     if (fread(*data, signalSize, 1, file) != 1)
     {
-        printf("Error reading wav data.");
+        sprintf(errorMessage, "Invalid WAV data: %s.\n", filename);
+        LOG_ERROR(errorMessage);
         return -1;
-    }
-
-    if (IS_MONO(header.format.channels))
-    {
-        u8 *converted = (u8 *)calloc(1, signalSize * 2);
-        monoToStereo(*data, converted, sampleCount);
-        free(*data);
-        *data = converted;
-        *length *= 2;
     }
 
     fclose(file);

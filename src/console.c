@@ -25,6 +25,7 @@
 #include "console.h"
 #include "api.h"
 #include "embed/font.h"
+#include "logs.h"
 
 #include <ctype.h>
 #include <string.h>
@@ -49,28 +50,18 @@ static void cmdReload(Console *console, Milk *milk, char **arguments, int argume
     milkLoadCode(milk);
     console->isGameInitialized = false;
 
-    logMessage(&milk->logs, "scripts have been reloaded", INFO);
-}
-
-
-static void cmdCheat(Console *console, Milk *milk, char **arguments, int argumentCount)
-{
-    if (!console->isGameInitialized)
-        logMessage(&milk->logs, "Cheat requires the game to be running.", WARN);
-    else if (argumentCount == 0)
-        logMessage(&milk->logs, "Cheat expects <cmd> <args>", WARN);
-    else
-        milkInvokeCheat(&milk->code, arguments[0], argumentCount > 1 ? &arguments[1] : NULL, argumentCount - 1);
+    LOG_INFO("scripts have been reloaded");
 }
 
 
 static void cmdClear(Console *console, Milk *milk, char **arguments, int argumentCount)
 {
     UNUSED(console);
+    UNUSED(milk);
     UNUSED(arguments);
     UNUSED(argumentCount);
 
-    clearLogs(&milk->logs);
+    LOG_CLEAR();
     console->lastErrorCount = 0;
 }
 
@@ -95,7 +86,6 @@ typedef struct command
 static Command commands[] =
 {
     { "reload",     cmdReload },
-    { "cheat",      cmdCheat },
     { "clear",      cmdClear },
     { "quit",       cmdQuit }
 };
@@ -269,7 +259,7 @@ static void handleEnter(Console *console, Milk *milk)
             for (int i = 0; i < MAX_COMMAND_ARGUMENTS; i++)
                 free(arguments[i]);
         }
-        else logMessage(&milk->logs, "Unknown command", WARN);
+        else LOG_WARN("Unknown command");
 
         resetCommandCandidate(console);
     }
@@ -318,11 +308,11 @@ static void handleInput(Console *console, Milk *milk)
  */
 
 
-static void haltOnError(Console *console, Milk *milk)
+static void haltOnError(Console *console)
 {
-    if (console->lastErrorCount < milk->logs.errorCount)
+    if (console->lastErrorCount < LOG_GET()->errorCount)
     {
-        console->lastErrorCount = milk->logs.errorCount;
+        console->lastErrorCount = LOG_GET()->errorCount;
         console->state = COMMAND;
         console->input.startTextInput();
     }
@@ -340,7 +330,7 @@ void updateConsole(Console *console, Milk *milk)
             break;
         case GAME:
             milkInvokeUpdate(&milk->code);
-            haltOnError(console, milk);
+            haltOnError(console);
             break;
         default:
             break;
@@ -465,7 +455,7 @@ static void drawLogLines(Milk *milk)
     ConsoleLine lines[MAX_LINES];
     int numLines;
 
-    getLogLines(&milk->logs, lines, &numLines);
+    getLogLines(LOG_GET(), lines, &numLines);
 
     for (int i = 0; i < numLines; i++)
         blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, LOG_START_HEIGHT + ((CHAR_HEIGHT + 2) * i), lines[i].text, 1, lines[i].color);
@@ -483,7 +473,7 @@ void drawConsole(Console *console, Milk *milk)
             break;
         case GAME:
             milkInvokeDraw(&milk->code);
-            haltOnError(console, milk);
+            haltOnError(console);
             break;
         default:
             break;

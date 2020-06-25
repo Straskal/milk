@@ -23,6 +23,7 @@
  */
 
 #include "milk.h"
+#include "logs.h"
 #include "wav.h"
 #include "embed/font.h"
 
@@ -47,19 +48,6 @@
  * Initialization and shutdown
  *******************************************************************************
  */
-
-
-static void initLogs(Logs *logs)
-{
-    for (int i = 0; i < MAX_LOGS; i++)
-    {
-        logs->messages[i].type = INFO;
-        memset(logs->messages[i].text, 0, MAX_LOG_LENGTH);
-    }
-
-    logs->count = 0;
-    logs->errorCount = 0;
-}
 
 
 static void initInput(Input *input)
@@ -111,11 +99,11 @@ Milk *createMilk()
 {
     Milk *milk = (Milk *) malloc(sizeof(Milk));
     milk->shouldQuit = false;
-    initLogs(&milk->logs);
     initInput(&milk->input);
     initVideo(&milk->video);
     initAudio(&milk->audio);
     initCode(&milk->code);
+    LOG_INIT();
     return milk;
 }
 
@@ -136,43 +124,6 @@ void freeMilk(Milk *milk)
  */
 
 
-/* When milk's log array is full, we shift down all of the logs before inserting the next one.*/
-static LogMessage *getNextFreeLogMessage(Logs *logs)
-{
-    if (logs->count == MAX_LOGS)
-    {
-        for (int i = 0; i < MAX_LOGS - 1; i++)
-            logs->messages[i] = logs->messages[i + 1];
-
-        return &logs->messages[MAX_LOGS - 1];
-    }
-    else
-        return &logs->messages[logs->count++];
-}
-
-
-void logMessage(Logs *logs, const char *text, LogType type)
-{
-    size_t len = strlen(text);
-
-    if (len > MAX_LOG_LENGTH)
-        len = MAX_LOG_LENGTH;
-
-    if (type == ERROR)
-        logs->errorCount++;
-
-    LogMessage *newLogMessage = getNextFreeLogMessage(logs);
-    memset(newLogMessage->text, 0, MAX_LOG_LENGTH);
-    strncpy(newLogMessage->text, text, len);
-    newLogMessage->type = type;
-}
-
-
-void clearLogs(Logs *logs)
-{
-    logs->count = 0;
-    logs->errorCount = 0;
-}
 
 
 /*
@@ -473,7 +424,7 @@ void loadSound(Audio *audio, int sampleIdx, const char *filename)
         unloadSound(audio, sampleIdx);
 
     SampleData *sampleData = &audio->samples[sampleIdx];
-    loadWavFile(filename, &sampleData->buffer, &sampleData->length);
+    loadWavFile(filename, &sampleData->buffer, &sampleData->length, &sampleData->channelCount);
     audio->unlock();
 }
 
@@ -604,6 +555,7 @@ static void mixSample(u8 *destination, const u8 *source, int length, int volume)
 {
     i16 sourceSample;
     i16 destSample;
+    i32 mixedSample;
     length /= 2;
 
     while (length--)
@@ -611,11 +563,36 @@ static void mixSample(u8 *destination, const u8 *source, int length, int volume)
         sourceSample = source[1] << 8 | source[0];
         sourceSample = (sourceSample * volume) / MAX_VOLUME;
         destSample = destination[1] << 8 | destination[0];
-        i32 mixedSample = CLAMP(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
+        mixedSample = CLAMP(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
         destination[0] = mixedSample & 0xff;
         destination[1] = (mixedSample >> 8) & 0xff;
         source += 2;
         destination += 2;
+    }
+}
+
+
+static void mixInterleavedSamples(u8 *destination, const u8 *source, int length, int volume)
+{
+    i16 sourceSample;
+    i16 destSample;
+    i32 mixedSample;
+    length /= 4;
+
+    while (length--)
+    {
+        sourceSample = source[1] << 8 | source[0];
+        sourceSample = (sourceSample * volume) / MAX_VOLUME;
+        destSample = destination[1] << 8 | destination[0];
+        mixedSample = CLAMP(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
+        destination[0] = mixedSample & 0xff;
+        destination[1] = (mixedSample >> 8) & 0xff;
+        destSample = destination[3] << 8 | destination[2];
+        mixedSample = CLAMP(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
+        destination[2] = mixedSample & 0xff;
+        destination[3] = (mixedSample >> 8) & 0xff;
+        source += 2;
+        destination += 4;
     }
 }
 
@@ -637,9 +614,19 @@ void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)
         if (slot->remainingLength > 0)
         {
             int bytesToWrite = MIN(slot->remainingLength, (int) len);
-            mixSample(stream, slot->position, bytesToWrite, slot->volume);
-            slot->position += bytesToWrite;
-            slot->remainingLength -= bytesToWrite;
+
+            if (slot->sampleData->channelCount == 1)
+            {
+                mixInterleavedSamples(stream, slot->position, bytesToWrite, slot->volume);
+                slot->position += bytesToWrite / 2;
+                slot->remainingLength -= bytesToWrite / 2;
+            }
+            else
+            {
+                mixSample(stream, slot->position, bytesToWrite, slot->volume);
+                slot->position += bytesToWrite;
+                slot->remainingLength -= bytesToWrite;
+            }
         }
         else if (i == LOOP_INDEX)
         {
