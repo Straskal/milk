@@ -77,20 +77,16 @@ int loadWavFile(const char* filename, u8 **data, u32 *length, u8 *channelCount)
 {
     WavHeader header;
     FILE *file = NULL;
-    char errorMessage[256];
-    memset(errorMessage, 0, sizeof(errorMessage));
 
     if ((file = fopen(filename, "rb")) == NULL)
     {
-        sprintf(errorMessage, "Error opening file: %s.\n", filename);
-        LOG_ERROR(errorMessage);
+        LOG_ERRORF("Error opening file: %s.\n", filename);
         return -1;
     }
 
     if (fread(&header, sizeof(WavHeader), 1, file) != 1)
     {
-        sprintf(errorMessage, "Error reading file: %s.\n", filename);
-        LOG_ERROR(errorMessage);
+        LOG_ERRORF("Error reading file: %s.\n", filename);
         return -1;
     }
 
@@ -100,15 +96,13 @@ int loadWavFile(const char* filename, u8 **data, u32 *length, u8 *channelCount)
         || INVALID_FORMAT_MARKER(header.format.marker)
         || INVALID_DATA_MARKER(header.data.marker))
     {
-        sprintf(errorMessage, "Invalid WAV format: %s.\n", filename);
-        LOG_ERROR(errorMessage);
+        LOG_ERRORF("Invalid WAV format: %s.\n", filename);
         return -1;
     }
 
     if (INVALID_CHANNEL_COUNT(header.format.channels))
     {
-        sprintf(errorMessage, "Invalid WAV channels: %s.\n", filename);
-        LOG_ERROR(errorMessage);
+        LOG_ERRORF("Invalid WAV channels: %s.\n", filename);
         return -1;
     }
 
@@ -121,8 +115,7 @@ int loadWavFile(const char* filename, u8 **data, u32 *length, u8 *channelCount)
 
     if (fread(*data, signalSize, 1, file) != 1)
     {
-        sprintf(errorMessage, "Invalid WAV data: %s.\n", filename);
-        LOG_ERROR(errorMessage);
+        LOG_ERRORF("Invalid WAV data: %s.\n", filename);
         return -1;
     }
 

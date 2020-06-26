@@ -1,6 +1,8 @@
 #include "logs.h"
 
+#include <stdarg.h>
 #include <string.h>
+#include <stdio.h>
 
 static Logs logs;
 
@@ -29,20 +31,19 @@ static LogMessage *getNextFreeLogMessage()
         return &logs.messages[logs.count++];
 }
 
-void logMessage(const char *text, LogType type)
+void logMessage(LogType type, const char *text, ...)
 {
     size_t len = strlen(text);
-
-    if (len > MAX_LOG_LENGTH)
-        len = MAX_LOG_LENGTH;
-
-    if (type == ERROR)
-        logs.errorCount++;
-
+    if (len > MAX_LOG_LENGTH) len = MAX_LOG_LENGTH;
+    if (type == ERROR) logs.errorCount++;
     LogMessage *newLogMessage = getNextFreeLogMessage();
-    memset(newLogMessage->text, 0, MAX_LOG_LENGTH);
-    strncpy(newLogMessage->text, text, len);
     newLogMessage->type = type;
+    memset(newLogMessage->text, 0, MAX_LOG_LENGTH);
+
+    va_list args;
+    va_start(args, text);
+    snprintf(newLogMessage->text, len, text, args);
+    va_end(args);
 }
 
 Logs *getLogs()
