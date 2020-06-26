@@ -31,13 +31,10 @@
 #include <stdio.h>
 #include <SDL.h>
 
-
 #define SDL_FIRST_AVAILABLE_RENDERER -1
 #define MILK_FRAMEBUF_PITCH (FRAMEBUFFER_WIDTH * 4)
 
-
 static SDL_AudioDeviceID gAudioDevice; /* Global audio device so we can access from our methods below. */
-
 
  /* Functions to lock and unlock the audio device so you can safely manipulate the milk's audio queue without another thread grabbing for it. */
 static void lockAudioDevice()
@@ -45,18 +42,15 @@ static void lockAudioDevice()
 	SDL_LockAudioDevice(gAudioDevice);
 }
 
-
 static void unlockAudioDevice()
 {
 	SDL_UnlockAudioDevice(gAudioDevice);
 }
 
-
 static void mixCallback(void *userdata, uint8_t *stream, int len)
 {
 	mixSamplesIntoStream((Audio *)userdata, stream, (size_t)len);
 }
-
 
 static void loadBmp(const char *filename, Color32 *dest, size_t len)
 {
@@ -78,18 +72,15 @@ static void loadBmp(const char *filename, Color32 *dest, size_t len)
 	SDL_FreeSurface(bmp);
 }
 
-
 static void startTextInput()
 {
 	SDL_StartTextInput();
 }
 
-
 static void stopTextInput()
 {
 	SDL_StopTextInput();
 }
-
 
 /*
  *******************************************************************************
@@ -146,7 +137,7 @@ int main(int argc, char *argv[])
 		wantedSpec.callback = mixCallback;
 		wantedSpec.userdata = (void *)&milk->audio;
 
-		audioDevice = SDL_OpenAudioDevice(NULL, 0, &wantedSpec, &actualSpec, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE | SDL_AUDIO_ALLOW_CHANNELS_CHANGE);
+		audioDevice = SDL_OpenAudioDevice(NULL, 0, &wantedSpec, &actualSpec, 0);
 		gAudioDevice = audioDevice;
 
 		milk->audio.channels = actualSpec.channels;

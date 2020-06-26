@@ -48,7 +48,6 @@ typedef struct riffChunk
     u32     wave;
 } RiffChunk;
 
-
 typedef struct formatChunk
 {
     u32     marker;
@@ -61,13 +60,11 @@ typedef struct formatChunk
     u16     bitsPerSample;
 } FormatChunk;
 
-
 typedef struct dataChunk
 {
     u32     marker;
     u32     size;
 } DataChunk;
-
 
 typedef struct wavHeader
 {
@@ -75,7 +72,6 @@ typedef struct wavHeader
     FormatChunk format;
     DataChunk   data;
 } WavHeader;
-
 
 int loadWavFile(const char* filename, u8 **data, u32 *length, u8 *channelCount)
 {

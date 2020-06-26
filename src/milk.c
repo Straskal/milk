@@ -36,12 +36,10 @@
  *******************************************************************************
  */
 
-
 #define MIN(x, y)           ((x) > (y) ? (y) : (x))
 #define MAX(x, y)           ((x) > (y) ? (x) : (y))
 #define CLAMP(v, low, up)   (MAX(low, MIN(v, up)))
 #define SIGN(x)             ((x > 0) - (x < 0))
-
 
 /*
  *******************************************************************************
@@ -49,13 +47,11 @@
  *******************************************************************************
  */
 
-
 static void initInput(Input *input)
 {
     input->gamepad.buttonState = BTN_NONE;
     input->gamepad.previousButtonState = BTN_NONE;
 }
-
 
 static void initVideo(Video *video)
 {
@@ -64,7 +60,6 @@ static void initVideo(Video *video)
     memcpy(&video->font, DEFAULT_FONT_DATA, sizeof(video->font));
     resetDrawState(video);
 }
-
 
 static void initAudio(Audio *audio)
 {
@@ -88,12 +83,10 @@ static void initAudio(Audio *audio)
     audio->channels = 0;
 }
 
-
 static void initCode(Code *code)
 {
     code->state = NULL;
 }
-
 
 Milk *createMilk()
 {
@@ -106,7 +99,6 @@ Milk *createMilk()
     LOG_INIT();
     return milk;
 }
-
 
 void freeMilk(Milk *milk)
 {
@@ -122,21 +114,17 @@ void freeMilk(Milk *milk)
  *******************************************************************************
  */
 
-
-#define IS_BIT_SET(val, bit) ((val & bit))
-
+#define IS_BIT_SET(val, bit) (val & bit)
 
 bool isButtonDown(Input *input, ButtonState button)
 {
     return IS_BIT_SET(input->gamepad.buttonState, button);
 }
 
-
 bool isButtonPressed(Input *input, ButtonState button)
 {
     return IS_BIT_SET(input->gamepad.buttonState, button) && !IS_BIT_SET(input->gamepad.previousButtonState, button);
 }
-
 
 /*
  *******************************************************************************
@@ -146,18 +134,15 @@ bool isButtonPressed(Input *input, ButtonState button)
  *******************************************************************************
  */
 
-
 void loadSpriteSheet(Video *video, const char *path)
 {
     video->loadBMP(path, video->spriteSheet, sizeof(video->spriteSheet) / sizeof(Color32));
 }
 
-
 void loadFont(Video *video, const char *path)
 {
     video->loadBMP(path, video->font, sizeof(video->font) / sizeof(Color32));
 }
-
 
 void resetDrawState(Video *video)
 {
@@ -168,7 +153,6 @@ void resetDrawState(Video *video)
     video->clipRect.right = FRAMEBUFFER_WIDTH;
 }
 
-
 void setClippingRect(Video *video, int x, int y, int w, int h)
 {
     video->clipRect.left = CLAMP(x, 0, FRAMEBUFFER_WIDTH);
@@ -177,10 +161,8 @@ void setClippingRect(Video *video, int x, int y, int w, int h)
     video->clipRect.bottom = CLAMP(y + h, 0, FRAMEBUFFER_HEIGHT);
 }
 
-
 #define FRAMEBUFFER_POS(x, y)           ((FRAMEBUFFER_WIDTH * y) + x)
 #define WITHIN_CLIP_RECT(clip, x, y)    (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
-
 
 void clearFramebuffer(Video *video, Color32 color)
 {
@@ -193,13 +175,11 @@ void clearFramebuffer(Video *video, Color32 color)
     }
 }
 
-
 void blitPixel(Video *video, int x, int y, Color32 color)
 {
     if (WITHIN_CLIP_RECT(video->clipRect, x, y))
         video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
-
 
 static void bresenhamLine(Video *video, int x0, int y0, int x1, int y1, Color32 color)
 {
@@ -243,12 +223,10 @@ static void bresenhamLine(Video *video, int x0, int y0, int x1, int y1, Color32 
     }
 }
 
-
 void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color)
 {
     bresenhamLine(video, x0, y0, x1, y1, color);
 }
-
 
 static void horizontalLine(Video *video, int x, int y, int w, Color32 color)
 {
@@ -256,13 +234,11 @@ static void horizontalLine(Video *video, int x, int y, int w, Color32 color)
         blitPixel(video, i, y, color);
 }
 
-
 static void verticalLine(Video *video, int x, int y, int h, Color32 color)
 {
     for (int i = y; i <= y + h; i++)
         blitPixel(video, x, i, color);
 }
-
 
 void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color)
 {
@@ -271,7 +247,6 @@ void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color)
     verticalLine(video, x, y, h, color); /* Left edge */
     verticalLine(video, x + w, y, h, color); /* Right edge */
 }
-
 
 void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color)
 {
@@ -282,12 +257,10 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
     }
 }
 
-
 #define MIN_SCALE            1
 #define MAX_SCALE            5
 #define IS_FLIPPED_X(flip)   (flip & 1)
 #define IS_FLIPPED_Y(flip)   (flip & 2)
-
 
 static void nearestNeighbor(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 *color)
 {
@@ -317,19 +290,16 @@ static void nearestNeighbor(Video *video, const Color32 *pixels, int x, int y, i
     }
 }
 
-
 static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 *color)
 {
     nearestNeighbor(video, pixels, x, y, w, h, pitch, scale, flip, color);
 }
-
 
 #define SPRSHEET_IDX_OO_BOUNDS(idx)     (idx < 0 || SPRITE_SHEET_SQRSIZE < idx)
 #define SPRSHEET_COLUMNS                ((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
 #define SPRSHEET_ROW_SIZE               ((int)(SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE))
 #define SPRSHEET_COL_SIZE               SPRITE_SQRSIZE
 #define SPRSHEET_POS(x, y)              (y * SPRSHEET_ROW_SIZE + x * SPRSHEET_COL_SIZE)
-
 
 void blitSprite(Video *video, int idx, int x, int y, int w, int h, int scale, u8 flip)
 {
@@ -344,13 +314,11 @@ void blitSprite(Video *video, int idx, int x, int y, int w, int h, int scale, u8
     blitRect(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, NULL);
 }
 
-
 #define FONT_COLUMNS         ((int)(FONT_WIDTH / CHAR_WIDTH))
 #define FONT_ROW_SIZE        ((int)(FONT_WIDTH * CHAR_HEIGHT))
 #define FONT_POS(x, y)       (y * FONT_ROW_SIZE + x * CHAR_WIDTH)
 #define IS_ASCII(c)          (0 < c)
 #define IS_NEWLINE(c)        (c == '\n')
-
 
 void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, int scale, Color32 color)
 {
@@ -382,17 +350,14 @@ void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const cha
     }
 }
 
-
 /*
  *******************************************************************************
  * Audio
  *******************************************************************************
  */
 
-
 #define SAMPLEIDX_OO_BOUNDS(idx)    (idx < 0 || idx > MAX_LOADED_SAMPLES)
 #define SLOTIDX_OO_BOUNDS(idx)      (idx < 0 || idx > MAX_SAMPLE_SLOTS)
-
 
 void resetSampleSlot(SampleSlot *slot)
 {
@@ -402,7 +367,6 @@ void resetSampleSlot(SampleSlot *slot)
     slot->position = NULL;
     slot->volume = 0;
 }
-
 
 void loadSound(Audio *audio, int sampleIdx, const char *filename)
 {
@@ -417,7 +381,6 @@ void loadSound(Audio *audio, int sampleIdx, const char *filename)
     loadWavFile(filename, &sampleData->buffer, &sampleData->length, &sampleData->channelCount);
     audio->unlock();
 }
-
 
 void unloadSound(Audio *audio, int sampleIdx)
 {
@@ -443,7 +406,6 @@ void unloadSound(Audio *audio, int sampleIdx)
     audio->unlock();
 }
 
-
 void playSound(Audio *audio, int slotIdx, int sampleIdx, int volume)
 {
     if (SAMPLEIDX_OO_BOUNDS(sampleIdx) || SLOTIDX_OO_BOUNDS(slotIdx))
@@ -465,7 +427,6 @@ void playSound(Audio *audio, int slotIdx, int sampleIdx, int volume)
     audio->unlock();
 }
 
-
 void stopSound(Audio *audio, int slotIdx)
 {
     audio->lock();
@@ -484,7 +445,6 @@ void stopSound(Audio *audio, int slotIdx)
 
     audio->unlock();
 }
-
 
 void pauseSound(Audio *audio, int slotIdx)
 {
@@ -505,7 +465,6 @@ void pauseSound(Audio *audio, int slotIdx)
     audio->unlock();
 }
 
-
 void resumeSound(Audio *audio, int slotIdx)
 {
     audio->lock();
@@ -525,21 +484,17 @@ void resumeSound(Audio *audio, int slotIdx)
     audio->unlock();
 }
 
-
 SampleSlotState getSampleState(Audio *audio, int slotIdx)
 {
     return SLOTIDX_OO_BOUNDS(slotIdx) ? STOPPED : audio->slots[slotIdx].state;
 }
-
 
 void setMasterVolume(Audio *audio, int volume)
 {
     audio->masterVolume = CLAMP(volume, 0, MAX_VOLUME);
 }
 
-
 #define _16_BIT_MAX 32767
-
 
 static void mixSample(u8 *destination, const u8 *source, int length, int volume)
 {
@@ -560,7 +515,6 @@ static void mixSample(u8 *destination, const u8 *source, int length, int volume)
         destination += 2;
     }
 }
-
 
 static void mixInterleavedSamples(u8 *destination, const u8 *source, int length, int volume)
 {
@@ -586,9 +540,7 @@ static void mixInterleavedSamples(u8 *destination, const u8 *source, int length,
     }
 }
 
-
 #define LOOP_INDEX 0
-
 
 void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)
 {

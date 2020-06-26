@@ -16,7 +16,6 @@ void initLogs()
     logs.errorCount = 0;
 }
 
-
 static LogMessage *getNextFreeLogMessage()
 {
     if (logs.count == MAX_LOGS)
@@ -29,7 +28,6 @@ static LogMessage *getNextFreeLogMessage()
     else
         return &logs.messages[logs.count++];
 }
-
 
 void logMessage(const char *text, LogType type)
 {
@@ -47,12 +45,10 @@ void logMessage(const char *text, LogType type)
     newLogMessage->type = type;
 }
 
-
 Logs *getLogs()
 {
     return &logs;
 }
-
 
 void clearLogs()
 {
