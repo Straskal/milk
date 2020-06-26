@@ -496,7 +496,7 @@ void setMasterVolume(Audio *audio, int volume)
 
 #define _16_BIT_MAX 32767
 
-static void mixSample(u8 *destination, const u8 *source, int length, int volume)
+static void mixStereoSamples(u8 *destination, const u8 *source, int length, int volume)
 {
     i16 sourceSample;
     i16 destSample;
@@ -516,7 +516,7 @@ static void mixSample(u8 *destination, const u8 *source, int length, int volume)
     }
 }
 
-static void mixInterleavedSamples(u8 *destination, const u8 *source, int length, int volume)
+static void mixInterleavedMonoSamples(u8 *destination, const u8 *source, int length, int volume)
 {
     i16 sourceSample;
     i16 destSample;
@@ -559,13 +559,13 @@ void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)
 
             if (slot->sampleData->channelCount == 1)
             {
-                mixInterleavedSamples(stream, slot->position, bytesToWrite, slot->volume);
+                mixInterleavedMonoSamples(stream, slot->position, bytesToWrite, slot->volume);
                 slot->position += bytesToWrite / 2;
                 slot->remainingLength -= bytesToWrite / 2;
             }
             else
             {
-                mixSample(stream, slot->position, bytesToWrite, slot->volume);
+                mixStereoSamples(stream, slot->position, bytesToWrite, slot->volume);
                 slot->position += bytesToWrite;
                 slot->remainingLength -= bytesToWrite;
             }
