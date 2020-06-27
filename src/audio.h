@@ -31,15 +31,15 @@
 
 /*
  *******************************************************************************
- * Specifications:
- * - 16 signals loaded in memory at time
- * - 16 concurrently playing signals
+ * Specification:
+ * - [16] sounds loaded in memory at time.
+ * - Sounds are played when inserted into one of the [16] sound slots.
+ * - A single sound can be inserted into multiple sound slots.
+ * - Sound slot [0] loops.
  *
- * Signals are dynamically allocated and must be freed.
- * 16 signals can be loaded into memory at a time.
- * To play a signal, it must be inserted into one of the 16 signal slots.
- * One signal can be inserted into multiple signal slots.
- * Signal slot 0 loops.
+ * Notes:
+ * Sounds are dynamically allocated and must be freed.
+ * The only memory limit on sound is the hardware.
  *******************************************************************************
  */
 
