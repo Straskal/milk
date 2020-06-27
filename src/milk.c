@@ -40,6 +40,7 @@ Milk *createMilk()
 {
     Milk *milk = (Milk *) malloc(sizeof(Milk));
     milk->shouldQuit = false;
+    milk->code.state = NULL;
     initInput(&milk->input);
     initVideo(&milk->video);
     initAudio(&milk->audio);

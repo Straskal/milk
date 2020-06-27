@@ -24,7 +24,6 @@
 
 #include "milk.h"
 #include "console.h"
-#include "wav.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -81,6 +80,27 @@ static void stopTextInput()
 	SDL_StopTextInput();
 }
 
+static Milk *milk;
+static Console *console;
+static SDL_Window *window;
+static SDL_Renderer *renderer;
+static SDL_Texture *frontBufferTexture;
+static SDL_AudioDeviceID audioDevice;
+static SDL_AudioSpec wantedSpec;
+static SDL_AudioSpec actualSpec;
+
+static void cleanup()
+{
+    unloadCode(milk);
+    SDL_CloseAudioDevice(audioDevice);
+    SDL_DestroyTexture(frontBufferTexture);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    freeConsole(console);
+    freeMilk(milk);
+    SDL_Quit();
+}
+
 /*
  *******************************************************************************
  * SDL_main
@@ -88,17 +108,10 @@ static void stopTextInput()
  */
 int main(int argc, char *argv[])
 {
-	(void)argc;
-	(void)argv;
+    UNUSED(argc);
+    UNUSED(argv);
 
-	Milk *milk;
-	Console *console;
-	SDL_Window *window;
-	SDL_Renderer *renderer;
-	SDL_Texture *frontBufferTexture;
-	SDL_AudioDeviceID audioDevice;
-	SDL_AudioSpec wantedSpec;
-	SDL_AudioSpec actualSpec;
+	atexit(cleanup);
 
 	{
 		/*
@@ -110,7 +123,7 @@ int main(int argc, char *argv[])
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
 		{
 			printf("Error initializing SDL: %s", SDL_GetError());
-			return 1;
+			exit(1);
 		}
 
 		milk = createMilk();
@@ -118,7 +131,6 @@ int main(int argc, char *argv[])
 		window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI );
 		renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
 		frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
-
 		SDL_RenderSetLogicalSize(renderer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 	}
 
@@ -139,12 +151,19 @@ int main(int argc, char *argv[])
 		audioDevice = SDL_OpenAudioDevice(NULL, 0, &wantedSpec, &actualSpec, 0);
 		gAudioDevice = audioDevice;
 
-		milk->audio.channels = actualSpec.channels;
-		milk->audio.frequency = actualSpec.freq;
+		if (wantedSpec.format != actualSpec.format
+		    || wantedSpec.channels != actualSpec.channels
+		    || wantedSpec.freq != actualSpec.freq
+		    || wantedSpec.samples != actualSpec.samples)
+        {
+		    printf("Audio device is not supported.");
+            exit(1);
+        }
+
 		milk->audio.lock = lockAudioDevice;
 		milk->audio.unlock = unlockAudioDevice;
-
-		SDL_PauseAudioDevice(audioDevice, 0); /* Pause(0) starts the device. lawl. */
+		const int noDontPauseIt_PlayItInstead = 0;
+		SDL_PauseAudioDevice(audioDevice, noDontPauseIt_PlayItInstead);
 	}
 
 	{
@@ -166,7 +185,6 @@ int main(int argc, char *argv[])
 		 */
 
 		milk->video.loadBMP = loadBmp;
-
         loadCode(milk);
 	}
 
@@ -245,13 +263,5 @@ int main(int argc, char *argv[])
 			SDL_Delay((Uint32)(FRAMERATE - elapsedTicks));
 	}
 
-    unloadCode(milk);
-	SDL_CloseAudioDevice(audioDevice);
-	SDL_DestroyTexture(frontBufferTexture);
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	freeConsole(console);
-	freeMilk(milk);
-	SDL_Quit();
 	return 0;
 }

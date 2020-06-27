@@ -39,8 +39,6 @@ void initAudio(Audio *audio)
     memset(&audio->sounds, 0, sizeof(audio->sounds));
     memset(&audio->slots, 0, sizeof(audio->slots));
     audio->masterVolume = MAX_VOLUME;
-    audio->frequency = 0;
-    audio->channels = 0;
 }
 
 

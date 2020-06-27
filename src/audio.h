@@ -77,9 +77,7 @@ typedef struct audio
 {
     SoundData   sounds[MAX_LOADED_SOUNDS];
     SoundSlot   slots[MAX_SOUND_SLOTS];
-    int         frequency;
     int         masterVolume;
-    int         channels;
 
     void (*lock)();
     void (*unlock)();

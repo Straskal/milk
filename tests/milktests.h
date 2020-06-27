@@ -143,8 +143,6 @@ TEST_CASE(initAudio_InitializesAudioSettings)
     ACT(initAudio(&audio));
 
 	ASSERT_EQ(MAX_VOLUME, audio.masterVolume);
-	ASSERT_EQ(0, audio.frequency);
-	ASSERT_EQ(0, audio.channels);
     END_ASSERTS();
 }
 
