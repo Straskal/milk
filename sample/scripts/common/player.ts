@@ -1,5 +1,5 @@
 import { Game } from "../game";
-import { GameplayState } from "./state";
+import { GameplayState } from "../gameplay/state";
 import { BulletPool } from "./bullets";
 import { CollisionType, ICollidable } from "./collision";
 

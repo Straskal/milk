@@ -72,6 +72,12 @@ typedef struct input
 void initInput(Input *input);
 
 /**
+ * Update the button state of the gamepad.
+ * @param input
+ */
+void updateButtonState(Input *input, ButtonState state);
+
+/**
  * Returns true if the given button state matches current state.
  * This is good for continuous button presses.
  * @param input

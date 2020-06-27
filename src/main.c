@@ -206,8 +206,6 @@ int main(int argc, char *argv[])
 		{
 			ButtonState btnState = BTN_NONE;
 			ConsoleInputState consoleInputState = CONSOLE_INPUT_NONE;
-
-			input->gamepad.previousButtonState = input->gamepad.buttonState;
 			consoleInput->previousState = consoleInput->state;
 
 			/* Poll input events and update input state. */
@@ -253,7 +251,7 @@ int main(int argc, char *argv[])
             if (kbState[SDL_SCANCODE_RETURN]) consoleInputState |= CONSOLE_INPUT_ENTER;
             if (kbState[SDL_SCANCODE_ESCAPE]) consoleInputState |= CONSOLE_INPUT_ESCAPE;
 
-			input->gamepad.buttonState = btnState;
+			updateButtonState(input, btnState);
 			consoleInput->state = consoleInputState;
 		}
 

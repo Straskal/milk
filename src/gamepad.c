@@ -33,6 +33,13 @@ void initInput(Input *input)
 }
 
 
+void updateButtonState(Input *input, ButtonState state)
+{
+    input->gamepad.previousButtonState = input->gamepad.buttonState;
+    input->gamepad.buttonState = state;
+}
+
+
 bool isButtonDown(Input *input, ButtonState button)
 {
     return IS_BIT_SET(input->gamepad.buttonState, button);

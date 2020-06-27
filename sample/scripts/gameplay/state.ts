@@ -1,10 +1,10 @@
 import { StarField } from "../common/starField";
-import { Player } from "./player";
+import { Player } from "../common/player";
 import { Game, GameState } from "../game";
-import { BulletPool } from "./bullets";
-import { EnemyPool } from "./enemies";
-import { ExplosionPool } from "./explosions";
-import { isColliding } from "./collision";
+import { BulletPool } from "../common/bullets";
+import { EnemyPool } from "../common/enemies";
+import { ExplosionPool } from "../common/explosions";
+import { isColliding } from "../common/collision";
 import { PauseState } from "../pause/state";
 
 export class GameplayState implements GameState {

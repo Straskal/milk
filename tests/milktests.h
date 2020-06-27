@@ -156,7 +156,7 @@ TEST_CASE(isButtonDown_WhenButtonDown_ReturnsTrue)
 {
 	Input input;
 	initInput(&input);
-	input.gamepad.buttonState |= BTN_DOWN;
+	updateButtonState(&input, BTN_DOWN);
 
 	bool isDown = ACT(isButtonDown(&input, BTN_DOWN));
 
@@ -168,7 +168,7 @@ TEST_CASE(isButtonDown_WhenButtonUp_ReturnsFalse)
 {
     Input input;
     initInput(&input);
-	input.gamepad.buttonState = BTN_NONE;
+    updateButtonState(&input, BTN_NONE);
 
 	bool isDown = ACT(isButtonDown(&input, BTN_DOWN));
 
@@ -180,8 +180,8 @@ TEST_CASE(isButtonPressed_WhenPressed_ReturnsTrue)
 {
     Input input;
     initInput(&input);
-	input.gamepad.buttonState |= BTN_DOWN;
-	input.gamepad.previousButtonState = BTN_NONE;
+    updateButtonState(&input, BTN_NONE);
+    updateButtonState(&input, BTN_DOWN);
 
 	bool isPressed = ACT(isButtonPressed(&input, BTN_DOWN));
 
@@ -193,8 +193,8 @@ TEST_CASE(isButtonPressed_WhenHeld_ReturnsFalse)
 {
     Input input;
     initInput(&input);
-    input.gamepad.buttonState |= BTN_DOWN;
-    input.gamepad.previousButtonState |= BTN_DOWN;
+    updateButtonState(&input, BTN_DOWN);
+    updateButtonState(&input, BTN_DOWN);
 
     bool isPressed = ACT(isButtonPressed(&input, BTN_DOWN));
 
