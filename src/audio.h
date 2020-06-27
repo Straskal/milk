@@ -85,26 +85,84 @@ typedef struct audio
     void (*unlock)();
 } Audio;
 
+/**
+ * Initialize audio.
+ * @param audio
+ */
 void initAudio(Audio *audio);
 
+/**
+ * Free audio and all loaded sounds.
+ * @param audio
+ */
 void freeAudio(Audio *audio);
 
+/**
+ * Load a sound file's data into the given sound index.
+ * @param audio
+ * @param soundIdx
+ * @param filename
+ */
 void loadSound(Audio *audio, int soundIdx, const char *filename);
 
+/**
+ * Unload the sound data at the given sound index.
+ * @param audio
+ * @param soundIdx
+ */
 void unloadSound(Audio *audio, int soundIdx);
 
+/**
+ * Play sound[soundIdx] at the given slot index.
+ * @param audio
+ * @param slotIdx
+ * @param soundIdx
+ * @param volume
+ */
 void playSound(Audio *audio, int slotIdx, int soundIdx, int volume);
 
+/**
+ * Stop the sound at the given slot index.
+ * @param audio
+ * @param slotIdx
+ */
 void stopSound(Audio *audio, int slotIdx);
 
+/**
+ * Pause the sound at the given slot index.
+ * @param audio
+ * @param slotIdx
+ */
 void pauseSound(Audio *audio, int slotIdx);
 
+/**
+ * Resume the sound at the given slot index.
+ * @param audio
+ * @param slotIdx
+ */
 void resumeSound(Audio *audio, int slotIdx);
 
+/**
+ * Get the state of the given slot index.
+ * @param audio
+ * @param slotIdx
+ * @return
+ */
 SoundState getSoundState(Audio *audio, int slotIdx);
 
+/**
+ * Set the master volume of all sounds.
+ * @param audio
+ * @param volume
+ */
 void setMasterVolume(Audio *audio, int volume);
 
+/**
+ * Mix all playing sounds into the given stream.
+ * @param audio
+ * @param stream
+ * @param len
+ */
 void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len);
 
 #endif
