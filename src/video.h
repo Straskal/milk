@@ -43,6 +43,7 @@
  * The sprite sheet and font are stored in fixed size, statically allocated arrays, so they do not need to be freed when milk shuts down. *
  * Milk does not support transparency when drawing, but it does use a color key to consider as 'transparent', which is defaulted to black.
  * All drawing functions only operate within the bounds of the clipping rectangle, which is reset to the framebuffer size at the beginning of each frame.
+ * Platform code is responsible for reading milk's framebuffer and sending it on down to the graphics device, ya dig?
  *******************************************************************************
  */
 

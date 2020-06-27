@@ -40,6 +40,7 @@
  * Notes:
  * Sounds are dynamically allocated and must be freed.
  * The only memory limit on sound is the hardware.
+ * Platform code is responsible for passing an audio device stream to milk. Milk will mix it's sounds into the stream.
  *******************************************************************************
  */
 
