@@ -1,5 +1,4 @@
-import { IntroState } from "./intro/state";
-import { CheatHandler } from "./cheatHandler";
+import { MainMenuState } from "./mainMenu/state";
 
 export interface GameState {
     updateBelow: boolean;
@@ -18,7 +17,6 @@ export class Game {
 
     private _ticks = 0;
     private _stateStack: GameState[] = [];
-    private _cheatHandler = new CheatHandler(this);
 
     public get ticks() {
         return this._ticks;
@@ -29,7 +27,7 @@ export class Game {
     }
 
     public init(): void {
-        this.pushState(new IntroState());
+        this.pushState(new MainMenuState());
     }
 
     public update(): void {
@@ -52,10 +50,6 @@ export class Game {
         }
 
         this._ticks++;
-    }
-
-    public cheat(command: string, args: string[]): void {
-        this._cheatHandler.handleCheat(command, args);
     }
 
     public peek(): GameState {

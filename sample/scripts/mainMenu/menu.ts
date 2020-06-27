@@ -1,5 +1,5 @@
 import { Game } from "../game";
-import { GameplayState } from "../gameplay/state";
+import { IntroState } from "../intro/state";
 
 interface MenuItem {
     text: string,
@@ -14,7 +14,7 @@ export class Menu {
             text: "play",
             execute: (game: Game) => {
                 game.popState();
-                game.pushState(new GameplayState());
+                game.pushState(new IntroState());
             }
         },
         {

@@ -16,7 +16,7 @@ endif()
 if (WIN32)
 	if (MINGW)
 		# provide paths for minGW/minGW-w64 development libs
-		set(SDL2_PATH C:/ExternalLibs/SDL2-devel-2.0.12-mingw/i686-w64-mingw32)
+		set(SDL2_PATH C:/ExternalLibs/SDL2-devel-2.0.10-mingw/i686-w64-mingw32)
 		set(ENV{LUA_DIR} C:/ExternalLibs/Lua53mingw)
 	elseif (MSVC)
 		# provide paths for visual c++ development libs

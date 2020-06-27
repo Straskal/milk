@@ -1,69 +1,100 @@
 import { StarField } from "../common/starField";
 import { Game, GameState } from "../game";
-import { Menu } from "./menu";
 import { TacoStand } from "../common/tacoStand";
+import { ExplosionPool } from "../common/explosions";
+import { GameplayState } from "../gameplay/state";
+import { Action, ActionList } from "../common/actionList";
 
-const PRESENTED_BY = "it'sgood's"
-const TITLE = "STAR GAME";
-const SUBTITLE = "Return of The Bad Boiz";
+interface ActionContext {
+    game: Game;
+    state: IntroState;
+}
+
+class ExplosionAction implements Action<ActionContext> {
+
+    private _explosionPool = new ExplosionPool();
+    private _timer = 0;
+
+    public enter(context: ActionContext): void {
+        this._timer = context.game.ticks + 200;
+    }
+
+    public update(context: ActionContext): boolean {
+        context.state._tacoStand.update(context.game.ticks, true);
+        this._explosionPool.update(context.game);
+        if (context.game.ticks % 15 == 0) {
+            this._explosionPool.create(math.random(10, 50), math.random(170, 200), context.game.ticks);
+            this._explosionPool.create(math.random(10, 50), math.random(170, 200), context.game.ticks);
+        }
+        return context.game.ticks > this._timer;
+    }
+
+    public draw(context: ActionContext): void {
+        context.state._tacoStand.draw(true);
+        this._explosionPool.draw();
+    }
+    
+    public exit(t: ActionContext): void {}
+}
+
+class DestroyedAction implements Action<ActionContext> {
+
+    private _timer = 0;
+
+    public enter(context: ActionContext): void {
+        this._timer = context.game.ticks + 300;
+    }
+
+    public update(context: ActionContext): boolean {
+        context.state._tacoStand.update(context.game.ticks, false);
+        return context.game.ticks > this._timer;
+    }
+
+    public draw(context: ActionContext): void {
+        context.state._tacoStand.draw(false);
+    }
+
+    public exit(t: ActionContext): void {}
+}
 
 export class IntroState implements GameState {    
 
     public updateBelow = false;
     public drawBelow = false;
+    public _starField = new StarField(0.1);
+    public _tacoStand = new TacoStand();
 
-    private _starField = new StarField(0.1);
-    private _tacoStand = new TacoStand();
-    private _menu = new Menu();
+    private _actionList = new ActionList([
+        new ExplosionAction(),
+        new DestroyedAction()
+    ]);
 
-    public enter(_: Game): void {
-        loadspr("art/sprsheet.bmp");
-        loadsnd(0, "sounds/12 HHavok-main.wav");
-        play(0, 0, 128);
+    private _actionContext!: ActionContext;
+
+    public enter(game: Game): void {
+        loadsnd(2, "sounds/explode.wav");
+
+        this._actionContext = {
+            game: game,
+            state: this
+        };
     }
 
     public update(game: Game): void {
         this._starField.update();
-        this._tacoStand.update(game.ticks);
-        this._menu.update(game);
+
+        if (this._actionList.update(this._actionContext)) {
+            game.popState();
+            game.pushState(new GameplayState());
+        }
     }
 
     public draw(game: Game): void {
         clrs(0x00);
         
         this._starField.draw();
-        this._tacoStand.draw();
-        this._menu.draw(256 / 2, 150, game.ticks);
-
-        this.drawTitle();
-        this.drawSubtitle(game.ticks);
+        this._actionList.draw(this._actionContext);
     }
 
-    public exit(_: Game): void {
-        freesnd(0);
-    }
-
-    private drawTitle(): void {
-        const length = string.len(TITLE);
-        const halfLength = length / 2;
-        const halfResolutionWidth = 256 / 2;
-
-        sprfont(halfResolutionWidth - halfLength * 16, 45, PRESENTED_BY, 1, 0x00ffffff);
-        sprfont(halfResolutionWidth - halfLength * 16, 60, TITLE, 2, 0x00ff000);
-    }
-
-    private drawSubtitle(ticks: number): void {
-        const length = string.len(SUBTITLE);
-        const halfLength = length / 2;
-        const halfResolutionWidth = 256 / 2;
-        const x = halfResolutionWidth - halfLength * 8;
-
-        for (let i = 1; i <= length; i++) {
-            const character = string.sub(SUBTITLE, i, i);
-            const adjustedTime = ticks + i * 4;
-            const y = 85 + math.sin(adjustedTime / 15) * 4;
-
-            sprfont(x + 8 * i, y, character, 1, 0x008751);
-        }
-    }
+    public exit(_: Game): void {}
 }
