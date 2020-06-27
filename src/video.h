@@ -32,10 +32,10 @@
 /*
  *******************************************************************************
  * Specification:
- * - 256x224px resolution
- * - Fixed 50fps
- * - 1 256x256px sprite sheet in memory at a time
- * - 1 128x48px bitmap font in memory at a time
+ * - [256x224] px resolution
+ * - Fixed [50] fps
+ * - [1] [256x256] px sprite sheet in memory at a time
+ * - [1] [128x48] px bitmap font in memory at a time
  *
  * Notes:
  * Milk draws to an internal framebuffer in left->right, bottom->top order.
