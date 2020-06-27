@@ -28,14 +28,23 @@
 #include "milk.h"
 
 /*
- *  Really basic wave file decoding. Milk only supports the following:
- *  - PCM data
- *  - 2 channels
- *  - 16 bit samples
- *  - 44100 sample rate
+ * Specification:
+ * - PCM
+ * - Mono or stereo
+ * - 16 bit samples
+ * - 44100 sample rate
  *
- *  Milk can interleave mono signals, but that's about it.
- *  Will have to use audacity er sum'n to do other conversions until they are supported.
+ * Notes:
+ * Mono sounds are interleaved during mixing.
+ */
+
+/**
+ * Load a wave file.
+ * @param filename
+ * @param data
+ * @param length
+ * @param channelCount
+ * @return
  */
 int loadWavFile(const char* filename, u8 **data, u32 *length, u8 *channelCount);
 
