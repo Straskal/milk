@@ -23,7 +23,6 @@
  */
 
 #include "milk.h"
-#include "api.h"
 #include "console.h"
 #include "wav.h"
 
@@ -168,7 +167,7 @@ int main(int argc, char *argv[])
 
 		milk->video.loadBMP = loadBmp;
 
-		milkLoadCode(milk);
+        loadCode(milk);
 	}
 
 	while (!milk->shouldQuit)
@@ -246,7 +245,7 @@ int main(int argc, char *argv[])
 			SDL_Delay((Uint32)(FRAMERATE - elapsedTicks));
 	}
 
-	milkUnloadCode(milk);
+    unloadCode(milk);
 	SDL_CloseAudioDevice(audioDevice);
 	SDL_DestroyTexture(frontBufferTexture);
 	SDL_DestroyRenderer(renderer);

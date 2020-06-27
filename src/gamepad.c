@@ -22,15 +22,21 @@
  *  SOFTWARE.
  */
 
-#ifndef __MILK_API_H__
-#define __MILK_API_H__
+#include "common.h"
+#include "gamepad.h"
 
-#include "milk.h"
+void initInput(Input *input)
+{
+    input->gamepad.buttonState = BTN_NONE;
+    input->gamepad.previousButtonState = BTN_NONE;
+}
 
-void milkLoadCode(Milk *milk);
-void milkUnloadCode(Milk *milk);
-void milkInvokeInit(Code *code);
-void milkInvokeUpdate(Code *code);
-void milkInvokeDraw(Code *code);
+bool isButtonDown(Input *input, ButtonState button)
+{
+    return IS_BIT_SET(input->gamepad.buttonState, button);
+}
 
-#endif
+bool isButtonPressed(Input *input, ButtonState button)
+{
+    return IS_BIT_SET(input->gamepad.buttonState, button) && !IS_BIT_SET(input->gamepad.previousButtonState, button);
+}

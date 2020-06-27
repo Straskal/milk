@@ -37,10 +37,7 @@
  *******************************************************************************
  */
 #define TEST_CASE(test)					static void test()
-#define SETUP(milk)						Milk *milk = createMilk()
 #define ACT(action)                     action
-#define FREE_MILK(milk)					freeMilk(milk)
-#define TEARDOWN    					teardown
 
 /*
  *******************************************************************************
@@ -80,6 +77,7 @@ Test *gCurrentTest = NULL;
 #define ASSERT_EQ(expected, actual)		BASE_ASSERT((expected) == (actual))
 #define ASSERT_NEQ(expected, actual)	BASE_ASSERT((expected) != (actual))
 #define ASSERT_NULL(val)				BASE_ASSERT((val) == (NULL))
+#define END_ASSERTS()                   teardown: ((void)0)
 
 /*
  *******************************************************************************

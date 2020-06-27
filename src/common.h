@@ -22,42 +22,22 @@
  *  SOFTWARE.
  */
 
-#ifndef __MILK_H__
-#define __MILK_H__
+#ifndef __COMMON_H__
+#define __COMMON_H__
 
-#include <stdbool.h>
+#include <stdint.h>
 
-#include "audio.h"
-#include "common.h"
-#include "gamepad.h"
-#include "video.h"
+typedef int16_t     i16;
+typedef int32_t     i32;
+typedef uint8_t     u8;
+typedef uint16_t    u16;
+typedef uint32_t    u32;
 
-typedef struct code
-{
-    void *state;
-} Code;
-
-typedef struct milk
-{
-	Input   input;
-    Video   video;
-    Audio   audio;
-	Code    code;
-    bool    shouldQuit;
-} Milk;
-
-Milk *createMilk();
-
-void freeMilk(Milk *milk);
-
-void loadCode(struct milk *milk);
-
-void unloadCode(struct milk *milk);
-
-void invokeInit(Code *code);
-
-void invokeUpdate(Code *code);
-
-void invokeDraw(Code *code);
+#define UNUSED(v)               ((void)v)
+#define MIN(x, y)               ((x) > (y) ? (y) : (x))
+#define MAX(x, y)               ((x) > (y) ? (x) : (y))
+#define CLAMP(v, low, up)       (MAX(low, MIN(v, up)))
+#define SIGN(x)                 ((x > 0) - (x < 0))
+#define IS_BIT_SET(val, bit)    (val & bit)
 
 #endif

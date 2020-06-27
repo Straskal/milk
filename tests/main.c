@@ -22,20 +22,19 @@
  *  SOFTWARE.
  */
 
-#include "milk.h"
 #include "milkassert.h"
 #include "milktests.h"
 
 static Test _tests[] =
 {
-	INIT_TEST(createMilk_InitializesFramebuffer),
-	INIT_TEST(createMilk_InitializesSpritesheet),
-	INIT_TEST(createMilk_InitializesFont),
-	INIT_TEST(createMilk_InitializesColorKey),
-	INIT_TEST(createMilk_InitializesClipRect),
-	INIT_TEST(createMilk_InitializesSamples),
-	INIT_TEST(createMilk_InitializesAudioSlots),
-	INIT_TEST(createMilk_InitializesAudioSettings),
+	INIT_TEST(initVideo_InitializesFramebuffer),
+	INIT_TEST(initVideo_InitializesSpritesheet),
+	INIT_TEST(initVideo_InitializesFont),
+	INIT_TEST(initVideo_InitializesColorKey),
+	INIT_TEST(initVideo_InitializesClipRect),
+	INIT_TEST(initAudio_InitializesSamples),
+	INIT_TEST(initAudio_InitializesAudioSlots),
+	INIT_TEST(initAudio_InitializesAudioSettings),
 
 	INIT_TEST(isButtonDown_WhenButtonDown_ReturnsTrue),
 	INIT_TEST(isButtonDown_WhenButtonUp_ReturnsFalse),

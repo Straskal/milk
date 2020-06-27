@@ -29,22 +29,28 @@ find_package(SDL2 REQUIRED)
 find_package(Lua53 REQUIRED)
 
 set(MILK_SRC_FILES
+	src/audio.c
+	src/audio.h
+	src/common.h
+	src/gamepad.c
+	src/gamepad.h
 	src/logs.c
 	src/logs.h
-	src/milk.c
-	src/milk.h
 	src/wav.c
 	src/wav.h
+	src/video.c
+	src/video.h
 	src/embed/font.c
 	src/embed/font.h
 )
 
 set(MILK_MAIN_SRC_FILES
-	src/api.c
-	src/api.h
-	src/main.c
 	src/console.c
-	src/console.h)
+	src/console.h
+	src/main.c
+	src/milk.c
+	src/milk.h
+)
 
 add_executable(milk ${MILK_SRC_FILES} ${MILK_MAIN_SRC_FILES})
 target_compile_definitions(milk PUBLIC MILK_CMD)

@@ -22,8 +22,8 @@
  *  SOFTWARE.
  */
 
+#include "common.h"
 #include "console.h"
-#include "api.h"
 #include "embed/font.h"
 #include "logs.h"
 
@@ -36,16 +36,14 @@
  *******************************************************************************
  */
 
-#define UNUSED(v) ((void)v)
-
 static void cmdReload(Console *console, Milk *milk, char **arguments, int argumentCount)
 {
     UNUSED(console);
     UNUSED(arguments);
     UNUSED(argumentCount);
 
-    milkUnloadCode(milk);
-    milkLoadCode(milk);
+    unloadCode(milk);
+    loadCode(milk);
     console->isGameInitialized = false;
 
     LOG_INFO("scripts have been reloaded");
@@ -252,7 +250,7 @@ static void handleEscape(Console *console, Milk *milk)
         {
             if (!console->isGameInitialized)
             {
-                milkInvokeInit(&milk->code);
+                invokeInit(&milk->code);
                 console->isGameInitialized = true;
             }
             resumeSound(&milk->audio, -1);
@@ -297,7 +295,7 @@ void updateConsole(Console *console, Milk *milk)
             handleInput(console, milk);
             break;
         case GAME:
-            milkInvokeUpdate(&milk->code);
+            invokeUpdate(&milk->code);
             haltOnError(console);
             break;
         default:
@@ -431,7 +429,7 @@ void drawConsole(Console *console, Milk *milk)
             drawLogLines(milk);
             break;
         case GAME:
-            milkInvokeDraw(&milk->code);
+            invokeDraw(&milk->code);
             haltOnError(console);
             break;
         default:
