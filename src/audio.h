@@ -46,8 +46,8 @@
 #define AUDIO_FREQUENCY     44100
 #define AUDIO_CHANNELS      2 /* Stereo */
 #define AUDIO_SAMPLES       4096
-#define MAX_LOADED_SOUNDS  16
-#define MAX_SOUND_SLOTS    16
+#define MAX_LOADED_SOUNDS   16
+#define MAX_SOUND_SLOTS     16
 #define MAX_VOLUME          128
 
 typedef struct soundData
