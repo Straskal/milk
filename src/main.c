@@ -29,8 +29,10 @@
 #include <stdio.h>
 #include <SDL.h>
 
+
 #define SDL_FIRST_AVAILABLE_RENDERER -1
 #define MILK_FRAMEBUF_PITCH (FRAMEBUFFER_WIDTH * 4)
+
 
 static SDL_AudioDeviceID gAudioDevice; /* Global audio device so we can access from our methods below. */
 
@@ -40,15 +42,18 @@ static void lockAudioDevice()
 	SDL_LockAudioDevice(gAudioDevice);
 }
 
+
 static void unlockAudioDevice()
 {
 	SDL_UnlockAudioDevice(gAudioDevice);
 }
 
+
 static void mixCallback(void *userdata, uint8_t *stream, int len)
 {
 	mixSamplesIntoStream((Audio *)userdata, stream, (size_t)len);
 }
+
 
 static void loadBmp(const char *filename, Color32 *dest, size_t len)
 {
@@ -70,15 +75,18 @@ static void loadBmp(const char *filename, Color32 *dest, size_t len)
 	SDL_FreeSurface(bmp);
 }
 
+
 static void startTextInput()
 {
 	SDL_StartTextInput();
 }
 
+
 static void stopTextInput()
 {
 	SDL_StopTextInput();
 }
+
 
 static Milk *milk;
 static Console *console;
@@ -88,6 +96,7 @@ static SDL_Texture *frontBufferTexture;
 static SDL_AudioDeviceID audioDevice;
 static SDL_AudioSpec wantedSpec;
 static SDL_AudioSpec actualSpec;
+
 
 static void cleanup()
 {

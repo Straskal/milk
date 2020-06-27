@@ -6,6 +6,7 @@
 
 static Logs logs;
 
+
 void initLogs()
 {
     for (int i = 0; i < MAX_LOGS; i++)
@@ -17,6 +18,7 @@ void initLogs()
     logs.count = 0;
     logs.errorCount = 0;
 }
+
 
 static LogMessage *getNextFreeLogMessage()
 {
@@ -30,6 +32,7 @@ static LogMessage *getNextFreeLogMessage()
     else
         return &logs.messages[logs.count++];
 }
+
 
 void logMessage(LogType type, const char *text, ...)
 {
@@ -46,10 +49,12 @@ void logMessage(LogType type, const char *text, ...)
     va_end(args);
 }
 
+
 Logs *getLogs()
 {
     return &logs;
 }
+
 
 void clearLogs()
 {

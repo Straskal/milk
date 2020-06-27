@@ -28,12 +28,6 @@
 #include "wav.h"
 
 
-#define SOUND_IDX_OO_BOUNDS(idx)    (idx < 0 || idx > MAX_LOADED_SOUNDS)
-#define SLOT_IDX_OO_BOUNDS(idx)     (idx < 0 || idx > MAX_SOUND_SLOTS)
-#define _16_BIT_MAX                 32767
-#define LOOP_INDEX                  0
-
-
 void initAudio(Audio *audio)
 {
     memset(&audio->sounds, 0, sizeof(audio->sounds));
@@ -53,6 +47,10 @@ void resetSampleSlot(SoundSlot *slot)
 {
     memset(slot, 0, sizeof(SoundSlot));
 }
+
+
+#define SOUND_IDX_OO_BOUNDS(idx)    (idx < 0 || idx > MAX_LOADED_SOUNDS)
+#define SLOT_IDX_OO_BOUNDS(idx)     (idx < 0 || idx > MAX_SOUND_SLOTS)
 
 
 void loadSound(Audio *audio, int soundIdx, const char *filename)
@@ -190,6 +188,10 @@ void setMasterVolume(Audio *audio, int volume)
 {
     audio->masterVolume = CLAMP(volume, 0, MAX_VOLUME);
 }
+
+
+#define _16_BIT_MAX 32767
+#define LOOP_INDEX  0
 
 
 static void mixStereoSamples(u8 *destination, const u8 *source, int length, int volume)
