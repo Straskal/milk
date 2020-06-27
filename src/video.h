@@ -31,15 +31,16 @@
 
 /*
  *******************************************************************************
- * Specifications:
+ * Specification:
  * - 256x224px resolution
  * - Fixed 50fps
  * - 1 256x256px sprite sheet in memory at a time
  * - 1 128x48px bitmap font in memory at a time
  *
- * Milk draws to an internal framebuffer.
- * The framebuffer is just an array of pixels (32 bit color 0xAARRGGBB). *
- * The sprite sheet and font are stored in fixed size arrays, so they do not need to be freed when milk shuts down. *
+ * Notes:
+ * Milk draws to an internal framebuffer in left->right, bottom->top order.
+ * The framebuffer is just an array of pixels (32 bit color 0xAARRGGBB).
+ * The sprite sheet and font are stored in fixed size, statically allocated arrays, so they do not need to be freed when milk shuts down. *
  * Milk does not support transparency when drawing, but it does use a color key to consider as 'transparent', which is defaulted to black.
  * All drawing functions only operate within the bounds of the clipping rectangle, which is reset to the framebuffer size at the beginning of each frame.
  *******************************************************************************
@@ -78,28 +79,115 @@ typedef struct video
     void(*loadBMP)(const char *, Color32 *, size_t);
 } Video;
 
+/**
+ * Initialize the video submodule.
+ * @param video
+ */
 void initVideo(Video *video);
 
+/**
+ * Load a sprite sheet into memory, replacing the current sprite sheet.
+ * @param video
+ * @param path
+ */
 void loadSpriteSheet(Video *video, const char *path);
 
+/**
+ * Load a font into memory, replace the current font.
+ * @param video
+ * @param path
+ */
 void loadFont(Video *video, const char *path);
 
+/**
+ * Reset video's draw state. This is to happen at the beginning of every new frame.
+ * @param video
+ */
 void resetDrawState(Video *video);
 
+/**
+ * Set the current clipping rectangle. All drawing functions can only draw within its boundaries.
+ * The clipping rectangle gets reset to the framebuffer size at the beginning of each frame.
+ * @param video
+ * @param x
+ * @param y
+ * @param w
+ * @param h
+ */
 void setClippingRect(Video *video, int x, int y, int w, int h);
 
+/**
+ * Clear the framebuffer to the given color.
+ * @param video
+ * @param color
+ */
 void clearFramebuffer(Video *video, Color32 color);
 
+/**
+ * Blit a pixel to the framebuffer at the given coords.
+ * @param video
+ * @param x
+ * @param y
+ * @param color
+ */
 void blitPixel(Video *video, int x, int y, Color32 color);
 
+/**
+ * Blit a colored line to the framebuffer and the given coords.
+ * @param video
+ * @param x0
+ * @param y0
+ * @param x1
+ * @param y1
+ * @param color
+ */
 void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color);
 
+/**
+ * Blit a rectangle to the framebuffer at the given coords.
+ * @param video
+ * @param x
+ * @param y
+ * @param w
+ * @param h
+ * @param color
+ */
 void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color);
 
+/**
+ * Blit a solid rectangle to the framebuffer at the given coords.
+ * @param video
+ * @param x
+ * @param y
+ * @param w
+ * @param h
+ * @param color
+ */
 void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color);
 
+/**
+ * Blit a sprite at the given coordinates.
+ * @param video
+ * @param idx The index of the sprite on the sprite sheet.
+ * @param x
+ * @param y
+ * @param w The number of sprites to span horizontally.
+ * @param h The number of sprites to span vertically.
+ * @param scale
+ * @param flip 0 = no flip, 1 = flip horizontally, 2 = flip vertically, 3 = flip both
+ */
 void blitSprite(Video *video, int idx, int x, int y, int w, int h, int scale, u8 flip);
 
+/**
+ * Blit the given text in the current font.
+ * @param video
+ * @param pixels
+ * @param x
+ * @param y
+ * @param str
+ * @param scale
+ * @param color
+ */
 void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, int scale, Color32 color);
 
 #endif
