@@ -44,7 +44,6 @@ static void cmdReload(Console *console, Milk *milk, char **arguments, int argume
     UNUSED(argumentCount);
 
     unloadCode(milk);
-    loadCode(milk);
     console->isGameInitialized = false;
 
     LOG_INFO("scripts have been reloaded");
@@ -275,6 +274,7 @@ static void handleEscape(Console *console, Milk *milk)
         {
             if (!console->isGameInitialized)
             {
+                loadCode(milk);
                 invokeInit(&milk->code);
                 console->isGameInitialized = true;
             }

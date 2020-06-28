@@ -53,7 +53,7 @@ set(MILK_MAIN_SRC_FILES
 )
 
 add_executable(milk ${MILK_SRC_FILES} ${MILK_MAIN_SRC_FILES})
-target_compile_definitions(milk PUBLIC MILK_CMD)
+target_compile_definitions(milk PUBLIC BUILD_WITH_CONSOLE)
 target_include_directories(milk PUBLIC ${SDL2_INCLUDE_DIR} ${LUA53_INCLUDE_DIR} ${MILK_SRC_DIR})
 if (WIN32)
 	target_link_directories(milk PUBLIC ${SDL2_INCLUDE_DIR} ${LUA53_INCLUDE_DIR} ${MILK_SRC_DIR})

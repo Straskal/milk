@@ -4,26 +4,26 @@
 #define MAX_LOGS       16
 #define MAX_LOG_LENGTH 512
 
-#ifndef MILK_CMD
-#define LOG_INIT()              ((void)0)
-#define LOG_INFO(text)          ((void)0)
-#define LOG_WARN(text)          ((void)0)
-#define LOG_ERROR(text)         ((void)0)
-#define LOG_INFOF(text, ...)    ((void)0)
-#define LOG_WARNF(text, ...)    ((void)0)
-#define LOG_ERRORF(text, ...)   ((void)0)
-#define LOG_GET()               ((void)0)
-#define LOG_CLEAR()             ((void)0)
+#ifdef BUILD_WITH_CONSOLE
+    #define LOG_INIT()              initLogs()
+    #define LOG_INFO(text)          logMessage(INFO,    text)
+    #define LOG_WARN(text)          logMessage(WARN,    text)
+    #define LOG_ERROR(text)         logMessage(ERROR,   text)
+    #define LOG_INFOF(text, ...)    logMessage(INFO,    text, __VA_ARGS__)
+    #define LOG_WARNF(text, ...)    logMessage(WARN,    text, __VA_ARGS__)
+    #define LOG_ERRORF(text, ...)   logMessage(ERROR,   text, __VA_ARGS__)
+    #define LOG_GET()               getLogs()
+    #define LOG_CLEAR()             clearLogs()
 #else
-#define LOG_INIT()              initLogs()
-#define LOG_INFO(text)          logMessage(INFO,    text)
-#define LOG_WARN(text)          logMessage(WARN,    text)
-#define LOG_ERROR(text)         logMessage(ERROR,   text)
-#define LOG_INFOF(text, ...)    logMessage(INFO,    text, __VA_ARGS__)
-#define LOG_WARNF(text, ...)    logMessage(WARN,    text, __VA_ARGS__)
-#define LOG_ERRORF(text, ...)   logMessage(ERROR,   text, __VA_ARGS__)
-#define LOG_GET()               getLogs()
-#define LOG_CLEAR()             clearLogs()
+    #define LOG_INIT()              ((void)0)
+    #define LOG_INFO(text)          ((void)0)
+    #define LOG_WARN(text)          ((void)0)
+    #define LOG_ERROR(text)         ((void)0)
+    #define LOG_INFOF(text, ...)    ((void)0)
+    #define LOG_WARNF(text, ...)    ((void)0)
+    #define LOG_ERRORF(text, ...)   ((void)0)
+    #define LOG_GET()               ((void)0)
+    #define LOG_CLEAR()             ((void)0)
 #endif
 
 typedef enum logType

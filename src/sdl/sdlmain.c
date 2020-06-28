@@ -173,7 +173,10 @@ static void setupAudioDevice()
 static void pollInput()
 {
     ButtonState btnState = BTN_NONE;
+
+#ifdef BUILD_WITH_CONSOLE
     ConsoleInputState consoleInputState = CONSOLE_INPUT_NONE;
+#endif
 
     SDL_Event event;
     while (SDL_PollEvent(&event))
@@ -183,6 +186,7 @@ static void pollInput()
             case SDL_QUIT:
                 milk->shouldQuit = true;
                 break;
+#ifdef BUILD_WITH_CONSOLE
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym)
                 {
@@ -197,6 +201,7 @@ static void pollInput()
                 consoleInputState |= CONSOLE_INPUT_CHAR;
                 console->input.currentChar = event.text.text[0];
                 break;
+#endif
             default:
                 break;
         }
@@ -214,18 +219,26 @@ static void pollInput()
     if (kbState[SDL_SCANCODE_C]) btnState |= BTN_X;
     if (kbState[SDL_SCANCODE_V]) btnState |= BTN_Y;
 
+#ifdef BUILD_WITH_CONSOLE
     if (kbState[SDL_SCANCODE_RETURN]) consoleInputState |= CONSOLE_INPUT_ENTER;
     if (kbState[SDL_SCANCODE_ESCAPE]) consoleInputState |= CONSOLE_INPUT_ESCAPE;
-
-    updateButtonState(&milk->input, btnState);
     console->input.previousState = console->input.state;
     console->input.state = consoleInputState;
+#endif
+
+    updateButtonState(&milk->input, btnState);
+
 }
 
 static void loopFrame()
 {
+#ifdef BUILD_WITH_CONSOLE
     updateConsole(console, milk);
     drawConsole(console, milk);
+#else
+    invokeUpdate(&milk->code);
+    invokeDraw(&milk->code);
+#endif
 }
 
 static void flipFramebuffer()
@@ -244,7 +257,11 @@ int main(int argc, char *argv[])
     initModules();
     setInterfaceFunctions();
     setupAudioDevice();
+
+#ifndef BUILD_WITH_CONSOLE
     loadCode(milk);
+    invokeInit(&milk->code);
+#endif
 
     while (!milk->shouldQuit)
     {
