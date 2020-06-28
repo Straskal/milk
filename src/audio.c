@@ -27,6 +27,9 @@
 #include "audio.h"
 #include "wav.h"
 
+static const int BIT16_MAX = 32767;
+static const int LOOP_INDEX = 0;
+static const int ALL_SOUNDS = -1;
 
 void initAudio(Audio *audio)
 {
@@ -35,27 +38,30 @@ void initAudio(Audio *audio)
     audio->masterVolume = MAX_VOLUME;
 }
 
-
 void freeAudio(Audio *audio)
 {
     for (int i = 0; i < MAX_LOADED_SOUNDS; i++)
         free(audio->sounds[i].samples);
 }
 
-
 void resetSampleSlot(SoundSlot *slot)
 {
     memset(slot, 0, sizeof(SoundSlot));
 }
 
+static bool soundIndexOutOfBounds(int idx)
+{
+    return idx < 0 || idx > MAX_LOADED_SOUNDS;
+}
 
-#define SOUND_IDX_OO_BOUNDS(idx)    (idx < 0 || idx > MAX_LOADED_SOUNDS)
-#define SLOT_IDX_OO_BOUNDS(idx)     (idx < 0 || idx > MAX_SOUND_SLOTS)
-
+static bool slotIndexOutOfBounds(int idx)
+{
+    return idx < 0 || idx > MAX_SOUND_SLOTS;
+}
 
 void loadSound(Audio *audio, int soundIdx, const char *filename)
 {
-    if (SOUND_IDX_OO_BOUNDS(soundIdx))
+    if (soundIndexOutOfBounds(soundIdx))
         return;
 
     audio->lock();
@@ -70,10 +76,9 @@ void loadSound(Audio *audio, int soundIdx, const char *filename)
     audio->unlock();
 }
 
-
 void unloadSound(Audio *audio, int soundIdx)
 {
-    if (SOUND_IDX_OO_BOUNDS(soundIdx))
+    if (soundIndexOutOfBounds(soundIdx))
         return;
 
     audio->lock();
@@ -95,10 +100,9 @@ void unloadSound(Audio *audio, int soundIdx)
     audio->unlock();
 }
 
-
 void playSound(Audio *audio, int slotIdx, int soundIdx, int volume)
 {
-    if (SOUND_IDX_OO_BOUNDS(soundIdx) || SLOT_IDX_OO_BOUNDS(slotIdx))
+    if (soundIndexOutOfBounds(soundIdx) || slotIndexOutOfBounds(slotIdx))
         return;
 
     audio->lock();
@@ -117,82 +121,68 @@ void playSound(Audio *audio, int slotIdx, int soundIdx, int volume)
     audio->unlock();
 }
 
+static void setAllSlotsFromTo(SoundSlot *slots, SoundState from, SoundState to)
+{
+    for (int i = 0; i < MAX_SOUND_SLOTS; i++)
+    {
+        if (IS_BIT_SET(slots[i].state, from))
+        {
+            if (to == STOPPED)
+                resetSampleSlot(&slots[i]);
+            else
+                slots[i].state = to;
+        }
+    }
+}
 
 void stopSound(Audio *audio, int slotIdx)
 {
     audio->lock();
     SoundSlot *slots = audio->slots;
 
-    if (slotIdx == -1)
-    {
-        for (int i = 0; i < MAX_SOUND_SLOTS; i++)
-        {
-            if (slots[i].state == PLAYING)
-                resetSampleSlot(&slots[i]);
-        }
-    }
-    else if (!SLOT_IDX_OO_BOUNDS(slotIdx))
+    if (slotIdx == ALL_SOUNDS)
+        setAllSlotsFromTo(slots, PLAYING | PAUSED, STOPPED);
+    else if (!slotIndexOutOfBounds(slotIdx))
         resetSampleSlot(&slots[slotIdx]);
 
     audio->unlock();
 }
-
 
 void pauseSound(Audio *audio, int slotIdx)
 {
     audio->lock();
     SoundSlot *slots = audio->slots;
 
-    if (slotIdx == -1)
-    {
-        for (int i = 0; i < MAX_SOUND_SLOTS; i++)
-        {
-            if (slots[i].state == PLAYING)
-                slots[i].state = PAUSED;
-        }
-    }
-    else if (!SLOT_IDX_OO_BOUNDS(slotIdx))
+    if (slotIdx == ALL_SOUNDS)
+        setAllSlotsFromTo(slots, PLAYING, PAUSED);
+    else if (!slotIndexOutOfBounds(slotIdx))
         slots[slotIdx].state = PAUSED;
 
     audio->unlock();
 }
-
 
 void resumeSound(Audio *audio, int slotIdx)
 {
     audio->lock();
     SoundSlot *slots = audio->slots;
 
-    if (slotIdx == -1)
-    {
-        for (int i = 0; i < MAX_SOUND_SLOTS; i++)
-        {
-            if (slots[i].state == PAUSED)
-                slots[i].state = PLAYING;
-        }
-    }
-    else if (!SLOT_IDX_OO_BOUNDS(slotIdx))
+    if (slotIdx == ALL_SOUNDS)
+        setAllSlotsFromTo(slots, PAUSED, PLAYING);
+    else if (!slotIndexOutOfBounds(slotIdx))
         slots[slotIdx].state = PLAYING;
 
     audio->unlock();
 }
 
-
 SoundState getSoundState(Audio *audio, int slotIdx)
 {
-    return SLOT_IDX_OO_BOUNDS(slotIdx) ? STOPPED : audio->slots[slotIdx].state;
+    return slotIndexOutOfBounds(slotIdx) ? STOPPED : audio->slots[slotIdx].state;
 }
-
 
 void setMasterVolume(Audio *audio, int volume)
 {
     audio->masterVolume = CLAMP(volume, 0, MAX_VOLUME);
 }
-
-
-#define _16_BIT_MAX 32767
-#define LOOP_INDEX  0
-
 
 static void mixStereoSamples(u8 *destination, const u8 *source, int length, int volume)
 {
@@ -206,14 +196,13 @@ static void mixStereoSamples(u8 *destination, const u8 *source, int length, int 
         sourceSample = source[1] << 8 | source[0];
         sourceSample = (sourceSample * volume) / MAX_VOLUME;
         destSample = destination[1] << 8 | destination[0];
-        mixedSample = CLAMP(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
+        mixedSample = CLAMP(sourceSample + destSample, -BIT16_MAX - 1, BIT16_MAX);
         destination[0] = mixedSample & 0xff;
         destination[1] = (mixedSample >> 8) & 0xff;
         source += 2;
         destination += 2;
     }
 }
-
 
 static void mixInterleavedMonoSamples(u8 *destination, const u8 *source, int length, int volume)
 {
@@ -227,18 +216,17 @@ static void mixInterleavedMonoSamples(u8 *destination, const u8 *source, int len
         sourceSample = source[1] << 8 | source[0];
         sourceSample = (sourceSample * volume) / MAX_VOLUME;
         destSample = destination[1] << 8 | destination[0];
-        mixedSample = CLAMP(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
+        mixedSample = CLAMP(sourceSample + destSample, -BIT16_MAX - 1, BIT16_MAX);
         destination[0] = mixedSample & 0xff;
         destination[1] = (mixedSample >> 8) & 0xff;
         destSample = destination[3] << 8 | destination[2];
-        mixedSample = CLAMP(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
+        mixedSample = CLAMP(sourceSample + destSample, -BIT16_MAX - 1, BIT16_MAX);
         destination[2] = mixedSample & 0xff;
         destination[3] = (mixedSample >> 8) & 0xff;
         source += 2;
         destination += 4;
     }
 }
-
 
 void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)
 {
