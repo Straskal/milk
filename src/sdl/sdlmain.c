@@ -79,17 +79,14 @@ static void freeModules()
  *******************************************************************************
  */
 
-/* Global audio device so we can access from our methods below. */
-static SDL_AudioDeviceID gAudioDevice;
-
 static void lockAudioDevice()
 {
-    SDL_LockAudioDevice(gAudioDevice);
+    SDL_LockAudioDevice(audioDevice);
 }
 
 static void unlockAudioDevice()
 {
-    SDL_UnlockAudioDevice(gAudioDevice);
+    SDL_UnlockAudioDevice(audioDevice);
 }
 
 static void mixCallback(void *userdata, uint8_t *stream, int len)
@@ -155,7 +152,6 @@ static void setupAudioDevice()
     wantedSpec.userdata = (void *)&milk->audio;
 
     audioDevice = SDL_OpenAudioDevice(NULL, 0, &wantedSpec, &actualSpec, 0);
-    gAudioDevice = audioDevice;
 
     if (wantedSpec.format != actualSpec.format || wantedSpec.channels != actualSpec.channels
         || wantedSpec.freq != actualSpec.freq || wantedSpec.samples != actualSpec.samples)
