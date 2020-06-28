@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <string.h>
 
-
 /* TODO: HANDLE ENDIANNESS */
 #define RIFF_MARKER     0x46464952
 #define WAVE_MARKER     0x45564157
@@ -42,14 +41,12 @@
 #define INVALID_FORMAT_TYPE(format)         (format != 1)
 #define INVALID_CHANNEL_COUNT(channelCount) (channelCount != 1 && channelCount != 2)
 
-
 typedef struct riffChunk
 {
     u32     riff;
     u32     fileSize;
     u32     wave;
 } RiffChunk;
-
 
 typedef struct formatChunk
 {
@@ -63,13 +60,11 @@ typedef struct formatChunk
     u16     bitsPerSample;
 } FormatChunk;
 
-
 typedef struct dataChunk
 {
     u32     marker;
     u32     size;
 } DataChunk;
-
 
 typedef struct wavHeader
 {
@@ -77,7 +72,6 @@ typedef struct wavHeader
     FormatChunk format;
     DataChunk   data;
 } WavHeader;
-
 
 int loadWavFile(const char* filename, u8 **data, u32 *length, u8 *channelCount)
 {

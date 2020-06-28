@@ -36,7 +36,6 @@
  *******************************************************************************
  */
 
-
 Milk *createMilk()
 {
     Milk *milk = (Milk *) malloc(sizeof(Milk));
@@ -49,13 +48,11 @@ Milk *createMilk()
     return milk;
 }
 
-
 void freeMilk(Milk *milk)
 {
     freeAudio(&milk->audio);
     free(milk);
 }
-
 
 /*
  *******************************************************************************
@@ -63,9 +60,7 @@ void freeMilk(Milk *milk)
  *******************************************************************************
  */
 
-
 static Milk *globalMilk;
-
 
 static int l_btn(lua_State *L)
 {
@@ -73,13 +68,11 @@ static int l_btn(lua_State *L)
     return 1;
 }
 
-
 static int l_btnp(lua_State *L)
 {
     lua_pushboolean(L, isButtonPressed(&globalMilk->input, (ButtonState) (1 << lua_tointeger(L, 1))));
     return 1;
 }
-
 
 static int l_loadspr(lua_State *L)
 {
@@ -87,13 +80,11 @@ static int l_loadspr(lua_State *L)
     return 0;
 }
 
-
 static int l_loadfont(lua_State *L)
 {
     loadFont(&globalMilk->video, lua_tostring(L, 1));
     return 0;
 }
-
 
 static int l_clip(lua_State *L)
 {
@@ -106,13 +97,11 @@ static int l_clip(lua_State *L)
     return 0;
 }
 
-
 static int l_clrs(lua_State *L)
 {
     clearFramebuffer(&globalMilk->video, (Color32)luaL_optinteger(L, 1, 0x000000));
     return 0;
 }
-
 
 static int l_pset(lua_State *L)
 {
@@ -123,7 +112,6 @@ static int l_pset(lua_State *L)
     );
     return 0;
 }
-
 
 static int l_line(lua_State *L)
 {
@@ -137,7 +125,6 @@ static int l_line(lua_State *L)
     return 0;
 }
 
-
 static int l_rect(lua_State *L)
 {
     blitRectangle(&globalMilk->video,
@@ -150,7 +137,6 @@ static int l_rect(lua_State *L)
     return 0;
 }
 
-
 static int l_rectfill(lua_State *L)
 {
     blitFilledRectangle(&globalMilk->video,
@@ -162,7 +148,6 @@ static int l_rectfill(lua_State *L)
     );
     return 0;
 }
-
 
 static int l_spr(lua_State *L)
 {
@@ -178,7 +163,6 @@ static int l_spr(lua_State *L)
     return 0;
 }
 
-
 static int l_sprfont(lua_State *L)
 {
     blitSpriteFont(&globalMilk->video, globalMilk->video.font,
@@ -191,7 +175,6 @@ static int l_sprfont(lua_State *L)
     return 1;
 }
 
-
 static int l_loadsnd(lua_State *L)
 {
     loadSound(&globalMilk->audio,
@@ -201,7 +184,6 @@ static int l_loadsnd(lua_State *L)
     return 0;
 }
 
-
 static int l_freesnd(lua_State *L)
 {
     unloadSound(&globalMilk->audio,
@@ -209,7 +191,6 @@ static int l_freesnd(lua_State *L)
     );
     return 0;
 }
-
 
 static int l_play(lua_State *L)
 {
@@ -221,7 +202,6 @@ static int l_play(lua_State *L)
     return 0;
 }
 
-
 static int l_pause(lua_State *L)
 {
     pauseSound(&globalMilk->audio,
@@ -229,7 +209,6 @@ static int l_pause(lua_State *L)
     );
     return 0;
 }
-
 
 static int l_resume(lua_State *L)
 {
@@ -239,7 +218,6 @@ static int l_resume(lua_State *L)
     return 0;
 }
 
-
 static int l_stop(lua_State *L)
 {
     stopSound(&globalMilk->audio,
@@ -247,7 +225,6 @@ static int l_stop(lua_State *L)
     );
     return 0;
 }
-
 
 static int l_sndslot(lua_State *L)
 {
@@ -257,7 +234,6 @@ static int l_sndslot(lua_State *L)
     return 1;
 }
 
-
 static int l_vol(lua_State *L)
 {
     setMasterVolume(&globalMilk->audio,
@@ -266,7 +242,6 @@ static int l_vol(lua_State *L)
     return 0;
 }
 
-
 static int l_exit(lua_State *L)
 {
     (void) L;
@@ -274,13 +249,11 @@ static int l_exit(lua_State *L)
     return 0;
 }
 
-
 static void pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_State *))
 {
     lua_pushcfunction(L, api_func);
     lua_setglobal(L, name);
 }
-
 
 static void pushApi(lua_State *L)
 {
@@ -307,7 +280,6 @@ static void pushApi(lua_State *L)
     pushApiFunction(L, "exit", l_exit);
 }
 
-
 void loadCode(Milk *milk)
 {
     if (milk->code.state == NULL)
@@ -323,7 +295,6 @@ void loadCode(Milk *milk)
     }
 }
 
-
 void unloadCode(Milk *milk)
 {
     if (milk->code.state != NULL)
@@ -333,7 +304,6 @@ void unloadCode(Milk *milk)
         globalMilk = NULL;
     }
 }
-
 
 void invokeInit(Code *code)
 {
@@ -347,7 +317,6 @@ void invokeInit(Code *code)
     }
 }
 
-
 void invokeUpdate(Code *code)
 {
     lua_State *L = (lua_State *) code->state;
@@ -359,7 +328,6 @@ void invokeUpdate(Code *code)
         lua_pop(L, -1);
     }
 }
-
 
 void invokeDraw(Code *code)
 {

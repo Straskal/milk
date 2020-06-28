@@ -36,7 +36,6 @@
  *******************************************************************************
  */
 
-
 static void cmdReload(Console *console, Milk *milk, char **arguments, int argumentCount)
 {
     UNUSED(console);
@@ -49,7 +48,6 @@ static void cmdReload(Console *console, Milk *milk, char **arguments, int argume
     LOG_INFO("scripts have been reloaded");
 }
 
-
 static void cmdClear(Console *console, Milk *milk, char **arguments, int argumentCount)
 {
     UNUSED(console);
@@ -61,7 +59,6 @@ static void cmdClear(Console *console, Milk *milk, char **arguments, int argumen
     console->lastErrorCount = 0;
 }
 
-
 static void cmdQuit(Console *console, Milk *milk, char **arguments, int argumentCount)
 {
     UNUSED(console);
@@ -71,13 +68,11 @@ static void cmdQuit(Console *console, Milk *milk, char **arguments, int argument
     milk->shouldQuit = true;
 }
 
-
 typedef struct command
 {
     char *cmd;
     void(*execute)(Console *, Milk *, char **, int);
 } Command;
-
 
 static Command commands[] =
 {
@@ -85,7 +80,6 @@ static Command commands[] =
     { "clear",      cmdClear },
     { "quit",       cmdQuit }
 };
-
 
 #define NUM_COMMANDS sizeof(commands) / sizeof(Command)
 
@@ -95,9 +89,7 @@ static Command commands[] =
  *******************************************************************************
  */
 
-
 static unsigned int ticks = 0;
-
 
 static void resetCommandCandidate(Console *console)
 {
@@ -106,7 +98,6 @@ static void resetCommandCandidate(Console *console)
         console->commandCandidate[i] = 0;
 }
 
-
 Console *createConsole()
 {
     Console *console = calloc(1, sizeof(Console));
@@ -114,7 +105,6 @@ Console *createConsole()
     resetCommandCandidate(console);
     return console;
 }
-
 
 void freeConsole(Console *console)
 {
@@ -127,16 +117,13 @@ void freeConsole(Console *console)
  *******************************************************************************
  */
 
-
 #define MAX_COMMAND_ARGUMENTS	8
 #define COMMAND_DELIMITER		" "
-
 
 static char* getCommandName(char* candidate)
 {
     return strtok(candidate, COMMAND_DELIMITER);
 }
-
 
 static Command *getCommand(const char *commandName)
 {
@@ -148,7 +135,6 @@ static Command *getCommand(const char *commandName)
     return NULL;
 }
 
-
 static void getCommandParameters(const char* candidateArguments, char **arguments, int *argumentCount)
 {
     candidateArguments = strtok(NULL, COMMAND_DELIMITER);
@@ -158,7 +144,6 @@ static void getCommandParameters(const char* candidateArguments, char **argument
         candidateArguments = strtok(NULL, COMMAND_DELIMITER);
     }
 }
-
 
 /* <command> <...args> */
 static Command *parseCommand(char *candidate, char **arguments, int *argumentCount)
@@ -175,22 +160,16 @@ static Command *parseCommand(char *candidate, char **arguments, int *argumentCou
     return command;
 }
 
-
 /*
  *******************************************************************************
  * Input
  *******************************************************************************
  */
 
-
-#define IS_BIT_SET(val, bit) (val & bit)
-
-
 static bool hasInputContinuous(ConsoleInput *input, ConsoleInputState inputState)
 {
     return IS_BIT_SET(input->state, inputState);
 }
-
 
 static bool hasInput(ConsoleInput *input, ConsoleInputState inputState)
 {
@@ -199,13 +178,11 @@ static bool hasInput(ConsoleInput *input, ConsoleInputState inputState)
     return IS_BIT_SET(currentState, inputState) && !IS_BIT_SET(previousState, inputState);
 }
 
-
 static void handleBackspace(Console *console)
 {
     if (hasInputContinuous(&console->input, CONSOLE_INPUT_BACK) && console->commandCandidateLength > 0)
         console->commandCandidate[--console->commandCandidateLength] = '\0';
 }
-
 
 static void handleCharacterInput(Console *console)
 {
@@ -216,7 +193,6 @@ static void handleCharacterInput(Console *console)
     }
 }
 
-
 static void handleGoToPreviousCommand(Console *console, Milk *milk)
 {
     if (isButtonPressed(&milk->input, BTN_UP) && console->previousCommandLength > 0)
@@ -226,13 +202,11 @@ static void handleGoToPreviousCommand(Console *console, Milk *milk)
     }
 }
 
-
 static void handleClearCandidate(Console *console, Milk *milk)
 {
     if (isButtonPressed(&milk->input, BTN_DOWN))
         resetCommandCandidate(console);
 }
-
 
 static void handleEnter(Console *console, Milk *milk)
 {
@@ -259,7 +233,6 @@ static void handleEnter(Console *console, Milk *milk)
     }
 }
 
-
 static void handleEscape(Console *console, Milk *milk)
 {
     if (hasInput(&console->input, CONSOLE_INPUT_ESCAPE))
@@ -285,7 +258,6 @@ static void handleEscape(Console *console, Milk *milk)
     }
 }
 
-
 static void handleInput(Console *console, Milk *milk)
 {
     handleBackspace(console);
@@ -295,13 +267,11 @@ static void handleInput(Console *console, Milk *milk)
     handleEnter(console, milk);
 }
 
-
 /*
  *******************************************************************************
  * Update
  *******************************************************************************
  */
-
 
 static void haltOnError(Console *console)
 {
@@ -312,7 +282,6 @@ static void haltOnError(Console *console)
         console->input.startTextInput();
     }
 }
-
 
 void updateConsole(Console *console, Milk *milk)
 {
@@ -332,13 +301,11 @@ void updateConsole(Console *console, Milk *milk)
     }
 }
 
-
 /*
  *******************************************************************************
  * Drawing
  *******************************************************************************
  */
-
 
 #define VERSION_HEADER "MILK [1.0.0]"
 
@@ -352,7 +319,6 @@ void updateConsole(Console *console, Milk *milk)
 #define MAX_LINES		    ((LOG_END_HEIGHT - LOG_START_HEIGHT) / CHAR_WIDTH)
 #define CHARS_PER_LINE	    31
 
-
 static void drawCommandLine(Console *console, Milk *milk)
 {
     clearFramebuffer(&milk->video, 0x000000);
@@ -365,7 +331,6 @@ static void drawCommandLine(Console *console, Milk *milk)
     if (ticks % 64 < 48)
         blitFilledRectangle(&milk->video, 24 + console->commandCandidateLength * CHAR_WIDTH, 40, 6, 8, 0xc10a31);
 }
-
 
 static void drawPlayingIndicator(Console *console, Milk *milk)
 {
@@ -383,13 +348,11 @@ static void drawPlayingIndicator(Console *console, Milk *milk)
     }
 }
 
-
 typedef struct consoleLine
 {
     char text[CHARS_PER_LINE];
     Color32 color;
 } ConsoleLine;
-
 
 static Color32 getLogColor(LogType type)
 {
@@ -405,7 +368,6 @@ static Color32 getLogColor(LogType type)
             return COMMAND_INFO_COLOR;
     }
 }
-
 
 static void getLogLines(Logs *logs, ConsoleLine *lines, int *numLines)
 {
@@ -444,7 +406,6 @@ static void getLogLines(Logs *logs, ConsoleLine *lines, int *numLines)
     *numLines = currentLine;
 }
 
-
 static void drawLogLines(Milk *milk)
 {
     ConsoleLine lines[MAX_LINES];
@@ -455,7 +416,6 @@ static void drawLogLines(Milk *milk)
     for (int i = 0; i < numLines; i++)
         blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, LOG_START_HEIGHT + ((CHAR_HEIGHT + 2) * i), lines[i].text, 1, lines[i].color);
 }
-
 
 void drawConsole(Console *console, Milk *milk)
 {
