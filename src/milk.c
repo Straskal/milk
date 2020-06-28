@@ -363,6 +363,8 @@ void invokeUpdate(Code *code)
 
 void invokeDraw(Code *code)
 {
+    resetDrawState(&globalMilk->video);
+
     lua_State *L = (lua_State *) code->state;
     lua_getglobal(L, "_draw");
 

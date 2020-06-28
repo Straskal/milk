@@ -36,9 +36,8 @@
  *
  * Notes:
  * Mono sounds are interleaved during mixing.
- */
-
-/**
+ *
+ *
  * Load a wave file.
  * @param filename
  * @param data

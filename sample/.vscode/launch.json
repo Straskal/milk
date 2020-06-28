@@ -8,12 +8,10 @@
             "name": "Debug",
             "type": "lua-local",
             "request": "launch",
-            "sourceRoot": "main.ts",
             "cwd": "${workspaceFolder}/build",
             "program": {
-                "command": "milk",
-            },
-            "args": []
+                "command": "milk"
+            }
         }
     ]
 }

@@ -47,9 +47,9 @@ set(MILK_SRC_FILES
 set(MILK_MAIN_SRC_FILES
 	src/console.c
 	src/console.h
-	src/main.c
 	src/milk.c
 	src/milk.h
+	src/sdl/sdlmain.c
 )
 
 add_executable(milk ${MILK_SRC_FILES} ${MILK_MAIN_SRC_FILES})
