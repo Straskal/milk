@@ -85,6 +85,7 @@ void loadSound(Audio *audio, int soundIdx, const char *filename);
 void unloadSound(Audio *audio, int soundIdx);
 
 // Play sound[soundIdx] at the given slot index.
+// Slot index 0 will loop the sound.
 void playSound(Audio *audio, int slotIdx, int soundIdx, int volume);
 
 // Stop the sound at the given slot index.
