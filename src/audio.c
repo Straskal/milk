@@ -196,6 +196,8 @@ static void mixStereoSamples(u8 *destination, const u8 *source, int length, int 
 }
 
 // Interleaves a mono sound into the given destination buffer.
+// This involves straight up playing each mono sample in both left and right channels, effectively doubling everything.
+// We interleave mono sounds at mix time as opposed to converting the mono to stereo, so we don't have to double our memory usage.
 static void mixInterleavedMonoSamples(u8 *destination, const u8 *source, int length, int volume)
 {
 	i16 sourceSample;
