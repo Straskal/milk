@@ -3,24 +3,10 @@
 
 #include "milk.h"
 
-/*
- * Specification:
- * - PCM
- * - Mono or stereo
- * - 16 bit samples
- * - 44100 sample rate
- *
- * Notes:
- * Mono sounds are interleaved during mixing.
- *
- *
- * Load a wave file.
- * @param filename
- * @param data
- * @param length
- * @param channelCount
- * @return
- */
+// There are limits to what kind of wave files we can load.
+// - Mono and stereo PCM
+// - Signed 16 bit samples
+// - 44,100 sample rate.
 int loadWavFile(const char* filename, u8 **data, u32 *length, u8 *channelCount);
 
 #endif
