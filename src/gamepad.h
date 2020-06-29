@@ -3,17 +3,7 @@
 
 #include <stdbool.h>
 
- /********************************************************************************
-	* Specification:
-	* - [9] buttons to emulate a basic gamepad.
-	* - There are keyboard mappings.
-	* - Buttons can be either up or down.
-	*
-	* Notes:
-	* Milk's input is pretty bare bones. Nothing fancy.
-	* Emulating a gamepad keeps the API simple. I don't plan on adding mouse or text input support.
-	*******************************************************************************/
-
+// Emulating a gamepad for all input makes the API clean and simple. I do not plan on adding mouse or text input support.
 typedef enum buttonState
 {
 	BTN_NONE  = 0 << 0,
@@ -39,34 +29,19 @@ typedef struct input
 	Gamepad gamepad;
 } Input;
 
-/**
- * Initialize the input.
- * @param input
- */
+// Initializes the input module.
 void initInput(Input *input);
 
-/**
- * Update the button state of the gamepad.
- * @param input
- */
+// Updates the button state for the gamepad.
+// Platform code is responsible for calling this function when system input is polled.
 void updateButtonState(Input *input, ButtonState state);
 
-/**
- * Returns true if the given button state matches current state.
- * This is good for continuous button presses.
- * @param input
- * @param button
- * @return
- */
+// Returns true if the given button state matches current state.
+// This is good for continuous button presses.
 bool isButtonDown(Input *input, ButtonState button);
 
-/**
- * Returns true if the given button state matches current state and not the previous state.
- * This is good for single button presses.
- * @param input
- * @param button
- * @return
- */
+// Returns true if the given button state matches current state and not the previous state.
+// This is good for single button presses.
 bool isButtonPressed(Input *input, ButtonState button);
 
 #endif

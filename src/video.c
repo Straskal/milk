@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "embed/font.h"
@@ -39,8 +40,11 @@ void setClippingRect(Video *video, int x, int y, int w, int h)
 	video->clipRect.bottom = CLAMP(y + h, 0, FRAMEBUFFER_HEIGHT);
 }
 
-#define FRAMEBUFFER_POS(x, y)           ((FRAMEBUFFER_WIDTH * y) + x)
-#define WITHIN_CLIP_RECT(clip, x, y)    (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
+// Transform an x and y coordinate to a framebuffer index.
+#define FRAMEBUFFER_POS(x, y) ((FRAMEBUFFER_WIDTH * y) + x)
+
+// Evaluates to true if the given coordinates are within the clipping rectangle.
+#define WITHIN_CLIP_RECT(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
 
 void clearFramebuffer(Video *video, Color32 color)
 {
@@ -59,6 +63,8 @@ void blitPixel(Video *video, int x, int y, Color32 color)
 		video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
+// The bresenham line drawing algorithm is pretty much THE line drawing algorithm.
+// A simple web search will give you all the information that you need about it.
 static void bresenhamLine(Video *video, int x0, int y0, int x1, int y1, Color32 color)
 {
 	int xDistance = x1 - x0;
@@ -120,10 +126,10 @@ static void verticalLine(Video *video, int x, int y, int h, Color32 color)
 
 void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color)
 {
-	horizontalLine(video, x, y, w, color); /* Top edge */
-	horizontalLine(video, x, y + h, w, color); /* Bottom edge */
-	verticalLine(video, x, y, h, color); /* Left edge */
-	verticalLine(video, x + w, y, h, color); /* Right edge */
+	horizontalLine(video, x, y, w, color); // Top edge
+	horizontalLine(video, x, y + h, w, color); // Bottom edge
+	verticalLine(video, x, y, h, color); // Left edge
+	verticalLine(video, x + w, y, h, color); // Right edge
 }
 
 void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color)
@@ -135,11 +141,14 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
 	}
 }
 
-#define MIN_SCALE						1
-#define MAX_SCALE						5
-#define IS_FLIPPED_X(flip)	(flip & 1)
-#define IS_FLIPPED_Y(flip)	(flip & 2)
+// To be honest, these values are kind of arbitrary.
+#define MIN_SCALE	1
+#define MAX_SCALE	5
 
+// Nearest neighbor scaling is almost exactly what it sounds like.
+// First it determines the ratio between the old size and the scaled size.
+// Using this ratio, it calculates the nearest neighboring pixel to the original pixel, and uses that to fill in the blanks.
+// This results is very pixelated, scaled images, which is perfect for pixel art.
 static void nearestNeighbor(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 *color)
 {
 	scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
@@ -148,10 +157,13 @@ static void nearestNeighbor(Video *video, const Color32 *pixels, int x, int y, i
 	int height = h * scale;
 	int xRatio = (int)floor((double)(w << 16) / width + 0.5);
 	int yRatio = (int)floor((double)(h << 16) / height + 0.5);
-	int xPixelStart = IS_FLIPPED_X(flip) ? width - 1 : 0;
-	int yPixelStart = IS_FLIPPED_Y(flip) ? height - 1 : 0;
-	int xStep = IS_FLIPPED_X(flip) ? -1 : 1;
-	int yStep = IS_FLIPPED_Y(flip) ? -1 : 1;
+
+	bool isXFlipped = IS_BIT_SET(flip, 1);
+	bool isYFlipped = IS_BIT_SET(flip, 2);
+	int xPixelStart = isXFlipped ? width - 1 : 0;
+	int yPixelStart = isYFlipped ? height - 1 : 0;
+	int xStep = isXFlipped ? -1 : 1;
+	int yStep = isYFlipped ? -1 : 1;
 
 	int xPixel, yPixel, xFramebuffer, yFramebuffer;
 	for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yStep)
@@ -173,29 +185,47 @@ static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, i
 	nearestNeighbor(video, pixels, x, y, w, h, pitch, scale, flip, color);
 }
 
-#define SPRSHEET_IDX_OO_BOUNDS(idx)	(idx < 0 || SPRITE_SHEET_SQRSIZE < idx)
-#define SPRSHEET_COLUMNS						((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
-#define SPRSHEET_ROW_SIZE						((int)(SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE))
-#define SPRSHEET_COL_SIZE						SPRITE_SQRSIZE
-#define SPRSHEET_POS(x, y)					(y * SPRSHEET_ROW_SIZE + x * SPRSHEET_COL_SIZE)
+// Number of colums in the sprite sheet
+#define SPRSHEET_COLUMNS ((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
+
+// The size of each row, in pixels.
+#define SPRSHEET_ROW_SIZE ((int)(SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE))
+
+// Transform a row and column into a sprite sheet index.
+#define SPRSHEET_POS(x, y) (y * SPRSHEET_ROW_SIZE + x * SPRITE_SQRSIZE)
+
+static bool isSpriteIndexWithinBounds(int index)
+{
+	return index >= 0 && index < SPRITE_SHEET_SQRSIZE;
+}
 
 void blitSprite(Video *video, int idx, int x, int y, int w, int h, int scale, u8 flip)
 {
-	if (SPRSHEET_IDX_OO_BOUNDS(idx))
-		return;
-
-	int width = w * SPRITE_SQRSIZE;
-	int height = h * SPRITE_SQRSIZE;
-	int row = (int)floor((double)idx / SPRSHEET_COLUMNS);
-	int col = (int)floor((double)(idx % SPRSHEET_COLUMNS));
-	Color32 *pixels = &video->spriteSheet[SPRSHEET_POS(col, row)];
-	blitRect(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, NULL);
+	if (isSpriteIndexWithinBounds(idx))
+	{
+		int width = w * SPRITE_SQRSIZE;
+		int height = h * SPRITE_SQRSIZE;
+		int row = (int)floor((double)idx / SPRSHEET_COLUMNS);
+		int col = (int)floor((double)(idx % SPRSHEET_COLUMNS));
+		Color32 *pixels = &video->spriteSheet[SPRSHEET_POS(col, row)];
+		blitRect(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, NULL);
+	}
 }
 
-#define FONT_COLUMNS		((int)(FONT_WIDTH / CHAR_WIDTH))
-#define FONT_ROW_SIZE		((int)(FONT_WIDTH * CHAR_HEIGHT))
-#define FONT_POS(x, y)	(y * FONT_ROW_SIZE + x * CHAR_WIDTH)
+// Number of colums in the font
+#define FONT_COLUMNS ((int)(FONT_WIDTH / CHAR_WIDTH))
+
+// The size of each row, in pixels.
+#define FONT_ROW_SIZE ((int)(FONT_WIDTH * CHAR_HEIGHT))
+
+// Transform a row and column into a font index.
+#define FONT_POS(x, y) (y * FONT_ROW_SIZE + x * CHAR_WIDTH)
+
+// Evaluates to true if the given character is ASCII.
+// We're using signed chars, which cap at 128.
 #define IS_ASCII(c)			(0 < c)
+
+// Evaluates to true if the given character is a newline.
 #define IS_NEWLINE(c)		(c == '\n')
 
 void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, int scale, Color32 color)
@@ -213,8 +243,12 @@ void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const cha
 	{
 		if (!IS_NEWLINE(curr))
 		{
-			if (!IS_ASCII(curr)) curr = '?';
-			int row = (int)floor((double)(curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
+			// If the given character is not ASCII, we will display a '?'. Problem solved.
+			if (!IS_ASCII(curr))
+				curr = '?';
+
+			// bitmap font starts at ASCII character 32 (SPACE)
+			int row = (int)floor((double)(curr - 32) / FONT_COLUMNS); 
 			int col = (int)floor((double)((curr - 32) % FONT_COLUMNS));
 			const Color32 *pixelStart = &pixels[FONT_POS(col, row)];
 			blitRect(video, pixelStart, xCurrent, yCurrent, CHAR_WIDTH, CHAR_HEIGHT, FONT_WIDTH, scale, 0, &color);
