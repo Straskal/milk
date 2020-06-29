@@ -65,6 +65,7 @@ void blitPixel(Video *video, int x, int y, Color32 color)
 
 // The bresenham line drawing algorithm is pretty much THE line drawing algorithm.
 // A simple web search will give you all the information that you need about it.
+// This is a slightly modified version to handle the case when y1 < y0 or x1 < x0.
 static void bresenhamLine(Video *video, int x0, int y0, int x1, int y1, Color32 color)
 {
 	int xDistance = x1 - x0;
@@ -146,6 +147,7 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
 #define MAX_SCALE	5
 
 // Nearest neighbor scaling is almost exactly what it sounds like.
+// A simple web search will give more detailed information.
 // First it determines the ratio between the old size and the scaled size.
 // Using this ratio, it calculates the nearest neighboring pixel to the original pixel, and uses that to fill in the blanks.
 // This results is very pixelated, scaled images, which is perfect for pixel art.
