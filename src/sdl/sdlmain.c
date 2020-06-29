@@ -1,27 +1,3 @@
-/*
- *  MIT License
- *
- *  Copyright(c) 2018 - 2020 Stephen Traskal
- *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files(the "Software"), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions :
- *
- *  The above copyright notice and this permission notice shall be included in all
- *  copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  SOFTWARE.
- */
-
 #include "milk.h"
 #include "console.h"
 
@@ -47,30 +23,30 @@ static SDL_AudioDeviceID audioDevice;
 
 static void initModules()
 {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
-    {
-        printf("Error initializing SDL: %s", SDL_GetError());
-        exit(1);
-    }
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
+	{
+		printf("Error initializing SDL: %s", SDL_GetError());
+		exit(1);
+	}
 
-    milk = createMilk();
-    console = createConsole();
-    window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI );
-    renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
-    frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
-    SDL_RenderSetLogicalSize(renderer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	milk = createMilk();
+	console = createConsole();
+	window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+	renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
+	frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	SDL_RenderSetLogicalSize(renderer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 }
 
 static void freeModules()
 {
-    unloadCode(milk);
-    SDL_CloseAudioDevice(audioDevice);
-    SDL_DestroyTexture(frontBufferTexture);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    freeConsole(console);
-    freeMilk(milk);
-    SDL_Quit();
+	unloadCode(milk);
+	SDL_CloseAudioDevice(audioDevice);
+	SDL_DestroyTexture(frontBufferTexture);
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	freeConsole(console);
+	freeMilk(milk);
+	SDL_Quit();
 }
 
 /*
@@ -81,47 +57,47 @@ static void freeModules()
 
 static void lockAudioDevice()
 {
-    SDL_LockAudioDevice(audioDevice);
+	SDL_LockAudioDevice(audioDevice);
 }
 
 static void unlockAudioDevice()
 {
-    SDL_UnlockAudioDevice(audioDevice);
+	SDL_UnlockAudioDevice(audioDevice);
 }
 
 static void mixCallback(void *userdata, uint8_t *stream, int len)
 {
-    mixSamplesIntoStream((Audio *)userdata, stream, (size_t)len);
+	mixSamplesIntoStream((Audio *)userdata, stream, (size_t)len);
 }
 
 static void loadBmp(const char *filename, Color32 *dest, size_t len)
 {
-    SDL_Surface *bmp = SDL_LoadBMP(filename);
-    if (bmp == NULL)
-        return;
+	SDL_Surface *bmp = SDL_LoadBMP(filename);
+	if (bmp == NULL)
+		return;
 
-    uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
+	uint8_t *bmpPixels = (Uint8 *)bmp->pixels;
 
-    for (size_t i = 0; i < len; i++)
-    {
-        uint32_t b = *bmpPixels++;
-        uint32_t g = *bmpPixels++;
-        uint32_t r = *bmpPixels++;
+	for (size_t i = 0; i < len; i++)
+	{
+		uint32_t b = *bmpPixels++;
+		uint32_t g = *bmpPixels++;
+		uint32_t r = *bmpPixels++;
 
-        dest[i] = (r << 16u) | (g << 8u) | (b);
-    }
+		dest[i] = (r << 16u) | (g << 8u) | (b);
+	}
 
-    SDL_FreeSurface(bmp);
+	SDL_FreeSurface(bmp);
 }
 
 static void startTextInput()
 {
-    SDL_StartTextInput();
+	SDL_StartTextInput();
 }
 
 static void stopTextInput()
 {
-    SDL_StopTextInput();
+	SDL_StopTextInput();
 }
 
 /*
@@ -132,36 +108,36 @@ static void stopTextInput()
 
 static void setInterfaceFunctions()
 {
-    milk->audio.lock = lockAudioDevice;
-    milk->audio.unlock = unlockAudioDevice;
-    console->input.startTextInput = startTextInput;
-    console->input.stopTextInput = stopTextInput;
-    milk->video.loadBMP = loadBmp;
+	milk->audio.lock = lockAudioDevice;
+	milk->audio.unlock = unlockAudioDevice;
+	console->input.startTextInput = startTextInput;
+	console->input.stopTextInput = stopTextInput;
+	milk->video.loadBMP = loadBmp;
 }
 
 static void setupAudioDevice()
 {
-    SDL_AudioSpec wantedSpec;
-    SDL_AudioSpec actualSpec;
+	SDL_AudioSpec wantedSpec;
+	SDL_AudioSpec actualSpec;
 
-    wantedSpec.freq = AUDIO_FREQUENCY;
-    wantedSpec.format = AUDIO_S16LSB;
-    wantedSpec.channels = AUDIO_CHANNELS;
-    wantedSpec.samples = AUDIO_SAMPLES;
-    wantedSpec.callback = mixCallback;
-    wantedSpec.userdata = (void *)&milk->audio;
+	wantedSpec.freq = AUDIO_FREQUENCY;
+	wantedSpec.format = AUDIO_S16LSB;
+	wantedSpec.channels = AUDIO_CHANNELS;
+	wantedSpec.samples = 4096;
+	wantedSpec.callback = mixCallback;
+	wantedSpec.userdata = (void *)&milk->audio;
 
-    audioDevice = SDL_OpenAudioDevice(NULL, 0, &wantedSpec, &actualSpec, 0);
+	audioDevice = SDL_OpenAudioDevice(NULL, 0, &wantedSpec, &actualSpec, 0);
 
-    if (wantedSpec.format != actualSpec.format || wantedSpec.channels != actualSpec.channels
-        || wantedSpec.freq != actualSpec.freq || wantedSpec.samples != actualSpec.samples)
-    {
-        printf("Audio device is not supported.");
-        exit(1);
-    }
+	if (wantedSpec.format != actualSpec.format || wantedSpec.channels != actualSpec.channels
+		|| wantedSpec.freq != actualSpec.freq || wantedSpec.samples != actualSpec.samples)
+	{
+		printf("Audio device is not supported.");
+		exit(1);
+	}
 
-    const int noDontPauseIt_PlayItInstead = 0;
-    SDL_PauseAudioDevice(audioDevice, noDontPauseIt_PlayItInstead);
+	const int noDontPauseIt_PlayItInstead = 0;
+	SDL_PauseAudioDevice(audioDevice, noDontPauseIt_PlayItInstead);
 }
 
 /*
@@ -172,110 +148,110 @@ static void setupAudioDevice()
 
 static void pollInput()
 {
-    ButtonState btnState = BTN_NONE;
+	ButtonState btnState = BTN_NONE;
 
 #ifdef BUILD_WITH_CONSOLE
-    ConsoleInputState consoleInputState = CONSOLE_INPUT_NONE;
+	ConsoleInputState consoleInputState = CONSOLE_INPUT_NONE;
 #endif
 
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
-        switch (event.type)
-        {
-            case SDL_QUIT:
-                milk->shouldQuit = true;
-                break;
+	SDL_Event event;
+	while (SDL_PollEvent(&event))
+	{
+		switch (event.type)
+		{
+		case SDL_QUIT:
+			milk->shouldQuit = true;
+			break;
 #ifdef BUILD_WITH_CONSOLE
-            case SDL_KEYDOWN:
-                switch (event.key.keysym.sym)
-                {
-                    case SDLK_BACKSPACE:
-                        consoleInputState |= CONSOLE_INPUT_BACK;
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case SDL_TEXTINPUT:
-                consoleInputState |= CONSOLE_INPUT_CHAR;
-                console->input.currentChar = event.text.text[0];
-                break;
+		case SDL_KEYDOWN:
+			switch (event.key.keysym.sym)
+			{
+			case SDLK_BACKSPACE:
+				consoleInputState |= CONSOLE_INPUT_BACK;
+				break;
+			default:
+				break;
+			}
+			break;
+		case SDL_TEXTINPUT:
+			consoleInputState |= CONSOLE_INPUT_CHAR;
+			console->input.currentChar = event.text.text[0];
+			break;
 #endif
-            default:
-                break;
-        }
-    }
+		default:
+			break;
+		}
+	}
 
-    const Uint8 *kbState = SDL_GetKeyboardState(NULL);
+	const Uint8 *kbState = SDL_GetKeyboardState(NULL);
 
-    if (kbState[SDL_SCANCODE_P]) btnState |= BTN_START;
-    if (kbState[SDL_SCANCODE_UP]) btnState |= BTN_UP;
-    if (kbState[SDL_SCANCODE_DOWN]) btnState |= BTN_DOWN;
-    if (kbState[SDL_SCANCODE_LEFT]) btnState |= BTN_LEFT;
-    if (kbState[SDL_SCANCODE_RIGHT]) btnState |= BTN_RIGHT;
-    if (kbState[SDL_SCANCODE_Z]) btnState |= BTN_A;
-    if (kbState[SDL_SCANCODE_X]) btnState |= BTN_B;
-    if (kbState[SDL_SCANCODE_C]) btnState |= BTN_X;
-    if (kbState[SDL_SCANCODE_V]) btnState |= BTN_Y;
+	if (kbState[SDL_SCANCODE_P]) btnState |= BTN_START;
+	if (kbState[SDL_SCANCODE_UP]) btnState |= BTN_UP;
+	if (kbState[SDL_SCANCODE_DOWN]) btnState |= BTN_DOWN;
+	if (kbState[SDL_SCANCODE_LEFT]) btnState |= BTN_LEFT;
+	if (kbState[SDL_SCANCODE_RIGHT]) btnState |= BTN_RIGHT;
+	if (kbState[SDL_SCANCODE_Z]) btnState |= BTN_A;
+	if (kbState[SDL_SCANCODE_X]) btnState |= BTN_B;
+	if (kbState[SDL_SCANCODE_C]) btnState |= BTN_X;
+	if (kbState[SDL_SCANCODE_V]) btnState |= BTN_Y;
 
 #ifdef BUILD_WITH_CONSOLE
-    if (kbState[SDL_SCANCODE_RETURN]) consoleInputState |= CONSOLE_INPUT_ENTER;
-    if (kbState[SDL_SCANCODE_ESCAPE]) consoleInputState |= CONSOLE_INPUT_ESCAPE;
-    console->input.previousState = console->input.state;
-    console->input.state = consoleInputState;
+	if (kbState[SDL_SCANCODE_RETURN]) consoleInputState |= CONSOLE_INPUT_ENTER;
+	if (kbState[SDL_SCANCODE_ESCAPE]) consoleInputState |= CONSOLE_INPUT_ESCAPE;
+	console->input.previousState = console->input.state;
+	console->input.state = consoleInputState;
 #endif
 
-    updateButtonState(&milk->input, btnState);
+	updateButtonState(&milk->input, btnState);
 
 }
 
 static void loopFrame()
 {
 #ifdef BUILD_WITH_CONSOLE
-    updateConsole(console, milk);
-    drawConsole(console, milk);
+	updateConsole(console, milk);
+	drawConsole(console, milk);
 #else
-    invokeUpdate(&milk->code);
-    invokeDraw(&milk->code);
+	invokeUpdate(&milk->code);
+	invokeDraw(&milk->code);
 #endif
 }
 
 static void flipFramebuffer()
 {
-    SDL_UpdateTexture(frontBufferTexture, NULL, (void *)milk->video.framebuffer, MILK_FRAMEBUF_PITCH);
-    SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
-    SDL_RenderPresent(renderer);
+	SDL_UpdateTexture(frontBufferTexture, NULL, (void *)milk->video.framebuffer, MILK_FRAMEBUF_PITCH);
+	SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
+	SDL_RenderPresent(renderer);
 }
 
 int main(int argc, char *argv[])
 {
-    UNUSED(argc);
-    UNUSED(argv);
+	UNUSED(argc);
+	UNUSED(argv);
 
-    atexit(freeModules);
-    initModules();
-    setInterfaceFunctions();
-    setupAudioDevice();
+	atexit(freeModules);
+	initModules();
+	setInterfaceFunctions();
+	setupAudioDevice();
 
 #ifndef BUILD_WITH_CONSOLE
-    loadCode(milk);
-    invokeInit(&milk->code);
+	loadCode(milk);
+	invokeInit(&milk->code);
 #endif
 
-    while (!milk->shouldQuit)
-    {
-        Uint32 frameStartTicks = SDL_GetTicks();
+	while (!milk->shouldQuit)
+	{
+		Uint32 frameStartTicks = SDL_GetTicks();
 
-        pollInput();
-        loopFrame();
-        flipFramebuffer();
+		pollInput();
+		loopFrame();
+		flipFramebuffer();
 
-        Uint32 elapsedTicks = SDL_GetTicks() - frameStartTicks;
+		Uint32 elapsedTicks = SDL_GetTicks() - frameStartTicks;
 
-        if (elapsedTicks < FRAMERATE)
-            SDL_Delay((Uint32)(FRAMERATE - elapsedTicks));
-    }
+		if (elapsedTicks < FRAMERATE)
+			SDL_Delay((Uint32)(FRAMERATE - elapsedTicks));
+	}
 
-    return 0;
+	return 0;
 }

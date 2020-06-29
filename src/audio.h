@@ -1,27 +1,3 @@
-/*
- *  MIT License
- *
- *  Copyright(c) 2018 - 2020 Stephen Traskal
- *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files(the "Software"), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions :
- *
- *  The above copyright notice and this permission notice shall be included in all
- *  copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  SOFTWARE.
- */
-
 #ifndef __AUDIO_H__
 #define __AUDIO_H__
 
@@ -29,59 +5,57 @@
 
 #include "common.h"
 
-/*
- *******************************************************************************
- * Specification:
- * - [16] sounds loaded in memory at time.
- * - Sounds are played when inserted into one of the [16] sound slots.
- * - A single sound can be inserted into multiple sound slots.
- * - Sound slot [0] loops.
- *
- * Notes:
- * Sounds are dynamically allocated and must be freed.
- * The only memory limit on sound is the hardware.
- * Platform code is responsible for passing an audio device stream to milk. Milk will mix it's sounds into the stream.
- *******************************************************************************
- */
+// 44,100 Hz / 44,100 samples per second.
+#define AUDIO_FREQUENCY 44100
 
-#define AUDIO_FREQUENCY     44100
-#define AUDIO_CHANNELS      2 /* Stereo */
-#define AUDIO_SAMPLES       4096
-#define MAX_LOADED_SOUNDS   16
-#define MAX_SOUND_SLOTS     16
-#define MAX_VOLUME          128
+// 2 output channels / stereo.
+#define AUDIO_CHANNELS 2
+
+// 16 sounds can be loaded into memory at once. The only memory limit for each individual sound is the hardware.
+#define MAX_LOADED_SOUNDS 16
+
+// 16 sounds can be playing concurrently.
+#define MAX_SOUND_SLOTS 16
+
+// Max volume that milk uses.
+#define MAX_VOLUME 128
 
 typedef struct soundData
 {
-    u32 length;
-    u8  *samples;
-    u8  channelCount;
+  // The length of the sound in bytes.
+	u32 length;
+
+  // Pointer to sample buffer.
+	u8  *samples;
+
+  // Number of channels the specific sound.
+	u8  channelCount;
 } SoundData;
 
 typedef enum soundState
 {
-    STOPPED,
-    PLAYING,
-    PAUSED
+	STOPPED,
+	PLAYING,
+	PAUSED
 } SoundState;
 
 typedef struct soundSlot
 {
-    SoundData   *soundData;
-    SoundState  state;
-    int         volume;
-    int         remainingLength;
-    u8          *position;
+	SoundData   *soundData;
+	SoundState  state;
+	int         volume;
+	int         remainingLength;
+	u8          *position;
 } SoundSlot;
 
 typedef struct audio
 {
-    SoundData   sounds[MAX_LOADED_SOUNDS];
-    SoundSlot   slots[MAX_SOUND_SLOTS];
-    int         masterVolume;
+	SoundData sounds[MAX_LOADED_SOUNDS];
+	SoundSlot slots[MAX_SOUND_SLOTS];
+	int       masterVolume;
 
-    void (*lock)();
-    void (*unlock)();
+	void (*lock)();
+	void (*unlock)();
 } Audio;
 
 /**
