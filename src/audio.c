@@ -103,6 +103,7 @@ void playSound(Audio *audio, int slotIdx, int soundIdx, int volume)
 	}
 }
 
+// Set's all slots with the given status [from] to the status [to].
 static void setAllSlotsFromTo(SoundSlot *slots, SoundState from, SoundState to)
 {
 	for (int i = 0; i < MAX_SOUND_SLOTS; i++)
@@ -173,6 +174,7 @@ void setMasterVolume(Audio *audio, int volume)
 	audio->masterVolume = CLAMP(volume, 0, MAX_VOLUME);
 }
 
+// Mixes a stereo sound into the given destination buffer.
 static void mixStereoSamples(u8 *destination, const u8 *source, int length, int volume)
 {
 	i16 sourceSample;
@@ -193,6 +195,7 @@ static void mixStereoSamples(u8 *destination, const u8 *source, int length, int 
 	}
 }
 
+// Interleaves a mono sound into the given destination buffer.
 static void mixInterleavedMonoSamples(u8 *destination, const u8 *source, int length, int volume)
 {
 	i16 sourceSample;
