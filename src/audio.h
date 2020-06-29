@@ -26,10 +26,10 @@ typedef struct soundData
 	u32 length;
 
   // Pointer to sample buffer.
-	u8  *samples;
+	u8 *samples;
 
   // Number of channels the specific sound.
-	u8  channelCount;
+	u8 channelCount;
 } SoundData;
 
 typedef enum soundState
@@ -41,101 +41,73 @@ typedef enum soundState
 
 typedef struct soundSlot
 {
-	SoundData   *soundData;
-	SoundState  state;
-	int         volume;
-	int         remainingLength;
-	u8          *position;
+  // The sound data that the given slot is referencing.
+	SoundData *soundData;
+
+  // The state of the sound slot.
+	SoundState state;
+
+  // The sound slots volume.
+	int volume;
+
+  // The remaining length of the sound slots sound data. soundData.buffer[soundData.length] - position.
+	int remainingLength;
+
+  // The slot's position in the sound data buffer.
+	u8 *position;
 } SoundSlot;
 
 typedef struct audio
 {
+  // All loaded sounds. A sound with a non-null buffer is loaded into memory.
 	SoundData sounds[MAX_LOADED_SOUNDS];
+
+  // All sound slots. Many slots can reference the same sound data.
 	SoundSlot slots[MAX_SOUND_SLOTS];
-	int       masterVolume;
+
+  // Master volume of audio will apply to each individual slot's volume.
+	int masterVolume;
 
 	void (*lock)();
 	void (*unlock)();
 } Audio;
 
-/**
- * Initialize audio.
- * @param audio
- */
+// Initializes the audio module.
 void initAudio(Audio *audio);
 
-/**
- * Free audio and all loaded sounds.
- * @param audio
- */
+// Frees the audio module and all loaded sounds.
 void freeAudio(Audio *audio);
 
-/**
- * Load a sound file's data into the given sound index.
- * @param audio
- * @param soundIdx
- * @param filename
- */
+// Load a sound file's data into the given sound index.
 void loadSound(Audio *audio, int soundIdx, const char *filename);
 
-/**
- * Unload the sound data at the given sound index.
- * @param audio
- * @param soundIdx
- */
+// Unload the sound data at the given sound index.
 void unloadSound(Audio *audio, int soundIdx);
 
-/**
- * Play sound[soundIdx] at the given slot index.
- * @param audio
- * @param slotIdx
- * @param soundIdx
- * @param volume
- */
+// Play sound[soundIdx] at the given slot index.
 void playSound(Audio *audio, int slotIdx, int soundIdx, int volume);
 
-/**
- * Stop the sound at the given slot index.
- * @param audio
- * @param slotIdx
- */
+// Stop the sound at the given slot index.
+// Index -1 will stop all playing slots.
 void stopSound(Audio *audio, int slotIdx);
 
-/**
- * Pause the sound at the given slot index.
- * @param audio
- * @param slotIdx
- */
+// Pause the sound at the given slot index.
+// Index -1 will pause all playing sounds.
 void pauseSound(Audio *audio, int slotIdx);
 
-/**
- * Resume the sound at the given slot index.
- * @param audio
- * @param slotIdx
- */
+// Resume the sound at the given slot index.
+// Index -1 will resume all paused sounds.
 void resumeSound(Audio *audio, int slotIdx);
 
-/**
- * Get the state of the given slot index.
- * @param audio
- * @param slotIdx
- * @return
- */
+// Get the state of the given slot index.
 SoundState getSoundState(Audio *audio, int slotIdx);
 
-/**
- * Set the master volume of all sounds.
- * @param audio
- * @param volume
- */
+// Set the master volume of all sounds.
 void setMasterVolume(Audio *audio, int volume);
 
-/**
- * Mix all playing sounds into the given stream.
- * @param audio
- * @param stream
- * @param len
- */
+// Mix all playing sounds into the given stream.
+// Milk on it's own does not maintain an audio stream.
+// Platform code is responsible for calling this method and specifying the amount of data, in bytes, to mix.
 void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len);
 
 #endif
