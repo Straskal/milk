@@ -198,6 +198,32 @@ static int l_sndslot(lua_State *L)
 	return 1;
 }
 
+static int l_openstream(lua_State *L)
+{
+	openStream(&globalMilk->audio,
+		(int)lua_tointeger(L, 1),
+		lua_tostring(L, 2)
+	);
+	return 0;
+}
+
+static int l_playstream(lua_State *L)
+{
+	playStream(&globalMilk->audio,
+		(int)lua_tointeger(L, 1),
+		(int)lua_tointeger(L, 2)
+	);
+	return 0;
+}
+
+static int l_closestream(lua_State *L)
+{
+	closeStream(&globalMilk->audio,
+		(int)lua_tointeger(L, 1)
+	);
+	return 0;
+}
+
 static int l_vol(lua_State *L)
 {
 	setMasterVolume(&globalMilk->audio,
@@ -239,6 +265,9 @@ static void pushApi(lua_State *L)
 	pushApiFunction(L, "stop", l_stop);
 	pushApiFunction(L, "pause", l_pause);
 	pushApiFunction(L, "resume", l_resume);
+	pushApiFunction(L, "openstream", l_openstream);
+	pushApiFunction(L, "playstream", l_playstream);
+	pushApiFunction(L, "closestream", l_closestream);
 	pushApiFunction(L, "sndslot", l_sndslot);
 	pushApiFunction(L, "vol", l_vol);
 	pushApiFunction(L, "exit", l_exit);

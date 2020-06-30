@@ -22,4 +22,7 @@ declare function play(index: number, sampleSlot: number, volume: number): void;
 declare function stop(sampleSlot: number): void;
 declare function pause(sampleSlot: number): void;
 declare function resume(sampleSlot: number): void;
+declare function openstream(index: 0 | 1, filePath: string): void;
+declare function playstream(index: 0 | 1, volume: number): void;
+declare function closestream(index: 0 | 1): void;
 declare function exit(): void;

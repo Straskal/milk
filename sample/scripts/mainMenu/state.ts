@@ -18,8 +18,8 @@ export class MainMenuState implements GameState {
 
     public enter(_: Game): void {
         loadspr("art/sprsheet.bmp");
-        loadsnd(0, "sounds/12 HHavok-main.wav");
-        play(0, 0, 128);
+        openstream(0, "sounds/12 HHavok-main.wav");
+        playstream(0, 128);
     }
 
     public update(game: Game): void {
@@ -40,7 +40,7 @@ export class MainMenuState implements GameState {
     }
 
     public exit(_: Game): void {
-        freesnd(0);
+        closestream(0);
     }
 
     private drawTitle(): void {

@@ -1,5 +1,5 @@
-#include "wav.h"
 #include "logs.h"
+#include "wav.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -118,4 +118,69 @@ int loadWavFile(const char *filename, u8 **data, u32 *length, u8 *channelCount)
 
 	fclose(file);
 	return 0;
+}
+
+int openWavStream(const char *filename, AudioStream *stream)
+{
+	FILE *file = NULL;
+	WavHeader header;
+
+	if ((file = fopen(filename, "rb")) == NULL)
+	{
+		LOG_ERRORF("Error opening file: %s.\n", filename);
+		return NULL;
+	}
+
+	if (fread(&header, sizeof(WavHeader), 1, file) != 1)
+	{
+		LOG_ERRORF("Error reading file: %s.\n", filename);
+		return NULL;
+	}
+
+	if (INVALID_FORMAT_TYPE(header.format.type)
+		|| INVALID_RIFF_MARKER(header.riff.riff)
+		|| INVALID_WAVE_MARKER(header.riff.wave)
+		|| INVALID_FORMAT_MARKER(header.format.marker)
+		|| INVALID_DATA_MARKER(header.data.marker))
+	{
+		LOG_ERRORF("Invalid WAV format: %s.\n", filename);
+		return NULL;
+	}
+
+	if (INVALID_CHANNEL_COUNT(header.format.channels))
+	{
+		LOG_ERRORF("Invalid WAV channels: %s.\n", filename);
+		return NULL;
+	}
+
+	u32 sampleSize = header.format.channels * header.format.bitsPerSample / 8;
+	u32 sampleCount = header.data.size / sampleSize;
+	size_t signalSize = sampleSize * sampleCount;
+
+	stream->chunk = (u8 *)calloc(1, CHUNK_SIZE);
+	stream->file = file;
+	stream->channelCount = header.format.channels;
+	stream->start = ftell(file);
+	stream->end = stream->start + signalSize;
+
+	return 1;
+}
+
+int readFromWavStream(AudioStream *stream, int *length)
+{
+	long start = stream->start;
+	long end = stream->end;
+	long remaining = MIN(end - start, CHUNK_SIZE);
+	*length = remaining;
+
+	return fread(stream->chunk, (size_t)remaining, 1, stream->file);
+}
+
+void closeWavStream(AudioStream *stream)
+{
+	if (stream->chunk != NULL)
+		free(stream->chunk);
+
+	if (stream->file != NULL)
+		fclose(stream->file);
 }

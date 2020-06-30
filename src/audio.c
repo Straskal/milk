@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <string.h>
 
 #include "audio.h"
@@ -16,6 +17,9 @@ void initAudio(Audio *audio)
 {
 	memset(&audio->sounds, 0, sizeof(audio->sounds));
 	memset(&audio->slots, 0, sizeof(audio->slots));
+	memset(&audio->streams, 0, sizeof(audio->streams));
+	memset(&audio->streamSlot, 0, sizeof(audio->streamSlot));
+
 	audio->masterVolume = MAX_VOLUME;
 }
 
@@ -23,6 +27,9 @@ void freeAudio(Audio *audio)
 {
 	for (int i = 0; i < MAX_LOADED_SOUNDS; i++)
 		free(audio->sounds[i].samples);
+
+	for (int i = 0; i < MAX_OPEN_STREAMS; i++)
+		closeStream(audio, i);
 }
 
 static void resetSampleSlot(SoundSlot *slot)
@@ -40,6 +47,18 @@ static bool isSlotIndexWithinBounds(int index)
 	return index >= 0 && index < MAX_SOUND_SLOTS;
 }
 
+static void internalUnloadSound(SoundSlot *soundSlots, SoundData *soundData)
+{
+	for (int i = 0; i < MAX_SOUND_SLOTS; i++)
+	{
+		if (soundSlots[i].soundData == soundData)
+			resetSampleSlot(&soundSlots[i]);
+	}
+
+	free(soundData->samples);
+	memset(soundData, 0, sizeof(SoundData));
+}
+
 void loadSound(Audio *audio, int soundIdx, const char *filename)
 {
 	if (isSoundIndexWithinBounds(soundIdx))
@@ -49,7 +68,7 @@ void loadSound(Audio *audio, int soundIdx, const char *filename)
 		SoundData *sound = &audio->sounds[soundIdx];
 
 		if (sound->samples != NULL)
-			unloadSound(audio, soundIdx);
+			internalUnloadSound(audio->slots, sound);
 
 		loadWavFile(filename, &sound->samples, &sound->length, &sound->channelCount);
 
@@ -66,16 +85,7 @@ void unloadSound(Audio *audio, int soundIdx)
 		SoundData *sound = &audio->sounds[soundIdx];
 
 		if (sound->samples != NULL)
-		{
-			for (int i = 0; i < MAX_SOUND_SLOTS; i++)
-			{
-				if (audio->slots[i].soundData == sound)
-					resetSampleSlot(&audio->slots[i]);
-			}
-
-			free(sound->samples);
-			memset(sound, 0, sizeof(SoundData));
-		}
+			internalUnloadSound(audio->slots, sound);
 
 		audio->unlock();
 	}
@@ -169,6 +179,93 @@ SoundState getSoundState(Audio *audio, int slotIdx)
 	return isSlotIndexWithinBounds(slotIdx) ? audio->slots[slotIdx].state : STOPPED;
 }
 
+static bool isStreamIndexWithinBounds(int index)
+{
+	return index >= 0 && index < MAX_OPEN_STREAMS;
+}
+
+static void internalStopStream(StreamSlot *streamSlot)
+{
+	streamSlot->state = STOPPED;
+	streamSlot->stream = NULL;
+	streamSlot->volume = 0;
+}
+
+static void internalCloseStream(StreamSlot *streamSlot, AudioStream *audioStream)
+{
+	if (audioStream->file != NULL)
+	{
+		if (streamSlot->stream == audioStream)
+			internalStopStream(streamSlot);
+
+		closeWavStream(audioStream);
+		memset(audioStream, 0, sizeof(AudioStream));
+	}
+}
+
+void openStream(Audio *audio, int index, const char *filePath)
+{
+	if (isStreamIndexWithinBounds(index))
+	{
+		audio->lock();
+
+		AudioStream *audioStream = &audio->streams[index];
+
+		if (audioStream->file != NULL)
+			internalCloseStream(&audio->streamSlot, audioStream);
+
+		openWavStream(filePath, audioStream);
+
+		audio->unlock();
+	}
+}
+
+void closeStream(Audio *audio, int index)
+{
+	if (isStreamIndexWithinBounds(index))
+	{
+		audio->lock();
+
+		internalCloseStream(&audio->streamSlot, &audio->streams[index]);
+
+		audio->unlock();
+	}
+}
+
+static void internalPlayStream(StreamSlot *streamSlot, AudioStream *audioStream, int volume)
+{
+	streamSlot->stream = audioStream;
+	streamSlot->state = PLAYING;
+	streamSlot->volume = CLAMP(volume, 0, MAX_VOLUME);
+}
+
+void playStream(Audio *audio, int index, int volume)
+{
+	if (isStreamIndexWithinBounds(index))
+	{
+		audio->lock();
+
+		AudioStream *audioStream = &audio->streams[index];
+
+		if (audioStream->file != NULL)
+			internalPlayStream(&audio->streamSlot, audioStream, volume);
+
+		audio->unlock();
+	}
+}
+
+void stopStream(Audio *audio, int index)
+{
+	if (isStreamIndexWithinBounds(index))
+	{
+		audio->lock();
+
+		internalStopStream(&audio->streamSlot);
+
+		audio->unlock();
+	}
+}
+
 void setMasterVolume(Audio *audio, int volume)
 {
 	audio->masterVolume = CLAMP(volume, 0, MAX_VOLUME);
@@ -225,6 +322,13 @@ static void mixInterleavedMonoSamples(u8 *destination, const u8 *source, int len
 void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)
 {
 	memset(stream, 0, len);
+
+	if (audio->streamSlot.stream != NULL)
+	{
+		int length;
+		readFromWavStream(audio->streamSlot.stream, &length);
+		mixStereoSamples(stream, audio->streamSlot.stream->chunk, length, 128);
+	}
 
 	for (int i = 0; i < MAX_SOUND_SLOTS; i++)
 	{

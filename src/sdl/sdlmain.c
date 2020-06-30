@@ -1,5 +1,6 @@
 #include "milk.h"
 #include "console.h"
+#include "wav.h"
 
 #include <math.h>
 #include <stdio.h>
