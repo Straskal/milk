@@ -15,6 +15,18 @@
 // Output stereo sounds / 2 channels.
 #define AUDIO_OUTPUT_CHANNELS 2
 
+// The number of samples that are output when mixing.
+#define AUDIO_OUTPUT_SAMPLES 4096
+
+// The size (in bytes) of each chunk to mix.
+// Example:
+//  Each sample being 16 bits. In other words, each sample is 2 bytes.
+//  If we're outputting 2 channels, then we're outputting 2x the samples. 4 bytes.
+//  We want to output 4096 samples per mix. 4096 samples at 4 bytes each = 16384 bytes per mix.
+//  This would be the size to use if we ever want to maintain our own internal stream.
+//  For now, this will only drive the size of our sound stream chunks.
+#define AUDIO_CHUNK_SIZE (AUDIO_OUTPUT_SAMPLES * (AUDIO_BITS_PER_SAMPLE * AUDIO_OUTPUT_CHANNELS / 8))
+
 // 16 sounds can be loaded into memory at once. The only memory limit for each individual sound is the hardware.
 #define MAX_LOADED_SOUNDS 16
 
@@ -145,6 +157,7 @@ void setMasterVolume(Audio *audio, int volume);
 // Milk on it's own does not maintain an audio stream.
 // Platform code is responsible for calling this method and specifying the amount of data, in bytes, to mix.
 // The destination stream is assumed to be signed, 16 bit samples in the following order LRLRLR.
+// Length is always assumed to be AUDIO_CHUNK_SIZE.
 void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len);
 
 #endif

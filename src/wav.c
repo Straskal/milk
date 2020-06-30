@@ -1,6 +1,5 @@
 #include "wav.h"
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -80,7 +79,7 @@ static bool readWavHeader(WavHeader *header, FILE *file)
 	return true;
 }
 
-int loadWavSound(SoundData *soundData, const char *filename)
+bool loadWavSound(SoundData *soundData, const char *filename)
 {
 	FILE *file = NULL;
 	WavHeader header;
@@ -103,14 +102,14 @@ int loadWavSound(SoundData *soundData, const char *filename)
 	if (fread(soundData->samples, signalSize, 1, file) != 1)
 	{
 		fclose(file);
-		return -1;
+		return false;
 	}
 
 	soundData->length = (u32)signalSize;
 	soundData->channelCount = header.format.channels;
 
 	fclose(file);
-	return 0;
+	return true;
 }
 
 void freeWavSound(SoundData *soundData)
@@ -118,46 +117,44 @@ void freeWavSound(SoundData *soundData)
 	free(soundData->samples);
 }
 
-int openWavStream(SoundStream *stream, const char *filename)
+bool openWavStream(SoundStream *stream, const char *filename)
 {
 	FILE *file = NULL;
 	WavHeader header;
 
 	if ((file = fopen(filename, "rb")) == NULL)
-		return -1;
+		return false;
 
 	if (!readWavHeader(&header, file))
-		return -1;
+		return false;
 
 	u32 sampleSize = header.format.channels * header.format.bitsPerSample / 8;
 	u32 sampleCount = header.data.size / sampleSize;
 	size_t signalSize = sampleSize * sampleCount;
 
-	stream->chunk = (u8 *)calloc(1, CHUNK_SIZE);
+	stream->chunk = (u8 *)calloc(1, AUDIO_CHUNK_SIZE);
 	stream->chunkLength = 0;
 	stream->file = file;
 	stream->channelCount = header.format.channels;
 	stream->start = ftell(file);
-	stream->end = stream->start + signalSize;
+	stream->end = stream->start + (long)signalSize;
 
-	return 1;
+	return true;
 }
 
-int readFromWavStream(SoundStream *stream)
+bool readFromWavStream(SoundStream *stream)
 {
-	long start = stream->start;
-	long end = stream->end;
-	long remaining = MIN(end - start, CHUNK_SIZE);
-	stream->chunkLength = remaining;
+	stream->chunkLength = MIN(stream->end - stream->start, AUDIO_CHUNK_SIZE);
+	return !fread(stream->chunk, (size_t)stream->chunkLength, 1, stream->file);
+}
 
-	return fread(stream->chunk, (size_t)remaining, 1, stream->file);
+void resetWavStream(SoundStream *stream)
+{
+  fseek(stream->file, stream->start, SEEK_SET);
 }
 
 void closeWavStream(SoundStream *stream)
 {
-	if (stream->chunk != NULL)
-		free(stream->chunk);
-
-	if (stream->file != NULL)
-		fclose(stream->file);
+	if (stream->chunk != NULL) free(stream->chunk);
+	if (stream->file != NULL) fclose(stream->file);
 }

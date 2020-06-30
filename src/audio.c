@@ -274,7 +274,7 @@ void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)
 
 	if (streamSlot->state == PLAYING)
 	{
-		readFromWavStream(streamSlot->stream);
+		if (readFromWavStream(streamSlot->stream)) resetWavStream(streamSlot->stream);
 		mixStereoSamples(stream, streamSlot->stream->chunk, streamSlot->stream->chunkLength, streamSlot->volume);
 	}
 
