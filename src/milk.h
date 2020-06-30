@@ -38,13 +38,13 @@ void freeMilk(Milk *milk);
  * Load scripts into memory.
  * @param milk
  */
-void loadCode(struct milk *milk);
+void loadCode(Milk *milk);
 
 /**
  * Unload all scripts from memory.
  * @param milk
  */
-void unloadCode(struct milk *milk);
+void unloadCode(Milk *milk);
 
 /**
  * Invoke the _init callback in scripts.

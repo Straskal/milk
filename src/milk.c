@@ -6,11 +6,7 @@
 #include <lualib.h>
 #include <math.h>
 
-/*
- *******************************************************************************
- * Initialization and shutdown
- *******************************************************************************
- */
+static Milk *globalMilk;
 
 Milk *createMilk()
 {
@@ -29,14 +25,6 @@ void freeMilk(Milk *milk)
 	freeAudio(&milk->audio);
 	free(milk);
 }
-
-/*
- *******************************************************************************
- * API
- *******************************************************************************
- */
-
-static Milk *globalMilk;
 
 static int l_btn(lua_State *L)
 {

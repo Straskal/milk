@@ -28,7 +28,7 @@ typedef struct soundData
   // Pointer to sample buffer.
 	u8 *samples;
 
-  // Number of channels the specific sound.
+  // Number of channels the specific sound. Either 1 (mono) or 2 (stereo).
 	u8 channelCount;
 } SoundData;
 
@@ -50,7 +50,7 @@ typedef struct soundSlot
   // The sound slots volume.
 	int volume;
 
-  // The remaining length of the sound slots sound data. soundData.buffer[soundData.length] - position.
+  // The remaining length of the sound slots sound data.
 	int remainingLength;
 
   // The slot's position in the sound data buffer.
