@@ -123,7 +123,7 @@ static void setupAudioDevice()
 
 	wantedSpec.freq = AUDIO_FREQUENCY;
 	wantedSpec.format = AUDIO_S16LSB;
-	wantedSpec.channels = AUDIO_CHANNELS;
+	wantedSpec.channels = AUDIO_OUTPUT_CHANNELS;
 	wantedSpec.samples = 4096;
 	wantedSpec.callback = mixCallback;
 	wantedSpec.userdata = (void *)&milk->audio;

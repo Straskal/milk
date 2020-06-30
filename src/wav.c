@@ -1,6 +1,6 @@
-#include "logs.h"
 #include "wav.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -18,31 +18,28 @@
 // "data"
 #define DATA_MARKER 0x61746164
 
-#define INVALID_RIFF_MARKER(header)		(header != RIFF_MARKER)
-#define INVALID_WAVE_MARKER(header)		(header != WAVE_MARKER)
+#define PCM 1
+#define MONO 1
+#define STEREO 2
+
+#define INVALID_RIFF_MARKER(header) (header != RIFF_MARKER)
+#define INVALID_WAVE_MARKER(header)	(header != WAVE_MARKER)
 #define INVALID_FORMAT_MARKER(header)	(header != FORMAT_MARKER)
-#define INVALID_DATA_MARKER(header)		(header != DATA_MARKER)
+#define INVALID_DATA_MARKER(header)	(header != DATA_MARKER)
+#define INVALID_FORMAT_TYPE(format) (format != PCM)
 
-// All format types other than PCM are considered invalid.
-#define INVALID_FORMAT_TYPE(format) (format != 1)
-
-// All channel counts other than 1 (mono) and 2 (stereo) are considered invalid.
-#define INVALID_CHANNEL_COUNT(channelCount) (channelCount != 1 && channelCount != 2)
+#define INVALID_CHANNEL_COUNT(channelCount) (channelCount != MONO && channelCount != STEREO)
+#define INVALID_SAMPLE_SIZE(size) (size != AUDIO_BITS_PER_SAMPLE)
 
 // The riff chunk describes the content of riff file.
 typedef struct riffChunk
 {
-	// Will always be "RIFF"
 	u32	riff;
-
-	// The size of the entire file.
 	u32	fileSize;
-
-	// Will always be "WAVE"
 	u32	wave;
 } RiffChunk;
 
-// The format chunk descibes the format of the wav data.
+// The format chunk describes the format of the wav data.
 typedef struct formatChunk
 {
 	u32	marker;
@@ -64,41 +61,36 @@ typedef struct dataChunk
 
 typedef struct wavHeader
 {
-	RiffChunk   riff;
+	RiffChunk riff;
 	FormatChunk format;
-	DataChunk   data;
+	DataChunk data;
 } WavHeader;
 
-int loadWavFile(const char *filename, u8 **data, u32 *length, u8 *channelCount)
+static bool readWavHeader(WavHeader *header, FILE *file)
+{
+	if (fread(header, sizeof(WavHeader), 1, file) != 1)
+		return false;
+
+	if (INVALID_FORMAT_TYPE(header->format.type) || INVALID_RIFF_MARKER(header->riff.riff)
+		|| INVALID_WAVE_MARKER(header->riff.wave) || INVALID_FORMAT_MARKER(header->format.marker)
+		|| INVALID_DATA_MARKER(header->data.marker) || INVALID_CHANNEL_COUNT(header->format.channels)
+		|| INVALID_SAMPLE_SIZE(header->format.bitsPerSample))
+		return false;
+
+	return true;
+}
+
+int loadWavSound(SoundData *soundData, const char *filename)
 {
 	FILE *file = NULL;
 	WavHeader header;
 
 	if ((file = fopen(filename, "rb")) == NULL)
-	{
-		LOG_ERRORF("Error opening file: %s.\n", filename);
 		return -1;
-	}
 
-	if (fread(&header, sizeof(WavHeader), 1, file) != 1)
+	if (!readWavHeader(&header, file))
 	{
-		LOG_ERRORF("Error reading file: %s.\n", filename);
-		return -1;
-	}
-
-	if (INVALID_FORMAT_TYPE(header.format.type)
-		|| INVALID_RIFF_MARKER(header.riff.riff)
-		|| INVALID_WAVE_MARKER(header.riff.wave)
-		|| INVALID_FORMAT_MARKER(header.format.marker)
-		|| INVALID_DATA_MARKER(header.data.marker))
-	{
-		LOG_ERRORF("Invalid WAV format: %s.\n", filename);
-		return -1;
-	}
-
-	if (INVALID_CHANNEL_COUNT(header.format.channels))
-	{
-		LOG_ERRORF("Invalid WAV channels: %s.\n", filename);
+		fclose(file);
 		return -1;
 	}
 
@@ -106,58 +98,43 @@ int loadWavFile(const char *filename, u8 **data, u32 *length, u8 *channelCount)
 	u32 sampleCount = header.data.size / sampleSize;
 	size_t signalSize = sampleSize * sampleCount;
 
-	*data = (u8 *)calloc(1, signalSize);
-	*length = (u32)signalSize;
-	*channelCount = header.format.channels;
+	soundData->samples = (u8 *)calloc(1, signalSize);
 
-	if (fread(*data, signalSize, 1, file) != 1)
+	if (fread(soundData->samples, signalSize, 1, file) != 1)
 	{
-		LOG_ERRORF("Invalid WAV data: %s.\n", filename);
+		fclose(file);
 		return -1;
 	}
+
+	soundData->length = (u32)signalSize;
+	soundData->channelCount = header.format.channels;
 
 	fclose(file);
 	return 0;
 }
 
-int openWavStream(const char *filename, AudioStream *stream)
+void freeWavSound(SoundData *soundData)
+{
+	free(soundData->samples);
+}
+
+int openWavStream(SoundStream *stream, const char *filename)
 {
 	FILE *file = NULL;
 	WavHeader header;
 
 	if ((file = fopen(filename, "rb")) == NULL)
-	{
-		LOG_ERRORF("Error opening file: %s.\n", filename);
-		return NULL;
-	}
+		return -1;
 
-	if (fread(&header, sizeof(WavHeader), 1, file) != 1)
-	{
-		LOG_ERRORF("Error reading file: %s.\n", filename);
-		return NULL;
-	}
-
-	if (INVALID_FORMAT_TYPE(header.format.type)
-		|| INVALID_RIFF_MARKER(header.riff.riff)
-		|| INVALID_WAVE_MARKER(header.riff.wave)
-		|| INVALID_FORMAT_MARKER(header.format.marker)
-		|| INVALID_DATA_MARKER(header.data.marker))
-	{
-		LOG_ERRORF("Invalid WAV format: %s.\n", filename);
-		return NULL;
-	}
-
-	if (INVALID_CHANNEL_COUNT(header.format.channels))
-	{
-		LOG_ERRORF("Invalid WAV channels: %s.\n", filename);
-		return NULL;
-	}
+	if (!readWavHeader(&header, file))
+		return -1;
 
 	u32 sampleSize = header.format.channels * header.format.bitsPerSample / 8;
 	u32 sampleCount = header.data.size / sampleSize;
 	size_t signalSize = sampleSize * sampleCount;
 
 	stream->chunk = (u8 *)calloc(1, CHUNK_SIZE);
+	stream->chunkLength = 0;
 	stream->file = file;
 	stream->channelCount = header.format.channels;
 	stream->start = ftell(file);
@@ -166,17 +143,17 @@ int openWavStream(const char *filename, AudioStream *stream)
 	return 1;
 }
 
-int readFromWavStream(AudioStream *stream, int *length)
+int readFromWavStream(SoundStream *stream)
 {
 	long start = stream->start;
 	long end = stream->end;
 	long remaining = MIN(end - start, CHUNK_SIZE);
-	*length = remaining;
+	stream->chunkLength = remaining;
 
 	return fread(stream->chunk, (size_t)remaining, 1, stream->file);
 }
 
-void closeWavStream(AudioStream *stream)
+void closeWavStream(SoundStream *stream)
 {
 	if (stream->chunk != NULL)
 		free(stream->chunk);

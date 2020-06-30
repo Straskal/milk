@@ -9,8 +9,11 @@
 // 44,100 Hz / 44,100 samples per second.
 #define AUDIO_FREQUENCY 44100
 
-// 2 output channels / stereo.
-#define AUDIO_CHANNELS 2
+// Samples are expected to be signed 16 bit integers.
+#define AUDIO_BITS_PER_SAMPLE 16
+
+// Output stereo sounds / 2 channels.
+#define AUDIO_OUTPUT_CHANNELS 2
 
 // 16 sounds can be loaded into memory at once. The only memory limit for each individual sound is the hardware.
 #define MAX_LOADED_SOUNDS 16
@@ -18,149 +21,122 @@
 // 16 sounds can be playing concurrently.
 #define MAX_SOUND_SLOTS 16
 
-// 2 streams can be open at a single time.
-// This is useful for switching back and forth between two music tracks.
+// 2 streams can be open at a time to enable things like switching between to music tracks.
 #define MAX_OPEN_STREAMS 2
 
-// Max volume that milk uses.
 #define MAX_VOLUME 128
 
-typedef enum soundState
+typedef enum
 {
 	STOPPED,
 	PLAYING,
 	PAUSED
 } SoundState;
 
-typedef struct soundData
+// Sound data represents an entire sound loaded into memory.
+// This is ideal for short-burst sounds, since they are typically small.
+typedef struct
 {
-  // The length of the sound in bytes.
 	u32 length;
-
-  // Pointer to sample buffer.
 	u8 *samples;
-
-  // Number of channels the specific sound. Either 1 (mono) or 2 (stereo).
 	u8 channelCount;
 } SoundData;
 
-typedef struct soundSlot
+// Sound slots are what we insert sound data in to in order to play them.
+// Many slots can reference a single sound data, and do their own book-keeping to track the sounds current position, volume, etc..
+typedef struct
 {
-  // The sound data that the given slot is referencing.
 	SoundData *soundData;
-
-  // The state of the sound slot.
 	SoundState state;
-
-  // The sound slots volume.
 	int volume;
-
-  // The remaining length of the sound slots sound data.
 	int remainingLength;
-
-  // The slot's position in the sound data buffer.
 	u8 *position;
 } SoundSlot;
 
-typedef struct audioStream
+// Sound streams are ideal for sounds with a larger memory footprint (music).
+// Instead of loading an entire music file into memory, we load chunks at a time from the disk.
+typedef struct
 {
-	// The file handle that is left open in order to read from disk.
+	long position;
+	long start;
+	long end;
 	FILE *file;
 
-	// The current read position.
-	long position;
+	// Chunk is filled with each call to stream read.
+	// Chunk length will tell you how much data has been loaded into the chunk
 
-	// The starting position of data.
-	// This is useful to track in order to loop back to the beginning of sample data.
-	long start;
-
-	// The end of data.
-	long end;
-
-	// This is filled with every call to stream.
+	int chunkLength;
 	u8 *chunk;
 
-	// The number of channels in stream.
 	u8 channelCount;
-} AudioStream;
+} SoundStream;
 
-typedef struct streamSlot
+typedef struct
 {
-	// Pointer to current stream.
-	AudioStream *stream;
-
-	// The state of the stream slot.
+	SoundStream *stream;
 	SoundState state;
-
-	// Volume of stream.
 	int volume;
 } StreamSlot;
 
-typedef struct audio
+typedef struct
 {
-  // All loaded sounds. A sound with a non-null buffer is loaded into memory.
 	SoundData sounds[MAX_LOADED_SOUNDS];
-
-  // All sound slots. Many slots can reference the same sound data.
-	SoundSlot slots[MAX_SOUND_SLOTS];
-
-	// All open streams. A stream with a non-null handle is open.
-	AudioStream streams[MAX_OPEN_STREAMS];
-
-	// One playing stream is allowed at a time.
+	SoundSlot soundSlots[MAX_SOUND_SLOTS];
+	SoundStream streams[MAX_OPEN_STREAMS];
 	StreamSlot streamSlot;
-
-  // Master volume of audio will apply to each individual slot's volume.
 	int masterVolume;
 
+	// The audio device is platform specific, but some audio device libraries run the device stream on a separate thread.
+	// Both lock and unlock functions are necessary to call whenever modifying our sound data.
+	// This tells the audio device "Hey, don't request us to mix anything [on another thread] into your audio stream at the moment."
 	void (*lock)();
 	void (*unlock)();
 } Audio;
 
 // Initializes the audio module.
-void initAudio(Audio *audio);
+void initializeAudio(Audio *audio);
 
-// Frees the audio module and all loaded sounds.
-void freeAudio(Audio *audio);
+// resets the audio module and frees all loaded sounds.
+void disableAudio(Audio *audio);
 
 // Load a sound file's data into the given sound index.
-void loadSound(Audio *audio, int soundIdx, const char *filename);
+void loadSound(Audio *audio, int soundIndex, const char *filename);
 
 // Unload the sound data at the given sound index.
-void unloadSound(Audio *audio, int soundIdx);
+void unloadSound(Audio *audio, int soundIndex);
 
 // Play sound[soundIdx] at the given slot index.
 // Slot index 0 will loop the sound.
-void playSound(Audio *audio, int slotIdx, int soundIdx, int volume);
+void playSound(Audio *audio, int soundIndex, int slotIndex, int volume);
 
 // Stop the sound at the given slot index.
 // Index -1 will stop all playing slots.
-void stopSound(Audio *audio, int slotIdx);
+void stopSound(Audio *audio, int slotIndex);
 
 // Pause the sound at the given slot index.
 // Index -1 will pause all playing sounds.
-void pauseSound(Audio *audio, int slotIdx);
+void pauseSound(Audio *audio, int slotIndex);
 
 // Resume the sound at the given slot index.
 // Index -1 will resume all paused sounds.
-void resumeSound(Audio *audio, int slotIdx);
+void resumeSound(Audio *audio, int slotIndex);
 
 // Get the state of the given slot index.
-SoundState getSoundState(Audio *audio, int slotIdx);
+SoundState getSoundState(Audio *audio, int slotIndex);
 
 // Open a sound file for streaming to the given stream index.
 // This is more efficient for music files, since we're only reading chunks at a time as opposed to loading the whole file into memory,
-void openStream(Audio *audio, int index, const char *filePath);
+void openStream(Audio *audio, int streamIndex, const char *filePath);
 
 // Close out a sound stream.
 // This will stop the stream if it is currently playing.
-void closeStream(Audio *audio, int index);
+void closeStream(Audio *audio, int streamIndex);
 
 // Set the stream at the given index to the currently playing stream.
-void playStream(Audio *audio, int index, int volume);
+void playStream(Audio *audio, int streamIndex, int volume);
 
 // Stop the stream at the given index if it is playing.
-void stopStream(Audio *audio, int index);
+void stopStream(Audio *audio, int streamIndex);
 
 // Set the master volume of all sounds.
 void setMasterVolume(Audio *audio, int volume);

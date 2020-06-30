@@ -12,10 +12,11 @@
 // - Mono and stereo PCM
 // - Signed 16 bit samples
 // - 44,100 sample rate.
-int loadWavFile(const char* filename, u8 **data, u32 *length, u8 *channelCount);
 
-int openWavStream(const char *filename, AudioStream *stream);
-int readFromWavStream(AudioStream *stream, int *length);
-void closeWavStream(AudioStream *stream);
+int loadWavSound(SoundData *soundData, const char *filename);
+void freeWavSound(SoundData *soundData);
+int openWavStream(SoundStream *stream, const char *filename);
+int readFromWavStream(SoundStream *stream);
+void closeWavStream(SoundStream *stream);
 
 #endif

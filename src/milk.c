@@ -1,10 +1,10 @@
-#include "milk.h"
-#include "logs.h"
-
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
 #include <math.h>
+
+#include "milk.h"
+#include "logs.h"
 
 static Milk *globalMilk;
 
@@ -15,14 +15,14 @@ Milk *createMilk()
 	milk->code.state = NULL;
 	initInput(&milk->input);
 	initVideo(&milk->video);
-	initAudio(&milk->audio);
+	initializeAudio(&milk->audio);
 	LOG_INIT();
 	return milk;
 }
 
 void freeMilk(Milk *milk)
 {
-	freeAudio(&milk->audio);
+	disableAudio(&milk->audio);
 	free(milk);
 }
 
@@ -207,6 +207,14 @@ static int l_openstream(lua_State *L)
 	return 0;
 }
 
+static int l_closestream(lua_State *L)
+{
+  closeStream(&globalMilk->audio,
+              (int)lua_tointeger(L, 1)
+  );
+  return 0;
+}
+
 static int l_playstream(lua_State *L)
 {
 	playStream(&globalMilk->audio,
@@ -216,12 +224,12 @@ static int l_playstream(lua_State *L)
 	return 0;
 }
 
-static int l_closestream(lua_State *L)
+static int l_stopstream(lua_State *L)
 {
-	closeStream(&globalMilk->audio,
-		(int)lua_tointeger(L, 1)
-	);
-	return 0;
+  stopStream(&globalMilk->audio,
+    (int)lua_tointeger(L, 1)
+  );
+  return 0;
 }
 
 static int l_vol(lua_State *L)
@@ -266,8 +274,9 @@ static void pushApi(lua_State *L)
 	pushApiFunction(L, "pause", l_pause);
 	pushApiFunction(L, "resume", l_resume);
 	pushApiFunction(L, "openstream", l_openstream);
+  pushApiFunction(L, "closestream", l_closestream);
 	pushApiFunction(L, "playstream", l_playstream);
-	pushApiFunction(L, "closestream", l_closestream);
+  pushApiFunction(L, "stopstream", l_stopstream);
 	pushApiFunction(L, "sndslot", l_sndslot);
 	pushApiFunction(L, "vol", l_vol);
 	pushApiFunction(L, "exit", l_exit);
