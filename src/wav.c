@@ -115,6 +115,9 @@ bool loadWavSound(SoundData *soundData, const char *filename)
 void freeWavSound(SoundData *soundData)
 {
   free(soundData->samples);
+  soundData->samples = NULL;
+  soundData->sampleCount = 0;
+  soundData->channelCount = 0;
 }
 
 bool openWavStream(SoundStream *stream, const char *filename)
@@ -126,7 +129,10 @@ bool openWavStream(SoundStream *stream, const char *filename)
     return false;
 
   if (!readWavHeader(&header, file))
+  {
+    fclose(file);
     return false;
+  }
 
   u32 sampleSize = header.format.channels * header.format.bitsPerSample / 8;
   u32 sampleCount = header.data.size / sampleSize;
@@ -166,6 +172,7 @@ bool readFromWavStream(SoundStream *stream, int numSamples, bool loop)
 
   stream->chunkSampleCount = (int) (totalBytesRead / sizeof(s16));
   stream->position = ftell(stream->file);
+
   return !readRequestedAmount;
 }
 
