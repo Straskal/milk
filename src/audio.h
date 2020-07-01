@@ -71,12 +71,12 @@ typedef struct
 {
   // The beginning and end of the sound data in the file on disk.
 
+  long position;
 	long start;
 	long end;
 	FILE *file;
 
-	// Chunk is filled with each call to stream read.
-	// Chunk length will tell you how much data has been loaded into the chunk
+	// Chunk is is to be filled with each call to read more data from stream.
 
 	int chunkSampleCount;
   s16 *chunk;
@@ -89,6 +89,7 @@ typedef struct
 	SoundStream *stream;
 	SoundState state;
 	int volume;
+	bool loop;
 } StreamSlot;
 
 typedef struct
@@ -107,61 +108,78 @@ typedef struct
 } Audio;
 
 // Initializes the audio module.
+//
 void initializeAudio(Audio *audio);
 
 // resets the audio module and frees all loaded sounds.
+//
 void disableAudio(Audio *audio);
 
 // Load a sound file's data into the given sound index.
+//
 void loadSound(Audio *audio, int soundIndex, const char *filePath);
 
 // Unload the sound data at the given sound index.
+//
 void unloadSound(Audio *audio, int soundIndex);
 
 // Play sound[soundIdx] at the given slot index.
 // Slot index 0 will loop the sound.
+//
 void playSound(Audio *audio, int soundIndex, int slotIndex, int volume);
 
 // Stop the sound at the given slot index.
+//
 void stopSound(Audio *audio, int slotIndex);
 
 // Pause the sound at the given slot index.
+//
 void pauseSound(Audio *audio, int slotIndex);
 
 // Resume the sound at the given slot index.
+//
 void resumeSound(Audio *audio, int slotIndex);
 
 // Get the state of the given slot index.
+//
 SoundState getSoundState(Audio *audio, int slotIndex);
 
 // Open a sound file for streaming to the given stream index.
-// This is more efficient for music files, since we're only reading chunks at a time as opposed to loading the whole file into memory,
+// This is more efficient for music files, since we're only reading chunks at a time as opposed to loading the whole file into memory.
+//
 void openStream(Audio *audio, int streamIndex, const char *filePath);
 
 // Close out a sound stream.
 // This will stop the stream if it is currently playing.
+//
 void closeStream(Audio *audio, int streamIndex);
 
 // Set the stream at the given index to the currently playing stream.
+//
 void playStream(Audio *audio, int streamIndex, int volume);
 
 // Stop the stream if it is playing.
+//
 void stopStream(Audio *audio);
 
 // pause the stream if it is playing.
+//
 void pauseStream(Audio *audio);
 
 // Resume the stream index if it is paused.
+//
 void resumeStream(Audio *audio);
 
 // Set the master volume of all sounds.
+//
 void setMasterVolume(Audio *audio, int volume);
 
 // Mix all playing sounds into the given stream.
 // Milk on it's own does not maintain an audio stream.
 // Platform code is responsible for calling this method and specifying the amount of data, in bytes, to mix.
-// The destination stream is assumed to be signed, 16 bit samples in the following order LRLRLR.
+// The destination stream is assumed to be signed, 16 bit samples in the following order [LRLRLR].
 // Length is always assumed to be AUDIO_CHUNK_SIZE.
+//
 void mixSamplesIntoStream(Audio *audio, s16 *stream, int numSamples);
 
 #endif

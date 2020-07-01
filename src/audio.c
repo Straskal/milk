@@ -230,6 +230,8 @@ void playStream(Audio *audio, int streamIndex, int volume)
 
     if (soundStream->file != NULL)
     {
+      resetWavStream(soundStream);
+
       StreamSlot *slot = &audio->streamSlot;
       slot->state = PLAYING;
       slot->stream = soundStream;
@@ -244,6 +246,7 @@ void stopStream(Audio *audio)
 {
   audio->lock();
 
+  resetWavStream(audio->streamSlot.stream);
   resetStreamSlot(&audio->streamSlot);
 
   audio->unlock();
@@ -317,11 +320,13 @@ void mixSamplesIntoStream(Audio *audio, s16 *stream, int numSamples)
 
   if (streamSlot->state == PLAYING)
   {
-    if (readFromWavStream(streamSlot->stream))
-      resetWavStream(streamSlot->stream);
+    bool streamFinished = readFromWavStream(streamSlot->stream, numSamples, streamSlot->loop);
 
     // TODO: Assuming that the music is stereo.
     mixStereoSamples(stream, streamSlot->stream->chunk, streamSlot->stream->chunkSampleCount, streamSlot->volume);
+
+    if (streamFinished)
+      resetStreamSlot(streamSlot);
   }
 
   // Mix all playing sound slots.
