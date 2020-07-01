@@ -220,7 +220,7 @@ void closeStream(Audio *audio, int streamIndex)
   }
 }
 
-void playStream(Audio *audio, int streamIndex, int volume)
+void playStream(Audio *audio, int streamIndex, int volume, bool loop)
 {
   if (isStreamIndexWithinBounds(streamIndex))
   {
@@ -236,6 +236,7 @@ void playStream(Audio *audio, int streamIndex, int volume)
       slot->state = PLAYING;
       slot->stream = soundStream;
       slot->volume = CLAMP(volume, 0, MAX_VOLUME);
+      slot->loop = loop;
     }
 
     audio->unlock();
@@ -357,7 +358,7 @@ void mixSamplesIntoStream(Audio *audio, s16 *stream, int numSamples)
           slot->remainingSamples -= samplesToMix;
         }
       }
-        // If we've no more samples to mix, then stop the sound.
+      // If we've no more samples to mix, then stop the sound.
       else resetSoundSlot(slot);
     }
   }

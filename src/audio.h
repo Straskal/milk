@@ -156,7 +156,7 @@ void closeStream(Audio *audio, int streamIndex);
 
 // Set the stream at the given index to the currently playing stream.
 //
-void playStream(Audio *audio, int streamIndex, int volume);
+void playStream(Audio *audio, int streamIndex, int volume, bool loop);
 
 // Stop the stream if it is playing.
 //
