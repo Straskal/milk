@@ -217,9 +217,15 @@ static int l_closestream(lua_State *L)
 
 static int l_playstream(lua_State *L)
 {
+  bool loop = false;
+
+  if (lua_isboolean(L, 3))
+    loop = lua_toboolean(L, 3);
+
 	playStream(&globalMilk->audio,
 		(int)lua_tointeger(L, 1),
-		(int)lua_tointeger(L, 2)
+		(int)lua_tointeger(L, 2),
+    loop
 	);
 	return 0;
 }
