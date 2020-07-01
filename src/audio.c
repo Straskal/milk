@@ -6,7 +6,7 @@
 #include "wav.h"
 
 // This value is used to clamp values when mixing two 16 bit samples.
-#define BIT16_MAX 32767
+#define S16_MAX 32767
 
 // Zero-ing out audio's memory resets it to it's default state.
 static void zeroOutAudioMemory(Audio *audio)
@@ -39,7 +39,7 @@ static void resetSoundSlot(SoundSlot *slot)
   slot->soundData = NULL;
   slot->position = NULL;
   slot->state = STOPPED;
-  slot->remainingLength = 0;
+  slot->remainingSamples = 0;
   slot->volume = 0;
 }
 
@@ -66,7 +66,7 @@ static void lockedUnloadSound(SoundData *soundData, SoundSlot *soundSlots)
   freeWavSound(soundData);
 
   soundData->samples = NULL;
-  soundData->length = 0;
+  soundData->sampleCount = 0;
   soundData->channelCount = 0;
 }
 
@@ -116,7 +116,7 @@ void playSound(Audio *audio, int soundIndex, int slotIndex, int volume)
       slot->state = PLAYING;
       slot->soundData = soundData;
       slot->position = soundData->samples;
-      slot->remainingLength = soundData->length;
+      slot->remainingSamples = soundData->sampleCount;
       slot->volume = CLAMP(volume, 0, MAX_VOLUME);
     }
 
@@ -275,71 +275,56 @@ void setMasterVolume(Audio *audio, int volume)
 }
 
 // Mixes a stereo sound into the given destination buffer.
-static void mixStereoSamples(u8 *destination, const u8 *source, int length, int volume)
+static void mixStereoSamples(s16 *destination, const s16 *source, int numSamples, int volume)
 {
-  i16 sourceSample;
-  i16 destSample;
-  i32 mixedSample;
-  length /= 2;
+  s16 sourceSample;
+  s16 destSample;
 
-  while (length--)
+  while (numSamples--)
   {
-    sourceSample = source[1] << 8 | source[0];
-    sourceSample = (sourceSample * volume) / MAX_VOLUME;
-    destSample = destination[1] << 8 | destination[0];
-    mixedSample = CLAMP(sourceSample + destSample, -BIT16_MAX - 1, BIT16_MAX);
-    destination[0] = mixedSample & 0xff;
-    destination[1] = (mixedSample >> 8) & 0xff;
-    source += 2;
-    destination += 2;
+    sourceSample = (*source++ * volume) / MAX_VOLUME;
+    destSample = CLAMP(sourceSample + *destination, -S16_MAX - 1, S16_MAX);
+    *destination++ = destSample;
   }
 }
 
 // Interleaves a mono sound into the given destination buffer.
 // This involves straight up playing each mono sample in both left and right channels, effectively doubling everything.
 // We interleave mono sounds at mix time as opposed to converting the mono to stereo, so we don't have to double our memory usage.
-static void mixInterleavedMonoSamples(u8 *destination, const u8 *source, int length, int volume)
+static void mixInterleavedMonoSamples(s16 *destination, const s16 *source, int numSamples, int volume)
 {
-  i16 sourceSample;
-  i16 destSample;
-  i32 mixedSample;
-  length /= 4;
+  s16 sourceSample;
+  s16 destSample;
+  numSamples /= sizeof(s16);
 
-  while (length--)
+  while (numSamples--)
   {
-    sourceSample = source[1] << 8 | source[0];
-    sourceSample = (sourceSample * volume) / MAX_VOLUME;
-    destSample = destination[1] << 8 | destination[0];
-    mixedSample = CLAMP(sourceSample + destSample, -BIT16_MAX - 1, BIT16_MAX);
-    destination[0] = mixedSample & 0xff;
-    destination[1] = (mixedSample >> 8) & 0xff;
-    destSample = destination[3] << 8 | destination[2];
-    mixedSample = CLAMP(sourceSample + destSample, -BIT16_MAX - 1, BIT16_MAX);
-    destination[2] = mixedSample & 0xff;
-    destination[3] = (mixedSample >> 8) & 0xff;
-    source += 2;
-    destination += 4;
+    sourceSample = (*source++ * volume) / MAX_VOLUME;
+    destSample = CLAMP(sourceSample + *destination, -S16_MAX - 1, S16_MAX);
+    *destination++ = destSample;
+    destSample = CLAMP(sourceSample + *destination, -S16_MAX - 1, S16_MAX);
+    *destination++ = destSample;
   }
 }
 
-static void mixSoundStreamSlot(Audio *audio, u8 *stream)
+// We clamp on every mix, which can cause clipping when we're mixing many sounds together.
+// Ideally, we'd mix all of our sounds into a 32 bit buffer, then clamp after all sounds have been mixed.
+// Haven't had any issues yet, but if we start to get distortion, then this is probably the issue.
+void mixSamplesIntoStream(Audio *audio, s16 *stream, int numSamples)
 {
   // If we're streaming audio, then read a new chunk and mix it into the audio device stream.
   StreamSlot *streamSlot = &audio->streamSlot;
 
   if (streamSlot->state == PLAYING)
   {
-    // If we've reached the end of the sound stream, then loop.
     if (readFromWavStream(streamSlot->stream))
       resetWavStream(streamSlot->stream);
 
     // TODO: Assuming that the music is stereo.
-    mixStereoSamples(stream, streamSlot->stream->chunk, streamSlot->stream->chunkLength, streamSlot->volume);
+    mixStereoSamples(stream, streamSlot->stream->chunk, streamSlot->stream->chunkSampleCount, streamSlot->volume);
   }
-}
 
-static void mixSoundSlots(Audio *audio, u8 *stream)
-{
+  // Mix all playing sound slots.
   for (int i = 0; i < MAX_SOUND_SLOTS; i++)
   {
     SoundSlot *slot = &audio->soundSlots[i];
@@ -347,36 +332,28 @@ static void mixSoundSlots(Audio *audio, u8 *stream)
     if (slot->state == PLAYING)
     {
       // If we still have an amount of sound to mix, then do so.
-      // Track the amount that we wrote, and move the sound position forward.
-      if (slot->remainingLength > 0)
+      if (slot->remainingSamples > 0)
       {
-        int bytesToWrite = MIN(slot->remainingLength, AUDIO_CHUNK_SIZE);
+        int samplesToMix = MIN(slot->remainingSamples, numSamples);
 
         if (slot->soundData->channelCount == 1)
         {
-          mixInterleavedMonoSamples(stream, slot->position, bytesToWrite, slot->volume);
-          slot->position += bytesToWrite / 2;
-          slot->remainingLength -= bytesToWrite / 2;
+          mixInterleavedMonoSamples(stream, slot->position, samplesToMix, slot->volume);
+
+          int halved = (int) (samplesToMix / sizeof(s16));
+          slot->position += halved;
+          slot->remainingSamples -= halved;
         }
         else
         {
-          mixStereoSamples(stream, slot->position, bytesToWrite, slot->volume);
-          slot->position += bytesToWrite;
-          slot->remainingLength -= bytesToWrite;
+          mixStereoSamples(stream, slot->position, samplesToMix, slot->volume);
+
+          slot->position += samplesToMix;
+          slot->remainingSamples -= samplesToMix;
         }
       }
-      else
-      {
-        slot->soundData = NULL;
-        slot->state = STOPPED;
-      }
+        // If we've no more samples to mix, then stop the sound.
+      else resetSoundSlot(slot);
     }
   }
-}
-
-void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)
-{
-  memset(stream, 0, len);
-  mixSoundStreamSlot(audio, stream);
-  mixSoundSlots(audio, stream);
 }

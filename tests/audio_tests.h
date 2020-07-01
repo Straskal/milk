@@ -20,7 +20,7 @@ TEST_CASE(initAudio_InitializesSounds)
 	for (int i = 0; i < MAX_LOADED_SOUNDS; i++)
 	{
 		ASSERT_NULL(audio.sounds[i].samples);
-		ASSERT_EQ(0, audio.sounds[i].length);
+		ASSERT_EQ(0, audio.sounds[i].sampleCount);
 		ASSERT_EQ(0, audio.sounds[i].channelCount);
 	}
 
@@ -37,7 +37,7 @@ TEST_CASE(initAudio_InitializesSoundSlots)
 	{
 		ASSERT_NULL(audio.soundSlots[i].soundData);
 		ASSERT_EQ(STOPPED, audio.soundSlots[i].state);
-		ASSERT_EQ(0, audio.soundSlots[i].remainingLength);
+		ASSERT_EQ(0, audio.soundSlots[i].remainingSamples);
 		ASSERT_NULL(audio.soundSlots[i].position);
 		ASSERT_EQ(0, audio.soundSlots[i].volume);
 	}
@@ -53,7 +53,6 @@ TEST_CASE(initAudio_InitializesStreams)
 
 	for (int i = 0; i < MAX_OPEN_STREAMS; i++)
 	{
-		ASSERT_EQ(0, audio.streams[i].position);
 		ASSERT_EQ(0, audio.streams[i].start);
 		ASSERT_EQ(0, audio.streams[i].end);
 		ASSERT_NULL(audio.streams[i].file);
@@ -115,7 +114,7 @@ TEST_CASE(playSound_WhenSampleLengthIsZero_DoesNothing)
 
 	audio.lock = mockLock;
 	audio.unlock = mockUnlock;
-	audio.sounds[0].length = 0;
+	audio.sounds[0].sampleCount = 0;
 
 	ACT(playSound(&audio, 0, 0, 0));
 
@@ -130,15 +129,15 @@ TEST_CASE(playSound_SetsSlot)
 
 	audio.lock = mockLock;
 	audio.unlock = mockUnlock;
-	uint8_t buffer[1];
+	s16 buffer[1];
 	audio.sounds[0].samples = buffer;
-	audio.sounds[0].length = 1;
+	audio.sounds[0].sampleCount = 1;
 
 	ACT(playSound(&audio, 0, 0, 50));
 
 	ASSERT_EQ(&audio.sounds[0], audio.soundSlots[0].soundData);
 	ASSERT_EQ(buffer, audio.soundSlots[0].position);
-	ASSERT_EQ(1, audio.soundSlots[0].remainingLength);
+	ASSERT_EQ(1, audio.soundSlots[0].remainingSamples);
 	ASSERT_EQ(PLAYING, audio.soundSlots[0].state);
 	ASSERT_EQ(50, audio.soundSlots[0].volume);
 	END_ASSERTS();
@@ -149,7 +148,7 @@ TEST_CASE(playSound_ClampsVolumeToMin)
 	Audio audio;
 	initializeAudio(&audio);
 
-	uint8_t buffer[1];
+	s16 buffer[1];
 	audio.lock = mockLock;
 	audio.unlock = mockUnlock;
 	audio.sounds[0].samples = buffer;
@@ -165,7 +164,7 @@ TEST_CASE(playSound_ClampsVolumeToMax)
 	Audio audio;
 	initializeAudio(&audio);
 
-	uint8_t buffer[1];
+	s16 buffer[1];
 	audio.lock = mockLock;
 	audio.unlock = mockUnlock;
 	audio.sounds[0].samples = buffer;

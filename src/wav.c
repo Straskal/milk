@@ -97,7 +97,7 @@ bool loadWavSound(SoundData *soundData, const char *filename)
 	u32 sampleCount = header.data.size / sampleSize;
 	size_t signalSize = sampleSize * sampleCount;
 
-	soundData->samples = (u8 *)calloc(1, signalSize);
+	soundData->samples = (s16 *)calloc(1, signalSize);
 
 	if (fread(soundData->samples, signalSize, 1, file) != 1)
 	{
@@ -105,7 +105,7 @@ bool loadWavSound(SoundData *soundData, const char *filename)
 		return false;
 	}
 
-	soundData->length = (u32)signalSize;
+	soundData->sampleCount = (int)(signalSize / sizeof(s16));
 	soundData->channelCount = header.format.channels;
 
 	fclose(file);
@@ -132,8 +132,8 @@ bool openWavStream(SoundStream *stream, const char *filename)
 	u32 sampleCount = header.data.size / sampleSize;
 	size_t signalSize = sampleSize * sampleCount;
 
-	stream->chunk = (u8 *)calloc(1, AUDIO_CHUNK_SIZE);
-	stream->chunkLength = 0;
+	stream->chunk = (s16 *)calloc(1, AUDIO_CHUNK_SIZE);
+	stream->chunkSampleCount = 0;
 	stream->file = file;
 	stream->channelCount = header.format.channels;
 	stream->start = ftell(file);
@@ -144,8 +144,10 @@ bool openWavStream(SoundStream *stream, const char *filename)
 
 bool readFromWavStream(SoundStream *stream)
 {
-	stream->chunkLength = MIN(stream->end - stream->start, AUDIO_CHUNK_SIZE);
-	return !fread(stream->chunk, (size_t)stream->chunkLength, 1, stream->file);
+	size_t bytesToRead = MIN(stream->end - stream->start, AUDIO_CHUNK_SIZE);
+	stream->chunkSampleCount = (int)(bytesToRead / sizeof(s16));
+
+	return !fread(stream->chunk, bytesToRead, 1, stream->file);
 }
 
 void resetWavStream(SoundStream *stream)

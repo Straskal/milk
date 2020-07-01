@@ -49,8 +49,8 @@ typedef enum
 // This is ideal for short-burst sounds, since they are typically small.
 typedef struct
 {
-	u32 length;
-	u8 *samples;
+	int sampleCount;
+	s16 *samples;
 	u8 channelCount;
 } SoundData;
 
@@ -61,15 +61,16 @@ typedef struct
 	SoundData *soundData;
 	SoundState state;
 	int volume;
-	int remainingLength;
-	u8 *position;
+	int remainingSamples;
+  s16 *position;
 } SoundSlot;
 
 // Sound streams are ideal for sounds with a larger memory footprint (music).
 // Instead of loading an entire music file into memory, we load chunks at a time from the disk.
 typedef struct
 {
-	long position;
+  // The beginning and end of the sound data in the file on disk.
+
 	long start;
 	long end;
 	FILE *file;
@@ -77,8 +78,8 @@ typedef struct
 	// Chunk is filled with each call to stream read.
 	// Chunk length will tell you how much data has been loaded into the chunk
 
-	int chunkLength;
-	u8 *chunk;
+	int chunkSampleCount;
+  s16 *chunk;
 
 	u8 channelCount;
 } SoundStream;
@@ -161,6 +162,6 @@ void setMasterVolume(Audio *audio, int volume);
 // Platform code is responsible for calling this method and specifying the amount of data, in bytes, to mix.
 // The destination stream is assumed to be signed, 16 bit samples in the following order LRLRLR.
 // Length is always assumed to be AUDIO_CHUNK_SIZE.
-void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len);
+void mixSamplesIntoStream(Audio *audio, s16 *stream, int numSamples);
 
 #endif
