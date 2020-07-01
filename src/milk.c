@@ -226,9 +226,22 @@ static int l_playstream(lua_State *L)
 
 static int l_stopstream(lua_State *L)
 {
-  stopStream(&globalMilk->audio,
-    (int)lua_tointeger(L, 1)
-  );
+  UNUSED(L);
+  stopStream(&globalMilk->audio);
+  return 0;
+}
+
+static int l_pausestream(lua_State *L)
+{
+  UNUSED(L);
+  pauseStream(&globalMilk->audio);
+  return 0;
+}
+
+static int l_resumestream(lua_State *L)
+{
+  UNUSED(L);
+  resumeStream(&globalMilk->audio);
   return 0;
 }
 
@@ -277,6 +290,8 @@ static void pushApi(lua_State *L)
   pushApiFunction(L, "closestream", l_closestream);
 	pushApiFunction(L, "playstream", l_playstream);
   pushApiFunction(L, "stopstream", l_stopstream);
+  pushApiFunction(L, "pausestream", l_pausestream);
+  pushApiFunction(L, "resumestream", l_resumestream);
 	pushApiFunction(L, "sndslot", l_sndslot);
 	pushApiFunction(L, "vol", l_vol);
 	pushApiFunction(L, "exit", l_exit);

@@ -122,15 +122,12 @@ void unloadSound(Audio *audio, int soundIndex);
 void playSound(Audio *audio, int soundIndex, int slotIndex, int volume);
 
 // Stop the sound at the given slot index.
-// Index -1 will stop all playing slots.
 void stopSound(Audio *audio, int slotIndex);
 
 // Pause the sound at the given slot index.
-// Index -1 will pause all playing sounds.
 void pauseSound(Audio *audio, int slotIndex);
 
 // Resume the sound at the given slot index.
-// Index -1 will resume all paused sounds.
 void resumeSound(Audio *audio, int slotIndex);
 
 // Get the state of the given slot index.
@@ -147,8 +144,14 @@ void closeStream(Audio *audio, int streamIndex);
 // Set the stream at the given index to the currently playing stream.
 void playStream(Audio *audio, int streamIndex, int volume);
 
-// Stop the stream at the given index if it is playing.
-void stopStream(Audio *audio, int streamIndex);
+// Stop the stream if it is playing.
+void stopStream(Audio *audio);
+
+// pause the stream if it is playing.
+void pauseStream(Audio *audio);
+
+// Resume the stream index if it is paused.
+void resumeStream(Audio *audio);
 
 // Set the master volume of all sounds.
 void setMasterVolume(Audio *audio, int volume);
