@@ -9,7 +9,7 @@
 #define BIT16_MAX 32767
 
 // Zero-ing out audio's memory resets it to it's default state.
-static void zeroOutAudioMem(Audio *audio)
+static void zeroOutAudioMemory(Audio *audio)
 {
   memset(audio->sounds, 0, sizeof(audio->sounds));
   memset(audio->soundSlots, 0, sizeof(audio->soundSlots));
@@ -19,7 +19,7 @@ static void zeroOutAudioMem(Audio *audio)
 
 void initializeAudio(Audio *audio)
 {
-  zeroOutAudioMem(audio);
+  zeroOutAudioMemory(audio);
   audio->masterVolume = MAX_VOLUME;
 }
 
@@ -31,13 +31,16 @@ void disableAudio(Audio *audio)
   for (int i = 0; i < MAX_OPEN_STREAMS; i++)
     closeWavStream(&audio->streams[i]);
 
-  zeroOutAudioMem(audio);
+  zeroOutAudioMemory(audio);
 }
 
-// Set the given sound slot to default values.
 static void resetSoundSlot(SoundSlot *slot)
 {
-  memset(slot, 0, sizeof(SoundSlot));
+  slot->soundData = NULL;
+  slot->position = NULL;
+  slot->state = STOPPED;
+  slot->remainingLength = 0;
+  slot->volume = 0;
 }
 
 static bool isSoundIndexWithinBounds(int index)
@@ -51,30 +54,35 @@ static bool isSlotIndexWithinBounds(int index)
 }
 
 // Assumes that the audio device is already locked.
-// Before unloading the sound, find all slots that reference it, and stop them.
 static void lockedUnloadSound(SoundData *soundData, SoundSlot *soundSlots)
 {
   for (int i = 0; i < MAX_SOUND_SLOTS; i++)
   {
+    // Before unloading the sound, find all slots that reference it, and stop them.
     if (soundSlots[i].soundData == soundData)
       resetSoundSlot(&soundSlots[i]);
   }
 
   freeWavSound(soundData);
-  memset(soundData, 0, sizeof(SoundData));
+
+  soundData->samples = NULL;
+  soundData->length = 0;
+  soundData->channelCount = 0;
 }
 
-void loadSound(Audio *audio, int soundIndex, const char *filename)
+void loadSound(Audio *audio, int soundIndex, const char *filePath)
 {
   if (isSoundIndexWithinBounds(soundIndex))
   {
     audio->lock();
-    SoundData *sound = &audio->sounds[soundIndex];
 
-    if (sound->samples != NULL)
-      lockedUnloadSound(sound, audio->soundSlots);
+    SoundData *soundData = &audio->sounds[soundIndex];
 
-    loadWavSound(sound, filename);
+    if (soundData->samples != NULL)
+      lockedUnloadSound(soundData, audio->soundSlots);
+
+    loadWavSound(soundData, filePath);
+
     audio->unlock();
   }
 }
@@ -84,10 +92,11 @@ void unloadSound(Audio *audio, int soundIndex)
   if (isSoundIndexWithinBounds(soundIndex))
   {
     audio->lock();
-    SoundData *sound = &audio->sounds[soundIndex];
 
-    if (sound->samples != NULL)
-      lockedUnloadSound(sound, audio->soundSlots);
+    SoundData *soundData = &audio->sounds[soundIndex];
+
+    if (soundData->samples != NULL)
+      lockedUnloadSound(soundData, audio->soundSlots);
 
     audio->unlock();
   }
@@ -98,17 +107,19 @@ void playSound(Audio *audio, int soundIndex, int slotIndex, int volume)
   if (isSoundIndexWithinBounds(soundIndex) && isSlotIndexWithinBounds(slotIndex))
   {
     audio->lock();
-    SoundData *sampleData = &audio->sounds[soundIndex];
 
-    if (sampleData->samples != NULL)
+    SoundData *soundData = &audio->sounds[soundIndex];
+
+    if (soundData->samples != NULL)
     {
       SoundSlot *slot = &audio->soundSlots[slotIndex];
       slot->state = PLAYING;
-      slot->soundData = sampleData;
-      slot->position = sampleData->samples;
-      slot->remainingLength = sampleData->length;
+      slot->soundData = soundData;
+      slot->position = soundData->samples;
+      slot->remainingLength = soundData->length;
       slot->volume = CLAMP(volume, 0, MAX_VOLUME);
     }
+
     audio->unlock();
   }
 }
@@ -118,8 +129,10 @@ void stopSound(Audio *audio, int slotIndex)
   if (isSlotIndexWithinBounds(slotIndex))
   {
     audio->lock();
+
     SoundSlot *slot = &audio->soundSlots[slotIndex];
     resetSoundSlot(slot);
+
     audio->unlock();
   }
 }
@@ -129,6 +142,7 @@ void pauseSound(Audio *audio, int slotIndex)
   if (isSlotIndexWithinBounds(slotIndex))
   {
     audio->lock();
+
     SoundSlot *slot = &audio->soundSlots[slotIndex];
 
     if (slot->state == PLAYING)
@@ -143,6 +157,7 @@ void resumeSound(Audio *audio, int slotIndex)
   if (isSlotIndexWithinBounds(slotIndex))
   {
     audio->lock();
+
     SoundSlot *slot = &audio->soundSlots[slotIndex];
 
     if (slot->state == PAUSED)
@@ -181,12 +196,14 @@ void openStream(Audio *audio, int streamIndex, const char *filePath)
   if (isStreamIndexWithinBounds(streamIndex))
   {
     audio->lock();
-    SoundStream *audioStream = &audio->streams[streamIndex];
 
-    if (audioStream->file != NULL)
-      lockedCloseStream(audioStream, &audio->streamSlot);
+    SoundStream *soundStream = &audio->streams[streamIndex];
 
-    openWavStream(audioStream, filePath);
+    if (soundStream->file != NULL)
+      lockedCloseStream(soundStream, &audio->streamSlot);
+
+    openWavStream(soundStream, filePath);
+
     audio->unlock();
   }
 }
@@ -196,7 +213,9 @@ void closeStream(Audio *audio, int streamIndex)
   if (isStreamIndexWithinBounds(streamIndex))
   {
     audio->lock();
+
     lockedCloseStream(&audio->streams[streamIndex], &audio->streamSlot);
+
     audio->unlock();
   }
 }
@@ -206,15 +225,17 @@ void playStream(Audio *audio, int streamIndex, int volume)
   if (isStreamIndexWithinBounds(streamIndex))
   {
     audio->lock();
-    SoundStream *audioStream = &audio->streams[streamIndex];
 
-    if (audioStream->file != NULL)
+    SoundStream *soundStream = &audio->streams[streamIndex];
+
+    if (soundStream->file != NULL)
     {
-      StreamSlot *streamSlot = &audio->streamSlot;
-      streamSlot->state = PLAYING;
-      streamSlot->stream = audioStream;
-      streamSlot->volume = CLAMP(volume, 0, MAX_VOLUME);
+      StreamSlot *slot = &audio->streamSlot;
+      slot->state = PLAYING;
+      slot->stream = soundStream;
+      slot->volume = CLAMP(volume, 0, MAX_VOLUME);
     }
+
     audio->unlock();
   }
 }
@@ -222,7 +243,9 @@ void playStream(Audio *audio, int streamIndex, int volume)
 void stopStream(Audio *audio)
 {
   audio->lock();
+
   resetStreamSlot(&audio->streamSlot);
+
   audio->unlock();
 }
 

@@ -112,7 +112,7 @@ void initializeAudio(Audio *audio);
 void disableAudio(Audio *audio);
 
 // Load a sound file's data into the given sound index.
-void loadSound(Audio *audio, int soundIndex, const char *filename);
+void loadSound(Audio *audio, int soundIndex, const char *filePath);
 
 // Unload the sound data at the given sound index.
 void unloadSound(Audio *audio, int soundIndex);
