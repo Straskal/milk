@@ -40,8 +40,8 @@
 
 typedef enum
 {
-	PLAYING,
-	STOPPED
+  STOPPED,
+  PLAYING
 } SoundState;
 
 // Sound data represents an entire sound loaded into memory.

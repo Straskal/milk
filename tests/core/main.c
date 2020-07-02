@@ -15,7 +15,6 @@ static Test _tests[] =
 	INIT_TEST(initAudio_InitializesSounds),
 	INIT_TEST(initAudio_InitializesSoundSlots),
 	INIT_TEST(initAudio_InitializesStreams),
-	INIT_TEST(initAudio_InitializesStreamSlot),
 	INIT_TEST(initAudio_InitializesMasterVolume),
 
 	INIT_TEST(playSound_WhenIndexOutOfBounds_DoesNothing),
@@ -28,8 +27,6 @@ static Test _tests[] =
 	INIT_TEST(setMasterVolume_ClampsToMaxValue),
 	INIT_TEST(stopSound_WhenIndexOutOfBounds_DoesNothing),
 	INIT_TEST(stopSound_StopsSound),
-	INIT_TEST(pauseSound_WhenIndexOutOfBounds_DoesNothing),
-	INIT_TEST(pauseSound_PausesSound),
 	INIT_TEST(resumeSound_WhenIndexOutOfBounds_DoesNothing),
 	INIT_TEST(resumeSound_resumesSound),
 

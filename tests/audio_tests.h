@@ -63,22 +63,6 @@ TEST_CASE(initAudio_InitializesStreams)
 	END_ASSERTS();
 }
 
-TEST_CASE(initAudio_InitializesStreamSlot)
-{
-	Audio audio;
-
-	ACT(initializeAudio(&audio));
-
-	for (int i = 0; i < MAX_OPEN_STREAMS; i++)
-	{
-		ASSERT_NULL(audio.streamSlot.stream);
-		ASSERT_EQ(STOPPED, audio.streamSlot.state);
-		ASSERT_EQ(0, audio.streamSlot.volume);
-	}
-
-	END_ASSERTS();
-}
-
 TEST_CASE(initAudio_InitializesMasterVolume)
 {
 	Audio audio;
@@ -220,36 +204,8 @@ TEST_CASE(stopSound_StopsSound)
 
 	ACT(stopSound(&audio, 0));
 
-	ASSERT_NULL(audio.soundSlots[0].soundData);
 	ASSERT_EQ(STOPPED, audio.soundSlots[0].state);
 
-	END_ASSERTS();
-}
-
-TEST_CASE(pauseSound_WhenIndexOutOfBounds_DoesNothing)
-{
-	Audio audio;
-	initializeAudio(&audio);
-
-	audio.lock = mockLock;
-	audio.unlock = mockUnlock;
-	ACT(pauseSound(&audio, -10));
-	ACT(pauseSound(&audio, MAX_SOUND_SLOTS + 10));
-}
-
-TEST_CASE(pauseSound_PausesSound)
-{
-	Audio audio;
-	initializeAudio(&audio);
-
-	audio.lock = mockLock;
-	audio.unlock = mockUnlock;
-	audio.soundSlots[0].soundData = &audio.sounds[0];
-	audio.soundSlots[0].state = PLAYING;
-
-	ACT(pauseSound(&audio, 0));
-
-	ASSERT_EQ(PAUSED, audio.soundSlots[0].state);
 	END_ASSERTS();
 }
 
@@ -272,7 +228,7 @@ TEST_CASE(resumeSound_resumesSound)
 	audio.lock = mockLock;
 	audio.unlock = mockUnlock;
 	audio.soundSlots[0].soundData = &audio.sounds[0];
-	audio.soundSlots[0].state = PAUSED;
+	audio.soundSlots[0].state = STOPPED;
 
 	ACT(resumeSound(&audio, 0));
 
