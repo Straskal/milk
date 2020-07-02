@@ -103,7 +103,8 @@ bool loadWavSound(SoundData *soundData, const char *filename)
 
 void freeWavSound(SoundData *soundData)
 {
-  free(soundData->samples);
+  if (soundData->samples != NULL)
+    free(soundData->samples);
 
   soundData->samples = NULL;
   soundData->sampleCount = 0;
@@ -142,6 +143,7 @@ void closeWavStream(SoundStream *stream)
 {
   if (stream->chunk != NULL)
     free(stream->chunk);
+
   if (stream->file != NULL)
     fclose(stream->file);
 
