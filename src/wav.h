@@ -19,6 +19,10 @@ void freeWavSound(SoundData *soundData);
 //
 bool openWavStream(SoundStream *stream, const char *filename);
 
+// Closes a wav stream.
+//
+void closeWavStream(SoundStream *stream);
+
 // Reads one chunk from the stream and returns true if the stream has reached its end.
 // Will always return false if loop is true.
 //
@@ -27,9 +31,5 @@ bool readFromWavStream(SoundStream *stream, int numSamples, bool loop);
 // Resets the wav stream to the beginning of data. This is ideal for looping.
 //
 void resetWavStream(SoundStream *stream);
-
-// Closes a wav stream.
-//
-void closeWavStream(SoundStream *stream);
 
 #endif

@@ -95,16 +95,17 @@ bool loadWavSound(SoundData *soundData, const char *filename)
 
   u32 sampleSize = header.format.channels * header.format.bitsPerSample / 8;
   u32 sampleCount = header.data.size / sampleSize;
-  size_t signalSize = sampleSize * sampleCount;
+  u32 signalSize = sampleSize * sampleCount;
+  s16 *samples = (s16 *) calloc(1, (size_t)signalSize);
 
-  soundData->samples = (s16 *) calloc(1, signalSize);
-
-  if (fread(soundData->samples, signalSize, 1, file) != 1)
+  if (fread(samples, signalSize, 1, file) != 1)
   {
+    free(samples);
     fclose(file);
     return false;
   }
 
+  soundData->samples = samples;
   soundData->sampleCount = (int) (signalSize / sizeof(s16));
   soundData->channelCount = header.format.channels;
 
@@ -115,6 +116,7 @@ bool loadWavSound(SoundData *soundData, const char *filename)
 void freeWavSound(SoundData *soundData)
 {
   free(soundData->samples);
+
   soundData->samples = NULL;
   soundData->sampleCount = 0;
   soundData->channelCount = 0;
@@ -136,16 +138,22 @@ bool openWavStream(SoundStream *stream, const char *filename)
 
   u32 sampleSize = header.format.channels * header.format.bitsPerSample / 8;
   u32 sampleCount = header.data.size / sampleSize;
-  size_t signalSize = sampleSize * sampleCount;
+  u32 signalSize = sampleSize * sampleCount;
 
+  stream->file = file;
   stream->chunk = (s16 *) calloc(1, AUDIO_CHUNK_SIZE);
   stream->chunkSampleCount = 0;
-  stream->file = file;
   stream->channelCount = header.format.channels;
   stream->start = ftell(file);
   stream->end = stream->start + (long) signalSize;
 
   return true;
+}
+
+void closeWavStream(SoundStream *stream)
+{
+  if (stream->chunk != NULL) free(stream->chunk);
+  if (stream->file != NULL) fclose(stream->file);
 }
 
 bool readFromWavStream(SoundStream *stream, int numSamples, bool loop)
@@ -157,33 +165,29 @@ bool readFromWavStream(SoundStream *stream, int numSamples, bool loop)
   // The number of bytes to read up until the end of the sound.
   long bytesToRead = MIN(remainingBytes, requestedBytes);
 
-  size_t readRequestedAmount = fread(stream->chunk, bytesToRead, 1, stream->file);
+  fread(stream->chunk, bytesToRead, 1, stream->file);
   totalBytesRead += bytesToRead;
+
+  bool finished = ftell(stream->file) == stream->end;
 
   // If our first read didn't meet our request, then we've hit the end of the stream.
   // If we want to loop, let's move back to the start of the stream and keep reading from where left off.
-  if (!readRequestedAmount && loop)
+  if (finished && loop)
   {
     bytesToRead = requestedBytes - remainingBytes;
     fseek(stream->file, stream->start, SEEK_SET);
-    readRequestedAmount = fread(stream->chunk + (bytesToRead / sizeof(s16)) + 1, bytesToRead, 1, stream->file);
+    fread(stream->chunk + (bytesToRead / sizeof(s16)) + 1, bytesToRead, 1, stream->file);
     totalBytesRead += bytesToRead;
   }
 
   stream->chunkSampleCount = (int) (totalBytesRead / sizeof(s16));
   stream->position = ftell(stream->file);
 
-  return !readRequestedAmount;
+  return finished && !loop;
 }
 
 void resetWavStream(SoundStream *stream)
 {
   fseek(stream->file, stream->start, SEEK_SET);
   stream->position = stream->start;
-}
-
-void closeWavStream(SoundStream *stream)
-{
-  if (stream->chunk != NULL) free(stream->chunk);
-  if (stream->file != NULL) fclose(stream->file);
 }
