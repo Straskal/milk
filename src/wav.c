@@ -82,7 +82,7 @@ bool loadWavSound(SoundData *soundData, const char *filename)
   }
 
   int sampleSize = header.format.channels * header.format.bitsPerSample / 8;
-  int sampleCount = header.data.size / sampleSize;
+  int sampleCount = (int)header.data.size / sampleSize;
   int signalSize = sampleSize * sampleCount;
   s16 *samples = (s16 *) calloc(1, (size_t)signalSize);
 
