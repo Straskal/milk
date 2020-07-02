@@ -3,26 +3,17 @@
 #include <stdio.h>
 #include <string.h>
 
-// TODO: Handle endianness for wav header markers.
+#define RIFF_MARKER_LE 0x46464952 // "RIFF"
+#define WAVE_MARKER_LE 0x45564157 // "WAVE"
+#define FORMAT_MARKER 0x20746d66  // "fmt0"
+#define DATA_MARKER 0x61746164    // "data"
 
-// "RIFF"
-#define RIFF_MARKER 0x46464952
+#define PCM     1
+#define MONO    1
+#define STEREO  2
 
-// "WAVE"
-#define WAVE_MARKER 0x45564157
-
-// "fmt0"
-#define FORMAT_MARKER 0x20746d66
-
-// "data"
-#define DATA_MARKER 0x61746164
-
-#define PCM 1
-#define MONO 1
-#define STEREO 2
-
-#define INVALID_RIFF_MARKER(header) (header != RIFF_MARKER)
-#define INVALID_WAVE_MARKER(header)  (header != WAVE_MARKER)
+#define INVALID_RIFF_MARKER(header) (header != RIFF_MARKER_LE)
+#define INVALID_WAVE_MARKER(header)  (header != WAVE_MARKER_LE)
 #define INVALID_FORMAT_MARKER(header)  (header != FORMAT_MARKER)
 #define INVALID_DATA_MARKER(header)  (header != DATA_MARKER)
 #define INVALID_FORMAT_TYPE(format) (format != PCM)
