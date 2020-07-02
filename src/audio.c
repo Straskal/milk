@@ -13,7 +13,6 @@ static void initializeMemory(Audio *audio)
   memset(audio->sounds, 0, sizeof(audio->sounds));
   memset(audio->soundSlots, 0, sizeof(audio->soundSlots));
   memset(audio->streams, 0, sizeof(audio->streams));
-  memset(&audio->streamSlot, 0, sizeof(audio->streamSlot));
 }
 
 void initializeAudio(Audio *audio)
@@ -42,15 +41,6 @@ static void resetSoundSlot(SoundSlot *slot)
   slot->state = STOPPED;
   slot->remainingSamples = 0;
   slot->volume = 0;
-}
-
-// Reset stream slot to default state.
-static void resetStreamSlot(StreamSlot *streamSlot)
-{
-  streamSlot->stream = NULL;
-  streamSlot->state = STOPPED;
-  streamSlot->volume = 0;
-  streamSlot->loop = false;
 }
 
 // Assumes that the audio device is already locked.
@@ -134,29 +124,28 @@ void playSound(Audio *audio, int soundIndex, int slotIndex, int volume)
 
 void stopSound(Audio *audio, int slotIndex)
 {
-  if (isSlotIndexWithinBounds(slotIndex))
+  if (slotIndex == -1)
   {
     audio->lock();
 
-    SoundSlot *slot = &audio->soundSlots[slotIndex];
+    for (int i = 0; i < MAX_SOUND_SLOTS; i++)
+    {
+      SoundSlot *slot = &audio->soundSlots[i];
 
-    if (slot->state != STOPPED)
-      resetSoundSlot(slot);
+      if (slot->state == PLAYING)
+        slot->state = STOPPED;
+    }
 
     audio->unlock();
   }
-}
-
-void pauseSound(Audio *audio, int slotIndex)
-{
-  if (isSlotIndexWithinBounds(slotIndex))
+  else if (isSlotIndexWithinBounds(slotIndex))
   {
     audio->lock();
 
     SoundSlot *slot = &audio->soundSlots[slotIndex];
 
     if (slot->state == PLAYING)
-      slot->state = PAUSED;
+      slot->state = STOPPED;
 
     audio->unlock();
   }
@@ -164,13 +153,27 @@ void pauseSound(Audio *audio, int slotIndex)
 
 void resumeSound(Audio *audio, int slotIndex)
 {
-  if (isSlotIndexWithinBounds(slotIndex))
+  if (slotIndex == -1)
+  {
+    audio->lock();
+
+    for (int i = 0; i < MAX_SOUND_SLOTS; i++)
+    {
+      SoundSlot *slot = &audio->soundSlots[i];
+
+      if (slot->soundData != NULL && slot->state == STOPPED)
+        slot->state = PLAYING;
+    }
+
+    audio->unlock();
+  }
+  else if (isSlotIndexWithinBounds(slotIndex))
   {
     audio->lock();
 
     SoundSlot *slot = &audio->soundSlots[slotIndex];
 
-    if (slot->state == PAUSED)
+    if (slot->soundData != NULL && slot->state == STOPPED)
       slot->state = PLAYING;
 
     audio->unlock();
@@ -187,16 +190,6 @@ static bool isStreamIndexWithinBounds(int index)
   return index >= 0 && index < MAX_OPEN_STREAMS;
 }
 
-// Assumes that the audio device is already locked.
-// If the stream is currently playing, then reset the stream slot.
-static void lockedCloseStream(SoundStream *soundStream, StreamSlot *streamSlot)
-{
-  if (streamSlot->stream == soundStream)
-    resetStreamSlot(streamSlot);
-
-  closeWavStream(soundStream);
-}
-
 void openStream(Audio *audio, int streamIndex, const char *filePath)
 {
   if (isStreamIndexWithinBounds(streamIndex))
@@ -206,7 +199,7 @@ void openStream(Audio *audio, int streamIndex, const char *filePath)
     SoundStream *soundStream = &audio->streams[streamIndex];
 
     if (soundStream->file != NULL)
-      lockedCloseStream(soundStream, &audio->streamSlot);
+      closeWavStream(soundStream);
 
     openWavStream(soundStream, filePath);
 
@@ -223,7 +216,7 @@ void closeStream(Audio *audio, int streamIndex)
     SoundStream *soundStream = &audio->streams[streamIndex];
 
     if (soundStream->file != NULL)
-      lockedCloseStream(soundStream, &audio->streamSlot);
+      closeWavStream(soundStream);
 
     audio->unlock();
   }
@@ -241,47 +234,71 @@ void playStream(Audio *audio, int streamIndex, int volume, bool loop)
     {
       moveWavStreamToStart(soundStream);
 
-      StreamSlot *slot = &audio->streamSlot;
-      slot->state = PLAYING;
-      slot->stream = soundStream;
-      slot->volume = CLAMP(volume, 0, MAX_VOLUME);
-      slot->loop = loop;
+      soundStream->state = PLAYING;
+      soundStream->volume = CLAMP(volume, 0, MAX_VOLUME);
+      soundStream->loop = loop;
     }
 
     audio->unlock();
   }
 }
 
-void stopStream(Audio *audio)
+void stopStream(Audio *audio, int streamIndex)
 {
-  audio->lock();
+  if (streamIndex == -1)
+  {
+    audio->lock();
 
-  StreamSlot *slot = &audio->streamSlot;
+    for (int i = 0; i < MAX_OPEN_STREAMS; i++)
+    {
+      SoundStream *soundStream = &audio->streams[i];
 
-  if (slot->state != STOPPED)
-    resetStreamSlot(&audio->streamSlot);
+      if (soundStream->state == PLAYING)
+        soundStream->state = STOPPED;
+    }
 
-  audio->unlock();
+    audio->unlock();
+  }
+  else if (isStreamIndexWithinBounds(streamIndex))
+  {
+    audio->lock();
+
+    SoundStream *soundStream = &audio->streams[streamIndex];
+
+    if (soundStream->state == PLAYING)
+      soundStream->state = STOPPED;
+
+    audio->unlock();
+  }
 }
 
-void pauseStream(Audio *audio)
+void resumeStream(Audio *audio, int streamIndex)
 {
-  audio->lock();
+  if (streamIndex == -1)
+  {
+    audio->lock();
 
-  if (audio->streamSlot.state == PLAYING)
-    audio->streamSlot.state = PAUSED;
+    for (int i = 0; i < MAX_OPEN_STREAMS; i++)
+    {
+      SoundStream *soundStream = &audio->streams[i];
 
-  audio->unlock();
-}
+      if (soundStream->file != NULL && soundStream->state == STOPPED)
+        soundStream->state = PLAYING;
+    }
 
-void resumeStream(Audio *audio)
-{
-  audio->lock();
+    audio->unlock();
+  }
+  else if (isStreamIndexWithinBounds(streamIndex))
+  {
+    audio->lock();
 
-  if (audio->streamSlot.state == PAUSED)
-    audio->streamSlot.state = PLAYING;
+    SoundStream *soundStream = &audio->streams[streamIndex];
 
-  audio->unlock();
+    if (soundStream->file != NULL &&soundStream->state == STOPPED)
+      soundStream->state = PLAYING;
+
+    audio->unlock();
+  }
 }
 
 void setMasterVolume(Audio *audio, int volume)
@@ -326,30 +343,31 @@ static void mixInterleavedMonoSamples(s16 *destination, const s16 *source, int n
 // Haven't had any issues yet, but if we start to get distortion, then this is probably the issue.
 void mixSamplesIntoStream(Audio *audio, s16 *stream, int numSamples)
 {
-  // If we're streaming audio, then read a new chunk and mix it into the audio device stream.
-  StreamSlot *streamSlot = &audio->streamSlot;
-
-  if (streamSlot->state == PLAYING)
+  for (int i = 0; i < MAX_OPEN_STREAMS; i++)
   {
-    SoundStream *soundStream = streamSlot->stream;
-    bool streamFinished = false;
+    SoundStream *soundStream = &audio->streams[i];
 
-    switch (soundStream->channelCount)
+    if (soundStream->state == PLAYING)
     {
-      case 1:
-        streamFinished = readFromWavStream(soundStream, numSamples / 2, streamSlot->loop);
-        mixInterleavedMonoSamples(stream, streamSlot->stream->chunk, streamSlot->stream->chunkSampleCount, streamSlot->volume);
-        break;
-      case 2:
-        streamFinished = readFromWavStream(soundStream, numSamples, streamSlot->loop);
-        mixStereoSamples(stream, streamSlot->stream->chunk, streamSlot->stream->chunkSampleCount, streamSlot->volume);
-        break;
-      default:
-        break; // This should never happen.
-    }
+      bool streamFinished = false;
 
-    if (streamFinished)
-      resetStreamSlot(streamSlot);
+      switch (soundStream->channelCount)
+      {
+        case 1:
+          streamFinished = readFromWavStream(soundStream, numSamples / 2, soundStream->loop);
+          mixInterleavedMonoSamples(stream, soundStream->chunk, soundStream->chunkSampleCount, soundStream->volume);
+          break;
+        case 2:
+          streamFinished = readFromWavStream(soundStream, numSamples, soundStream->loop);
+          mixStereoSamples(stream, soundStream->chunk, soundStream->chunkSampleCount, soundStream->volume);
+          break;
+        default:
+          break; // This should never happen.
+      }
+
+      if (streamFinished)
+        soundStream->state = STOPPED;
+    }
   }
 
   // Mix all playing sound slots.

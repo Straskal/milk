@@ -40,9 +40,8 @@
 
 typedef enum
 {
-	STOPPED,
 	PLAYING,
-	PAUSED
+	STOPPED
 } SoundState;
 
 // Sound data represents an entire sound loaded into memory.
@@ -69,35 +68,23 @@ typedef struct
 // Instead of loading an entire music file into memory, we load chunks at a time from the disk.
 typedef struct
 {
-  // The beginning and end of the sound data in the file on disk.
-
   long position;
 	long start;
 	long end;
 	FILE *file;
-
-	// Chunk is is to be filled with each call to read more data from stream.
-
+  SoundState state;
+  int volume;
 	int chunkSampleCount;
   s16 *chunk;
-
+  bool loop;
 	u8 channelCount;
 } SoundStream;
-
-typedef struct
-{
-	SoundStream *stream;
-	SoundState state;
-	int volume;
-	bool loop;
-} StreamSlot;
 
 typedef struct
 {
 	SoundData sounds[MAX_LOADED_SOUNDS];
 	SoundSlot soundSlots[MAX_SOUND_SLOTS];
 	SoundStream streams[MAX_OPEN_STREAMS];
-	StreamSlot streamSlot;
 	int masterVolume;
 
 	// The audio device is platform specific, but some audio device libraries run the device stream on a separate thread.
@@ -129,12 +116,9 @@ void unloadSound(Audio *audio, int soundIndex);
 void playSound(Audio *audio, int soundIndex, int slotIndex, int volume);
 
 // Stop the sound at the given slot index.
+// slot index -1 will stop all playing sounds.
 //
 void stopSound(Audio *audio, int slotIndex);
-
-// Pause the sound at the given slot index.
-//
-void pauseSound(Audio *audio, int slotIndex);
 
 // Resume the sound at the given slot index.
 //
@@ -160,15 +144,11 @@ void playStream(Audio *audio, int streamIndex, int volume, bool loop);
 
 // Stop the stream if it is playing.
 //
-void stopStream(Audio *audio);
-
-// pause the stream if it is playing.
-//
-void pauseStream(Audio *audio);
+void stopStream(Audio *audio, int streamIndex);
 
 // Resume the stream index if it is paused.
 //
-void resumeStream(Audio *audio);
+void resumeStream(Audio *audio, int streamIndex);
 
 // Set the master volume of all sounds.
 //
