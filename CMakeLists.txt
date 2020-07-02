@@ -66,9 +66,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
 set(MILK_TEST_SRC_FILES
 	${MILK_SRC_FILES}
 	tests/audio_tests.h
-	tests/main.c
-	tests/milktests.h
-	tests/milkassert.h
+	tests/input_tests.h
+	tests/video_tests.h
+	tests/core/main.c
+	tests/core/milkassert.h
 )
 
 add_executable(milktests ${MILK_TEST_SRC_FILES})

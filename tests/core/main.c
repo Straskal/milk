@@ -1,6 +1,7 @@
-#include "audio_tests.h"
+#include "../audio_tests.h"
 #include "common.h"
-#include "milktests.h"
+#include "../input_tests.h"
+#include "../video_tests.h"
 
 static Test _tests[] =
 {
@@ -38,6 +39,7 @@ static Test _tests[] =
 	INIT_TEST(initVideo_InitializesFont),
 	INIT_TEST(initVideo_InitializesColorKey),
 	INIT_TEST(initVideo_InitializesClipRect),
+
 	INIT_TEST(resetDrawState_ResetsColorKey),
 	INIT_TEST(resetDrawState_ResetsClipRect),
 	INIT_TEST(setClippingRect_ClampsClipRectToFramebufferSize),

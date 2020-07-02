@@ -1,7 +1,7 @@
 #ifndef __AUDIO_TESTS_H__
 #define __AUDIO_TESTS_H__
 
-#include "milkassert.h"
+#include "core/milkassert.h"
 
 static void mockLock()
 {
