@@ -5,13 +5,23 @@
 #include "embed/font.h"
 #include "video.h"
 
-void initializeVideo(Video *video)
+static void initializeMemory(Video *video)
 {
   memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
   memset(&video->spriteSheet, 0x00, sizeof(video->spriteSheet));
   memcpy(&video->font, DEFAULT_FONT_DATA, sizeof(video->font));
+}
+
+void initializeVideo(Video *video)
+{
+  initializeMemory(video);
 
   resetDrawState(video);
+}
+
+void disableVideo(Video *video)
+{
+  initializeMemory(video);
 }
 
 void loadSpriteSheet(Video *video, const char *path)

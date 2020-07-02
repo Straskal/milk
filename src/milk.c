@@ -13,9 +13,11 @@ Milk *createMilk()
 	Milk *milk = (Milk *)malloc(sizeof(Milk));
 	milk->shouldQuit = false;
 	milk->code.state = NULL;
+
 	initInput(&milk->input);
   initializeVideo(&milk->video);
 	initializeAudio(&milk->audio);
+
   LOG_INIT();
 	return milk;
 }
@@ -23,6 +25,7 @@ Milk *createMilk()
 void freeMilk(Milk *milk)
 {
 	disableAudio(&milk->audio);
+	disableVideo(&milk->video);
 	free(milk);
 }
 

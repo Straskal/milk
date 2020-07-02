@@ -70,6 +70,10 @@ typedef struct video
 //
 void initializeVideo(Video *video);
 
+// Disables the video module and cleans up memory.
+//
+void disableVideo(Video *video);
+
 // Load a sprite sheet into memory, replacing the current sprite sheet.
 //
 void loadSpriteSheet(Video *video, const char *path);
