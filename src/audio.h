@@ -176,9 +176,8 @@ void setMasterVolume(Audio *audio, int volume);
 
 // Mix all playing sounds into the given stream.
 // Milk on it's own does not maintain an audio stream.
-// Platform code is responsible for calling this method and specifying the amount of data, in bytes, to mix.
+// Platform code is responsible for calling this method and specifying the amount of data, in samples, to mix.
 // The destination stream is assumed to be signed, 16 bit samples in the following order [LRLRLR].
-// Length is always assumed to be AUDIO_CHUNK_SIZE.
 //
 void mixSamplesIntoStream(Audio *audio, s16 *stream, int numSamples);
 

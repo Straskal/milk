@@ -5,7 +5,7 @@
 #define MAX_LOG_LENGTH 512
 
 #ifdef BUILD_WITH_CONSOLE
-#define LOG_INIT()              initLogs()
+#define LOG_INIT()              initializeLogs()
 #define LOG_INFO(text)          logMessage(INFO,    text)
 #define LOG_WARN(text)          logMessage(WARN,    text)
 #define LOG_ERROR(text)         logMessage(ERROR,   text)
@@ -28,25 +28,39 @@
 
 typedef enum logType
 {
-	INFO, WARN, ERROR
+  INFO, WARN, ERROR
 } LogType;
 
 typedef struct logMessage
 {
-	LogType type;
-	char    text[MAX_LOG_LENGTH];
+  char text[MAX_LOG_LENGTH];
+  LogType type;
 } LogMessage;
 
+// This is really only used for the console at the moment.
+// It would be nice to be able to dump the logs to a text file.
+//
 typedef struct logs
 {
-	LogMessage  messages[MAX_LOGS];
-	int         count;
-	int         errorCount;
+  LogMessage messages[MAX_LOGS];
+  int count;
+  int errorCount;
 } Logs;
 
-void initLogs();
+// Initialize the logger.
+//
+void initializeLogs();
+
+// Log a formatted message of the given type.
+//
 void logMessage(LogType type, const char *text, ...);
+
+// Returns all current logs.
+//
 Logs *getLogs();
+
+// Clears all logs.
+//
 void clearLogs();
 
 #endif

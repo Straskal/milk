@@ -1,6 +1,5 @@
 #include "audio_tests.h"
 #include "common.h"
-#include "milkassert.h"
 #include "milktests.h"
 
 static Test _tests[] =

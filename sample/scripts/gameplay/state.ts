@@ -28,10 +28,10 @@ export class GameplayState implements GameState {
     }
 
     public enter(_: Game): void {
-        loadsnd(0, "sounds/02 Underclocked (underunderclocked mix).wav");
+        openstream(0, "sounds/02 Underclocked (underunderclocked mix).wav");
         loadsnd(1, "sounds/shoot.wav");
         loadsnd(2, "sounds/explode.wav");
-        play(0, 0, 128);
+        playstream(0, 128, true);
     }
 
     public update(game: Game): void {
@@ -60,7 +60,11 @@ export class GameplayState implements GameState {
         this.drawScore();
     }
 
-    public exit(_: Game): void { }
+    public exit(_: Game): void { 
+        closestream(0);
+        freesnd(1);
+        freesnd(2);
+    }
 
     private handleBulletEnemyCollisions(ticks: number): void {
         for (const enemy of this._enemyPool.liveEnemies) {

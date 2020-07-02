@@ -68,7 +68,7 @@ typedef struct video
 
 // Initialize the video submodule.
 //
-void initVideo(Video *video);
+void initializeVideo(Video *video);
 
 // Load a sprite sheet into memory, replacing the current sprite sheet.
 //

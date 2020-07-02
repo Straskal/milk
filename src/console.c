@@ -3,16 +3,13 @@
 #include "embed/font.h"
 #include "logs.h"
 
-#include <ctype.h>
 #include <string.h>
 
-/*
- *******************************************************************************
- * Commands
- *******************************************************************************
- */
+// Track number of ticks since engine has started.
+static unsigned int ticks = 0;
 
-static void cmdReload(Console *console, Milk *milk, char **arguments, int argumentCount)
+// Unloads the current scripts.
+static void cmdUnload(Console *console, Milk *milk, char **arguments, int argumentCount)
 {
 	UNUSED(console);
 	UNUSED(arguments);
@@ -21,9 +18,10 @@ static void cmdReload(Console *console, Milk *milk, char **arguments, int argume
 	unloadCode(milk);
 	console->isGameInitialized = false;
 
-	LOG_INFO("scripts have been reloaded");
+	LOG_INFO("scripts have been unloaded");
 }
 
+// Clears the logs.
 static void cmdClear(Console *console, Milk *milk, char **arguments, int argumentCount)
 {
 	UNUSED(console);
@@ -35,6 +33,7 @@ static void cmdClear(Console *console, Milk *milk, char **arguments, int argumen
 	console->lastErrorCount = 0;
 }
 
+// Quits the engine.
 static void cmdQuit(Console *console, Milk *milk, char **arguments, int argumentCount)
 {
 	UNUSED(console);
@@ -52,26 +51,21 @@ typedef struct command
 
 static Command commands[] =
 {
-		{ "reload",     cmdReload },
-		{ "clear",      cmdClear },
-		{ "quit",       cmdQuit }
+		{ "unload", cmdUnload },
+    { "-u",     cmdUnload },
+		{ "clear",  cmdClear },
+    { "-c",     cmdClear },
+		{ "quit",   cmdQuit },
+    { "-q",     cmdQuit }
 };
 
 #define NUM_COMMANDS sizeof(commands) / sizeof(Command)
-
-/*
- *******************************************************************************
- * Console
- *******************************************************************************
- */
-
-static unsigned int ticks = 0;
 
 static void resetCommandCandidate(Console *console)
 {
 	console->commandCandidateLength = 0;
 	for (int i = 0; i < COMMAND_MAX_LENGTH; i++)
-		console->commandCandidate[i] = 0;
+		console->commandCandidate[i] = '\0';
 }
 
 Console *createConsole()
@@ -87,14 +81,8 @@ void freeConsole(Console *console)
 	free(console);
 }
 
-/*
- *******************************************************************************
- * Command Parsing
- *******************************************************************************
- */
-
 #define MAX_COMMAND_ARGUMENTS	8
-#define COMMAND_DELIMITER		" "
+#define COMMAND_DELIMITER	" "
 
 static char *getCommandName(char *candidate)
 {
@@ -135,12 +123,6 @@ static Command *parseCommand(char *candidate, char **arguments, int *argumentCou
 
 	return command;
 }
-
-/*
- *******************************************************************************
- * Input
- *******************************************************************************
- */
 
 static bool hasInputContinuous(ConsoleInput *input, ConsoleInputState inputState)
 {
@@ -189,10 +171,11 @@ static void handleEnter(Console *console, Milk *milk)
 	if (hasInput(&console->input, CONSOLE_INPUT_ENTER) && console->commandCandidateLength > 0)
 	{
 		Command *command;
+    int argumentCount;
 		char *arguments[MAX_COMMAND_ARGUMENTS];
+
 		for (int i = 0; i < MAX_COMMAND_ARGUMENTS; i++)
 			arguments[i] = calloc(COMMAND_MAX_LENGTH, sizeof(char));
-		int argumentCount;
 
 		if ((command = parseCommand(console->commandCandidate, arguments, &argumentCount)) != NULL)
 		{
@@ -227,6 +210,7 @@ static void handleEscape(Console *console, Milk *milk)
 				invokeInit(&milk->code);
 				console->isGameInitialized = true;
 			}
+
 			resumeSound(&milk->audio, -1);
 			console->state = GAME;
 			console->input.stopTextInput();
@@ -242,12 +226,6 @@ static void handleInput(Console *console, Milk *milk)
 	handleClearCandidate(console, milk);
 	handleEnter(console, milk);
 }
-
-/*
- *******************************************************************************
- * Update
- *******************************************************************************
- */
 
 static void haltOnError(Console *console)
 {
@@ -265,35 +243,29 @@ void updateConsole(Console *console, Milk *milk)
 
 	switch (console->state)
 	{
-	case COMMAND:
-		handleInput(console, milk);
-		break;
-	case GAME:
-		invokeUpdate(&milk->code);
-		haltOnError(console);
-		break;
-	default:
-		break;
+    case COMMAND:
+      handleInput(console, milk);
+      break;
+    case GAME:
+      invokeUpdate(&milk->code);
+      haltOnError(console);
+      break;
+    default:
+      break;
 	}
 }
 
-/*
- *******************************************************************************
- * Drawing
- *******************************************************************************
- */
-
 #define VERSION_HEADER "MILK [1.0.0]"
 
-#define COMMAND_TEXT_COLOR		0xffffff
-#define COMMAND_INFO_COLOR	    0x5c5c5c
-#define COMMAND_ERROR_COLOR     0xbf4040
-#define COMMAND_WARN_COLOR	    0xffec27
+#define COMMAND_TEXT_COLOR	0xffffff
+#define COMMAND_INFO_COLOR  0x5c5c5c
+#define COMMAND_ERROR_COLOR 0xbf4040
+#define COMMAND_WARN_COLOR	0xffec27
 
-#define LOG_START_HEIGHT    56
-#define LOG_END_HEIGHT	    (224 - 32)
-#define MAX_LINES		    ((LOG_END_HEIGHT - LOG_START_HEIGHT) / CHAR_WIDTH)
-#define CHARS_PER_LINE	    31
+#define LOG_START_HEIGHT 56
+#define LOG_END_HEIGHT (224 - 32)
+#define MAX_LINES	((LOG_END_HEIGHT - LOG_START_HEIGHT) / CHAR_WIDTH)
+#define CHARS_PER_LINE 31
 
 static void drawCommandLine(Console *console, Milk *milk)
 {
@@ -303,7 +275,7 @@ static void drawCommandLine(Console *console, Milk *milk)
 	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 8, 40, ">:", 1, COMMAND_TEXT_COLOR);
 	blitSpriteFont(&milk->video, DEFAULT_FONT_DATA, 24, 40, console->commandCandidate, 1, COMMAND_TEXT_COLOR);
 
-	/* Draw blinking position marker. */
+	// Draw blinking position marker.
 	if (ticks % 64 < 48)
 		blitFilledRectangle(&milk->video, 24 + console->commandCandidateLength * CHAR_WIDTH, 40, 6, 8, 0xc10a31);
 }
@@ -334,14 +306,14 @@ static Color32 getLogColor(LogType type)
 {
 	switch (type)
 	{
-	case INFO:
-		return COMMAND_INFO_COLOR;
-	case WARN:
-		return COMMAND_WARN_COLOR;
-	case ERROR:
-		return COMMAND_ERROR_COLOR;
-	default:
-		return COMMAND_INFO_COLOR;
+    case INFO:
+      return COMMAND_INFO_COLOR;
+    case WARN:
+      return COMMAND_WARN_COLOR;
+    case ERROR:
+      return COMMAND_ERROR_COLOR;
+    default:
+      return COMMAND_INFO_COLOR;
 	}
 }
 
@@ -356,14 +328,14 @@ static void getLogLines(Logs *logs, ConsoleLine *lines, int *numLines)
 
 		char tempText[MAX_LOG_LENGTH + 3] = ">:";
 		strcpy(&tempText[2], logs->messages[i].text);
-		char *splitByNewline = strtok(tempText, "\n"); /* Split message by newline. */
+		char *splitByNewline = strtok(tempText, "\n"); // Split message by newline.
 
 		while (splitByNewline != NULL && currentLine < MAX_LINES - 1)
 		{
 			size_t messageLength = strlen(splitByNewline);
 			char *messageText = splitByNewline;
 
-			while (messageLength > 0 && currentLine < MAX_LINES - 1) /* Draw the message in separate line. */
+			while (messageLength > 0 && currentLine < MAX_LINES - 1) // Draw the message in separate line.
 			{
 				size_t remainingLength = strlen(messageText);
 				size_t lineLength = remainingLength > CHARS_PER_LINE - 1 ? CHARS_PER_LINE - 1 : remainingLength;
@@ -397,17 +369,17 @@ void drawConsole(Console *console, Milk *milk)
 {
 	switch (console->state)
 	{
-	case COMMAND:
-		drawCommandLine(console, milk);
-		drawPlayingIndicator(console, milk);
-		drawLogLines(milk);
-		break;
-	case GAME:
-		invokeDraw(&milk->code);
-		haltOnError(console);
-		break;
-	default:
-		break;
+    case COMMAND:
+      drawCommandLine(console, milk);
+      drawPlayingIndicator(console, milk);
+      drawLogLines(milk);
+      break;
+    case GAME:
+      invokeDraw(&milk->code);
+      haltOnError(console);
+      break;
+    default:
+      break;
 	}
 	ticks++;
 }

@@ -14,9 +14,9 @@ Milk *createMilk()
 	milk->shouldQuit = false;
 	milk->code.state = NULL;
 	initInput(&milk->input);
-	initVideo(&milk->video);
+  initializeVideo(&milk->video);
 	initializeAudio(&milk->audio);
-	LOG_INIT();
+  LOG_INIT();
 	return milk;
 }
 
@@ -210,7 +210,7 @@ static int l_openstream(lua_State *L)
 static int l_closestream(lua_State *L)
 {
   closeStream(&globalMilk->audio,
-              (int)lua_tointeger(L, 1)
+		(int)lua_tointeger(L, 1)
   );
   return 0;
 }

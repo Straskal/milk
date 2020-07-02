@@ -1,8 +1,5 @@
 #include "wav.h"
 
-#include <stdio.h>
-#include <string.h>
-
 #define RIFF_MARKER_LE 0x46464952 // "RIFF"
 #define WAVE_MARKER_LE 0x45564157 // "WAVE"
 #define FORMAT_MARKER 0x20746d66  // "fmt0"
@@ -84,9 +81,9 @@ bool loadWavSound(SoundData *soundData, const char *filename)
     return -1;
   }
 
-  u32 sampleSize = header.format.channels * header.format.bitsPerSample / 8;
-  u32 sampleCount = header.data.size / sampleSize;
-  u32 signalSize = sampleSize * sampleCount;
+  int sampleSize = header.format.channels * header.format.bitsPerSample / 8;
+  int sampleCount = header.data.size / sampleSize;
+  int signalSize = sampleSize * sampleCount;
   s16 *samples = (s16 *) calloc(1, (size_t)signalSize);
 
   if (fread(samples, signalSize, 1, file) != 1)
@@ -156,7 +153,7 @@ bool readFromWavStream(SoundStream *stream, int numSamples, bool loop)
   // The number of bytes to read up until the end of the sound.
   long bytesToRead = MIN(remainingBytes, requestedBytes);
 
-  fread(stream->chunk, bytesToRead, 1, stream->file);
+  fread(stream->chunk, (size_t)bytesToRead, 1, stream->file);
   totalBytesRead += bytesToRead;
 
   bool finished = ftell(stream->file) == stream->end;
@@ -167,7 +164,7 @@ bool readFromWavStream(SoundStream *stream, int numSamples, bool loop)
   {
     bytesToRead = requestedBytes - remainingBytes;
     fseek(stream->file, stream->start, SEEK_SET);
-    fread(stream->chunk + (bytesToRead / sizeof(s16)) + 1, bytesToRead, 1, stream->file);
+    fread(stream->chunk + (bytesToRead / sizeof(s16)) + 1, (size_t)bytesToRead, 1, stream->file);
     totalBytesRead += bytesToRead;
   }
 

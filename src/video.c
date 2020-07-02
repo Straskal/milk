@@ -5,11 +5,12 @@
 #include "embed/font.h"
 #include "video.h"
 
-void initVideo(Video *video)
+void initializeVideo(Video *video)
 {
   memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
   memset(&video->spriteSheet, 0x00, sizeof(video->spriteSheet));
   memcpy(&video->font, DEFAULT_FONT_DATA, sizeof(video->font));
+
   resetDrawState(video);
 }
 
@@ -43,19 +44,19 @@ void setClippingRect(Video *video, int x, int y, int w, int h)
 // Transform an x and y coordinate to a framebuffer index.
 #define FRAMEBUFFER_POS(x, y) ((FRAMEBUFFER_WIDTH * y) + x)
 
-// Evaluates to true if the given coordinates are within the clipping rectangle.
-#define WITHIN_CLIP_RECT(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
-
 void clearFramebuffer(Video *video, Color32 color)
 {
   Rect clip = video->clipRect;
 
-  for (int i = clip.top; i < clip.bottom; i++)
+  for (int y = clip.top; y < clip.bottom; y++)
   {
-    for (int j = clip.left; j < clip.right; j++)
-      video->framebuffer[FRAMEBUFFER_POS(j, i)] = color;
+    for (int x = clip.left; x < clip.right; x++)
+      video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
   }
 }
+
+// Evaluates to true if the given coordinates are within the clipping rectangle.
+#define WITHIN_CLIP_RECT(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
 
 void blitPixel(Video *video, int x, int y, Color32 color)
 {
@@ -143,8 +144,8 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
 }
 
 // To be honest, these values are kind of arbitrary.
-#define MIN_SCALE  1
-#define MAX_SCALE  5
+#define MIN_SCALE 1
+#define MAX_SCALE 5
 
 // Nearest neighbor scaling is almost exactly what it sounds like.
 // A simple web search will give more detailed information.

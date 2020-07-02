@@ -19,7 +19,7 @@ export class MainMenuState implements GameState {
     public enter(_: Game): void {
         loadspr("art/sprsheet.bmp");
         openstream(0, "sounds/12 HHavok-main.wav");
-        playstream(0, 128);
+        playstream(0, 128, true);
     }
 
     public update(game: Game): void {

@@ -28,7 +28,7 @@ void closeWavStream(SoundStream *stream);
 //
 bool readFromWavStream(SoundStream *stream, int numSamples, bool loop);
 
-// Resets the wav stream to the beginning of data. This is ideal for looping.
+// Resets the wav stream to the beginning of data.
 //
 void resetWavStream(SoundStream *stream);
 

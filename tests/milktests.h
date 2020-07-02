@@ -24,7 +24,7 @@ TEST_CASE(initVideo_InitializesFramebuffer)
 {
 	Video video;
 
-	ACT(initVideo(&video));
+	ACT(initializeVideo(&video));
 
 	for (int i = 0; i < FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT; i++)
 		ASSERT_EQ(0x00, video.framebuffer[i]);
@@ -36,7 +36,7 @@ TEST_CASE(initVideo_InitializesSpritesheet)
 {
 	Video video;
 
-	ACT(initVideo(&video));
+	ACT(initializeVideo(&video));
 
 	for (int i = 0; i < SPRITE_SHEET_SQRSIZE * SPRITE_SHEET_SQRSIZE; i++)
 		ASSERT_EQ(0x00, video.spriteSheet[i]);
@@ -48,7 +48,7 @@ TEST_CASE(initVideo_InitializesFont)
 {
 	Video video;
 
-	ACT(initVideo(&video));
+	ACT(initializeVideo(&video));
 
 	for (int i = 0; i < FONT_WIDTH * FONT_HEIGHT; i++)
 		ASSERT_EQ(DEFAULT_FONT_DATA[i], video.font[i]);
@@ -60,7 +60,7 @@ TEST_CASE(initVideo_InitializesColorKey)
 {
 	Video video;
 
-	ACT(initVideo(&video));
+	ACT(initializeVideo(&video));
 
 	ASSERT_EQ(0x00, video.colorKey);
 	END_ASSERTS();
@@ -70,7 +70,7 @@ TEST_CASE(initVideo_InitializesClipRect)
 {
 	Video video;
 
-	ACT(initVideo(&video));
+	ACT(initializeVideo(&video));
 
 	ASSERT_EQ(0, video.clipRect.top);
 	ASSERT_EQ(0, video.clipRect.left);
@@ -144,7 +144,7 @@ TEST_CASE(isButtonPressed_WhenHeld_ReturnsFalse)
 TEST_CASE(resetDrawState_ResetsColorKey)
 {
 	Video video;
-	initVideo(&video);
+  initializeVideo(&video);
 	video.colorKey = 0xff;
 
 	ACT(resetDrawState(&video));
@@ -156,7 +156,7 @@ TEST_CASE(resetDrawState_ResetsColorKey)
 TEST_CASE(resetDrawState_ResetsClipRect)
 {
 	Video video;
-	initVideo(&video);
+  initializeVideo(&video);
 
 	video.clipRect.top = 10;
 	video.clipRect.bottom = 10;
@@ -175,7 +175,7 @@ TEST_CASE(resetDrawState_ResetsClipRect)
 TEST_CASE(setClippingRect_ClampsClipRectToFramebufferSize)
 {
 	Video video;
-	initVideo(&video);
+  initializeVideo(&video);
 
 	ACT(setClippingRect(&video, -10, -10, 500, 500));
 
@@ -189,7 +189,7 @@ TEST_CASE(setClippingRect_ClampsClipRectToFramebufferSize)
 TEST_CASE(setClippingRect_SetsClipRect)
 {
 	Video video;
-	initVideo(&video);
+  initializeVideo(&video);
 
 	ACT(setClippingRect(&video, 10, 20, 200, 100));
 
@@ -203,7 +203,7 @@ TEST_CASE(setClippingRect_SetsClipRect)
 TEST_CASE(blitPixel_WhenPixelWithinClipRect_SetsPixel)
 {
 	Video video;
-	initVideo(&video);
+  initializeVideo(&video);
 	clearFramebuffer(&video, 0x00);
 
 	ACT(blitPixel(&video, 15, 30, 0x00ff00));
@@ -215,7 +215,7 @@ TEST_CASE(blitPixel_WhenPixelWithinClipRect_SetsPixel)
 TEST_CASE(blitPixel_WhenPixelIsNotWithinClipRect_DoesNotSetPixel)
 {
 	Video video;
-	initVideo(&video);
+  initializeVideo(&video);
 	clearFramebuffer(&video, 0x00);
 	setClippingRect(&video, 10, 20, 200, 100);
 

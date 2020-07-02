@@ -1,8 +1,6 @@
 #include "milk.h"
 #include "console.h"
 
-#include <math.h>
-#include <stdio.h>
 #include <SDL.h>
 
 #define SDL_FIRST_AVAILABLE_RENDERER -1
@@ -64,7 +62,7 @@ static void unlockAudioDevice()
 static void mixCallback(void *userData, u8 *stream, int numBytes)
 {
   // SDL doesn't guarantee that the output buffer is silent.
-  memset(stream, 0, numBytes);
+  memset(stream, 0, (size_t)numBytes);
 
   mixSamplesIntoStream((Audio *) userData, (s16 *) stream, (int) (numBytes / sizeof(s16)));
 }

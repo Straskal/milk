@@ -22,46 +22,32 @@ typedef struct milk
 	bool  shouldQuit;
 } Milk;
 
-/**
- * Create a new instance of milk and initialize all submodules.
- * @return
- */
+// Create a new instance of milk and initialize all submodules.
+//
 Milk *createMilk();
 
-/**
- * Free milk and all of it's submodules.
- * @param milk
- */
+// Free milk and all of it's submodules.
+//
 void freeMilk(Milk *milk);
 
-/**
- * Load scripts into memory.
- * @param milk
- */
+// Load scripts into memory.
+//
 void loadCode(Milk *milk);
 
-/**
- * Unload all scripts from memory.
- * @param milk
- */
+// Unload all scripts from memory.
+//
 void unloadCode(Milk *milk);
 
-/**
- * Invoke the _init callback in scripts.
- * @param code
- */
+// Invoke the _init callback in scripts.
+//
 void invokeInit(Code *code);
 
-/**
- * Invoke the _update callback in scripts.
- * @param code
- */
+// Invoke the _update callback in scripts.
+//
 void invokeUpdate(Code *code);
 
-/**
- * Invoke the _draw callback in scripts.
- * @param code
- */
+// Invoke the _draw callback in scripts.
+//
 void invokeDraw(Code *code);
 
 #endif
