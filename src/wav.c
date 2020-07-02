@@ -140,8 +140,17 @@ bool openWavStream(SoundStream *stream, const char *filename)
 
 void closeWavStream(SoundStream *stream)
 {
-  if (stream->chunk != NULL) free(stream->chunk);
-  if (stream->file != NULL) fclose(stream->file);
+  if (stream->chunk != NULL)
+    free(stream->chunk);
+  if (stream->file != NULL)
+    fclose(stream->file);
+
+  stream->file = NULL;
+  stream->chunk = NULL;
+  stream->chunkSampleCount = 0;
+  stream->channelCount = 0;
+  stream->start = 0;
+  stream->end = 0;
 }
 
 bool readFromWavStream(SoundStream *stream, int numSamples, bool loop)
@@ -174,7 +183,7 @@ bool readFromWavStream(SoundStream *stream, int numSamples, bool loop)
   return finished && !loop;
 }
 
-void resetWavStream(SoundStream *stream)
+void moveWavStreamToStart(SoundStream *stream)
 {
   fseek(stream->file, stream->start, SEEK_SET);
   stream->position = stream->start;

@@ -7,8 +7,8 @@
 #define S16_MAX 32767
 #define S16_MIN -32768
 
-// Zero-ing out audio's memory resets it to it's default state.
-static void zeroOutAudioMemory(Audio *audio)
+// Right now, we can just rely on memset to initialize our memory to default state.
+static void initializeMemory(Audio *audio)
 {
   memset(audio->sounds, 0, sizeof(audio->sounds));
   memset(audio->soundSlots, 0, sizeof(audio->soundSlots));
@@ -18,7 +18,8 @@ static void zeroOutAudioMemory(Audio *audio)
 
 void initializeAudio(Audio *audio)
 {
-  zeroOutAudioMemory(audio);
+  initializeMemory(audio);
+
   audio->masterVolume = MAX_VOLUME;
 }
 
@@ -30,9 +31,10 @@ void disableAudio(Audio *audio)
   for (int i = 0; i < MAX_OPEN_STREAMS; i++)
     closeWavStream(&audio->streams[i]);
 
-  zeroOutAudioMemory(audio);
+  initializeMemory(audio);
 }
 
+// Reset sound slot to default state.
 static void resetSoundSlot(SoundSlot *slot)
 {
   slot->soundData = NULL;
@@ -42,13 +44,22 @@ static void resetSoundSlot(SoundSlot *slot)
   slot->volume = 0;
 }
 
+// Reset stream slot to default state.
+static void resetStreamSlot(StreamSlot *streamSlot)
+{
+  streamSlot->stream = NULL;
+  streamSlot->state = STOPPED;
+  streamSlot->volume = 0;
+  streamSlot->loop = false;
+}
+
 // Assumes that the audio device is already locked.
+// Before unloading a sound, we find all sound slots that reference it, and stop them.
 static void lockedUnloadSound(SoundData *soundData, SoundSlot *soundSlots)
 {
-  // Before unloading the sound, find all slots that reference it, and stop them.
   for (int i = 0; i < MAX_SOUND_SLOTS; i++)
   {
-    SoundSlot* slot = &soundSlots[i];
+    SoundSlot *slot = &soundSlots[i];
 
     if (slot->soundData == soundData)
       resetSoundSlot(slot);
@@ -128,7 +139,9 @@ void stopSound(Audio *audio, int slotIndex)
     audio->lock();
 
     SoundSlot *slot = &audio->soundSlots[slotIndex];
-    resetSoundSlot(slot);
+
+    if (slot->state != STOPPED)
+      resetSoundSlot(slot);
 
     audio->unlock();
   }
@@ -174,19 +187,14 @@ static bool isStreamIndexWithinBounds(int index)
   return index >= 0 && index < MAX_OPEN_STREAMS;
 }
 
-static void resetStreamSlot(StreamSlot *streamSlot)
-{
-  memset(streamSlot, 0, sizeof(StreamSlot));
-}
-
 // Assumes that the audio device is already locked.
-static void lockedCloseStream(SoundStream *audioStream, StreamSlot *streamSlot)
+// If the stream is currently playing, then reset the stream slot.
+static void lockedCloseStream(SoundStream *soundStream, StreamSlot *streamSlot)
 {
-  if (streamSlot->stream == audioStream)
+  if (streamSlot->stream == soundStream)
     resetStreamSlot(streamSlot);
 
-  closeWavStream(audioStream);
-  memset(audioStream, 0, sizeof(SoundStream));
+  closeWavStream(soundStream);
 }
 
 void openStream(Audio *audio, int streamIndex, const char *filePath)
@@ -212,7 +220,10 @@ void closeStream(Audio *audio, int streamIndex)
   {
     audio->lock();
 
-    lockedCloseStream(&audio->streams[streamIndex], &audio->streamSlot);
+    SoundStream *soundStream = &audio->streams[streamIndex];
+
+    if (soundStream->file != NULL)
+      lockedCloseStream(soundStream, &audio->streamSlot);
 
     audio->unlock();
   }
@@ -228,7 +239,7 @@ void playStream(Audio *audio, int streamIndex, int volume, bool loop)
 
     if (soundStream->file != NULL)
     {
-      resetWavStream(soundStream);
+      moveWavStreamToStart(soundStream);
 
       StreamSlot *slot = &audio->streamSlot;
       slot->state = PLAYING;
@@ -245,8 +256,10 @@ void stopStream(Audio *audio)
 {
   audio->lock();
 
-  resetWavStream(audio->streamSlot.stream);
-  resetStreamSlot(&audio->streamSlot);
+  StreamSlot *slot = &audio->streamSlot;
+
+  if (slot->state != STOPPED)
+    resetStreamSlot(&audio->streamSlot);
 
   audio->unlock();
 }
