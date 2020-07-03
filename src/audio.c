@@ -39,15 +39,13 @@ static void lockedUnloadSound(SoundData *soundData, SoundSlot *soundSlots)
 {
   for (int i = 0; i < MAX_SOUND_SLOTS; i++)
   {
-    SoundSlot *slot = &soundSlots[i];
-
-    if (slot->soundData == soundData)
+    if (soundSlots[i].soundData == soundData)
     {
-      slot->soundData = NULL;
-      slot->position = NULL;
-      slot->state = STOPPED;
-      slot->remainingSamples = 0;
-      slot->volume = 0;
+      soundSlots[i].soundData = NULL;
+      soundSlots[i].position = NULL;
+      soundSlots[i].state = STOPPED;
+      soundSlots[i].remainingSamples = 0;
+      soundSlots[i].volume = 0;
     }
   }
 
