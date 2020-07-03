@@ -228,7 +228,7 @@ TEST_CASE(resumeSound_resumesSound)
 	audio.lock = mockLock;
 	audio.unlock = mockUnlock;
 	audio.soundSlots[0].soundData = &audio.sounds[0];
-	audio.soundSlots[0].state = STOPPED;
+	audio.soundSlots[0].state = PAUSED;
 
 	ACT(resumeSound(&audio, 0));
 
