@@ -41,7 +41,8 @@
 typedef enum
 {
   STOPPED,
-  PLAYING
+  PLAYING,
+  PAUSED
 } SoundState;
 
 // Sound data represents an entire sound loaded into memory.
@@ -120,7 +121,13 @@ void playSound(Audio *audio, int soundIndex, int slotIndex, int volume);
 //
 void stopSound(Audio *audio, int slotIndex);
 
+// Pause the sound at the given slot index.
+// slot index -1 will pause all playing sounds.
+//
+void pauseSound(Audio *audio, int slotIndex);
+
 // Resume the sound at the given slot index.
+// slot index -1 will resume all paused sounds.
 //
 void resumeSound(Audio *audio, int slotIndex);
 
@@ -143,10 +150,17 @@ void closeStream(Audio *audio, int streamIndex);
 void playStream(Audio *audio, int streamIndex, int volume, bool loop);
 
 // Stop the stream if it is playing.
+// streamIndex -1 will stop all playing sounds.
 //
 void stopStream(Audio *audio, int streamIndex);
 
+// Pause the stream if it is playing.
+// streamIndex -1 will pause all playing sounds.
+//
+void pauseStream(Audio *audio, int streamIndex);
+
 // Resume the stream index if it is paused.
+// streamIndex -1 will resume all paused sounds.
 //
 void resumeStream(Audio *audio, int streamIndex);
 

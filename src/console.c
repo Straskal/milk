@@ -198,8 +198,8 @@ static void handleEscape(Console *console, Milk *milk)
 	{
 		if (console->state != COMMAND)
 		{
-			stopSound(&milk->audio, -1);
-			stopStream(&milk->audio, -1);
+			pauseSound(&milk->audio, -1);
+			pauseStream(&milk->audio, -1);
 			console->state = COMMAND;
 			console->input.startTextInput();
 		}
