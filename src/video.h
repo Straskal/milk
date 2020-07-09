@@ -6,7 +6,7 @@
 #include "common.h"
 
 // Run at a fixed 50 frames per second. 50 fps just sounds cool, doesn't it? It's not 60 fps, but it's still good.
-#define FRAMERATE (1000.0f / 50.0f)
+#define FRAMERATE 50
 
 // Fixed 256x224 pixel resolution. Same as the SNES, and the SNES rocks.
 #define FRAMEBUFFER_WIDTH   256

@@ -17,6 +17,7 @@ export class Game {
 
     private _ticks = 0;
     private _stateStack: GameState[] = [];
+    private _time = 0;
 
     public get ticks() {
         return this._ticks;
@@ -26,8 +27,9 @@ export class Game {
         this._ticks = value;
     }
 
-    public init(): void {
-        this.pushState(new MainMenuState());
+    public init(): void {     
+        this._time = os.clock();
+        this.pushState(new MainMenuState());   
     }
 
     public update(): void {
@@ -50,6 +52,9 @@ export class Game {
         }
 
         this._ticks++;
+
+        const fps = this.ticks / (os.clock() - this._time);
+        sprfont(190, 10, string.format("fps %.0f", fps));
     }
 
     public peek(): GameState {
