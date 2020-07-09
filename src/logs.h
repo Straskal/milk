@@ -37,9 +37,6 @@ typedef struct logMessage
   LogType type;
 } LogMessage;
 
-// This is really only used for the console at the moment.
-// It would be nice to be able to dump the logs to a text file.
-//
 typedef struct logs
 {
   LogMessage messages[MAX_LOGS];
@@ -47,20 +44,9 @@ typedef struct logs
   int errorCount;
 } Logs;
 
-// Initialize the logger.
-//
 void initializeLogs();
-
-// Log a formatted message of the given type.
-//
 void logMessage(LogType type, const char *text, ...);
-
-// Returns all current logs.
-//
 Logs *getLogs();
-
-// Clears all logs.
-//
 void clearLogs();
 
 #endif

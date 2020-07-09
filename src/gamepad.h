@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 
-// Emulating a gamepad for all input makes the API clean and simple. I do not plan on adding mouse or text input support.
 typedef enum buttonState
 {
   BTN_NONE  = 0 << 0,
@@ -29,23 +28,9 @@ typedef struct input
   Gamepad gamepad;
 } Input;
 
-// Initializes the input module.
-//
 void initInput(Input *input);
-
-// Updates the button state for the gamepad.
-// Platform code is responsible for calling this function when system input is polled.
-//
 void updateButtonState(Input *input, ButtonState state);
-
-// Returns true if the given button state matches current state.
-// This is good for continuous button presses.
-//
 bool isButtonDown(Input *input, ButtonState button);
-
-// Returns true if the given button state matches current state and not the previous state.
-// This is good for single button presses.
-//
 bool isButtonPressed(Input *input, ButtonState button);
 
 #endif

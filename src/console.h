@@ -16,8 +16,6 @@ typedef enum consoleInputState
   CONSOLE_INPUT_ESCAPE  = 1 << 3
 } ConsoleInputState;
 
-// The console handles input differently than the core engine.
-// This creates some weird flow for the milk api but I can't think of a better way to hand this right now.
 typedef struct consoleInput
 {
   void (*startTextInput)();
@@ -28,8 +26,6 @@ typedef struct consoleInput
   char currentChar;
 } ConsoleInput;
 
-// When compiled with the console, the console pretty much takes over.
-// The console determines what state the engine is in.
 typedef enum consoleState
 {
   GAME,
@@ -48,20 +44,9 @@ typedef struct console
   bool isGameInitialized;
 } Console;
 
-// Create new console and initialize commands.
-//
 Console *createConsole();
-
-// Free the console
-//
 void freeConsole(Console *console);
-
-// Update the console. Calling this could potentially update the game as well, depending on the consoles state.
-//
 void updateConsole(Console *console, Milk *milk);
-
-// Draw the console.
-//
 void drawConsole(Console *console, Milk *milk);
 
 #endif
