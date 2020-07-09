@@ -53,11 +53,11 @@ TEST_CASE(initAudio_InitializesStreams)
 
 	for (int i = 0; i < MAX_OPEN_STREAMS; i++)
 	{
-		ASSERT_EQ(0, audio.streams[i].start);
-		ASSERT_EQ(0, audio.streams[i].end);
-		ASSERT_NULL(audio.streams[i].file);
-		ASSERT_NULL(audio.streams[i].chunk);
-		ASSERT_EQ(0, audio.streams[i].channelCount);
+		ASSERT_EQ(0, audio.streams[i].data.start);
+		ASSERT_EQ(0, audio.streams[i].data.end);
+		ASSERT_NULL(audio.streams[i].data.file);
+		ASSERT_NULL(audio.streams[i].data.chunk);
+		ASSERT_EQ(0, audio.streams[i].data.channelCount);
 	}
 
 	END_ASSERTS();
