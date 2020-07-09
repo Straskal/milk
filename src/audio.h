@@ -45,17 +45,17 @@ typedef enum
   PAUSED
 } SoundState;
 
-// Sound data represents an entire sound loaded into memory.
+// Sound data is an entire sound loaded into memory.
 // This is ideal for short-burst sounds, since they are typically small.
 typedef struct
 {
+  int channelCount;
 	int sampleCount;
 	s16 *samples;
-	u8 channelCount;
 } SoundData;
 
 // Sound slots are what we insert sound data in to in order to play them.
-// Many slots can reference a single sound data, and do their own book-keeping to track the sounds current position, volume, etc..
+// Many slots can reference a single sound data.
 typedef struct
 {
 	SoundData *soundData;
@@ -65,20 +65,26 @@ typedef struct
   s16 *position;
 } SoundSlot;
 
-// Sound streams are ideal for sounds with a larger memory footprint (music).
-// Instead of loading an entire music file into memory, we load chunks at a time from the disk.
+// Sound stream data is an open sound file stream.
+// This is ideal for larger sound files, like music.
 typedef struct
 {
   long position;
-	long start;
-	long end;
-	FILE *file;
+  long start;
+  long end;
+  FILE *file;
+  int channelCount;
+  int sampleCount;
+  s16 *chunk;
+} SoundStreamData;
+
+// A sound stream instance.
+typedef struct
+{
+  SoundStreamData data;
   SoundState state;
   int volume;
-	int chunkSampleCount;
-  s16 *chunk;
   bool loop;
-	u8 channelCount;
 } SoundStream;
 
 typedef struct

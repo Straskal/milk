@@ -17,19 +17,19 @@ void freeWavSound(SoundData *soundData);
 
 // Opens a new wav data stream or returns false if an error occurs.
 //
-bool openWavStream(SoundStream *stream, const char *filename);
+bool openWavStream(SoundStreamData *streamData, const char *filename);
 
 // Closes a wav stream and resets the stream memory.
 //
-void closeWavStream(SoundStream *stream);
+void closeWavStream(SoundStreamData *streamData);
 
 // Reads one chunk from the stream and returns true if the stream has reached its end.
 // Will always return false if loop is true.
 //
-bool readFromWavStream(SoundStream *stream, int numSamples, bool loop);
+bool readFromWavStream(SoundStreamData *streamData, int numSamples, bool loop);
 
 // Resets the wav stream to the beginning of data.
 //
-void moveWavStreamToStart(SoundStream *stream);
+void moveWavStreamToStart(SoundStreamData *streamData);
 
 #endif

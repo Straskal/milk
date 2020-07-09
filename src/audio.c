@@ -28,7 +28,7 @@ void disableAudio(Audio *audio)
     freeWavSound(&audio->sounds[i]);
 
   for (int i = 0; i < MAX_OPEN_STREAMS; i++)
-    closeWavStream(&audio->streams[i]);
+    closeWavStream(&audio->streams[i].data);
 
   initializeMemory(audio);
 }
@@ -185,10 +185,10 @@ void openStream(Audio *audio, int streamIndex, const char *filePath)
 
     SoundStream *soundStream = &audio->streams[streamIndex];
 
-    if (soundStream->file != NULL)
-      closeWavStream(soundStream);
+    if (soundStream->data.file != NULL)
+      closeWavStream(&soundStream->data);
 
-    openWavStream(soundStream, filePath);
+    openWavStream(&soundStream->data, filePath);
 
     audio->unlock();
   }
@@ -202,8 +202,8 @@ void closeStream(Audio *audio, int streamIndex)
 
     SoundStream *soundStream = &audio->streams[streamIndex];
 
-    if (soundStream->file != NULL)
-      closeWavStream(soundStream);
+    if (soundStream->data.file != NULL)
+      closeWavStream(&soundStream->data);
 
     audio->unlock();
   }
@@ -217,9 +217,9 @@ void playStream(Audio *audio, int streamIndex, int volume, bool loop)
 
     SoundStream *soundStream = &audio->streams[streamIndex];
 
-    if (soundStream->file != NULL)
+    if (soundStream->data.file != NULL)
     {
-      moveWavStreamToStart(soundStream);
+      moveWavStreamToStart(&soundStream->data);
 
       soundStream->state = PLAYING;
       soundStream->volume = CLAMP(volume, 0, MAX_VOLUME);
@@ -324,17 +324,18 @@ void mixSamplesIntoStream(Audio *audio, s16 *stream, int numSamples)
   {
     if (soundStreams[i].state == PLAYING)
     {
+      SoundStreamData *streamData = &soundStreams[i].data;
       bool streamFinished = false;
 
-      switch (soundStreams[i].channelCount)
+      switch (streamData->channelCount)
       {
         case 1:
-          streamFinished = readFromWavStream(&soundStreams[i], numSamples / 2, soundStreams[i].loop);
-          mixInterleavedMonoSamples(stream, soundStreams[i].chunk, soundStreams[i].chunkSampleCount, soundStreams[i].volume);
+          streamFinished = readFromWavStream(&soundStreams[i].data, numSamples / 2, soundStreams[i].loop);
+          mixInterleavedMonoSamples(stream, streamData->chunk, streamData->sampleCount, soundStreams[i].volume);
           break;
         case 2:
-          streamFinished = readFromWavStream(&soundStreams[i], numSamples, soundStreams[i].loop);
-          mixStereoSamples(stream, soundStreams[i].chunk, soundStreams[i].chunkSampleCount, soundStreams[i].volume);
+          streamFinished = readFromWavStream(&soundStreams[i].data, numSamples, soundStreams[i].loop);
+          mixStereoSamples(stream, streamData->chunk, streamData->sampleCount, soundStreams[i].volume);
           break;
         default:
           break; // This should never happen.
