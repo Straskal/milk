@@ -149,6 +149,7 @@ void closeWavStream(SoundStreamData *streamData)
   streamData->chunk = NULL;
   streamData->sampleCount = 0;
   streamData->channelCount = 0;
+  streamData->position = 0;
   streamData->start = 0;
   streamData->end = 0;
 }

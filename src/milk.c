@@ -15,10 +15,10 @@ Milk *createMilk()
 	milk->code.state = NULL;
 
 	initInput(&milk->input);
-  initializeVideo(&milk->video);
+	initializeVideo(&milk->video);
 	initializeAudio(&milk->audio);
 
-  LOG_INIT();
+	LOG_INIT();
 	return milk;
 }
 

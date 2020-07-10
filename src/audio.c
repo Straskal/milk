@@ -184,7 +184,13 @@ void closeStream(Audio *audio, int streamId)
     SoundStream *soundStream = &audio->streams[streamId];
 
     if (soundStream->data.file != NULL)
+    {
       closeWavStream(&soundStream->data);
+
+      soundStream->state = STOPPED;
+      soundStream->volume = 0;
+      soundStream->loop = false;
+    }
 
     audio->unlock();
   }
@@ -291,8 +297,8 @@ void mixSamplesIntoStream(Audio *audio, s16 *stream, int numSamples)
     if (soundStreams[i].state == PLAYING)
     {
       SoundStreamData *streamData = &soundStreams[i].data;
-      
-      if (streamData->channelCount)
+
+      if (streamData->channelCount == 1)
         numSamples /= 2;
 
       bool streamFinished = readFromWavStream(&soundStreams[i].data, numSamples, soundStreams[i].loop);
