@@ -213,14 +213,14 @@ static bool isSpriteIndexWithinBounds(int index)
   return index >= 0 && index < SPRITE_SHEET_SQRSIZE;
 }
 
-void blitSprite(Video *video, int idx, int x, int y, int w, int h, int scale, u8 flip)
+void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 flip)
 {
-  if (isSpriteIndexWithinBounds(idx))
+  if (isSpriteIndexWithinBounds(id))
   {
     int width = w * SPRITE_SQRSIZE;
     int height = h * SPRITE_SQRSIZE;
-    int row = (int) floor((double) idx / SPRSHEET_COLUMNS);
-    int col = (int) floor((double) (idx % SPRSHEET_COLUMNS));
+    int row = (int) floor((double) id / SPRSHEET_COLUMNS);
+    int col = (int) floor((double) (id % SPRSHEET_COLUMNS));
     Color32 *pixels = &video->spriteSheet[SPRSHEET_POS(col, row)];
     blitRect(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, NULL);
   }
