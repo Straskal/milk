@@ -1,647 +1,370 @@
-/*
- *  MIT License
- *
- *  Copyright(c) 2018 - 2020 Stephen Traskal
- *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files(the "Software"), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions :
- *
- *  The above copyright notice and this permission notice shall be included in all
- *  copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  SOFTWARE.
- */
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+#include <math.h>
 
 #include "milk.h"
-#include "embed/font.h"
+#include "logs.h"
 
-#include <math.h>
-#include <string.h>
-
-/*
- *******************************************************************************
- * Helpers
- *******************************************************************************
- */
-
-
-#define MIN(x, y)           ((x) > (y) ? (y) : (x))
-#define MAX(x, y)           ((x) > (y) ? (x) : (y))
-#define CLAMP(v, low, up)   (MAX(low, MIN(v, up)))
-
-
-/*
- *******************************************************************************
- * Initialization and shutdown
- *******************************************************************************
- */
-
-
-static void initLogs(Logs *logs)
-{
-    for (int i = 0; i < MAX_LOGS; i++)
-    {
-        logs->messages[i].type = INFO;
-        memset(logs->messages[i].text, 0, MAX_LOG_LENGTH);
-    }
-
-    logs->count = 0;
-    logs->errorCount = 0;
-}
-
-
-static void initInput(Input *input)
-{
-    input->gamepad.buttonState = BTN_NONE;
-    input->gamepad.previousButtonState = BTN_NONE;
-}
-
-
-static void initVideo(Video *video)
-{
-    memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
-    memset(&video->spriteSheet, 0x00, sizeof(video->spriteSheet));
-    memcpy(&video->font, DEFAULT_FONT_DATA, sizeof(video->font));
-    resetDrawState(video);
-}
-
-
-static void initAudio(Audio *audio)
-{
-    for (int i = 0; i < MAX_LOADED_SAMPLES; i++)
-    {
-        audio->samples[i].buffer = NULL;
-        audio->samples[i].length = 0;
-    }
-
-    for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
-    {
-        audio->slots[i].sampleData = NULL;
-        audio->slots[i].state = STOPPED;
-        audio->slots[i].remainingLength = 0;
-        audio->slots[i].position = NULL;
-        audio->slots[i].volume = 0;
-    }
-
-    audio->masterVolume = MAX_VOLUME;
-    audio->frequency = 0;
-    audio->channels = 0;
-}
-
-
-static void initCode(Code *code)
-{
-    code->state = NULL;
-}
-
+static Milk *globalMilk;
 
 Milk *createMilk()
 {
-    Milk *milk = (Milk *) malloc(sizeof(Milk));
-    milk->shouldQuit = false;
-    initLogs(&milk->logs);
-    initInput(&milk->input);
-    initVideo(&milk->video);
-    initAudio(&milk->audio);
-    initCode(&milk->code);
-    return milk;
-}
+	Milk *milk = (Milk *)malloc(sizeof(Milk));
+	milk->shouldQuit = false;
+	milk->code.state = NULL;
 
+	initInput(&milk->input);
+	initializeVideo(&milk->video);
+	initializeAudio(&milk->audio);
+
+	LOG_INIT();
+	return milk;
+}
 
 void freeMilk(Milk *milk)
 {
-    for (int i = 0; i < MAX_LOADED_SAMPLES; i++)
-        free(milk->audio.samples[i].buffer);
-
-    free(milk);
+	disableAudio(&milk->audio);
+	disableVideo(&milk->video);
+	free(milk);
 }
 
-
-/*
- *******************************************************************************
- * Logging
- *******************************************************************************
- */
-
-
-/* When milk's log array is full, we shift down all of the logs before inserting the next one.*/
-static LogMessage *getNextFreeLogMessage(Logs *logs)
+static int l_btn(lua_State *L)
 {
-    if (logs->count == MAX_LOGS)
-    {
-        for (int i = 0; i < MAX_LOGS - 1; i++)
-            logs->messages[i] = logs->messages[i + 1];
-
-        return &logs->messages[MAX_LOGS - 1];
-    }
-    else
-        return &logs->messages[logs->count++];
+	lua_pushboolean(L, isButtonDown(&globalMilk->input, (ButtonState)(1 << lua_tointeger(L, 1))));
+	return 1;
 }
 
-
-void logMessage(Logs *logs, const char *text, LogType type)
+static int l_btnp(lua_State *L)
 {
-    size_t len = strlen(text);
-
-    if (len > MAX_LOG_LENGTH)
-        len = MAX_LOG_LENGTH;
-
-    if (type == ERROR)
-        logs->errorCount++;
-
-    LogMessage *newLogMessage = getNextFreeLogMessage(logs);
-    memset(newLogMessage->text, 0, MAX_LOG_LENGTH);
-    strncpy(newLogMessage->text, text, len);
-    newLogMessage->type = type;
+	lua_pushboolean(L, isButtonPressed(&globalMilk->input, (ButtonState)(1 << lua_tointeger(L, 1))));
+	return 1;
 }
 
-
-void clearLogs(Logs *logs)
+static int l_loadspr(lua_State *L)
 {
-    logs->count = 0;
-    logs->errorCount = 0;
+	loadSpriteSheet(&globalMilk->video, lua_tostring(L, 1));
+	return 0;
 }
 
-
-/*
- *******************************************************************************
- * Input
- *******************************************************************************
- */
-
-
-#define IS_BIT_SET(val, bit) ((val & bit))
-
-
-bool isButtonDown(Input *input, ButtonState button)
+static int l_loadfont(lua_State *L)
 {
-    return IS_BIT_SET(input->gamepad.buttonState, button);
+	loadFont(&globalMilk->video, lua_tostring(L, 1));
+	return 0;
 }
 
-
-bool isButtonPressed(Input *input, ButtonState button)
+static int l_clip(lua_State *L)
 {
-    return IS_BIT_SET(input->gamepad.buttonState, button) && !IS_BIT_SET(input->gamepad.previousButtonState, button);
+	setClippingRect(&globalMilk->video,
+		(int)lua_tointeger(L, 1),
+		(int)lua_tointeger(L, 2),
+		(int)lua_tointeger(L, 3),
+		(int)lua_tointeger(L, 4)
+	);
+	return 0;
 }
 
-
-/*
- *******************************************************************************
- * Video
- *
- * All drawing functions should draw left -> right, top -> bottom.
- *******************************************************************************
- */
-
-
-void loadSpriteSheet(Video *video, const char *path)
+static int l_clrs(lua_State *L)
 {
-    video->loadBMP(path, video->spriteSheet, sizeof(video->spriteSheet) / sizeof(Color32));
+	clearFramebuffer(&globalMilk->video, (Color32)luaL_optinteger(L, 1, 0x000000));
+	return 0;
 }
 
-
-void loadFont(Video *video, const char *path)
+static int l_pset(lua_State *L)
 {
-    video->loadBMP(path, video->font, sizeof(video->font) / sizeof(Color32));
+	blitPixel(&globalMilk->video,
+		(int)floor(lua_tonumber(L, 1)),
+		(int)floor(lua_tonumber(L, 2)),
+		(Color32)lua_tointeger(L, 3)
+	);
+	return 0;
 }
 
-
-void resetDrawState(Video *video)
+static int l_line(lua_State *L)
 {
-    video->colorKey = 0x00;
-    video->clipRect.top = 0;
-    video->clipRect.left = 0;
-    video->clipRect.bottom = FRAMEBUFFER_HEIGHT;
-    video->clipRect.right = FRAMEBUFFER_WIDTH;
+	blitLine(&globalMilk->video,
+		(int)lua_tointeger(L, 1),
+		(int)lua_tointeger(L, 2),
+		(int)lua_tointeger(L, 3),
+		(int)lua_tointeger(L, 4),
+		(Color32)lua_tointeger(L, 5)
+	);
+	return 0;
 }
 
-void setClippingRect(Video *video, int x, int y, int w, int h)
+static int l_rect(lua_State *L)
 {
-    video->clipRect.left = CLAMP(x, 0, FRAMEBUFFER_WIDTH);
-    video->clipRect.right = CLAMP(x + w, 0, FRAMEBUFFER_WIDTH);
-    video->clipRect.top = CLAMP(y, 0, FRAMEBUFFER_HEIGHT);
-    video->clipRect.bottom = CLAMP(y + h, 0, FRAMEBUFFER_HEIGHT);
+	blitRectangle(&globalMilk->video,
+		(int)floor(lua_tonumber(L, 1)),
+		(int)floor(lua_tonumber(L, 2)),
+		(int)lua_tointeger(L, 3),
+		(int)lua_tointeger(L, 4),
+		(Color32)lua_tointeger(L, 5)
+	);
+	return 0;
 }
 
-
-#define FRAMEBUFFER_POS(x, y)           ((FRAMEBUFFER_WIDTH * y) + x)
-#define WITHIN_CLIP_RECT(clip, x, y)    (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
-
-
-void clearFramebuffer(Video *video, Color32 color)
+static int l_rectfill(lua_State *L)
 {
-    Rect clip = video->clipRect;
-
-    for (int i = clip.top; i < clip.bottom; i++)
-    {
-        for (int j = clip.left; j < clip.right; j++)
-            video->framebuffer[FRAMEBUFFER_POS(j, i)] = color;
-    }
+	blitFilledRectangle(&globalMilk->video,
+		(int)floor(lua_tonumber(L, 1)),
+		(int)floor(lua_tonumber(L, 2)),
+		(int)lua_tointeger(L, 3),
+		(int)lua_tointeger(L, 4),
+		(Color32)lua_tointeger(L, 5)
+	);
+	return 0;
 }
 
-
-void blitPixel(Video *video, int x, int y, Color32 color)
+static int l_spr(lua_State *L)
 {
-    if (WITHIN_CLIP_RECT(video->clipRect, x, y))
-        video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
+	blitSprite(&globalMilk->video,
+		(int)lua_tointeger(L, 1),
+		(int)floor(lua_tonumber(L, 2)),
+		(int)floor(lua_tonumber(L, 3)),
+		(int)luaL_optinteger(L, 4, 1),
+		(int)luaL_optinteger(L, 5, 1),
+		(int)luaL_optnumber(L, 6, 1.0),
+		(u8)luaL_optinteger(L, 7, 0)
+	);
+	return 0;
 }
 
-
-/*
- * Modified Bresenham line drawing algorithm to handle straight lines, and doing more than just drawing lower left to upper right.
- */
-static void bresenham(Video *video, int x0, int y0, int x1, int y1, Color32 color)
+static int l_sprfont(lua_State *L)
 {
-    int xStep, yStep;
-    int xDistance = x1 - x0;
-    int yDistance = y1 - y0;
-
-    if (yDistance < 0)
-    {
-        yDistance = -yDistance;
-        yStep = -1;
-    }
-    else yStep = 1;
-
-    if (xDistance < 0)
-    {
-        xDistance = -xDistance;
-        xStep = -1;
-    }
-    else xStep = 1;
-
-    yDistance <<= 1;
-    xDistance <<= 1;
-    blitPixel(video, x0, y0, color);
-
-    if (xDistance > yDistance)
-    {
-        int fraction = yDistance - (xDistance >> 1);
-        while (x0 != x1)
-        {
-            x0 += xStep;
-            if (fraction >= 0)
-            {
-                y0 += yStep;
-                fraction -= xDistance;
-            }
-            fraction += yDistance;
-            blitPixel(video, x0, y0, color);
-        }
-    }
-    else
-    {
-        int fraction = xDistance - (yDistance >> 1);
-        while (y0 != y1)
-        {
-            if (fraction >= 0)
-            {
-                x0 += xStep;
-                fraction -= yDistance;
-            }
-            y0 += yStep;
-            fraction += xDistance;
-            blitPixel(video, x0, y0, color);
-        }
-    }
+	blitSpriteFont(&globalMilk->video, globalMilk->video.font,
+		(int)floor(lua_tonumber(L, 1)),
+		(int)floor(lua_tonumber(L, 2)),
+		lua_tostring(L, 3),
+		(int)luaL_optnumber(L, 4, 1.0),
+		(Color32)luaL_optinteger(L, 5, 0xffffff)
+	);
+	return 1;
 }
 
-
-void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color)
+static int l_loadsnd(lua_State *L)
 {
-    bresenham(video, x0, y0, x1, y1, color);
+	loadSound(&globalMilk->audio,
+		(int)lua_tointeger(L, 1),
+		lua_tostring(L, 2)
+	);
+	return 0;
 }
 
-
-static void horizontalLine(Video *video, int x, int y, int w, Color32 color)
+static int l_freesnd(lua_State *L)
 {
-    for (int i = x; i <= x + w; i++)
-        blitPixel(video, i, y, color);
+	unloadSound(&globalMilk->audio,
+		(int)lua_tointeger(L, 1)
+	);
+	return 0;
 }
 
-
-static void verticalLine(Video *video, int x, int y, int h, Color32 color)
+static int l_play(lua_State *L)
 {
-    for (int i = y; i <= y + h; i++)
-        blitPixel(video, x, i, color);
+	playSound(&globalMilk->audio,
+		(int)lua_tointeger(L, 1),
+		(int)lua_tointeger(L, 2),
+		(int)lua_tointeger(L, 3)
+	);
+	return 0;
 }
 
-
-void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color)
+static int l_pause(lua_State *L)
 {
-    horizontalLine(video, x, y, w, color); /* Top edge */
-    horizontalLine(video, x, y + h, w, color); /* Bottom edge */
-    verticalLine(video, x, y, h, color); /* Left edge */
-    verticalLine(video, x + w, y, h, color); /* Right edge */
+  pauseSound(&globalMilk->audio,
+    (int)lua_tointeger(L, 1)
+  );
+  return 0;
 }
 
-
-void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color)
+static int l_resume(lua_State *L)
 {
-    for (int i = y; i < y + h; i++)
-    {
-        for (int j = x; j < x + w; j++)
-            blitPixel(video, j, i, color);
-    }
+	resumeSound(&globalMilk->audio,
+		(int)lua_tointeger(L, 1)
+	);
+	return 0;
 }
 
-
-#define MIN_SCALE            1
-#define MAX_SCALE            5
-#define IS_FLIPPED_X(flip)   (flip & 1)
-#define IS_FLIPPED_Y(flip)   (flip & 2)
-
-
-/*
- * Main helper function to blit pixel images onto the framebuffer.
- * We're pretty much running nearest neighbor scaling on all blit pixels.
- * This greatly simplifies the code, so it should stay this way unless it starts causing performance issues.
- *
- * "Nearest neighbor scaling replaces every pixel with the nearest pixel in the output.
- *  When up scaling an image, multiple pixels of the same color will be duplicated throughout the image." - Some random explanation on google.
- */
-static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 *color)
+static int l_stop(lua_State *L)
 {
-    scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
-
-    int width =         w * scale;
-    int height =        h * scale;
-    int xRatio =        (int) floor((double) (w << 16) / width + 0.5);
-    int yRatio =        (int) floor((double) (h << 16) / height + 0.5);
-    int xPixelStart =   IS_FLIPPED_X(flip) ? width - 1 : 0;
-    int yPixelStart =   IS_FLIPPED_Y(flip) ? height - 1 : 0;
-    int xStep =         IS_FLIPPED_X(flip) ? -1 : 1;
-    int yStep =         IS_FLIPPED_Y(flip) ? -1 : 1;
-
-    int xPixel, yPixel, xFramebuffer, yFramebuffer;
-    for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yStep)
-    {
-        for (xFramebuffer = x, xPixel = xPixelStart; xFramebuffer < x + width; xFramebuffer++, xPixel += xStep)
-        {
-            int xNearest = (xPixel * xRatio) >> 16;
-            int yNearest = (yPixel * yRatio) >> 16;
-            Color32 col = pixels[yNearest * pitch + xNearest];
-
-            if (col != video->colorKey)
-                blitPixel(video, xFramebuffer, yFramebuffer, color != NULL ? *color : col);
-        }
-    }
+	stopSound(&globalMilk->audio,
+		(int)lua_tointeger(L, 1)
+	);
+	return 0;
 }
 
-
-#define SPRSHEET_IDX_OO_BOUNDS(idx)     (idx < 0 || SPRITE_SHEET_SQRSIZE < idx)
-#define SPRSHEET_COLUMNS                ((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
-#define SPRSHEET_ROW_SIZE               ((int)(SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE))
-#define SPRSHEET_COL_SIZE               SPRITE_SQRSIZE
-#define SPRSHEET_POS(x, y)              (y * SPRSHEET_ROW_SIZE + x * SPRSHEET_COL_SIZE)
-
-
-void blitSprite(Video *video, int idx, int x, int y, int w, int h, int scale, u8 flip)
+static int l_sndslot(lua_State *L)
 {
-    if (SPRSHEET_IDX_OO_BOUNDS(idx))
-        return;
-
-    int width = w * SPRITE_SQRSIZE;
-    int height = h * SPRITE_SQRSIZE;
-    int row = (int) floor((double) idx / SPRSHEET_COLUMNS);
-    int col = (int) floor((double) (idx % SPRSHEET_COLUMNS));
-    Color32 *pixels = &video->spriteSheet[SPRSHEET_POS(col, row)];
-    blitRect(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, NULL);
+	lua_pushinteger(L,
+		getSoundState(&globalMilk->audio, (int)lua_tointeger(L, 1))
+	);
+	return 1;
 }
 
-
-#define FONT_COLUMNS         ((int)(FONT_WIDTH / CHAR_SQRSIZE))
-#define FONT_ROW_SIZE        ((int)(FONT_WIDTH * CHAR_SQRSIZE))
-#define FONT_COL_SIZE        CHAR_SQRSIZE
-#define FONT_POS(x, y)       (y * FONT_ROW_SIZE + x * FONT_COL_SIZE)
-#define IS_ASCII(c)          (0 < c)
-#define IS_NEWLINE(c)        (c == '\n')
-
-
-void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, int scale, Color32 color)
+static int l_openstream(lua_State *L)
 {
-    if (str == NULL)
-        return;
-
-    int charSize = (int) floor((double) CHAR_SQRSIZE * scale);
-    int xCurrent = x;
-    int yCurrent = y;
-    char curr;
-
-    while ((curr = *str++) != '\0')
-    {
-        if (!IS_NEWLINE(curr))
-        {
-            if (!IS_ASCII(curr)) curr = '?';
-            int row = (int) floor((double)(curr - 32) / FONT_COLUMNS); /* bitmap font starts at ASCII character 32 (SPACE) */
-            int col = (int) floor((double)((curr - 32) % FONT_COLUMNS));
-            const Color32 *pixelStart = &pixels[FONT_POS(col, row)];
-            blitRect(video, pixelStart, xCurrent, yCurrent, CHAR_SQRSIZE, CHAR_SQRSIZE, FONT_WIDTH, scale, 0, &color);
-            xCurrent += charSize;
-        }
-        else
-        {
-            xCurrent = x;
-            yCurrent += charSize;
-        }
-    }
+	openStream(&globalMilk->audio,
+		(int)lua_tointeger(L, 1),
+		lua_tostring(L, 2)
+	);
+	return 0;
 }
 
-
-/*
- *******************************************************************************
- * Audio
- *******************************************************************************
- */
-
-
-#define SAMPLEIDX_OO_BOUNDS(idx)    (idx < 0 || idx > MAX_LOADED_SAMPLES)
-#define SLOTIDX_OO_BOUNDS(idx)      (idx < 0 || idx > MAX_SAMPLE_SLOTS)
-
-
-void resetSampleSlot(SampleSlot *slot)
+static int l_closestream(lua_State *L)
 {
-    slot->sampleData = NULL;
-    slot->state = STOPPED;
-    slot->remainingLength = 0;
-    slot->position = NULL;
-    slot->volume = 0;
+  closeStream(&globalMilk->audio,
+		(int)lua_tointeger(L, 1)
+  );
+  return 0;
 }
 
-
-void loadSound(Audio *audio, int sampleIdx, const char *filename)
+static int l_playstream(lua_State *L)
 {
-    if (SAMPLEIDX_OO_BOUNDS(sampleIdx))
-        return;
+  bool loop = false;
 
-    audio->lock();
+  if (lua_isboolean(L, 3))
+    loop = lua_toboolean(L, 3);
 
-    if (audio->samples[sampleIdx].buffer != NULL)
-        unloadSound(audio, sampleIdx);
-
-    audio->loadWAV(audio, filename, sampleIdx);
-    audio->unlock();
+	playStream(&globalMilk->audio,
+		(int)lua_tointeger(L, 1),
+		(int)lua_tointeger(L, 2),
+    loop
+	);
+	return 0;
 }
 
-
-void unloadSound(Audio *audio, int sampleIdx)
+static int l_stopstream(lua_State *L)
 {
-    if (SAMPLEIDX_OO_BOUNDS(sampleIdx))
-        return;
-
-    audio->lock();
-    SampleData *sampleData = &audio->samples[sampleIdx];
-
-    if (sampleData != NULL)
-    {
-        for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
-        {
-            if (audio->slots[i].sampleData == sampleData)
-                resetSampleSlot(&audio->slots[i]);
-        }
-
-        free(audio->samples[sampleIdx].buffer);
-        audio->samples[sampleIdx].buffer = NULL;
-    }
-    audio->unlock();
+  UNUSED(L);
+  stopStream(&globalMilk->audio, lua_tointeger(L, 1));
+  return 0;
 }
 
-
-void playSound(Audio *audio, int slotIdx, int sampleIdx, int volume)
+static int l_pausestream(lua_State *L)
 {
-    if (SAMPLEIDX_OO_BOUNDS(sampleIdx) || SLOTIDX_OO_BOUNDS(slotIdx))
-        return;
-
-    SampleData *sampleData = &audio->samples[sampleIdx];
-
-    if (sampleData->length <= 0)
-        return;
-
-    audio->lock();
-    SampleSlot *slot = &audio->slots[slotIdx];
-    slot->sampleData = sampleData;
-    slot->state = PLAYING;
-    slot->position = sampleData->buffer;
-    slot->remainingLength = sampleData->length;
-    slot->volume = CLAMP(volume, 0, MAX_VOLUME);
-    audio->unlock();
+  UNUSED(L);
+  pauseStream(&globalMilk->audio, lua_tointeger(L, 1));
+  return 0;
 }
 
-
-void stopSound(Audio *audio, int slotIdx)
+static int l_resumestream(lua_State *L)
 {
-    if (SLOTIDX_OO_BOUNDS(slotIdx))
-        return;
-
-    audio->lock();
-    resetSampleSlot(&audio->slots[slotIdx]);
-    audio->unlock();
+  UNUSED(L);
+  resumeStream(&globalMilk->audio, lua_tointeger(L, 1));
+  return 0;
 }
 
-
-void pauseSound(Audio *audio, int slotIdx)
+static int l_vol(lua_State *L)
 {
-    if (SLOTIDX_OO_BOUNDS(slotIdx))
-        return;
-
-    if (audio->slots[slotIdx].state == PLAYING)
-    {
-        audio->lock();
-        audio->slots[slotIdx].state = PAUSED;
-        audio->unlock();
-    }
+	setMasterVolume(&globalMilk->audio,
+		(u8)lua_tointeger(L, 1)
+	);
+	return 0;
 }
 
-
-void resumeSound(Audio *audio, int slotIdx)
+static int l_exit(lua_State *L)
 {
-    if (SLOTIDX_OO_BOUNDS(slotIdx))
-        return;
-
-    if (audio->slots[slotIdx].state == PAUSED)
-    {
-        audio->lock();
-        audio->slots[slotIdx].state = PLAYING;
-        audio->unlock();
-    }
+	(void)L;
+	globalMilk->shouldQuit = true;
+	return 0;
 }
 
-
-SampleSlotState getSampleState(Audio *audio, int slotIdx)
+static void pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_State *))
 {
-    return SLOTIDX_OO_BOUNDS(slotIdx) ? STOPPED : audio->slots[slotIdx].state;
+	lua_pushcfunction(L, api_func);
+	lua_setglobal(L, name);
 }
 
-
-void setMasterVolume(Audio *audio, int volume)
+static void pushApi(lua_State *L)
 {
-    audio->masterVolume = CLAMP(volume, 0, MAX_VOLUME);
+	pushApiFunction(L, "btn", l_btn);
+	pushApiFunction(L, "btnp", l_btnp);
+	pushApiFunction(L, "loadspr", l_loadspr);
+	pushApiFunction(L, "loadfont", l_loadfont);
+	pushApiFunction(L, "clip", l_clip);
+	pushApiFunction(L, "clrs", l_clrs);
+	pushApiFunction(L, "pset", l_pset);
+	pushApiFunction(L, "line", l_line);
+	pushApiFunction(L, "rect", l_rect);
+	pushApiFunction(L, "rectfill", l_rectfill);
+	pushApiFunction(L, "spr", l_spr);
+	pushApiFunction(L, "sprfont", l_sprfont);
+	pushApiFunction(L, "loadsnd", l_loadsnd);
+	pushApiFunction(L, "freesnd", l_freesnd);
+	pushApiFunction(L, "play", l_play);
+  pushApiFunction(L, "pause", l_pause);
+	pushApiFunction(L, "stop", l_stop);
+	pushApiFunction(L, "resume", l_resume);
+	pushApiFunction(L, "openstream", l_openstream);
+  pushApiFunction(L, "closestream", l_closestream);
+	pushApiFunction(L, "playstream", l_playstream);
+  pushApiFunction(L, "stopstream", l_stopstream);
+  pushApiFunction(L, "pausestream", l_pausestream);
+  pushApiFunction(L, "resumestream", l_resumestream);
+	pushApiFunction(L, "sndslot", l_sndslot);
+	pushApiFunction(L, "vol", l_vol);
+	pushApiFunction(L, "exit", l_exit);
 }
 
-
-#define _16_BIT_MAX 32767
-
-
-static void mixSample(u8 *destination, const u8 *source, int length, int volume)
+void loadCode(Milk *milk)
 {
-    i16 sourceSample;
-    i16 destSample;
-    length /= 2;
+	if (milk->code.state == NULL)
+	{
+		lua_State *L = luaL_newstate();
+		globalMilk = milk;
+		milk->code.state = (void *)L;
+		luaL_openlibs(L);
+		pushApi(L);
 
-    while (length--)
-    {
-        sourceSample = source[1] << 8 | source[0];
-        sourceSample = (sourceSample * volume) / MAX_VOLUME;
-        destSample = destination[1] << 8 | destination[0];
-        i32 mixedSample = CLAMP(sourceSample + destSample, -_16_BIT_MAX - 1, _16_BIT_MAX);
-        destination[0] = mixedSample & 0xff;
-        destination[1] = (mixedSample >> 8) & 0xff;
-        source += 2;
-        destination += 2;
-    }
+		if (luaL_dofile(L, "main.lua"))
+			LOG_ERROR(lua_tostring(L, -1));
+	}
 }
 
-
-#define LOOP_INDEX 0
-
-
-void mixSamplesIntoStream(Audio *audio, u8 *stream, size_t len)
+void unloadCode(Milk *milk)
 {
-    memset(stream, 0, len);
+	if (milk->code.state != NULL)
+	{
+		lua_close((lua_State *)milk->code.state);
+		milk->code.state = NULL;
+		globalMilk = NULL;
+	}
+}
 
-    for (int i = 0; i < MAX_SAMPLE_SLOTS; i++)
-    {
-        SampleSlot *slot = &audio->slots[i];
+void invokeInit(Code *code)
+{
+	lua_State *L = (lua_State *)code->state;
+	lua_getglobal(L, "_init");
 
-        if (slot->sampleData == NULL || slot->state != PLAYING)
-            continue;
+	if (lua_pcall(L, 0, 0, 0) != 0)
+	{
+		LOG_ERROR(lua_tostring(L, -1));
+		lua_pop(L, -1);
+	}
+}
 
-        if (slot->remainingLength > 0)
-        {
-            int bytesToWrite = MIN(slot->remainingLength, (int) len);
-            mixSample(stream, slot->position, bytesToWrite, slot->volume);
-            slot->position += bytesToWrite;
-            slot->remainingLength -= bytesToWrite;
-        }
-        else if (i == LOOP_INDEX)
-        {
-            slot->position = slot->sampleData->buffer;
-            slot->remainingLength = slot->sampleData->length;
-        }
-        else
-        {
-            slot->sampleData = NULL;
-            slot->state = STOPPED;
-        }
-    }
+void invokeUpdate(Code *code)
+{
+	lua_State *L = (lua_State *)code->state;
+	lua_getglobal(L, "_update");
+
+	if (lua_pcall(L, 0, 0, 0) != 0)
+	{
+		LOG_ERROR(lua_tostring(L, -1));
+		lua_pop(L, -1);
+	}
+}
+
+void invokeDraw(Code *code)
+{
+	resetDrawState(&globalMilk->video);
+
+	lua_State *L = (lua_State *)code->state;
+	lua_getglobal(L, "_draw");
+
+	if (lua_pcall(L, 0, 0, 0) != 0)
+	{
+		LOG_ERROR(lua_tostring(L, -1));
+		lua_pop(L, -1);
+	}
 }

@@ -16,7 +16,7 @@ endif()
 if (WIN32)
 	if (MINGW)
 		# provide paths for minGW/minGW-w64 development libs
-		set(SDL2_PATH C:/ExternalLibs/SDL2-devel-2.0.10-mingw/SDL2-2.0.10/i686-w64-mingw32)
+		set(SDL2_PATH C:/ExternalLibs/SDL2-devel-2.0.10-mingw/i686-w64-mingw32)
 		set(ENV{LUA_DIR} C:/ExternalLibs/Lua53mingw)
 	elseif (MSVC)
 		# provide paths for visual c++ development libs
@@ -25,26 +25,35 @@ if (WIN32)
 	endif()
 endif()
 
-find_package(SDL2 2.0.10 EXACT REQUIRED)
+find_package(SDL2 REQUIRED)
 find_package(Lua53 REQUIRED)
 
 set(MILK_SRC_FILES
-	src/milk.c
-	src/milk.h
+	src/audio.c
+	src/audio.h
+	src/common.h
+	src/gamepad.c
+	src/gamepad.h
+	src/logs.c
+	src/logs.h
+	src/wav.c
+	src/wav.h
+	src/video.c
+	src/video.h
 	src/embed/font.c
 	src/embed/font.h
 )
 
 set(MILK_MAIN_SRC_FILES
-	src/api.c
-	src/api.h
-	src/main.c
-	src/cmd.c
-	src/cmd.h
+	src/console.c
+	src/console.h
+	src/milk.c
+	src/milk.h
+	src/sdl/sdlmain.c
 )
 
 add_executable(milk ${MILK_SRC_FILES} ${MILK_MAIN_SRC_FILES})
-target_compile_definitions(milk PUBLIC MILK_CMD)
+target_compile_definitions(milk PUBLIC BUILD_WITH_CONSOLE)
 target_include_directories(milk PUBLIC ${SDL2_INCLUDE_DIR} ${LUA53_INCLUDE_DIR} ${MILK_SRC_DIR})
 if (WIN32)
 	target_link_directories(milk PUBLIC ${SDL2_INCLUDE_DIR} ${LUA53_INCLUDE_DIR} ${MILK_SRC_DIR})
@@ -52,12 +61,15 @@ endif()
 target_link_libraries(milk PUBLIC ${SDL2_LIBRARY} ${LUA53_LIBRARIES})
 
 enable_testing()
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
 
 set(MILK_TEST_SRC_FILES
 	${MILK_SRC_FILES}
-	tests/main.c
-	tests/milktests.h
-	tests/milkassert.h
+	tests/audio_tests.h
+	tests/input_tests.h
+	tests/video_tests.h
+	tests/core/main.c
+	tests/core/milkassert.h
 )
 
 add_executable(milktests ${MILK_TEST_SRC_FILES})
@@ -75,15 +87,5 @@ if(WIN32)
 		COMMAND ${CMAKE_COMMAND} -E copy_directory
 		${MILK_LIBS_DIR}
 		$<TARGET_FILE_DIR:milk>
-	)
-
-	add_custom_command(TARGET milk POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy
-		$<TARGET_FILE:milk> ${CMAKE_SOURCE_DIR}/samples/spaceshooter)
-
-	add_custom_command(TARGET milk POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-		${MILK_LIBS_DIR}
-		${CMAKE_SOURCE_DIR}/samples/spaceshooter
 	)
 endif()
