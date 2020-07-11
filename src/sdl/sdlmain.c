@@ -227,24 +227,22 @@ int main(int argc, char *argv[])
 #endif
 
   const Uint64 deltaTime = SDL_GetPerformanceFrequency() / FRAMERATE;
-
   Uint64 accumulator = 0;
-  Uint64 currentTime = SDL_GetPerformanceCounter();
 
   while (!milk->shouldQuit)
   {
-    Uint64 newTime = SDL_GetPerformanceCounter();
-    Uint64 frameTime = newTime - currentTime;
-    currentTime = newTime;
-    accumulator += frameTime;
+    accumulator += deltaTime;
 
-    while (accumulator >= deltaTime)
-    {
-      pollInput();
-      loopFrame();
-      flipFramebuffer();
-      accumulator -= deltaTime;
-    }
+    pollInput();
+    loopFrame();
+    flipFramebuffer();
+
+    Sint64 delay = accumulator - SDL_GetPerformanceCounter();
+
+    if (delay < 0)
+      accumulator -= delay;
+    else
+      SDL_Delay((Uint32)(delay * 1000 / SDL_GetPerformanceFrequency()));
   }
 
   return 0;

@@ -3,11 +3,11 @@ import { Game, GameState } from "../game";
 import { Menu } from "./menu";
 import { TacoStand } from "../common/tacoStand";
 
-const PRESENTED_BY = "it'sgood's"
+const PRESENTED_BY = "Straskal's"
 const TITLE = "STAR GAME";
 const SUBTITLE = "Return of The Bad Boiz";
 
-export class MainMenuState implements GameState {    
+export class MainMenuState implements GameState {
 
     public updateBelow = false;
     public drawBelow = false;
@@ -30,7 +30,7 @@ export class MainMenuState implements GameState {
 
     public draw(game: Game): void {
         clrs(0x00);
-        
+
         this._starField.draw();
         this._tacoStand.draw(true);
         this._menu.draw(256 / 2, 150, game.ticks);
