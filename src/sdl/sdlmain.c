@@ -43,12 +43,6 @@ static void freeModules()
   SDL_Quit();
 }
 
-/*
- *******************************************************************************
- * Interface implementations
- *******************************************************************************
- */
-
 static void lockAudioDevice()
 {
   SDL_LockAudioDevice(audioDevice);
