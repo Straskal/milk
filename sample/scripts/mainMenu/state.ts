@@ -48,8 +48,8 @@ export class MainMenuState implements GameState {
         const halfLength = length / 2;
         const halfResolutionWidth = 256 / 2;
 
-        sprfont(halfResolutionWidth - halfLength * 16, 45, PRESENTED_BY, 1, 0x00ffffff);
-        sprfont(halfResolutionWidth - halfLength * 16, 60, TITLE, 2, 0x00ff000);
+        font(0, halfResolutionWidth - halfLength * 16, 45, PRESENTED_BY, 1, 0x00ffffff);
+        font(0, halfResolutionWidth - halfLength * 16, 60, TITLE, 2, 0x00ff000);
     }
 
     private drawSubtitle(ticks: number): void {
@@ -63,7 +63,7 @@ export class MainMenuState implements GameState {
             const adjustedTime = ticks + i * 4;
             const y = 85 + math.sin(adjustedTime / 15) * 4;
 
-            sprfont(x + 8 * i, y, character, 1, 0x008751);
+            font(0, x + 8 * i, y, character, 1, 0x008751);
         }
     }
 }

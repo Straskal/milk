@@ -60,7 +60,7 @@ export class GameplayState implements GameState {
         this.drawScore();
     }
 
-    public exit(_: Game): void { 
+    public exit(_: Game): void {
         closestream(0);
         freesnd(1);
         freesnd(2);
@@ -86,6 +86,6 @@ export class GameplayState implements GameState {
     }
 
     private drawScore(): void {
-        sprfont(10, 10, `SCORE:${this._score}`);
+        font(0, 10, 10, `SCORE:${this._score}`);
     }
 }

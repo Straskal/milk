@@ -50,7 +50,7 @@ static int l_loadspr(lua_State *L)
 static int l_loadfont(lua_State *L)
 {
 	loadFont(&globalMilk->video,
-		lua_tostring(L, 1),
+		lua_tointeger(L, 1),
 		lua_tostring(L, 2)
 	);
 	return 0;
@@ -133,15 +133,16 @@ static int l_spr(lua_State *L)
 	return 0;
 }
 
-static int l_sprfont(lua_State *L)
+static int l_font(lua_State *L)
 {
-	// blitSpriteFont(&globalMilk->video,
-	// 	(int)floor(lua_tonumber(L, 1)),
-	// 	(int)floor(lua_tonumber(L, 2)),
-	// 	lua_tostring(L, 3),
-	// 	(int)luaL_optnumber(L, 4, 1.0),
-	// 	(Color32)luaL_optinteger(L, 5, 0xffffff)
-	// );
+	blitFont(&globalMilk->video,
+		(int)floor(lua_tonumber(L, 1)),
+		(int)floor(lua_tonumber(L, 2)),
+		(int)floor(lua_tonumber(L, 3)),
+		lua_tostring(L, 4),
+		(int)floor(luaL_optinteger(L, 5, 1)),
+		(Color32)floor(luaL_optinteger(L, 6, 0xffffff))
+	);
 	return 1;
 }
 
@@ -291,7 +292,7 @@ static void pushApi(lua_State *L)
 	pushApiFunction(L, "rect", l_rect);
 	pushApiFunction(L, "rectfill", l_rectfill);
 	pushApiFunction(L, "spr", l_spr);
-	pushApiFunction(L, "sprfont", l_sprfont);
+	pushApiFunction(L, "font", l_font);
 	pushApiFunction(L, "loadsnd", l_loadsnd);
 	pushApiFunction(L, "freesnd", l_freesnd);
 	pushApiFunction(L, "play", l_play);

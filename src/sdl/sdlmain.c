@@ -78,7 +78,7 @@ static void loadBmp(const char *filename, Color32 *dest, size_t len)
     uint32_t g = *bmpPixels++;
     uint32_t r = *bmpPixels++;
 
-    dest[i] = (r << 16u) | (g << 8u) | (b);
+    dest[i] = (r << 16) | (g << 8) | (b);
   }
 
   SDL_FreeSurface(bmp);

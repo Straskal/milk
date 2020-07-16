@@ -36,7 +36,7 @@ void loadSpriteSheet(Video *video, const char *path)
 
 void loadFont(Video *video, int id, const char *path)
 {
-  video->loadBMP(path, video->fonts[id], sizeof(video->fonts[id]));
+  video->loadBMP(path, video->fonts[id], sizeof(video->fonts[id]) / sizeof(Color32));
 }
 
 void resetDrawState(Video *video)
@@ -232,7 +232,7 @@ int fontWidth(const char *text)
         currentWidth = 0;
         break;
       default:
-        currentWidth += FONT_CHAR_WIDTH - FONT_CHAR_OFFSET;
+        currentWidth += FONT_CHAR_WIDTH;
         break;
     }
 
@@ -273,13 +273,13 @@ void blitFont(Video *video, int id, int x, int y, const char *str, int scale, Co
           int col = FLOOR((curr - 33) % FONT_COLUMNS);
 
           int yy = row * FONT_WIDTH * FONT_CHAR_HEIGHT;
-          int xx = col * FONT_CHAR_WIDTH + FONT_CHAR_OFFSET;
+          int xx = col * FONT_CHAR_WIDTH;
 
           Color32 *pixels = &fontPixels[yy + xx];
 
-          blitRect(video, pixels, xCurrent, yCurrent, FONT_CHAR_WIDTH - FONT_CHAR_OFFSET, FONT_CHAR_HEIGHT, FONT_WIDTH, scale, 0, &color);
+          blitRect(video, pixels, xCurrent, yCurrent, FONT_CHAR_WIDTH, FONT_CHAR_HEIGHT, FONT_WIDTH, scale, 0, &color);
 
-          xCurrent += FONT_CHAR_WIDTH - FONT_CHAR_OFFSET * scale;
+          xCurrent += (FONT_CHAR_WIDTH) * scale;
         }
         break;
     }

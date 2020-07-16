@@ -97,7 +97,7 @@ class HailSatanAction implements Action<ActionContext> {
     public draw(context: ActionContext): void {
         context.state._tacoStand.draw(false);
         spr(this._satanFrame, 128, 100);
-        sprfont(20, 50, "Hail Satan, motherfuckers!!!");
+        font(0, 20, 50, "Hail Satan, motherfuckers!!!");
     }
 
     public exit(t: ActionContext): void {}

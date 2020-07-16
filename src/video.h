@@ -17,8 +17,7 @@
 #define FONT_HEIGHT 64
 #define FONT_CHAR_WIDTH 8
 #define FONT_CHAR_HEIGHT 8
-#define FONT_CHAR_OFFSET 1
-#define FONT_CHAR_SPACING 3
+#define FONT_CHAR_SPACING 6
 
 typedef u32 Color32;
 

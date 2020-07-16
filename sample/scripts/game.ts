@@ -1,5 +1,7 @@
 import { MainMenuState } from "./mainMenu/state";
 
+const GameFont = "art/font.bmp";
+
 export interface GameState {
     updateBelow: boolean;
     drawBelow: boolean;
@@ -27,9 +29,10 @@ export class Game {
         this._ticks = value;
     }
 
-    public init(): void {     
+    public init(): void {
+        loadfont(0, GameFont);
         this._time = os.clock();
-        this.pushState(new MainMenuState());   
+        this.pushState(new MainMenuState());
     }
 
     public update(): void {
@@ -54,7 +57,7 @@ export class Game {
         this._ticks++;
 
         const fps = this.ticks / (os.clock() - this._time);
-        sprfont(190, 10, string.format("fps %.0f", fps));
+        font(0, 190, 10, string.format("fps %.0f", fps));
     }
 
     public peek(): GameState {

@@ -31,8 +31,8 @@ export class PauseState implements GameState {
         const halfResolution = 256 / 2;
         const x = halfResolution - (pausedLength / 2) * 8;
 
-        rectfill(x - 10, 95, pausedLength * 8 + 15, 18, 0x00);        
-        sprfont(x, 100, paused)
+        rectfill(x - 10, 95, pausedLength * 8 + 15, 18, 0x00);
+        font(0, x, 100, paused)
     }
 
     public exit(game: Game): void {

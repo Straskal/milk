@@ -46,7 +46,7 @@ export class Menu {
             if (i == this._selectedMenuItem)
                 spr(ticks % 64 < 48 ? 36 : 37, x + (halfLength * 8) + 4, y - 4);
 
-            sprfont(xPosition, y, menuItem.text);
+            font(0, xPosition, y, menuItem.text);
             y += 16;
         }
     }
