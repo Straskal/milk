@@ -29,6 +29,7 @@ static void initModules()
   frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC,
                                          FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
   SDL_RenderSetLogicalSize(renderer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
 }
 
 static void freeModules()
@@ -65,6 +66,7 @@ static void mixCallback(void *userData, u8 *stream, int numBytes)
 static void loadBmp(const char *filename, Color32 *dest, size_t len)
 {
   SDL_Surface *bmp = SDL_LoadBMP(filename);
+
   if (bmp == NULL)
     return;
 

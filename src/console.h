@@ -37,9 +37,9 @@ typedef struct console
   ConsoleInput input;
   ConsoleState state;
   int lastErrorCount;
-  char commandCandidate[COMMAND_MAX_LENGTH];
+  char candidate[COMMAND_MAX_LENGTH];
   char previousCommand[COMMAND_MAX_LENGTH];
-  int commandCandidateLength;
+  int candidateLength;
   int previousCommandLength;
   bool isGameInitialized;
 } Console;

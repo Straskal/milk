@@ -40,8 +40,7 @@ set(MILK_SRC_FILES
 	src/wav.h
 	src/video.c
 	src/video.h
-	src/embed/font.c
-	src/embed/font.h
+	src/embed/font.inl
 )
 
 set(MILK_MAIN_SRC_FILES
