@@ -2,7 +2,6 @@
 #define __VIDEO_TESTS_H__
 
 #include "core/milkassert.h"
-#include "embed/font.h"
 
 #define FRAMEBUFFER_POS(x, y) ((FRAMEBUFFER_WIDTH * y) + x)
 #define WITHIN_CLIP_RECT(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
@@ -27,18 +26,6 @@ TEST_CASE(initVideo_InitializesSpritesheet)
 
   for (int i = 0; i < SPRITE_SHEET_SQRSIZE * SPRITE_SHEET_SQRSIZE; i++)
     ASSERT_EQ(0x00, video.spriteSheet[i]);
-
-  END_ASSERTS();
-}
-
-TEST_CASE(initVideo_InitializesFont)
-{
-  Video video;
-
-  ACT(initializeVideo(&video));
-
-  for (int i = 0; i < FONT_WIDTH * FONT_HEIGHT; i++)
-    ASSERT_EQ(DEFAULT_FONT_DATA[i], video.font[i]);
 
   END_ASSERTS();
 }

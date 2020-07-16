@@ -4,6 +4,9 @@
 
 #include "video.h"
 
+#define MIN_SCALE 1
+#define MAX_SCALE 5
+
 void initializeVideo(Video *video)
 {
   Color32 embeddedFontData[] =
@@ -81,7 +84,7 @@ void blitPixel(Video *video, int x, int y, Color32 color)
     video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
-static void bresenhamLine(Video *video, int x0, int y0, int x1, int y1, Color32 color)
+void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color)
 {
   int xDistance = x1 - x0;
   int yDistance = y1 - y0;
@@ -130,11 +133,6 @@ static void bresenhamLine(Video *video, int x0, int y0, int x1, int y1, Color32 
   }
 }
 
-void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color)
-{
-  bresenhamLine(video, x0, y0, x1, y1, color);
-}
-
 static void horizontalLine(Video *video, int x, int y, int w, Color32 color)
 {
   for (int i = x; i <= x + w; i++)
@@ -164,10 +162,7 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
   }
 }
 
-#define MIN_SCALE 1
-#define MAX_SCALE 5
-
-static void nearestNeighbor(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 *color)
+static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 *color)
 {
   scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
 
@@ -201,11 +196,6 @@ static void nearestNeighbor(Video *video, const Color32 *pixels, int x, int y, i
   }
 }
 
-static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 *color)
-{
-  nearestNeighbor(video, pixels, x, y, w, h, pitch, scale, flip, color);
-}
-
 #define SPRSHEET_COLUMNS ((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
 #define SPRSHEET_ROW_SIZE ((int)(SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE))
 #define SPRSHEET_POS(x, y) (y * SPRSHEET_ROW_SIZE + x * SPRITE_SQRSIZE)
@@ -227,20 +217,34 @@ void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 
 
 int fontWidth(const char *text)
 {
+  int currentWidth = 0;
   int width = 0;
   char curr;
 
   while ((curr = *text++))
   {
-    if (curr != ' ') width += FONT_CHAR_WIDTH - FONT_CHAR_OFFSET;
-    else width += FONT_CHAR_SPACING;
+    switch (curr)
+    {
+      case ' ':
+        currentWidth += FONT_CHAR_SPACING;
+        break;
+      case '\n':
+        currentWidth = 0;
+        break;
+      default:
+        currentWidth += FONT_CHAR_WIDTH - FONT_CHAR_OFFSET;
+        break;
+    }
+
+    if (currentWidth > width)
+      width = currentWidth;
   }
 
   return width;
 }
 
 #define IS_ASCII(c) (0 < c)
-#define FONT_COLUMNS ((int)(FONT_WIDTH / FONT_CHAR_WIDTH))
+#define FONT_COLUMNS (FONT_WIDTH / FONT_CHAR_WIDTH)
 
 void blitFont(Video *video, int id, int x, int y, const char *str, int scale, Color32 color)
 {
@@ -250,31 +254,34 @@ void blitFont(Video *video, int id, int x, int y, const char *str, int scale, Co
   int yCurrent = y;
   char curr;
 
-  while ((curr = *str++) != '\0')
+  while ((curr = *str++))
   {
-    if (curr != '\n')
+    if (!IS_ASCII(curr)) curr = '?';
+
+    switch (curr)
     {
-      if (curr != ' ')
-      {
-        if (!IS_ASCII(curr)) curr = '?';
+      case '\n':
+        xCurrent = x;
+        yCurrent += FONT_CHAR_HEIGHT * scale;
+        break;
+      case ' ':
+        xCurrent += FONT_CHAR_SPACING * scale;
+        break;
+      default:
+        {
+          int row = FLOOR((curr - 33) / FONT_COLUMNS);
+          int col = FLOOR((curr - 33) % FONT_COLUMNS);
 
-        int row = FLOOR((curr - 33) / FONT_COLUMNS);
-        int col = FLOOR((curr - 33) % FONT_COLUMNS);
+          int yy = row * FONT_WIDTH * FONT_CHAR_HEIGHT;
+          int xx = col * FONT_CHAR_WIDTH + FONT_CHAR_OFFSET;
 
-        int yy = row * FONT_WIDTH * FONT_CHAR_HEIGHT;
-        int xx = col * FONT_CHAR_WIDTH + FONT_CHAR_OFFSET;
+          Color32 *pixels = &fontPixels[yy + xx];
 
-        Color32 *pixels = &fontPixels[yy + xx];
+          blitRect(video, pixels, xCurrent, yCurrent, FONT_CHAR_WIDTH - FONT_CHAR_OFFSET, FONT_CHAR_HEIGHT, FONT_WIDTH, scale, 0, &color);
 
-        blitRect(video, pixels, xCurrent, yCurrent, FONT_CHAR_WIDTH - FONT_CHAR_OFFSET, FONT_CHAR_HEIGHT, FONT_WIDTH, scale, 0, &color);
-        xCurrent += FONT_CHAR_WIDTH - FONT_CHAR_OFFSET * scale;
-      }
-      else xCurrent += FONT_CHAR_SPACING * scale;
-    }
-    else
-    {
-      xCurrent = x;
-      yCurrent += FONT_CHAR_HEIGHT * scale;
+          xCurrent += FONT_CHAR_WIDTH - FONT_CHAR_OFFSET * scale;
+        }
+        break;
     }
   }
 }

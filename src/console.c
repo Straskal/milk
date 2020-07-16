@@ -224,7 +224,7 @@ static void drawCommandLine(Console *console, Milk *milk)
 	static const char *separator = "------------------------------";
 	static const char *pointer = ">";
 
-	int pointerWidth = fontWidth(video, pointer);
+	int pointerWidth = fontWidth(pointer);
 	int x = 8;
 	int y = 10;
 
@@ -234,7 +234,7 @@ static void drawCommandLine(Console *console, Milk *milk)
 	blitFont(video, -1, (x += pointerWidth + 2), y, console->candidate, 1, primary);
 
 	if (ticks % 64 < 48)
-		blitFilledRectangle(video, x + fontWidth(video, console->candidate), y, 6, 8, alert);
+		blitFilledRectangle(video, x + fontWidth(console->candidate), y, 6, 8, alert);
 }
 
 static void drawPlayingIndicator(Console *console, Milk *milk)

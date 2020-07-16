@@ -33,7 +33,6 @@ static Test _tests[] =
 	// Video
 	INIT_TEST(initVideo_InitializesFramebuffer),
 	INIT_TEST(initVideo_InitializesSpritesheet),
-	INIT_TEST(initVideo_InitializesFont),
 	INIT_TEST(initVideo_InitializesColorKey),
 	INIT_TEST(initVideo_InitializesClipRect),
 
