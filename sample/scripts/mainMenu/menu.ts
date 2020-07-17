@@ -24,9 +24,10 @@ export class Menu {
                 };
 
                 game.popState();
-                game.pushState(new CinematicState<ActionContext>(
-                    introCinematicContext, actions, new GameplayState()
-                ));
+                // game.pushState(new CinematicState<ActionContext>(
+                //     introCinematicContext, actions, new GameplayState()
+                // ));
+                game.pushState(new GameplayState());
             }
         },
         {

@@ -24,7 +24,6 @@ interface Person {
     x: number;
     frame: number;
     timer: number;
-    alive: boolean;
     direction: number;
     speed: number;
 }
@@ -45,12 +44,11 @@ export class TacoStand {
             timer: 0
         });
 
-        for (let i = 0; i < NumPeople; i++){
+        for (let i = 0; i < NumPeople; i++) {
             this._people[i] = {
                 x: math.random(60, 176),
                 frame: math.random(PersonStartFrame, PersonStartFrame + PersonNumFrames - 1),
                 timer: math.random(0, 20),
-                alive: true,
                 direction: i % 2 == 0 ? -1 : 1,
                 speed: i % 2 == 0 ? 0.5 : 0.8
             }
@@ -58,14 +56,15 @@ export class TacoStand {
     }
 
     panic(): void {
-        for (const person of this._people)
+        for (const person of this._people) {
             person.speed = 1.5;
+        }
     }
 
     destroy(): void {
         this._tacoStandUpperHalfSprite = TacoStandUpperHalfDestroyed;
 
-        for (let i = 0; i < NumSmokeForCloud; i++){
+        for (let i = 0; i < NumSmokeForCloud; i++) {
             this._smokeClouds[i] = {
                 x: math.random(15, 40),
                 y: math.random(180, 190),
@@ -73,7 +72,6 @@ export class TacoStand {
                 timer: 0
             }
         }
-
         for (const person of this._people) {
             this._deadPeoplePositions.push(person.x);
         }
@@ -92,7 +90,6 @@ export class TacoStand {
                     chimneySmoke.frame = SmokeStartFrame;
             }
         }
-
         for (const smoke of this._smokeClouds) {
             if (ticks > smoke.timer) {
                 smoke.x = math.random(15, 40);
@@ -103,9 +100,9 @@ export class TacoStand {
                 smoke.timer = ticks + SmokeAnimationTimer;
             }
         }
-
         for (const person of this._people) {
             person.x += person.direction * person.speed;
+
             if (ticks > person.timer) {
                 if (person.x < 20 || person.x > 200)
                     person.direction *= -1;
@@ -125,11 +122,9 @@ export class TacoStand {
         for (const person of this._people) {
             spr(person.frame, person.x, 200, 1, 1, 1, person.direction == -1 ? 0 : 1);
         }
-
         for (const person of this._deadPeoplePositions) {
             spr(DeadPersonFrame, person, 204);
         }
-
         for (const smoke of this._smokeClouds) {
             spr(smoke.frame, smoke.x, smoke.y);
         }

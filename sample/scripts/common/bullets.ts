@@ -1,20 +1,20 @@
 import { ICollidable, CollisionType, isColliding } from "./collision";
 
+const PoolSize = 10;
+
 interface Bullet extends ICollidable {
     sprite: number
     damage: number;
     direction: number;
-    isActive: boolean;
 }
 
 export class BulletPool {
 
-    readonly POOL_SIZE = 10;
-
     private _pool: Bullet[] = [];
+    private _liveBullets: Bullet[] = [];
 
     constructor() {
-        for (let i = 0; i < this.POOL_SIZE; i++) {
+        for (let i = 0; i < PoolSize; i++) {
             this._pool.push({
                 type: CollisionType.BULLET,
                 mask: 0,
@@ -24,53 +24,58 @@ export class BulletPool {
                 height: 16,
                 sprite: 0,
                 damage: 1,
-                direction: 0,
-                isActive: false
+                direction: 0
             });
         }
     }
 
     public update(): void {
-        for (let i = 0; i < this.POOL_SIZE; i++) {
-            const bullet = this._pool[i];
-            if (!bullet.isActive)
-                continue;
-            bullet.y += bullet.direction
-            if (this.isOutOfBounds(this._pool[i]))
-                bullet.isActive = false;
+        let len = this._liveBullets.length;
+
+        for (let i = len; i > 0; i--) {
+            const bullet = this._liveBullets[i - 1];
+
+            bullet.y += bullet.direction;
+
+            if (this.isOutOfBounds(bullet)) {
+                this._pool.push(bullet);
+                this._liveBullets.splice(i - 1, 1);
+            }
         }
     }
 
     public draw(): void {
-        for (let i = 0; i < this.POOL_SIZE; i++) {
-            const bullet = this._pool[i];
-            if (bullet.isActive)
-                spr(bullet.sprite, bullet.x - 8, bullet.y - 8);
+        for (const bullet of this._liveBullets) {
+            spr(bullet.sprite, bullet.x - 8, bullet.y - 8);
         }
     }
 
     public create(x: number, y: number, direction: number, sprite: number, mask: number): void {
-        for (let i = 0; i < this.POOL_SIZE; i++) {
-            const bullet = this._pool[i];
-            if (bullet.isActive)
-                continue;
+        const bullet = this._pool.pop();
+
+        if (bullet != undefined) {
             bullet.mask = mask;
             bullet.x = x;
             bullet.y = y;
             bullet.direction = direction;
             bullet.sprite = sprite;
-            bullet.isActive = true;
-            break;
+            this._liveBullets.push(bullet);
         }
     }
 
     public checkCollision(target: ICollidable): boolean {
-        for (let i = 0; i < this.POOL_SIZE; i++) {
-            if (this._pool[i].isActive && isColliding(this._pool[i], target)) {
-                this._pool[i].isActive = false;
+        let len = this._liveBullets.length;
+
+        for (let i = len; i > 0; i--) {
+            const bullet = this._liveBullets[i - 1];
+
+            if (isColliding(bullet, target)) {
+                this._pool.push(bullet);
+                this._liveBullets.splice(i - 1, 1);
                 return true;
             }
         }
+
         return false;
     }
 

@@ -31,6 +31,7 @@ export class GameplayState implements GameState {
     }
 
     enter(_: Game): void {
+        loadspr("art/sprsheet.bmp");
         openstream(0, "sounds/02 Underclocked (underunderclocked mix).wav");
         loadsnd(ShootSound, "sounds/shoot.wav");
         loadsnd(ExplosionSound, "sounds/explode.wav");
