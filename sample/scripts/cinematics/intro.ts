@@ -1,7 +1,7 @@
-import { StarField } from "../common/starField";
+import { Stars } from "../common/stars";
 import { Game, GameState } from "../game";
 import { TacoStand } from "../common/tacoStand";
-import { ExplosionPool } from "../common/explosions";
+import { Explosions } from "../common/explosions";
 import { GameplayState } from "../gameplay/state";
 import { Action, ActionList } from "../common/actionList";
 
@@ -10,7 +10,7 @@ const EvilLaughSound = 1;
 
 export interface ActionContext {
     game: Game;
-    starField: StarField;
+    starField: Stars;
     tacoStand: TacoStand;
 }
 
@@ -40,9 +40,9 @@ class Free implements Action<ActionContext> {
     exit(t: ActionContext): void {}
 }
 
-class Explosions implements Action<ActionContext> {
+class TacoStandExplosions implements Action<ActionContext> {
 
-    private _explosionPool = new ExplosionPool();
+    private _explosions = new Explosions();
     private _timer = 0;
 
     enter(context: ActionContext): void {
@@ -52,10 +52,10 @@ class Explosions implements Action<ActionContext> {
     update(context: ActionContext): boolean {
         context.starField.update();
         context.tacoStand.update(context.game.ticks);
-        this._explosionPool.update(context.game);
+        this._explosions.update(context.game);
         if (context.game.ticks % 15 == 0) {
-            this._explosionPool.create(math.random(10, 200), math.random(170, 200), context.game.ticks);
-            this._explosionPool.create(math.random(10, 50), math.random(170, 200), context.game.ticks);
+            this._explosions.create(math.random(10, 200), math.random(170, 200), context.game.ticks);
+            this._explosions.create(math.random(10, 50), math.random(170, 200), context.game.ticks);
             play(ExplosionSound, 0, 128);
         }
         return context.game.ticks > this._timer;
@@ -64,7 +64,7 @@ class Explosions implements Action<ActionContext> {
         clrs();
         context.starField.draw();
         context.tacoStand.draw();
-        this._explosionPool.draw();
+        this._explosions.draw();
     }
     exit(t: ActionContext): void {}
 }
@@ -161,7 +161,7 @@ class ScreenWipeAction implements Action<ActionContext> {
 
 export const actions = [
     new Load(),
-    new Explosions(),
+    new TacoStandExplosions(),
     new TacoStandDestroyedDelay(),
     new SatanEnter(),
     new HailSatanAction(),

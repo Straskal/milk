@@ -1,4 +1,4 @@
-import { StarField } from "../common/starField";
+import { Stars } from "../common/stars";
 import { Game, GameState } from "../game";
 import { Menu } from "./menu";
 import { TacoStand } from "../common/tacoStand";
@@ -12,7 +12,7 @@ export class MainMenuState implements GameState {
     public updateBelow = false;
     public drawBelow = false;
 
-    private _starField = new StarField(0.1);
+    private _starField = new Stars(0.1);
     private _tacoStand = new TacoStand();
     private _menu = new Menu();
 

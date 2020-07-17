@@ -1,29 +1,31 @@
-import { StarField } from "../common/starField";
+import { Stars } from "../common/stars";
 import { Player } from "../common/player";
 import { Game, GameState } from "../game";
-import { BulletPool } from "../common/bullets";
-import { EnemyPool } from "../common/enemies";
-import { ExplosionPool } from "../common/explosions";
+import { Bullets } from "../common/bullets";
+import { Enemies } from "../common/enemies";
+import { Explosions } from "../common/explosions";
 import { isColliding } from "../common/collision";
 import { PauseState } from "../pause/state";
 
-export const ExplosionSound = 0;
-export const ShootSound = 1;
+const MusicStream = 0;
+const ExplosionSound = 0;
+const ShootSound = 1;
 
 export class GameplayState implements GameState {
 
-    private _starField = new StarField();
-    private _player = new Player();
-    private _enemyPool = new EnemyPool();
-    private _bulletPool = new BulletPool();
-    private _explosionPool = new ExplosionPool();
     private _score = 0;
+
+    starField = new Stars();
+    player = new Player({ shootSound: ShootSound });
+    explosions = new Explosions({ explosionSound: ExplosionSound });
+    enemies = new Enemies();
+    bullets = new Bullets();
 
     updateBelow = false;
     drawBelow = false;
 
     get bulletPool() {
-        return this._bulletPool;
+        return this.bullets;
     }
 
     addToScore(amount: number): void {
@@ -32,21 +34,21 @@ export class GameplayState implements GameState {
 
     enter(_: Game): void {
         loadspr("art/sprsheet.bmp");
-        openstream(0, "sounds/02 Underclocked (underunderclocked mix).wav");
+        openstream(MusicStream, "sounds/02 Underclocked (underunderclocked mix).wav");
         loadsnd(ShootSound, "sounds/shoot.wav");
         loadsnd(ExplosionSound, "sounds/explode.wav");
-        playstream(0, 128, true);
+        playstream(MusicStream, 128, true);
     }
 
     update(game: Game): void {
         if (btnp(0))
             game.pushState(new PauseState());
 
-        this._starField.update();
-        this._player.update(game, this);
-        this._enemyPool.update(game);
-        this._bulletPool.update();
-        this._explosionPool.update(game);
+        this.starField.update();
+        this.player.update(game, this);
+        this.enemies.update(game);
+        this.bullets.update();
+        this.explosions.update(game);
 
         this.handleBulletEnemyCollisions(game.ticks);
         this.handlePlayerEnemyCollisions(game.ticks);
@@ -55,40 +57,38 @@ export class GameplayState implements GameState {
     draw(_: Game): void {
         clrs(0x00);
 
-        this._starField.draw();
-        this._bulletPool.draw();
-        this._enemyPool.draw();
-        this._explosionPool.draw();
-        this._player.draw();
+        this.starField.draw();
+        this.bullets.draw();
+        this.enemies.draw();
+        this.explosions.draw();
+        this.player.draw();
 
         this.drawScore();
     }
 
     exit(_: Game): void {
-        closestream(0);
-        freesnd(1);
-        freesnd(2);
+        closestream(MusicStream);
+        freesnd(ShootSound);
+        freesnd(ExplosionSound);
     }
 
+    // Will want to revisit this implementation.
     private handleBulletEnemyCollisions(ticks: number): void {
-        for (const enemy of this._enemyPool.liveEnemies) {
-            if (this._bulletPool.checkCollision(enemy)) {
-                this._explosionPool.create(enemy.x, enemy.y, ticks);
-                this._enemyPool.destroy(enemy);
+        for (const enemy of this.enemies.liveEnemies) {
+            if (this.bullets.checkCollision(enemy)) {
+                this.explosions.create(enemy.x, enemy.y, ticks);
+                this.enemies.destroy(enemy);
                 this._score++;
-
-                play(ExplosionSound, 0, 80);
             }
         }
     }
 
+    // Will want to revisit this implementation.
     private handlePlayerEnemyCollisions(ticks: number): void {
-        for (const enemy of this._enemyPool.liveEnemies) {
-            if (isColliding(this._player, enemy)) {
-                this._explosionPool.create(enemy.x, enemy.y, ticks);
-                this._enemyPool.destroy(enemy);
-
-                play(ExplosionSound, 0, 80);
+        for (const enemy of this.enemies.liveEnemies) {
+            if (isColliding(this.player, enemy)) {
+                this.explosions.create(enemy.x, enemy.y, ticks);
+                this.enemies.destroy(enemy);
             }
         }
     }

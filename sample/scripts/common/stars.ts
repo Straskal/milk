@@ -5,14 +5,14 @@ interface Star {
     color: number;
 }
 
-export class StarField {
+export class Stars {
 
-    private stars: Star[] = [];
+    private readonly _stars: Star[] = [];
 
     constructor(readonly warpFactor: number = 3) {
         for (let i = 0; i < 10; i++) {
             for (let j = 0; j < 10; j++) {
-                this.stars.push({
+                this._stars.push({
                     x: math.random(256),
                     y: math.random(224),
                     pace: i,
@@ -23,8 +23,8 @@ export class StarField {
     }
 
     public update(): void {
-        for (let i = 0; i < this.stars.length; i++) {
-            const star = this.stars[i];
+        for (let i = 0; i < this._stars.length; i++) {
+            const star = this._stars[i];
             star.y = star.y + star.pace * this.warpFactor / 10;
             if (star.y > 224) {
                 star.y = 0;
@@ -34,8 +34,8 @@ export class StarField {
     }
 
     public draw(): void {
-        for (let i = 0; i < this.stars.length; i++) {
-            pset(this.stars[i].x, this.stars[i].y, this.stars[i].color)
+        for (let i = 0; i < this._stars.length; i++) {
+            pset(this._stars[i].x, this._stars[i].y, this._stars[i].color)
         }
     }
 }

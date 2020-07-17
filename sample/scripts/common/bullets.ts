@@ -1,6 +1,8 @@
 import { ICollidable, CollisionType, isColliding } from "./collision";
 
 const PoolSize = 10;
+const BulletWidth = 16;
+const BulletHeight = 16;
 
 interface Bullet extends ICollidable {
     sprite: number
@@ -8,10 +10,10 @@ interface Bullet extends ICollidable {
     direction: number;
 }
 
-export class BulletPool {
+export class Bullets {
 
-    private _pool: Bullet[] = [];
-    private _liveBullets: Bullet[] = [];
+    private readonly _pool: Bullet[] = [];
+    private readonly _liveBullets: Bullet[] = [];
 
     constructor() {
         for (let i = 0; i < PoolSize; i++) {
@@ -20,8 +22,8 @@ export class BulletPool {
                 mask: 0,
                 x: 0,
                 y: 0,
-                width: 16,
-                height: 16,
+                width: BulletWidth,
+                height: BulletHeight,
                 sprite: 0,
                 damage: 1,
                 direction: 0
@@ -29,8 +31,8 @@ export class BulletPool {
         }
     }
 
-    public update(): void {
-        let len = this._liveBullets.length;
+    update(): void {
+        const len = this._liveBullets.length;
 
         for (let i = len; i > 0; i--) {
             const bullet = this._liveBullets[i - 1];
@@ -44,27 +46,28 @@ export class BulletPool {
         }
     }
 
-    public draw(): void {
+    draw(): void {
         for (const bullet of this._liveBullets) {
             spr(bullet.sprite, bullet.x - 8, bullet.y - 8);
         }
     }
 
-    public create(x: number, y: number, direction: number, sprite: number, mask: number): void {
+    create(x: number, y: number, direction: number, sprite: number, mask: number): void {
         const bullet = this._pool.pop();
 
-        if (bullet != undefined) {
+        if (bullet) {
             bullet.mask = mask;
             bullet.x = x;
             bullet.y = y;
             bullet.direction = direction;
             bullet.sprite = sprite;
+
             this._liveBullets.push(bullet);
         }
     }
 
-    public checkCollision(target: ICollidable): boolean {
-        let len = this._liveBullets.length;
+    checkCollision(target: ICollidable): boolean {
+        const len = this._liveBullets.length;
 
         for (let i = len; i > 0; i--) {
             const bullet = this._liveBullets[i - 1];

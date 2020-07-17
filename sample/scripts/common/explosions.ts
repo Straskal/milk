@@ -1,65 +1,72 @@
 import { Game } from "../game";
 
-interface IExplosion {
+const PoolSize = 10;
+const ExplosionAnimStartFrame = 18;
+const ExplosionAnimNumFrames = 4;
+const ExplosionAnimFrameTime = 4;
+
+interface Explosion {
     x: number,
     y: number,
     frame: number,
-    timer: number,
-    isActive: boolean
+    timer: number
 }
 
-export class ExplosionPool {
+export interface ExplosionAssetInfo {
+    explosionSound: number;
+}
 
-    readonly ANIM_START_SPRITE = 18;
-    readonly NUM_FRAMES = 4;
-    readonly ANIM_TIMER = 3;
-    readonly POOL_SIZE = 10;
+export class Explosions {
 
-    private _pool: IExplosion[] = [];
+    private readonly _pool: Explosion[] = [];
+    private readonly _liveExplosions: Explosion[] = [];
 
-    constructor() {
-        for (let i = 0; i < this.POOL_SIZE; i++) {
+    constructor(private readonly _assetInfo: ExplosionAssetInfo) {
+        for (let i = 0; i < PoolSize; i++) {
             this._pool.push({
                 x: 0,
                 y: 0,
                 frame: 0,
-                timer: 0,
-                isActive: false
+                timer: 0
             });
         }
     }
 
     public update(game: Game): void {
-        for (let i = 0; i < this.POOL_SIZE; i++) {
-            const explosion = this._pool[i];
-            if (explosion.isActive && game.ticks > explosion.timer) {
+        const len = this._liveExplosions.length;
+
+        for (let i = len; i > 0; i--) {
+            const explosion = this._liveExplosions[i - 1];
+
+            if (game.ticks > explosion.timer) {
                 explosion.frame++;
-                explosion.timer = game.ticks + this.ANIM_TIMER;
-                if (explosion.frame > this.ANIM_START_SPRITE + this.NUM_FRAMES)
-                    explosion.isActive = false;
+                explosion.timer = game.ticks + ExplosionAnimFrameTime;
+
+                if (explosion.frame > ExplosionAnimStartFrame + ExplosionAnimNumFrames) {
+                    this._pool.push(explosion);
+                    this._liveExplosions.splice(i - 1, 1);
+                }
             }
         }
     }
 
     public draw(): void {
-        for (let i = 0; i < this.POOL_SIZE; i++) {
-            const explosion = this._pool[i];
-            if (explosion.isActive)
-                spr(explosion.frame, explosion.x - 8, explosion.y - 8);
+        for (const explosion of this._liveExplosions) {
+            spr(explosion.frame, explosion.x - 8, explosion.y - 8);
         }
     }
 
     public create(x: number, y: number, ticks: number): void {
-        for (let i = 0; i < this.POOL_SIZE; i++) {
-            const explosion = this._pool[i];
-            if (!explosion.isActive) {
-                explosion.isActive = true;
-                explosion.x = x;
-                explosion.y = y;
-                explosion.frame = this.ANIM_START_SPRITE;
-                explosion.timer = ticks + this.ANIM_TIMER;
-                break;
-            }
+        const explosion = this._pool.pop();
+
+        if (explosion) {
+            explosion.x = x;
+            explosion.y = y;
+            explosion.frame = ExplosionAnimStartFrame;
+            explosion.timer = ticks + ExplosionAnimFrameTime;
+
+            this._liveExplosions.push(explosion);
+            play(this._assetInfo.explosionSound, 0, 80);
         }
     }
 }

@@ -1,7 +1,7 @@
 import { Game } from "../game";
 import { actions, ActionContext } from "../cinematics/intro";
 import { CinematicState } from "../common/cinematic";
-import { StarField } from "../common/starField";
+import { Stars } from "../common/stars";
 import { TacoStand } from "../common/tacoStand";
 import { GameplayState } from "../gameplay/state";
 
@@ -19,7 +19,7 @@ export class Menu {
             execute: (game: Game) => {
                 let introCinematicContext = {
                     game: game,
-                    starField: new StarField(0.1),
+                    starField: new Stars(0.1),
                     tacoStand: new TacoStand()
                 };
 

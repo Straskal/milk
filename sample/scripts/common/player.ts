@@ -1,30 +1,37 @@
 import { Game } from "../game";
 import { GameplayState } from "../gameplay/state";
-import { BulletPool } from "./bullets";
+import { Bullets } from "./bullets";
 import { CollisionType, ICollidable } from "./collision";
+
+const AttackTimeDelay = 8;
+const AnimationFrame_1 = 0;
+const AnimationFrame_2 = 1;
+
+export interface PlayerAssetInfo {
+    shootSound: number;
+}
 
 export class Player implements ICollidable {
 
-    readonly ATTACK_BUFFER = 8;
+    x = 256 / 2 - 8;
+    y = 224 - 64;
+    type = CollisionType.PLAYER;
+    mask = 0;
+    width = 16;
+    height = 16;
+    speed = 1;
+    sprite = AnimationFrame_1;
+    bulletTimer = 0;
 
-    public x = 256 / 2 - 8;
-    public y = 224 - 64;
-    public type = CollisionType.PLAYER;
-    public mask = 0;
-    public width = 16;
-    public height = 16;
+    constructor(private readonly _assetInfo: PlayerAssetInfo) {}
 
-    private speed = 1;
-    private sprite = 0;
-    private bulletTimer = 0;
-
-    public update(game: Game, gameplay: GameplayState): void {
+    update(game: Game, gameplay: GameplayState): void {
         this.move();
         this.attack(game.ticks, gameplay.bulletPool);
         this.animate(game.ticks);
     }
 
-    public draw(): void {
+    draw(): void {
         spr(this.sprite, this.x - 8, this.y - 8);
     }
 
@@ -46,15 +53,15 @@ export class Player implements ICollidable {
     }
 
     private animate(ticks: number): void {
-        this.sprite = ticks % 12 < 6 ? 0 : 1;
+        this.sprite = ticks % 12 < 6 ? AnimationFrame_1 : AnimationFrame_2;
     }
 
-    private attack(ticks: number, bulletPool: BulletPool): void {
+    private attack(ticks: number, bulletPool: Bullets): void {
         if (btn(5) && ticks > this.bulletTimer) {
             bulletPool.create(this.x, this.y, -3, 2, CollisionType.ENEMY);
-            this.bulletTimer = ticks + this.ATTACK_BUFFER;
+            this.bulletTimer = ticks + AttackTimeDelay;
 
-            play(1, 1, 50);
+            play(this._assetInfo.shootSound, 1, 50);
         }
     }
 }
