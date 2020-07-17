@@ -1,5 +1,5 @@
 import { Game } from "../game";
-import { actions, ActionContext } from "../intro/actions";
+import { actions, ActionContext } from "../cinematics/intro";
 import { CinematicState } from "../common/cinematic";
 import { StarField } from "../common/starField";
 import { TacoStand } from "../common/tacoStand";
