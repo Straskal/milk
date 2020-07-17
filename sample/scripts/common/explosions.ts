@@ -58,7 +58,6 @@ export class ExplosionPool {
                 explosion.y = y;
                 explosion.frame = this.ANIM_START_SPRITE;
                 explosion.timer = ticks + this.ANIM_TIMER;
-                play(2, 2, 50);
                 break;
             }
         }

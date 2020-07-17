@@ -7,10 +7,10 @@ import { ExplosionPool } from "../common/explosions";
 import { isColliding } from "../common/collision";
 import { PauseState } from "../pause/state";
 
-export class GameplayState implements GameState {
+export const ExplosionSound = 0;
+export const ShootSound = 1;
 
-    public updateBelow = false;
-    public drawBelow = false;
+export class GameplayState implements GameState {
 
     private _starField = new StarField();
     private _player = new Player();
@@ -19,22 +19,25 @@ export class GameplayState implements GameState {
     private _explosionPool = new ExplosionPool();
     private _score = 0;
 
-    public get bulletPool() {
+    updateBelow = false;
+    drawBelow = false;
+
+    get bulletPool() {
         return this._bulletPool;
     }
 
-    public addToScore(amount: number): void {
+    addToScore(amount: number): void {
         this._score += amount;
     }
 
-    public enter(_: Game): void {
+    enter(_: Game): void {
         openstream(0, "sounds/02 Underclocked (underunderclocked mix).wav");
-        loadsnd(1, "sounds/shoot.wav");
-        loadsnd(2, "sounds/explode.wav");
+        loadsnd(ShootSound, "sounds/shoot.wav");
+        loadsnd(ExplosionSound, "sounds/explode.wav");
         playstream(0, 128, true);
     }
 
-    public update(game: Game): void {
+    update(game: Game): void {
         if (btnp(0))
             game.pushState(new PauseState());
 
@@ -48,7 +51,7 @@ export class GameplayState implements GameState {
         this.handlePlayerEnemyCollisions(game.ticks);
     }
 
-    public draw(_: Game): void {
+    draw(_: Game): void {
         clrs(0x00);
 
         this._starField.draw();
@@ -60,7 +63,7 @@ export class GameplayState implements GameState {
         this.drawScore();
     }
 
-    public exit(_: Game): void {
+    exit(_: Game): void {
         closestream(0);
         freesnd(1);
         freesnd(2);
@@ -72,6 +75,8 @@ export class GameplayState implements GameState {
                 this._explosionPool.create(enemy.x, enemy.y, ticks);
                 this._enemyPool.destroy(enemy);
                 this._score++;
+
+                play(ExplosionSound, 0, 80);
             }
         }
     }
@@ -81,6 +86,8 @@ export class GameplayState implements GameState {
             if (isColliding(this._player, enemy)) {
                 this._explosionPool.create(enemy.x, enemy.y, ticks);
                 this._enemyPool.destroy(enemy);
+
+                play(ExplosionSound, 0, 80);
             }
         }
     }

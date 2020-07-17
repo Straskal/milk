@@ -51,9 +51,10 @@ export class Player implements ICollidable {
 
     private attack(ticks: number, bulletPool: BulletPool): void {
         if (btn(5) && ticks > this.bulletTimer) {
-            play(1, 1, 50);
             bulletPool.create(this.x, this.y, -3, 2, CollisionType.ENEMY);
             this.bulletTimer = ticks + this.ATTACK_BUFFER;
+
+            play(1, 1, 50);
         }
     }
 }

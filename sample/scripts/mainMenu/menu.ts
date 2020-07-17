@@ -1,5 +1,9 @@
 import { Game } from "../game";
-import { IntroState } from "../intro/state";
+import { actions, ActionContext } from "../intro/actions";
+import { CinematicState } from "../common/cinematic";
+import { StarField } from "../common/starField";
+import { TacoStand } from "../common/tacoStand";
+import { GameplayState } from "../gameplay/state";
 
 interface MenuItem {
     text: string,
@@ -13,8 +17,16 @@ export class Menu {
         {
             text: "play",
             execute: (game: Game) => {
+                let introCinematicContext = {
+                    game: game,
+                    starField: new StarField(0.1),
+                    tacoStand: new TacoStand()
+                };
+
                 game.popState();
-                game.pushState(new IntroState());
+                game.pushState(new CinematicState<ActionContext>(
+                    introCinematicContext, actions, new GameplayState()
+                ));
             }
         },
         {
