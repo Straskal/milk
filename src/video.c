@@ -169,36 +169,37 @@ static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, i
   int width = w * scale;
   int height = h * scale;
   int xRatio = FLOOR((w << 16) / width + 0.5);
-  int yRatio = FLOOR((w << 16) / width + 0.5);
+  int yRatio = FLOOR((h << 16) / height + 0.5);
 
-  bool isXFlipped = IS_BIT_SET(flip, 1);
-  bool isYFlipped = IS_BIT_SET(flip, 2);
-  int xPixelStart = isXFlipped ? width - 1 : 0;
-  int yPixelStart = isYFlipped ? height - 1 : 0;
+  bool xFlip = IS_BIT_SET(flip, 1);
+  bool yFlip = IS_BIT_SET(flip, 2);
 
-  int xStep = isXFlipped ? -1 : 1;
-  int yStep = isYFlipped ? -1 : 1;
+  int xPixelStart = xFlip ? width - 1 : 0;
+  int yPixelStart = yFlip ? height - 1 : 0;
+  int xStep = xFlip ? -1 : 1;
+  int yStep = yFlip ? -1 : 1;
 
-  int xPixel, yPixel, xFramebuffer, yFramebuffer;
+  int xSource;
+  int ySource;
+  int xDest;
+  int yDest;
 
-  for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yStep)
+  for (yDest = y, ySource = yPixelStart; yDest < y + height; yDest++, ySource += yStep)
   {
-    for (xFramebuffer = x, xPixel = xPixelStart; xFramebuffer < x + width; xFramebuffer++, xPixel += xStep)
+    for (xDest = x, xSource = xPixelStart; xDest < x + width; xDest++, xSource += xStep)
     {
-      int xNearest = (xPixel * xRatio) >> 16;
-      int yNearest = (yPixel * yRatio) >> 16;
+      int xNearest = (xSource * xRatio) >> 16;
+      int yNearest = (ySource * yRatio) >> 16;
 
       Color32 col = pixels[yNearest * pitch + xNearest];
 
       if (col != video->colorKey)
-        blitPixel(video, xFramebuffer, yFramebuffer, color != NULL ? *color : col);
+        blitPixel(video, xDest, yDest, color != NULL ? *color : col);
     }
   }
 }
 
 #define SPRSHEET_COLUMNS ((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
-#define SPRSHEET_ROW_SIZE ((int)(SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE))
-#define SPRSHEET_POS(x, y) (y * SPRSHEET_ROW_SIZE + x * SPRITE_SQRSIZE)
 
 void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 flip)
 {
@@ -208,8 +209,10 @@ void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 
     int height = h * SPRITE_SQRSIZE;
     int row = FLOOR(id / SPRSHEET_COLUMNS);
     int col = FLOOR(id % SPRSHEET_COLUMNS);
+    int yPixel = row * SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE;
+    int xPixel = col * SPRITE_SQRSIZE;
 
-    Color32 *pixels = &video->spriteSheet[SPRSHEET_POS(col, row)];
+    Color32 *pixels = &video->spriteSheet[yPixel + xPixel];
 
     blitRect(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, NULL);
   }
@@ -271,11 +274,10 @@ void blitFont(Video *video, int id, int x, int y, const char *str, int scale, Co
         {
           int row = FLOOR((curr - 33) / FONT_COLUMNS);
           int col = FLOOR((curr - 33) % FONT_COLUMNS);
+          int yPixel = row * FONT_WIDTH * FONT_CHAR_HEIGHT;
+          int xPixel = col * FONT_CHAR_WIDTH;
 
-          int yy = row * FONT_WIDTH * FONT_CHAR_HEIGHT;
-          int xx = col * FONT_CHAR_WIDTH;
-
-          Color32 *pixels = &fontPixels[yy + xx];
+          Color32 *pixels = &fontPixels[yPixel + xPixel];
 
           blitRect(video, pixels, xCurrent, yCurrent, FONT_CHAR_WIDTH, FONT_CHAR_HEIGHT, FONT_WIDTH, scale, 0, &color);
 

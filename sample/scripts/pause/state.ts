@@ -19,12 +19,12 @@ export class PauseState implements GameState {
         if (btnp(0))
             game.popState(); // Pop self.
 
-        this._tacoStand.update(game.ticks, false);
+        this._tacoStand.update(game.ticks);
     }
 
     public draw(_: Game): void {
         this.drawOverlay();
-        this._tacoStand.draw(false);
+        this._tacoStand.draw();
 
         const paused = "paused";
         const pausedLength = string.len(paused);

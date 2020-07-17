@@ -1,9 +1,17 @@
-const SMOKE_START_FRAME = 31;
-const SMOKE_NUM_FRAME = 4;
-const SMOKE_ANIM_TIMER = 20;
-const PERSON_START_FRAME = 192;
-const PERSON_NUM_FRAME = 2;
-const PERSON_ANIM_TIMER = 10;
+const SmokeStartFrame = 31;
+const SmokeNumFrames = 4;
+const SmokeAnimationTimer = 20;
+const NumSmokeForCloud = 20;
+
+const PersonStartFrame = 192;
+const PersonNumFrames = 2;
+const PersonAnimationTimer = 10;
+const DeadPersonFrame = 195;
+const NumPeople = 3;
+
+const TacoStandLowerHalf = 209;
+const TacoStandUpperHalf = 160;
+const TacoStandUpperHalfDestroyed = 164;
 
 interface Smoke {
     x: number;
@@ -23,25 +31,24 @@ interface Person {
 
 export class TacoStand {
 
-    private _smokeFrame = SMOKE_START_FRAME;
-    private _smokePosition = 20;
-    private _bigSmokeFrames: Smoke[] = [];
+    private _tacoStandUpperHalfSprite = TacoStandUpperHalf;
+    private _chimneySmoke: Smoke[] = [];
+    private _smokeClouds: Smoke[] = [];
     private _people: Person[] = [];
+    private _deadPeoplePositions: number[] = [];
 
     constructor() {
-        for (let i = 0; i < 20; i++){
-            this._bigSmokeFrames[i] = {
-                x: math.random(15, 40),
-                y: math.random(180, 190),
-                frame: math.random(SMOKE_START_FRAME, SMOKE_START_FRAME + SMOKE_NUM_FRAME - 1),
-                timer: 0
-            }
-        }
+        this._chimneySmoke.push({
+            x: 0,
+            y: 0,
+            frame: SmokeStartFrame,
+            timer: 0
+        });
 
-        for (let i = 0; i < 3; i++){
+        for (let i = 0; i < NumPeople; i++){
             this._people[i] = {
                 x: math.random(60, 176),
-                frame: math.random(PERSON_START_FRAME, PERSON_START_FRAME + PERSON_NUM_FRAME - 1),
+                frame: math.random(PersonStartFrame, PersonStartFrame + PersonNumFrames - 1),
                 timer: math.random(0, 20),
                 alive: true,
                 direction: i % 2 == 0 ? -1 : 1,
@@ -50,95 +57,81 @@ export class TacoStand {
         }
     }
 
-    public init(ticks: number): void {
-        for (let i = 0; i < 20; i++){
-            this._bigSmokeFrames[i].timer = ticks + math.random(0, SMOKE_ANIM_TIMER);
-        }
-    }
-
-    public update(ticks: number, isEverythingFine: boolean = true): void {
-        if (isEverythingFine)
-            this.updateEverythingIsFine(ticks);
-        else
-            this.updateEverythingIsNotFine(ticks);
-    }
-
-    public draw(isEverythingFine: boolean = true): void {
-        if (isEverythingFine)
-            this.drawEverythingIsFine();
-        else
-            this.drawEverythingIsNotFine();
-    }
-
-    public panic(): void {
+    panic(): void {
         for (const person of this._people)
             person.speed = 1.5;
     }
 
-    private updateEverythingIsFine(ticks: number): void {
-        this.animateSmoke(ticks);
-        this.animatePeople(ticks);
+    destroy(): void {
+        this._tacoStandUpperHalfSprite = TacoStandUpperHalfDestroyed;
+
+        for (let i = 0; i < NumSmokeForCloud; i++){
+            this._smokeClouds[i] = {
+                x: math.random(15, 40),
+                y: math.random(180, 190),
+                frame: math.random(SmokeStartFrame, SmokeStartFrame + SmokeNumFrames - 1),
+                timer: 0
+            }
+        }
+
+        for (const person of this._people) {
+            this._deadPeoplePositions.push(person.x);
+        }
+
+        this._people = [];
+        this._chimneySmoke = [];
     }
 
-    private updateEverythingIsNotFine(ticks: number): void {
-        this.animateBigSmoke(ticks);
-    }
+    update(ticks: number): void {
+        for (const chimneySmoke of this._chimneySmoke) {
+            if (ticks % 12 == 6) {
+                chimneySmoke.frame++;
+                chimneySmoke.x = math.random(17, 24);
 
-    private animateBigSmoke(ticks: number): void {
-        for (const smoke of this._bigSmokeFrames) {
+                if (chimneySmoke.frame > SmokeStartFrame + SmokeNumFrames)
+                    chimneySmoke.frame = SmokeStartFrame;
+            }
+        }
+
+        for (const smoke of this._smokeClouds) {
             if (ticks > smoke.timer) {
                 smoke.x = math.random(15, 40);
 
-                if (++smoke.frame > SMOKE_START_FRAME + SMOKE_NUM_FRAME)
-                    smoke.frame = SMOKE_START_FRAME;
+                if (++smoke.frame > SmokeStartFrame + SmokeNumFrames)
+                    smoke.frame = SmokeStartFrame;
 
-                smoke.timer = ticks + SMOKE_ANIM_TIMER;
+                smoke.timer = ticks + SmokeAnimationTimer;
             }
         }
-    }
 
-    private animateSmoke(ticks: number): void {
-        if (ticks % 12 == 6) {
-            this._smokeFrame++;
-            this._smokePosition = math.random(17, 24);
-
-            if (this._smokeFrame > SMOKE_START_FRAME + SMOKE_NUM_FRAME)
-                this._smokeFrame = SMOKE_START_FRAME;
-        }
-    }
-
-    private animatePeople(ticks: number): void {
         for (const person of this._people) {
             person.x += person.direction * person.speed;
             if (ticks > person.timer) {
                 if (person.x < 20 || person.x > 200)
                     person.direction *= -1;
 
-                if (++person.frame > PERSON_START_FRAME + PERSON_NUM_FRAME)
-                    person.frame = PERSON_START_FRAME;
+                if (++person.frame > PersonStartFrame + PersonNumFrames)
+                    person.frame = PersonStartFrame;
 
-                person.timer = ticks + PERSON_ANIM_TIMER;
+                person.timer = ticks + PersonAnimationTimer;
             }
         }
     }
 
-    private drawEverythingIsFine(): void {
-        spr(this._smokeFrame, this._smokePosition, 183);
-        spr(209, 16, 176, 16, 3);
-        spr(160, 16, 176, 4, 2);
+    draw(): void {
+        spr(TacoStandLowerHalf, 16, 176, 16, 3);
+        spr(this._tacoStandUpperHalfSprite, 16, 176, 4, 2);
 
-        for (const person of this._people)
+        for (const person of this._people) {
             spr(person.frame, person.x, 200, 1, 1, 1, person.direction == -1 ? 0 : 1);
-    }
+        }
 
-    private drawEverythingIsNotFine(): void {
-        for (const smoke of this._bigSmokeFrames)
+        for (const person of this._deadPeoplePositions) {
+            spr(DeadPersonFrame, person, 204);
+        }
+
+        for (const smoke of this._smokeClouds) {
             spr(smoke.frame, smoke.x, smoke.y);
-
-        spr(209, 16, 176, 16, 3);
-        spr(164, 16, 176, 4, 2);
-
-        for (const person of this._people)
-            spr(195, person.x, 204, 1, 1, 1, person.direction == -1 ? 0 : 1);
+        }
     }
 }

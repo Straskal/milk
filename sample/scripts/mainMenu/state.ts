@@ -24,7 +24,7 @@ export class MainMenuState implements GameState {
 
     public update(game: Game): void {
         this._starField.update();
-        this._tacoStand.update(game.ticks, true);
+        this._tacoStand.update(game.ticks);
         this._menu.update(game);
     }
 
@@ -32,7 +32,7 @@ export class MainMenuState implements GameState {
         clrs(0x00);
 
         this._starField.draw();
-        this._tacoStand.draw(true);
+        this._tacoStand.draw();
         this._menu.draw(256 / 2, 150, game.ticks);
 
         this.drawTitle();

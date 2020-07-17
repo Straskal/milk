@@ -51,7 +51,7 @@ class Explosions implements Action<ActionContext> {
     }
     update(context: ActionContext): boolean {
         context.starField.update();
-        context.tacoStand.update(context.game.ticks, true);
+        context.tacoStand.update(context.game.ticks);
         this._explosionPool.update(context.game);
         if (context.game.ticks % 15 == 0) {
             this._explosionPool.create(math.random(10, 200), math.random(170, 200), context.game.ticks);
@@ -63,7 +63,7 @@ class Explosions implements Action<ActionContext> {
     draw(context: ActionContext): void {
         clrs();
         context.starField.draw();
-        context.tacoStand.draw(true);
+        context.tacoStand.draw();
         this._explosionPool.draw();
     }
     exit(t: ActionContext): void {}
@@ -75,16 +75,17 @@ class TacoStandDestroyedDelay implements Action<ActionContext> {
 
     enter(context: ActionContext): void {
         this._timer = context.game.ticks + 100;
+        context.tacoStand.destroy();
     }
     update(context: ActionContext): boolean {
         context.starField.update();
-        context.tacoStand.update(context.game.ticks, false);
+        context.tacoStand.update(context.game.ticks);
         return context.game.ticks > this._timer;
     }
     draw(context: ActionContext): void {
         clrs();
         context.starField.draw();
-        context.tacoStand.draw(false);
+        context.tacoStand.draw();
     }
     exit(t: ActionContext): void {}
 }
@@ -97,14 +98,14 @@ class SatanEnter implements Action<ActionContext> {
     update(context: ActionContext): boolean {
         context.starField.update();
         this._satanPosition += 1;
-        context.tacoStand.update(context.game.ticks, false);
+        context.tacoStand.update(context.game.ticks);
 
         return this._satanPosition >= 100;
     }
     draw(context: ActionContext): void {
         clrs();
         context.starField.draw();
-        context.tacoStand.draw(false);
+        context.tacoStand.draw();
         spr(49, 128, this._satanPosition);
     }
     exit(t: ActionContext): void {}
@@ -122,13 +123,13 @@ class HailSatanAction implements Action<ActionContext> {
     update(context: ActionContext): boolean {
         context.starField.update();
         this._satanFrame = context.game.ticks % 12 > 6 ? 49 : 50;
-        context.tacoStand.update(context.game.ticks, false);
+        context.tacoStand.update(context.game.ticks);
         return context.game.ticks > this._timer;
     }
     draw(context: ActionContext): void {
         clrs();
         context.starField.draw();
-        context.tacoStand.draw(false);
+        context.tacoStand.draw();
         spr(this._satanFrame, 128, 100);
         font(0, 20, 50, "Hail Satan, motherfuckers!!!");
     }
@@ -144,14 +145,14 @@ class ScreenWipeAction implements Action<ActionContext> {
     update(context: ActionContext): boolean {
         context.starField.update();
         this._satanFrame = context.game.ticks % 12 > 6 ? 49 : 50;
-        context.tacoStand.update(context.game.ticks, false);
+        context.tacoStand.update(context.game.ticks);
         this._rectPos -= 2;
         return this._rectPos == 0;
     }
     draw(context: ActionContext): void {
         clrs();
         context.starField.draw();
-        context.tacoStand.draw(false);
+        context.tacoStand.draw();
         spr(this._satanFrame, 128, 100);
         rectfill(this._rectPos, 0, 265 - this._rectPos, 224, 0x00);
     }
