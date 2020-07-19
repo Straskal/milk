@@ -42,7 +42,7 @@ class Free implements Action<ActionContext> {
 
 class TacoStandExplosions implements Action<ActionContext> {
 
-    private _explosions = new Explosions();
+    private _explosions = new Explosions({ explosionSound: ExplosionSound });
     private _timer = 0;
 
     enter(context: ActionContext): void {

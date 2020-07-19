@@ -32,7 +32,7 @@ export class Explosions {
         }
     }
 
-    public update(game: Game): void {
+    update(game: Game): void {
         const len = this._liveExplosions.length;
 
         for (let i = len; i > 0; i--) {
@@ -50,13 +50,13 @@ export class Explosions {
         }
     }
 
-    public draw(): void {
+    draw(): void {
         for (const explosion of this._liveExplosions) {
             spr(explosion.frame, explosion.x - 8, explosion.y - 8);
         }
     }
 
-    public create(x: number, y: number, ticks: number): void {
+    create(x: number, y: number, ticks: number): void {
         const explosion = this._pool.pop();
 
         if (explosion) {

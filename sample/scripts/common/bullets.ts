@@ -10,6 +10,10 @@ interface Bullet extends ICollidable {
     direction: number;
 }
 
+function isOutOfBounds(bullet: Bullet): boolean {
+    return bullet.x < 0 || bullet.x > 256 || bullet.y < 0 || bullet.y > 224;
+}
+
 export class Bullets {
 
     private readonly _pool: Bullet[] = [];
@@ -39,7 +43,7 @@ export class Bullets {
 
             bullet.y += bullet.direction;
 
-            if (this.isOutOfBounds(bullet)) {
+            if (isOutOfBounds(bullet)) {
                 this._pool.push(bullet);
                 this._liveBullets.splice(i - 1, 1);
             }
@@ -80,9 +84,5 @@ export class Bullets {
         }
 
         return false;
-    }
-
-    private isOutOfBounds(bullet: Bullet) {
-        return bullet.x < 0 || bullet.x > 256 || bullet.y < 0 || bullet.y > 224;
     }
 }

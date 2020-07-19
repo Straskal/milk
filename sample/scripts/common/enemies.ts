@@ -12,6 +12,10 @@ export interface Enemy extends ICollidable {
     health: number;
 }
 
+function isOutOfBounds(enemy: Enemy) {
+    return enemy.y > 224;
+}
+
 export class Enemies {
 
     private readonly _pool: Enemy[] = [];
@@ -44,7 +48,7 @@ export class Enemies {
             enemy.x = enemy.rotation * math.sin(game.ticks / 20) + enemy.xMove
             enemy.y = enemy.rotation * math.cos(game.ticks / 20) + ++enemy.yMove
 
-            if (this.isOutOfBounds(enemy))
+            if (isOutOfBounds(enemy))
                 this.destroy(enemy);
         }
     }
@@ -60,9 +64,5 @@ export class Enemies {
         enemy.xMove = math.random(256);
         enemy.yMove = -math.random(100);
         enemy.rotation = math.random(20);
-    }
-
-    private isOutOfBounds(enemy: Enemy) {
-        return enemy.y > 224;
     }
 }
