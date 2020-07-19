@@ -57,6 +57,7 @@ export class Game {
         this._ticks++;
 
         const fps = this.ticks / (os.clock() - this._time);
+        blend(1);
         font(0, 190, 10, string.format("fps %.0f", fps));
     }
 
