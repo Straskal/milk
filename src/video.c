@@ -15,11 +15,8 @@
 #define GC(color) ((color & GMASK) >> 8)
 #define BC(color) ((color & BMASK))
 
-#define BLENDC(c1, c2)\
-(MIN((c1 + c2) / 2, 255))
-
-#define ADDC(c1, c2)\
-(MIN((c1 + c2), 255))
+#define BLENDC(c1, c2) (MIN((c1 + c2) / 2, 255))
+#define ADDC(c1, c2) (MIN((c1 + c2), 255))
 
 #define BLEND_COLORS(col1, col2)\
 ((BLENDC(RC(col1), RC(col2)) << 16) | (BLENDC(GC(col1), GC(col2)) << 8) | BLENDC(BC(col1), BC(col2)))
