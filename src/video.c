@@ -19,10 +19,10 @@
 #define ADDC(c1, c2) (MIN((c1 + c2), 255))
 
 #define AVERAGE_COLORS(col1, col2)\
-((AVERAGEC(rc(col1), rc(col2)) << 16) | (AVERAGEC(gc(col1), gc(col2)) << 8) | AVERAGEC(bc(col1), bc(col2)))
+  ((AVERAGEC(rc(col1), rc(col2)) << 16) | (AVERAGEC(gc(col1), gc(col2)) << 8) | AVERAGEC(bc(col1), bc(col2)))
 
 #define ADD_COLORS(col1, col2)\
-((ADDC(rc(col1), rc(col2)) << 16) | (ADDC(gc(col1), gc(col2)) << 8) | ADDC(bc(col1), bc(col2)))
+  ((ADDC(rc(col1), rc(col2)) << 16) | (ADDC(gc(col1), gc(col2)) << 8) | ADDC(bc(col1), bc(col2)))
 
 void initializeVideo(Video *video)
 {
