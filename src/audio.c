@@ -67,17 +67,17 @@ void loadSound(Audio *audio, int soundId, const char *filePath)
 
 void unloadSound(Audio *audio, int soundId)
 {
-  if (soundId >= 0 && soundId < MAX_LOADED_SOUNDS)
+  audio->lock();
+
+  SoundData *sounds = audio->sounds;
+
+  for (int i = 0; i < MAX_LOADED_SOUNDS; i++)
   {
-    audio->lock();
-
-    SoundData *soundData = &audio->sounds[soundId];
-
-    if (soundData->samples != NULL)
-      lockedUnloadSound(soundData, audio->soundSlots);
-
-    audio->unlock();
+    if ((soundId == -1 || soundId == i) && sounds[i].samples != NULL)
+      lockedUnloadSound(&sounds[i], audio->soundSlots);
   }
+
+  audio->unlock();
 }
 
 void playSound(Audio *audio, int soundId, int slotId, int volume)
@@ -177,23 +177,23 @@ void openStream(Audio *audio, int streamId, const char *filePath)
 
 void closeStream(Audio *audio, int streamId)
 {
-  if (streamId >= 0 && streamId < MAX_OPEN_STREAMS)
+  audio->lock();
+
+  SoundStream *streams = audio->streams;
+
+  for (int i = 0; i < MAX_OPEN_STREAMS; i++)
   {
-    audio->lock();
-
-    SoundStream *soundStream = &audio->streams[streamId];
-
-    if (soundStream->data.file != NULL)
+    if ((streamId == -1 || streamId == i) && streams[i].data.file != NULL)
     {
-      closeWavStream(&soundStream->data);
+      closeWavStream(&streams[i].data);
 
-      soundStream->state = STOPPED;
-      soundStream->volume = 0;
-      soundStream->loop = false;
+      streams[i].state = STOPPED;
+      streams[i].volume = 0;
+      streams[i].loop = false;
     }
-
-    audio->unlock();
   }
+
+  audio->unlock();
 }
 
 void playStream(Audio *audio, int streamId, int volume, bool loop)

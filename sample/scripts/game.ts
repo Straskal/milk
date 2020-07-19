@@ -1,4 +1,4 @@
-import { MainMenuState } from "./mainMenu/state";
+import { SplashState } from "./splash/state";
 
 const GameFont = "art/font.bmp";
 
@@ -32,7 +32,7 @@ export class Game {
     public init(): void {
         loadfont(0, GameFont);
         this._time = os.clock();
-        this.pushState(new MainMenuState());
+        this.pushState(new SplashState());
     }
 
     public update(): void {

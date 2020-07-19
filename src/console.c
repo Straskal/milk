@@ -24,6 +24,8 @@ static void cmdUnload(Console *console, Milk *milk, char *argument)
 	UNUSED(argument);
 
 	unloadCode(milk);
+	unloadSound(&milk->audio, -1);
+	closeStream(&milk->audio, -1);
 	console->isGameInitialized = false;
 
 	LOG_INFO("Game has been unloaded");
@@ -54,10 +56,10 @@ typedef struct
 } Command;
 
 static Command commands[] =
-	{
-		{"unload", cmdUnload},
-		{"clear", cmdClear},
-		{"quit", cmdQuit},
+{
+	{"unload", cmdUnload},
+	{"clear", cmdClear},
+	{"quit", cmdQuit},
 };
 
 static void resetCandidate(Console *console)
