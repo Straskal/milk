@@ -206,7 +206,7 @@ void playStream(Audio *audio, int streamId, int volume, bool loop)
 
     if (soundStream->data.file != NULL)
     {
-      moveWavStreamToStart(&soundStream->data);
+      wavStreamSeekStart(&soundStream->data);
 
       soundStream->state = PLAYING;
       soundStream->volume = CLAMP(volume, 0, MAX_VOLUME);
@@ -301,7 +301,7 @@ void mixSamplesIntoStream(Audio *audio, s16 *stream, int numSamples)
       if (streamData->channelCount == 1)
         numSamples /= 2;
 
-      bool streamFinished = readFromWavStream(&soundStreams[i].data, numSamples, soundStreams[i].loop);
+      bool streamFinished = wavStreamRead(&soundStreams[i].data, numSamples, soundStreams[i].loop);
       mixSamples(stream, streamData->chunk, streamData->sampleCount, soundStreams[i].data.channelCount, soundStreams[i].volume);
 
       if (streamFinished)

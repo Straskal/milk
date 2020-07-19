@@ -154,7 +154,7 @@ void closeWavStream(SoundStreamData *streamData)
   streamData->end = 0;
 }
 
-bool readFromWavStream(SoundStreamData *streamData, int numSamples, bool loop)
+bool wavStreamRead(SoundStreamData *streamData, int numSamples, bool loop)
 {
   long totalBytesRead = 0;
   long requestedBytes = numSamples * (long)sizeof(s16);
@@ -177,7 +177,7 @@ bool readFromWavStream(SoundStreamData *streamData, int numSamples, bool loop)
   return finished && !loop;
 }
 
-void moveWavStreamToStart(SoundStreamData *streamData)
+void wavStreamSeekStart(SoundStreamData *streamData)
 {
   fseek(streamData->file, streamData->start, SEEK_SET);
   streamData->position = streamData->start;
