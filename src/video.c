@@ -15,11 +15,11 @@
 #define gc(color) ((color & GMASK) >> 8)
 #define bc(color) ((color & BMASK))
 
-#define BLENDC(c1, c2) (MIN((c1 + c2) / 2, 255))
+#define AVERAGEC(c1, c2) (MIN((c1 + c2) / 2, 255))
 #define ADDC(c1, c2) (MIN((c1 + c2), 255))
 
-#define BLEND_COLORS(col1, col2)\
-((BLENDC(rc(col1), rc(col2)) << 16) | (BLENDC(gc(col1), gc(col2)) << 8) | BLENDC(bc(col1), bc(col2)))
+#define AVERAGE_COLORS(col1, col2)\
+((AVERAGEC(rc(col1), rc(col2)) << 16) | (AVERAGEC(gc(col1), gc(col2)) << 8) | AVERAGEC(bc(col1), bc(col2)))
 
 #define ADD_COLORS(col1, col2)\
 ((ADDC(rc(col1), rc(col2)) << 16) | (ADDC(gc(col1), gc(col2)) << 8) | ADDC(bc(col1), bc(col2)))
@@ -223,7 +223,7 @@ static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w,
         switch(blendMode)
         {
           case Average:
-            col = BLEND_COLORS(col, color);
+            col = AVERAGE_COLORS(col, color);
             break;
           case Additive:
             col = ADD_COLORS(col, color);
