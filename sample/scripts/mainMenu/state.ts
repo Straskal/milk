@@ -35,7 +35,6 @@ export class MainMenuState implements GameState {
         this._tacoStand.draw();
         this._menu.draw(256 / 2, 150, game.ticks);
 
-        blend(0);
         this.drawTitle();
         this.drawSubtitle(game.ticks);
     }

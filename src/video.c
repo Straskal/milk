@@ -59,7 +59,6 @@ void loadFont(Video *video, int id, const char *path)
 void resetDrawState(Video *video)
 {
   video->colorKey = 0x00;
-  video->blendMode = Additive;
 
   video->clipRect = (Rect)
   {
@@ -79,11 +78,6 @@ void setClippingRect(Video *video, int x, int y, int w, int h)
     .top = CLAMP(y, 0, FRAMEBUFFER_HEIGHT),
     .bottom = CLAMP(y + h, 0, FRAMEBUFFER_HEIGHT)
   };
-}
-
-void setBlendMode(Video *video, BlendMode mode)
-{
-  video->blendMode = mode;
 }
 
 #define FRAMEBUFFER_POS(x, y) ((FRAMEBUFFER_WIDTH * y) + x)
@@ -185,10 +179,8 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
   }
 }
 
-static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, Color32 color)
+static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, Color32 color, ColorMode mode)
 {
-  BlendMode blendMode = video->blendMode;
-
   scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
 
   int width = w * scale;
@@ -220,7 +212,7 @@ static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w,
 
       if (col != video->colorKey)
       {
-        switch(blendMode)
+        switch(mode)
         {
           case Average:
             col = AVERAGE_COLORS(col, color);
@@ -228,7 +220,7 @@ static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w,
           case Additive:
             col = ADD_COLORS(col, color);
             break;
-          case None:
+          case Solid:
             col = color;
             break;
           default:
@@ -243,7 +235,7 @@ static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w,
 
 #define SPRSHEET_COLUMNS ((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
 
-void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 flip)
+void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 flip, Color32 color, ColorMode mode)
 {
   if (id >= 0 && id < SPRITE_SHEET_SQRSIZE)
   {
@@ -254,7 +246,7 @@ void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 
 
     Color32 *pixels = &video->spriteSheet[yPixel + xPixel];
 
-    blitBuffer(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, 0x00);
+    blitBuffer(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, color, mode);
   }
 }
 
@@ -317,7 +309,7 @@ void blitFont(Video *video, int id, int x, int y, const char *str, int scale, Co
 
           Color32 *pixels = &fontPixels[yPixel + xPixel];
 
-          blitBuffer(video, pixels, xCurrent, yCurrent, FONT_CHAR_WIDTH, FONT_CHAR_HEIGHT, FONT_WIDTH, scale, 0, color);
+          blitBuffer(video, pixels, xCurrent, yCurrent, FONT_CHAR_WIDTH, FONT_CHAR_HEIGHT, FONT_WIDTH, scale, 0, color, Solid);
 
           xCurrent += (FONT_CHAR_WIDTH) * scale;
         }

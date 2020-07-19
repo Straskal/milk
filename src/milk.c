@@ -67,11 +67,6 @@ static int l_clip(lua_State *L)
 	return 0;
 }
 
-static int l_blend(lua_State *L)
-{
-	setBlendMode(&globalMilk->video, (BlendMode)lua_tointeger(L, 1));
-}
-
 static int l_clrs(lua_State *L)
 {
 	clearFramebuffer(&globalMilk->video, (Color32)luaL_optinteger(L, 1, 0x000000));
@@ -133,7 +128,9 @@ static int l_spr(lua_State *L)
 		(int)luaL_optinteger(L, 4, 1),
 		(int)luaL_optinteger(L, 5, 1),
 		(int)luaL_optnumber(L, 6, 1.0),
-		(u8)luaL_optinteger(L, 7, 0)
+		(u8)luaL_optinteger(L, 7, 0),
+		(Color32)luaL_optinteger(L, 8, 0x00),
+		(ColorMode)luaL_optinteger(L, 9, Additive)
 	);
 	return 0;
 }
@@ -146,7 +143,7 @@ static int l_font(lua_State *L)
 		(int)floor(lua_tonumber(L, 3)),
 		lua_tostring(L, 4),
 		(int)floor(luaL_optinteger(L, 5, 1)),
-		(Color32)floor(luaL_optinteger(L, 6, 0x00))
+		(Color32)floor(luaL_optinteger(L, 6, 0xffffff))
 	);
 	return 1;
 }
@@ -291,7 +288,6 @@ static void pushApi(lua_State *L)
 	pushApiFunction(L, "loadspr", l_loadspr);
 	pushApiFunction(L, "loadfont", l_loadfont);
 	pushApiFunction(L, "clip", l_clip);
-	pushApiFunction(L, "blend", l_blend);
 	pushApiFunction(L, "clrs", l_clrs);
 	pushApiFunction(L, "pset", l_pset);
 	pushApiFunction(L, "line", l_line);

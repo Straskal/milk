@@ -23,10 +23,10 @@ typedef u32 Color32;
 
 typedef enum
 {
-  None,
   Additive,
   Average,
-} BlendMode;
+  Solid,
+} ColorMode;
 
 typedef struct
 {
@@ -43,7 +43,6 @@ typedef struct
   Color32 fonts[FONTS_MAX][FONT_WIDTH * FONT_HEIGHT];
   Color32 embeddedFont[FONT_WIDTH * FONT_HEIGHT];
   Color32 colorKey;
-  BlendMode blendMode;
   Rect clipRect;
 
   void (*loadBMP)(const char *, Color32 *, size_t);
@@ -55,13 +54,12 @@ void loadSpriteSheet(Video *video, const char *path);
 void loadFont(Video *video, int id, const char *path);
 void resetDrawState(Video *video);
 void setClippingRect(Video *video, int x, int y, int w, int h);
-void setBlendMode(Video *video, BlendMode mode);
 void clearFramebuffer(Video *video, Color32 color);
 void blitPixel(Video *video, int x, int y, Color32 color);
 void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color);
 void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color);
 void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color);
-void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 flip);
+void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 flip, Color32 color, ColorMode mode);
 int fontWidth(const char *text);
 void blitFont(Video *video, int id, int x, int y, const char *str, int scale, Color32 color);
 
