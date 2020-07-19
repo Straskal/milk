@@ -188,7 +188,7 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
   }
 }
 
-static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 color)
+static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, Color32 color)
 {
   BlendMode blendMode = video->blendMode;
 
