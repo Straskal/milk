@@ -11,6 +11,8 @@ export class SplashState implements GameState {
     drawBelow = false;
 
     enter(game: Game): void {
+        loadsnd(0, "sounds/splash.wav");
+        play(0, 0, 128);
         this._timer = game.ticks + NUMTICKS;
     }
     update(game: Game): void {
@@ -21,8 +23,9 @@ export class SplashState implements GameState {
     }
     draw(_: Game): void {
         clrs();
-        font(0, 10, 10, "it'sgood! games", 2);
+        font(0, 10, 50, "it'sgood! games", 2);
     }
     exit(_: Game): void {
+        freesnd(0);
     }
 }
