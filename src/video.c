@@ -7,6 +7,26 @@
 #define MIN_SCALE 1
 #define MAX_SCALE 5
 
+#define RMASK 0x00ff0000
+#define GMASK 0x0000ff00
+#define BMASK 0x000000ff
+
+#define RC(color) ((color & RMASK) >> 16)
+#define GC(color) ((color & GMASK) >> 8)
+#define BC(color) ((color & BMASK))
+
+#define BLENDC(c1, c2)\
+(MIN((c1 + c2) / 2, 255))
+
+#define ADDC(c1, c2)\
+(MIN((c1 + c2), 255))
+
+#define BLEND_COLORS(col1, col2)\
+((BLENDC(RC(col1), RC(col2)) << 16) | (BLENDC(GC(col1), GC(col2)) << 8) | BLENDC(BC(col1), BC(col2)))
+
+#define ADD_COLORS(col1, col2)\
+((ADDC(RC(col1), RC(col2)) << 16) | (ADDC(GC(col1), GC(col2)) << 8) | ADDC(BC(col1), BC(col2)))
+
 void initializeVideo(Video *video)
 {
   Color32 embeddedFontData[] =
@@ -42,6 +62,7 @@ void loadFont(Video *video, int id, const char *path)
 void resetDrawState(Video *video)
 {
   video->colorKey = 0x00;
+  video->blendMode = Additive;
 
   video->clipRect = (Rect)
   {
@@ -61,6 +82,11 @@ void setClippingRect(Video *video, int x, int y, int w, int h)
     .top = CLAMP(y, 0, FRAMEBUFFER_HEIGHT),
     .bottom = CLAMP(y + h, 0, FRAMEBUFFER_HEIGHT)
   };
+}
+
+void setBlendMode(Video *video, BlendMode mode)
+{
+  video->blendMode = mode;
 }
 
 #define FRAMEBUFFER_POS(x, y) ((FRAMEBUFFER_WIDTH * y) + x)
@@ -162,8 +188,10 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
   }
 }
 
-static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 *color)
+static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 color)
 {
+  BlendMode blendMode = video->blendMode;
+
   scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
 
   int width = w * scale;
@@ -194,7 +222,24 @@ static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, i
       Color32 col = pixels[yNearest * pitch + xNearest];
 
       if (col != video->colorKey)
-        blitPixel(video, xDest, yDest, color != NULL ? *color : col);
+      {
+        switch(blendMode)
+        {
+          case Blend:
+            col = BLEND_COLORS(col, color);
+            break;
+          case Additive:
+            col = ADD_COLORS(col, color);
+            break;
+          case Solid:
+            col = color;
+            break;
+          default:
+            break;
+        }
+
+        blitPixel(video, xDest, yDest, col);
+      }
     }
   }
 }
@@ -207,14 +252,12 @@ void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 
   {
     int width = w * SPRITE_SQRSIZE;
     int height = h * SPRITE_SQRSIZE;
-    int row = FLOOR(id / SPRSHEET_COLUMNS);
-    int col = FLOOR(id % SPRSHEET_COLUMNS);
-    int yPixel = row * SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE;
-    int xPixel = col * SPRITE_SQRSIZE;
+    int yPixel = FLOOR(id / SPRSHEET_COLUMNS) * SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE;
+    int xPixel = FLOOR(id % SPRSHEET_COLUMNS) * SPRITE_SQRSIZE;
 
     Color32 *pixels = &video->spriteSheet[yPixel + xPixel];
 
-    blitRect(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, NULL);
+    blitBuffer(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, 0x00);
   }
 }
 
@@ -272,14 +315,12 @@ void blitFont(Video *video, int id, int x, int y, const char *str, int scale, Co
         break;
       default:
         {
-          int row = FLOOR((curr - 33) / FONT_COLUMNS);
-          int col = FLOOR((curr - 33) % FONT_COLUMNS);
-          int yPixel = row * FONT_WIDTH * FONT_CHAR_HEIGHT;
-          int xPixel = col * FONT_CHAR_WIDTH;
+          int yPixel = FLOOR((curr - 33) / FONT_COLUMNS) * FONT_WIDTH * FONT_CHAR_HEIGHT;
+          int xPixel = FLOOR((curr - 33) % FONT_COLUMNS) * FONT_CHAR_WIDTH;
 
           Color32 *pixels = &fontPixels[yPixel + xPixel];
 
-          blitRect(video, pixels, xCurrent, yCurrent, FONT_CHAR_WIDTH, FONT_CHAR_HEIGHT, FONT_WIDTH, scale, 0, &color);
+          blitBuffer(video, pixels, xCurrent, yCurrent, FONT_CHAR_WIDTH, FONT_CHAR_HEIGHT, FONT_WIDTH, scale, 0, color);
 
           xCurrent += (FONT_CHAR_WIDTH) * scale;
         }

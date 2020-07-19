@@ -9,6 +9,7 @@ declare function btnp(button: number): boolean;
 declare function loadspr(filePath: string): void;
 declare function loadfont(fontId: number, filePath: string): void;
 declare function clip(x: number, y: number, width: number, height: number): void;
+declare function blend(mode: 0 | 1 | 2): void;
 declare function clrs(color?: number): void;
 declare function pset(x: number, y: number, color: number): void;
 declare function line(x0: number, y0: number, x1: number, y1: number, color: number): void;

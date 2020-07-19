@@ -3,7 +3,7 @@ import { Game, GameState } from "../game";
 import { Menu } from "./menu";
 import { TacoStand } from "../common/tacoStand";
 
-const PRESENTED_BY = "Straskal's"
+const PRESENTED_BY = "It'sgood's"
 const TITLE = "STAR GAME";
 const SUBTITLE = "Return of The Bad Boiz";
 
@@ -35,6 +35,7 @@ export class MainMenuState implements GameState {
         this._tacoStand.draw();
         this._menu.draw(256 / 2, 150, game.ticks);
 
+        blend(2);
         this.drawTitle();
         this.drawSubtitle(game.ticks);
     }

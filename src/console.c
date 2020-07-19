@@ -315,6 +315,8 @@ static void getLogLines(Logs *logs, ConsoleLine *lines, int *numLines)
 
 static void drawLogLines(Milk *milk)
 {
+	setBlendMode(&milk->video, Solid);
+
 	ConsoleLine lines[MAX_LINES];
 	int numLines;
 
@@ -322,6 +324,8 @@ static void drawLogLines(Milk *milk)
 
 	for (int i = 0; i < numLines; i++)
 		blitFont(&milk->video, -1, 8, LOG_START_HEIGHT + ((8 + 2) * i), lines[i].text, 1, lines[i].color);
+
+	setBlendMode(&milk->video, Additive);
 }
 
 void drawConsole(Console *console, Milk *milk)

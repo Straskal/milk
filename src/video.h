@@ -21,7 +21,14 @@
 
 typedef u32 Color32;
 
-typedef struct rect
+typedef enum
+{
+  Additive,
+  Blend,
+  Solid
+} BlendMode;
+
+typedef struct
 {
   int top;
   int bottom;
@@ -29,13 +36,14 @@ typedef struct rect
   int right;
 } Rect;
 
-typedef struct video
+typedef struct
 {
   Color32 framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
   Color32 spriteSheet[SPRITE_SHEET_SQRSIZE * SPRITE_SHEET_SQRSIZE];
   Color32 fonts[FONTS_MAX][FONT_WIDTH * FONT_HEIGHT];
   Color32 embeddedFont[FONT_WIDTH * FONT_HEIGHT];
   Color32 colorKey;
+  BlendMode blendMode;
   Rect clipRect;
 
   void (*loadBMP)(const char *, Color32 *, size_t);
@@ -47,6 +55,7 @@ void loadSpriteSheet(Video *video, const char *path);
 void loadFont(Video *video, int id, const char *path);
 void resetDrawState(Video *video);
 void setClippingRect(Video *video, int x, int y, int w, int h);
+void setBlendMode(Video *video, BlendMode mode);
 void clearFramebuffer(Video *video, Color32 color);
 void blitPixel(Video *video, int x, int y, Color32 color);
 void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color);
