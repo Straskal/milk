@@ -23,9 +23,9 @@ typedef u32 Color32;
 
 typedef enum
 {
+  None,
   Additive,
-  Blend,
-  Solid
+  Average,
 } BlendMode;
 
 typedef struct

@@ -315,7 +315,7 @@ static void getLogLines(Logs *logs, ConsoleLine *lines, int *numLines)
 
 static void drawLogLines(Milk *milk)
 {
-	setBlendMode(&milk->video, Solid);
+	setBlendMode(&milk->video, None);
 
 	ConsoleLine lines[MAX_LINES];
 	int numLines;
