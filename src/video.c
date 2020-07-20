@@ -190,7 +190,7 @@ void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 
 }
 
 int fontWidth(const char *text) {
-  int currentWidth, width = 0;
+  int currentWidth = 0, width = 0;
   char curr;
   while ((curr = *text++)) {
     switch (curr) {
