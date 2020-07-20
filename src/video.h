@@ -21,23 +21,20 @@
 
 typedef u32 Color32;
 
-typedef enum
-{
+typedef enum {
   Additive,
   Average,
   Solid,
 } ColorMode;
 
-typedef struct
-{
+typedef struct {
   int top;
   int bottom;
   int left;
   int right;
 } Rect;
 
-typedef struct
-{
+typedef struct {
   Color32 framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
   Color32 spriteSheet[SPRITE_SHEET_SQRSIZE * SPRITE_SHEET_SQRSIZE];
   Color32 fonts[FONTS_MAX][FONT_WIDTH * FONT_HEIGHT];

@@ -16,22 +16,19 @@
 #define MAX_OPEN_STREAMS 2
 #define MAX_VOLUME 128
 
-typedef enum
-{
+typedef enum {
   STOPPED,
   PLAYING,
   PAUSED
 } SoundState;
 
-typedef struct
-{
+typedef struct {
   int channelCount;
 	int sampleCount;
 	s16 *samples;
 } SoundData;
 
-typedef struct
-{
+typedef struct {
 	SoundData *soundData;
 	SoundState state;
 	int volume;
@@ -39,8 +36,7 @@ typedef struct
   s16 *position;
 } SoundSlot;
 
-typedef struct
-{
+typedef struct {
   long position;
   long start;
   long end;
@@ -50,16 +46,14 @@ typedef struct
   s16 *chunk;
 } SoundStreamData;
 
-typedef struct
-{
+typedef struct {
   SoundStreamData data;
   SoundState state;
   int volume;
   bool loop;
 } SoundStream;
 
-typedef struct
-{
+typedef struct {
 	SoundData sounds[MAX_LOADED_SOUNDS];
 	SoundSlot soundSlots[MAX_SOUND_SLOTS];
 	SoundStream streams[MAX_OPEN_STREAMS];
