@@ -47,55 +47,40 @@ Test *gCurrentTest = NULL;
 // This macro just makes the tests look a bit nicer.
 #define END_ASSERTS() teardown: ((void)0)
 
-static int executeTests(Test *tests, int count)
-{
+static int executeTests(Test *tests, int count) {
   int passRate = 0;
-
 	printf("Running tests\n\n\n");
-
-	for (int i = 0; i < count; i++)
-	{
+	for (int i = 0; i < count; i++) {
 		gCurrentTest = &tests[i];
 		tests[i].execute();
-
 		if (tests[i].failedAssert == NULL)
 		  passRate++;
 	}
-
   return passRate;
 }
 
-static int printPassRate(Test *tests, int count, int passRate)
-{
+static int printPassRate(Test *tests, int count, int passRate) {
 	printf("Passed %d/%d\n", passRate, count);
 	printf("=======================================\n\n");
-
-	for (int i = 0; i < count; i++)
-  {
+	for (int i = 0; i < count; i++) {
     if (tests[i].failedAssert == NULL)
       printf("	- %s\n", tests[i].name);
   }
-
 	return passRate;
 }
 
-static void printFailedRate(Test *tests, int count, int passRate)
-{
+static void printFailedRate(Test *tests, int count, int passRate) {
 	printf("\nFailed %d/%d\n", count - passRate, count);
 	printf("=======================================\n\n");
-
-	for (int i = 0; i < count; i++)
-	{
-		if (tests[i].failedAssert != NULL)
-		{
+	for (int i = 0; i < count; i++)	{
+		if (tests[i].failedAssert != NULL) {
 			printf("	- %s\n", tests[i].name);
 			printf("		%s\n", tests[i].failedAssert);
 		}
 	}
 }
 
-int runTests(Test *tests, int count)
-{
+int runTests(Test *tests, int count) {
   int passRate = executeTests(tests, count);
 	printPassRate(tests, count, passRate);
 	printFailedRate(tests, count, passRate);

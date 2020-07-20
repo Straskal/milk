@@ -26,19 +26,16 @@
 #define LOG_CLEAR()             ((void)0)
 #endif
 
-typedef enum logType
-{
+typedef enum {
   INFO, WARN, ERROR
 } LogType;
 
-typedef struct logMessage
-{
+typedef struct {
   char text[MAX_LOG_LENGTH];
   LogType type;
 } LogMessage;
 
-typedef struct logs
-{
+typedef struct {
   LogMessage messages[MAX_LOGS];
   int count;
   int errorCount;

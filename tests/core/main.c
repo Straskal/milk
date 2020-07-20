@@ -3,8 +3,7 @@
 #include "../input_tests.h"
 #include "../video_tests.h"
 
-static Test _tests[] =
-{
+static Test _tests[] = {
 	// Input
 	INIT_TEST(isButtonDown_WhenButtonDown_ReturnsTrue),
 	INIT_TEST(isButtonDown_WhenButtonUp_ReturnsFalse),
@@ -46,10 +45,8 @@ static Test _tests[] =
 
 #define TEST_COUNT (sizeof(_tests) / sizeof(Test))
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 	UNUSED(argc);
 	UNUSED(argv);
-
 	return runTests(_tests, TEST_COUNT);
 }

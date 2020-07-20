@@ -7,8 +7,7 @@
 
 #define COMMAND_MAX_LENGTH 25
 
-typedef enum consoleInputState
-{
+typedef enum {
   CONSOLE_INPUT_NONE    = 0 << 0,
   CONSOLE_INPUT_CHAR    = 1 << 0,
   CONSOLE_INPUT_BACK    = 1 << 1,
@@ -16,8 +15,7 @@ typedef enum consoleInputState
   CONSOLE_INPUT_ESCAPE  = 1 << 3
 } ConsoleInputState;
 
-typedef struct consoleInput
-{
+typedef struct {
   void (*startTextInput)();
   void (*stopTextInput)();
 
@@ -26,14 +24,12 @@ typedef struct consoleInput
   char currentChar;
 } ConsoleInput;
 
-typedef enum consoleState
-{
+typedef enum {
   GAME,
   COMMAND
 } ConsoleState;
 
-typedef struct console
-{
+typedef struct {
   ConsoleInput input;
   ConsoleState state;
   int lastErrorCount;

@@ -3,8 +3,7 @@
 
 #include <stdbool.h>
 
-typedef enum buttonState
-{
+typedef enum {
   BTN_NONE  = 0 << 0,
   BTN_START = 1 << 0,
   BTN_UP    = 1 << 1,
@@ -17,14 +16,12 @@ typedef enum buttonState
   BTN_Y     = 1 << 8,
 } ButtonState;
 
-typedef struct gamepad
-{
+typedef struct {
   ButtonState buttonState;
   ButtonState previousButtonState;
 } Gamepad;
 
-typedef struct input
-{
+typedef struct {
   Gamepad gamepad;
 } Input;
 

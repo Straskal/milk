@@ -8,13 +8,11 @@
 #include "gamepad.h"
 #include "video.h"
 
-typedef struct code
-{
+typedef struct {
 	void *state;
 } Code;
 
-typedef struct milk
-{
+typedef struct {
 	Input input;
 	Video video;
 	Audio audio;
