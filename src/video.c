@@ -147,14 +147,11 @@ static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w,
   int height = h * scale;
   int xRatio = FLOOR((w << 16) / width + 0.5);
   int yRatio = FLOOR((h << 16) / height + 0.5);
-  bool xFlip = IS_BIT_SET(flip, 1);
-  bool yFlip = IS_BIT_SET(flip, 2);
-  int xPixelStart = xFlip ? width - 1 : 0;
-  int yPixelStart = yFlip ? height - 1 : 0;
-  int xStep = xFlip ? -1 : 1;
-  int yStep = yFlip ? -1 : 1;
-  int xSource, ySource;
-  int xDest, yDest;
+  int xPixelStart = IS_BIT_SET(flip, 1) ? width - 1 : 0;
+  int yPixelStart = IS_BIT_SET(flip, 2) ? height - 1 : 0;
+  int xStep = IS_BIT_SET(flip, 1) ? -1 : 1;
+  int yStep = IS_BIT_SET(flip, 2) ? -1 : 1;
+  int xSource, ySource, xDest, yDest;
   for (yDest = y, ySource = yPixelStart; yDest < y + height; yDest++, ySource += yStep) {
     for (xDest = x, xSource = xPixelStart; xDest < x + width; xDest++, xSource += xStep) {
       int xNearest = (xSource * xRatio) >> 16;
@@ -223,8 +220,7 @@ void blitFont(Video *video, int id, int x, int y, const char *str, int scale, Co
         yCurrent += FONT_CHAR_HEIGHT * scale; break;
       case ' ':
         xCurrent += FONT_CHAR_SPACING * scale; break;
-      default:
-        {
+      default: {
           int yPixel = FLOOR((curr - 33) / FONT_COLUMNS) * FONT_WIDTH * FONT_CHAR_HEIGHT;
           int xPixel = FLOOR((curr - 33) % FONT_COLUMNS) * FONT_CHAR_WIDTH;
           Color32 *pixels = &fontPixels[yPixel + xPixel];
