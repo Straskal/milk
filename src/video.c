@@ -11,18 +11,18 @@
 #define GMASK 0x0000ff00
 #define BMASK 0x000000ff
 
-#define rc(color) ((color & RMASK) >> 16)
-#define gc(color) ((color & GMASK) >> 8)
-#define bc(color) ((color & BMASK))
+#define r_comp(color) ((color & RMASK) >> 16)
+#define g_comp(color) ((color & GMASK) >> 8)
+#define b_comp(color) ((color & BMASK))
 
-#define AVERAGEC(c1, c2) (MIN((c1 + c2) / 2, 255))
-#define ADDC(c1, c2) (MIN((c1 + c2), 255))
+#define AVERAGE_COMP(c1, c2) (MIN((c1 + c2) / 2, 255))
+#define ADD_COMP(c1, c2) (MIN((c1 + c2), 255))
 
 #define AVERAGE_COLORS(col1, col2)\
-  ((AVERAGEC(rc(col1), rc(col2)) << 16) | (AVERAGEC(gc(col1), gc(col2)) << 8) | AVERAGEC(bc(col1), bc(col2)))
+  ((AVERAGE_COMP(r_comp(col1), r_comp(col2)) << 16) | (AVERAGE_COMP(g_comp(col1), g_comp(col2)) << 8) | AVERAGE_COMP(b_comp(col1), b_comp(col2)))
 
 #define ADD_COLORS(col1, col2)\
-  ((ADDC(rc(col1), rc(col2)) << 16) | (ADDC(gc(col1), gc(col2)) << 8) | ADDC(bc(col1), bc(col2)))
+  ((ADD_COMP(r_comp(col1), r_comp(col2)) << 16) | (ADD_COMP(g_comp(col1), g_comp(col2)) << 8) | ADD_COMP(b_comp(col1), b_comp(col2)))
 
 void initializeVideo(Video *video) {
   Color32 embeddedFontData[] = {
