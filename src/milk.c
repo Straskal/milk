@@ -26,12 +26,16 @@ void freeMilk(Milk *milk) {
 }
 
 static int l_btn(lua_State *L) {
-	lua_pushboolean(L, isButtonDown(&globalMilk->input, (ButtonState)(1 << lua_tointeger(L, 1))));
+	lua_pushboolean(L,
+		isButtonDown(&globalMilk->input,
+		(ButtonState)(1 << lua_tointeger(L, 1))));
 	return 1;
 }
 
 static int l_btnp(lua_State *L) {
-	lua_pushboolean(L, isButtonPressed(&globalMilk->input, (ButtonState)(1 << lua_tointeger(L, 1))));
+	lua_pushboolean(L,
+		isButtonPressed(&globalMilk->input,
+		(ButtonState)(1 << lua_tointeger(L, 1))));
 	return 1;
 }
 
@@ -59,7 +63,8 @@ static int l_clip(lua_State *L) {
 }
 
 static int l_clrs(lua_State *L) {
-	clearFramebuffer(&globalMilk->video, (Color32)luaL_optinteger(L, 1, 0x000000));
+	clearFramebuffer(&globalMilk->video,
+		(Color32)luaL_optinteger(L, 1, 0x000000));
 	return 0;
 }
 
