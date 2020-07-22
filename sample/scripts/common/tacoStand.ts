@@ -9,7 +9,7 @@ const PersonAnimationTimer = 10;
 const DeadPersonFrame = 195;
 const NumPeople = 3;
 
-const TacoStandLowerHalf = 209;
+const TacoStandLowerHalf = 241;
 const TacoStandUpperHalf = 160;
 const TacoStandUpperHalfDestroyed = 164;
 
@@ -116,7 +116,7 @@ export class TacoStand {
     }
 
     draw(): void {
-        spr(TacoStandLowerHalf, 16, 176, 16, 3);
+        spr(TacoStandLowerHalf, 16, 208, 14, 1);
         spr(this._tacoStandUpperHalfSprite, 16, 176, 4, 2);
 
         for (const person of this._people) {

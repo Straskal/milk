@@ -173,16 +173,20 @@ static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w,
   }
 }
 
-#define SPRSHEET_COLUMNS ((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
+#define SPRITE_SHEET_CELLS ((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
 
 void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 flip, Color32 color, ColorMode mode) {
   if (id >= 0 && id < SPRITE_SHEET_SQRSIZE) {
-    int width = w * SPRITE_SQRSIZE;
-    int height = h * SPRITE_SQRSIZE;
-    int yPixel = FLOOR(id / SPRSHEET_COLUMNS) * SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE;
-    int xPixel = FLOOR(id % SPRSHEET_COLUMNS) * SPRITE_SQRSIZE;
-    Color32 *pixels = &video->spriteSheet[yPixel + xPixel];
-    blitBuffer(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, color, mode);
+    int row = FLOOR(id / SPRITE_SHEET_CELLS);
+    int column = FLOOR(id % SPRITE_SHEET_CELLS);
+    w = CLAMP(w, 1, SPRITE_SHEET_CELLS - column);
+    h = CLAMP(h, 1, SPRITE_SHEET_CELLS - row);
+    int widthPx = w * SPRITE_SQRSIZE;
+    int heightPx = h * SPRITE_SQRSIZE;
+    int yPx = row * SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE;
+    int xPx = column * SPRITE_SQRSIZE;
+    Color32 *pixels = &video->spriteSheet[yPx + xPx];
+    blitBuffer(video, pixels, x, y, widthPx, heightPx, SPRITE_SHEET_SQRSIZE, scale, flip, color, mode);
   }
 }
 

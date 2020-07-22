@@ -153,8 +153,10 @@ static void handleInput(Console *console, Milk *milk) {
 	handleEnter(console, milk);
 }
 
-static void haltOnError(Console *console) {
+static void haltOnError(Console *console, Milk *milk) {
 	if (console->lastErrorCount < LOG_GET()->errorCount) {
+		pauseSound(&milk->audio, -1);
+		pauseStream(&milk->audio, -1);
 		console->lastErrorCount = LOG_GET()->errorCount;
 		console->state = COMMAND;
 		console->input.startTextInput();
@@ -168,7 +170,7 @@ void updateConsole(Console *console, Milk *milk) {
 			handleInput(console, milk);	break;
 		case GAME:
 			invokeUpdate(&milk->code);
-			haltOnError(console);
+			haltOnError(console, milk);
 			break;
 		default: break;
 	}
@@ -259,7 +261,7 @@ void drawConsole(Console *console, Milk *milk) {
 			break;
 		case GAME:
 			invokeDraw(&milk->code);
-			haltOnError(console);
+			haltOnError(console, milk);
 			break;
 		default: break;
 	}

@@ -1,5 +1,6 @@
 import { SplashState } from "./splash/state";
 import { GameplayState } from "./gameplay/state";
+import { MainMenuState } from "./mainMenu/state";
 
 const GameFont = "art/font.bmp";
 
@@ -33,7 +34,7 @@ export class Game {
     public init(): void {
         loadfont(0, GameFont);
         this._time = os.clock();
-        this.pushState(new GameplayState());
+        this.pushState(new MainMenuState());
     }
 
     public update(): void {
