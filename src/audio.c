@@ -46,7 +46,8 @@ void loadSound(Audio *audio, int soundId, const char *filePath) {
   if (soundId >= 0 && soundId < MAX_LOADED_SOUNDS) {
     audio->lock();
     SoundData *soundData = &audio->sounds[soundId];
-    if (soundData->samples != NULL) lockedUnloadSound(soundData, audio->soundSlots);
+    if (soundData->samples != NULL)
+      lockedUnloadSound(soundData, audio->soundSlots);
     loadWavSound(soundData, filePath);
     audio->unlock();
   }
@@ -121,7 +122,8 @@ void openStream(Audio *audio, int streamId, const char *filePath) {
   if (streamId >= 0 && streamId < MAX_OPEN_STREAMS) {
     audio->lock();
     SoundStream *soundStream = &audio->streams[streamId];
-    if (soundStream->data.file != NULL) closeWavStream(&soundStream->data);
+    if (soundStream->data.file != NULL)
+      closeWavStream(&soundStream->data);
     openWavStream(&soundStream->data, filePath);
     audio->unlock();
   }
@@ -209,7 +211,8 @@ void mixSamplesIntoStream(Audio *audio, int16_t *stream, int numSamples) {
   for (int i = 0; i < MAX_OPEN_STREAMS; i++) {
     if (soundStreams[i].state == PLAYING) {
       SoundStreamData *streamData = &soundStreams[i].data;
-      if (streamData->channelCount == 1) numSamples /= 2;
+      if (streamData->channelCount == 1)
+        numSamples /= 2;
       bool streamFinished = wavStreamRead(&soundStreams[i].data, numSamples, soundStreams[i].loop);
       mixSamples(stream, streamData->chunk, streamData->sampleCount, soundStreams[i].data.channelCount, soundStreams[i].volume);
       if (streamFinished) soundStreams[i].state = STOPPED;
@@ -219,7 +222,8 @@ void mixSamplesIntoStream(Audio *audio, int16_t *stream, int numSamples) {
     if (slots[i].state == PLAYING) {
       if (slots[i].remainingSamples > 0) {
         int samplesToMix = MIN(slots[i].remainingSamples, numSamples);
-        if (slots[i].soundData->channelCount == 1) samplesToMix /= 2;
+        if (slots[i].soundData->channelCount == 1)
+          samplesToMix /= 2;
         mixSamples(stream, slots[i].position, samplesToMix, slots[i].soundData->channelCount, slots[i].volume);
         slots[i].position += samplesToMix;
         slots[i].remainingSamples -= samplesToMix;

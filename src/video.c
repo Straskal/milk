@@ -218,7 +218,8 @@ void blitFont(Video *video, int id, int x, int y, const char *str, int scale, Co
   int yCurrent = y;
   char curr;
   while ((curr = *str++)) {
-    if (!IS_ASCII(curr)) curr = '?';
+    if (!IS_ASCII(curr))
+      curr = '?';
     switch (curr) {
       case '\n':
         xCurrent = x;
