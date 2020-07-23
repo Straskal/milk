@@ -2,7 +2,9 @@
 #include <lauxlib.h>
 #include <lualib.h>
 #include <math.h>
+#include <stdint.h>
 
+#include "common.h"
 #include "milk.h"
 #include "logs.h"
 
@@ -118,7 +120,7 @@ static int l_spr(lua_State *L) {
 		(int)luaL_optinteger(L, 4, 1),
 		(int)luaL_optinteger(L, 5, 1),
 		(int)luaL_optnumber(L, 6, 1.0),
-		(u8)luaL_optinteger(L, 7, 0),
+		(uint8_t)luaL_optinteger(L, 7, 0),
 		(Color32)luaL_optinteger(L, 8, 0x00),
 		(ColorMode)luaL_optinteger(L, 9, Additive)
 	);
@@ -235,7 +237,7 @@ static int l_resumestream(lua_State *L) {
 
 static int l_vol(lua_State *L) {
 	setMasterVolume(&globalMilk->audio,
-		(u8)lua_tointeger(L, 1)
+		lua_tointeger(L, 1)
 	);
 	return 0;
 }

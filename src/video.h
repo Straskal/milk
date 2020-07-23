@@ -1,9 +1,8 @@
 #ifndef __VIDEO_H__
 #define __VIDEO_H__
 
+#include <stdint.h>
 #include <stdlib.h>
-
-#include "common.h"
 
 #define FRAMERATE 50
 #define FRAMEBUFFER_WIDTH 256
@@ -19,7 +18,7 @@
 #define FONT_CHAR_HEIGHT 8
 #define FONT_CHAR_SPACING 6
 
-typedef u32 Color32;
+typedef uint32_t Color32;
 
 typedef enum {
   Additive,
@@ -56,7 +55,7 @@ void blitPixel(Video *video, int x, int y, Color32 color);
 void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color);
 void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color);
 void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color);
-void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 flip, Color32 color, ColorMode mode);
+void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, uint8_t flip, Color32 color, ColorMode mode);
 int fontWidth(const char *text);
 void blitFont(Video *video, int id, int x, int y, const char *str, int scale, Color32 color);
 

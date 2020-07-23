@@ -2,12 +2,6 @@
 #define __COMMON_H__
 
 #include <math.h>
-#include <stdint.h>
-
-typedef int16_t   s16;
-typedef uint8_t   u8;
-typedef uint16_t  u16;
-typedef uint32_t  u32;
 
 #define UNUSED(v) ((void)v)
 #define MIN(x, y) ((x) > (y) ? (y) : (x))

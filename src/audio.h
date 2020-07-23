@@ -2,9 +2,8 @@
 #define __AUDIO_H__
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
-
-#include "common.h"
 
 #define AUDIO_FREQUENCY 44100
 #define AUDIO_BITS_PER_SAMPLE 16
@@ -25,7 +24,7 @@ typedef enum {
 typedef struct {
   int channelCount;
 	int sampleCount;
-	s16 *samples;
+	int16_t *samples;
 } SoundData;
 
 typedef struct {
@@ -33,7 +32,7 @@ typedef struct {
 	SoundState state;
 	int volume;
 	int remainingSamples;
-  s16 *position;
+  int16_t *position;
 } SoundSlot;
 
 typedef struct {
@@ -43,7 +42,7 @@ typedef struct {
   FILE *file;
   int channelCount;
   int sampleCount;
-  s16 *chunk;
+  int16_t *chunk;
 } SoundStreamData;
 
 typedef struct {
@@ -79,6 +78,6 @@ void stopStream(Audio *audio, int streamId);
 void pauseStream(Audio *audio, int streamId);
 void resumeStream(Audio *audio, int streamId);
 void setMasterVolume(Audio *audio, int volume);
-void mixSamplesIntoStream(Audio *audio, s16 *stream, int numSamples);
+void mixSamplesIntoStream(Audio *audio, int16_t *stream, int numSamples);
 
 #endif

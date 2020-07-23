@@ -4,7 +4,6 @@
 #include <stdbool.h>
 
 #include "audio.h"
-#include "common.h"
 #include "gamepad.h"
 #include "video.h"
 

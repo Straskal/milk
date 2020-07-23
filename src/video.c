@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "common.h"
 #include "video.h"
 
 #define MIN_SCALE 1
@@ -141,7 +142,7 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color
   }
 }
 
-static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, Color32 color, ColorMode mode) {
+static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, uint8_t flip, Color32 color, ColorMode mode) {
   scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
   int width = w * scale;
   int height = h * scale;
@@ -175,7 +176,7 @@ static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w,
 
 #define SPRITE_SHEET_CELLS ((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
 
-void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 flip, Color32 color, ColorMode mode) {
+void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, uint8_t flip, Color32 color, ColorMode mode) {
   if (id >= 0 && id < SPRITE_SHEET_SQRSIZE) {
     int row = FLOOR(id / SPRITE_SHEET_CELLS);
     int column = FLOOR(id % SPRITE_SHEET_CELLS);

@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "audio.h"
+#include "common.h"
 #include "wav.h"
 
 #define S16_MAX 32767
@@ -188,8 +189,8 @@ void setMasterVolume(Audio *audio, int volume) {
   audio->masterVolume = CLAMP(volume, 0, MAX_VOLUME);
 }
 
-static void mixSamples(s16 *destination, const s16 *source, int numSamples, int numChannels, int volume) {
-  s16 sourceSample, destSample;
+static void mixSamples(int16_t *destination, const int16_t *source, int numSamples, int numChannels, int volume) {
+  int16_t sourceSample, destSample;
   while (numSamples--) {
     sourceSample = (*source++ * volume) / MAX_VOLUME;
     for (int i = 0; i < 3 - numChannels; i++) {
@@ -202,7 +203,7 @@ static void mixSamples(s16 *destination, const s16 *source, int numSamples, int 
 // We clamp on every mix, which can cause clipping when we're mixing many sounds together.
 // Ideally, we'd mix all of our sounds into a 32 bit buffer, then clamp after all sounds have been mixed.
 // Haven't had any issues yet, but if we start to get distortion, then this is probably the issue.
-void mixSamplesIntoStream(Audio *audio, s16 *stream, int numSamples) {
+void mixSamplesIntoStream(Audio *audio, int16_t *stream, int numSamples) {
   SoundStream *soundStreams = audio->streams;
   SoundSlot *slots = audio->soundSlots;
   for (int i = 0; i < MAX_OPEN_STREAMS; i++) {
