@@ -13,8 +13,6 @@ const ShootSound = 1;
 
 export class GameplayState implements GameState {
 
-    private _score = 0;
-
     starField = new Stars();
     player = new Player({ shootSound: ShootSound });
     explosions = new Explosions({ explosionSound: ExplosionSound });
@@ -26,10 +24,6 @@ export class GameplayState implements GameState {
 
     get bulletPool() {
         return this.bullets;
-    }
-
-    addToScore(amount: number): void {
-        this._score += amount;
     }
 
     enter(_: Game): void {
@@ -62,8 +56,6 @@ export class GameplayState implements GameState {
         this.enemies.draw();
         this.explosions.draw();
         this.player.draw();
-
-        this.drawScore();
     }
 
     exit(_: Game): void {
@@ -77,8 +69,7 @@ export class GameplayState implements GameState {
         for (const enemy of this.enemies.liveEnemies) {
             if (this.bullets.checkCollision(enemy)) {
                 this.explosions.create(enemy.x, enemy.y, ticks);
-                this.enemies.destroy(enemy);
-                this._score++;
+                this.enemies.damage(enemy, 1);
             }
         }
     }
@@ -88,12 +79,8 @@ export class GameplayState implements GameState {
         for (const enemy of this.enemies.liveEnemies) {
             if (isColliding(this.player, enemy)) {
                 this.explosions.create(enemy.x, enemy.y, ticks);
-                this.enemies.destroy(enemy);
+                this.enemies.damage(enemy, 1);
             }
         }
-    }
-
-    private drawScore(): void {
-        font(0, 10, 10, `SCORE:${this._score}`);
     }
 }

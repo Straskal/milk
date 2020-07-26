@@ -10,6 +10,7 @@ export interface Enemy extends ICollidable {
     rotation: number;
     sprite: number;
     health: number;
+    color: number;
 }
 
 function isOutOfBounds(enemy: Enemy) {
@@ -33,7 +34,8 @@ export class Enemies {
                 yMove: -math.random(100),
                 rotation: math.random(20),
                 sprite: EnemySprite,
-                health: 1
+                health: 2,
+                color: 0x00
             });
         }
     }
@@ -45,24 +47,35 @@ export class Enemies {
     update(game: Game): void {
         for (let i = 0; i < PoolSize; i++) {
             const enemy = this._pool[i];
+            enemy.color = 0x00;
             enemy.x = enemy.rotation * math.sin(game.ticks / 20) + enemy.xMove
             enemy.y = enemy.rotation * math.cos(game.ticks / 20) + ++enemy.yMove
 
-            if (isOutOfBounds(enemy))
-                this.destroy(enemy);
+            if (isOutOfBounds(enemy)) {
+                enemy.health = 2;
+                enemy.xMove = math.random(256);
+                enemy.yMove = -math.random(100);
+                enemy.rotation = math.random(20);
+            }
         }
     }
 
     draw(): void {
         for (let i = 0; i < PoolSize; i++) {
             const enemy = this._pool[i];
-            spr(enemy.sprite, enemy.x - 8, enemy.y - 8);
+            const scale = enemy.y / 224;
+            spr(enemy.sprite, enemy.x - 8, enemy.y - 8, 1, 1, scale, 0, enemy.color);
         }
     }
 
-    destroy(enemy: Enemy): void {
-        enemy.xMove = math.random(256);
-        enemy.yMove = -math.random(100);
-        enemy.rotation = math.random(20);
+    damage(enemy: Enemy, amount: number): void {
+        enemy.health -= amount;
+        enemy.color = 0xffffff;
+        if (enemy.health <= 0) {
+            enemy.health = 2;
+            enemy.xMove = math.random(256);
+            enemy.yMove = -math.random(100);
+            enemy.rotation = math.random(20);
+        }
     }
 }

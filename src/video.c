@@ -26,7 +26,7 @@
   ((ADD_COMP(r_comp(col1), r_comp(col2)) << 16) | (ADD_COMP(g_comp(col1), g_comp(col2)) << 8) | ADD_COMP(b_comp(col1), b_comp(col2)))
 
 void initializeVideo(Video *video) {
-  Color32 embeddedFontData[] = {
+  uint32_t embeddedFontData[] = {
     #include "embed/font.inl"
   };
   memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
@@ -43,11 +43,11 @@ void disableVideo(Video *video) {
 }
 
 void loadSpriteSheet(Video *video, const char *path) {
-  video->loadBMP(path, video->spriteSheet, sizeof(video->spriteSheet) / sizeof(Color32));
+  video->loadBMP(path, video->spriteSheet, sizeof(video->spriteSheet) / sizeof(uint32_t));
 }
 
 void loadFont(Video *video, int id, const char *path) {
-  video->loadBMP(path, video->fonts[id], sizeof(video->fonts[id]) / sizeof(Color32));
+  video->loadBMP(path, video->fonts[id], sizeof(video->fonts[id]) / sizeof(uint32_t));
 }
 
 void resetDrawState(Video *video) {
@@ -71,7 +71,7 @@ void setClippingRect(Video *video, int x, int y, int w, int h) {
 
 #define FRAMEBUFFER_POS(x, y) ((FRAMEBUFFER_WIDTH * y) + x)
 
-void clearFramebuffer(Video *video, Color32 color) {
+void clearFramebuffer(Video *video, uint32_t color) {
   Rect clip = video->clipRect;
   for (int y = clip.top; y < clip.bottom; y++) {
     for (int x = clip.left; x < clip.right; x++)
@@ -79,13 +79,13 @@ void clearFramebuffer(Video *video, Color32 color) {
   }
 }
 
-void blitPixel(Video *video, int x, int y, Color32 color) {
+void blitPixel(Video *video, int x, int y, uint32_t color) {
   Rect clip = video->clipRect;
   if (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
     video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
-void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color) {
+void blitLine(Video *video, int x0, int y0, int x1, int y1, uint32_t color) {
   int xDistance = x1 - x0;
   int yDistance = y1 - y0;
   int xStep = SIGN(xDistance);
@@ -118,31 +118,31 @@ void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color) {
   }
 }
 
-static void horizontalLine(Video *video, int x, int y, int w, Color32 color) {
+static void horizontalLine(Video *video, int x, int y, int w, uint32_t color) {
   for (int i = x; i <= x + w; i++)
     blitPixel(video, i, y, color);
 }
 
-static void verticalLine(Video *video, int x, int y, int h, Color32 color) {
+static void verticalLine(Video *video, int x, int y, int h, uint32_t color) {
   for (int i = y; i <= y + h; i++)
     blitPixel(video, x, i, color);
 }
 
-void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color) {
+void blitRectangle(Video *video, int x, int y, int w, int h, uint32_t color) {
   horizontalLine(video, x, y, w, color);     // Top edge
   horizontalLine(video, x, y + h, w, color); // Bottom edge
   verticalLine(video, x, y, h, color);       // Left edge
   verticalLine(video, x + w, y, h, color);   // Right edge
 }
 
-void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color) {
+void blitFilledRectangle(Video *video, int x, int y, int w, int h, uint32_t color) {
   for (int i = y; i < y + h; i++) {
     for (int j = x; j < x + w; j++)
       blitPixel(video, j, i, color);
   }
 }
 
-static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, uint8_t flip, Color32 color, ColorMode mode) {
+static void blitBuffer(Video *video, const uint32_t *pixels, int x, int y, int w, int h, int pitch, int scale, uint8_t flip, uint32_t color, ColorMode mode) {
   scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
   int width = w * scale;
   int height = h * scale;
@@ -157,7 +157,7 @@ static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w,
     for (xDest = x, xSource = xPixelStart; xDest < x + width; xDest++, xSource += xStep) {
       int xNearest = (xSource * xRatio) >> 16;
       int yNearest = (ySource * yRatio) >> 16;
-      Color32 col = pixels[yNearest * pitch + xNearest];
+      uint32_t col = pixels[yNearest * pitch + xNearest];
       if (col != video->colorKey) {
         switch(mode) {
           case Average:
@@ -176,7 +176,7 @@ static void blitBuffer(Video *video, const Color32 *pixels, int x, int y, int w,
 
 #define SPRITE_SHEET_CELLS ((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
 
-void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, uint8_t flip, Color32 color, ColorMode mode) {
+void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, uint8_t flip, uint32_t color, ColorMode mode) {
   if (id >= 0 && id < SPRITE_SHEET_SQRSIZE) {
     int row = FLOOR(id / SPRITE_SHEET_CELLS);
     int column = FLOOR(id % SPRITE_SHEET_CELLS);
@@ -186,7 +186,7 @@ void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, uin
     int heightPx = h * SPRITE_SQRSIZE;
     int yPx = row * SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE;
     int xPx = column * SPRITE_SQRSIZE;
-    Color32 *pixels = &video->spriteSheet[yPx + xPx];
+    uint32_t *pixels = &video->spriteSheet[yPx + xPx];
     blitBuffer(video, pixels, x, y, widthPx, heightPx, SPRITE_SHEET_SQRSIZE, scale, flip, color, mode);
   }
 }
@@ -212,8 +212,8 @@ int fontWidth(const char *text) {
 #define IS_ASCII(c) (0 < c)
 #define FONT_COLUMNS (FONT_WIDTH / FONT_CHAR_WIDTH)
 
-void blitFont(Video *video, int id, int x, int y, const char *str, int scale, Color32 color) {
-  Color32 *fontPixels = id == -1 ? video->embeddedFont : video->fonts[id];
+void blitFont(Video *video, int id, int x, int y, const char *str, int scale, uint32_t color) {
+  uint32_t *fontPixels = id == -1 ? video->embeddedFont : video->fonts[id];
   int xCurrent = x;
   int yCurrent = y;
   char curr;
@@ -229,7 +229,7 @@ void blitFont(Video *video, int id, int x, int y, const char *str, int scale, Co
       default: {
           int yPixel = FLOOR((curr - 33) / FONT_COLUMNS) * FONT_WIDTH * FONT_CHAR_HEIGHT;
           int xPixel = FLOOR((curr - 33) % FONT_COLUMNS) * FONT_CHAR_WIDTH;
-          Color32 *pixels = &fontPixels[yPixel + xPixel];
+          uint32_t *pixels = &fontPixels[yPixel + xPixel];
           blitBuffer(video, pixels, xCurrent, yCurrent, FONT_CHAR_WIDTH, FONT_CHAR_HEIGHT, FONT_WIDTH, scale, 0, color, Solid);
           xCurrent += (FONT_CHAR_WIDTH) * scale;
         } break;

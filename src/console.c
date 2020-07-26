@@ -13,10 +13,10 @@
 
 static unsigned int ticks = 0;
 
-static const Color32 primary = 0xffffff;
-static const Color32 dark = 0x5c5c5c;
-static const Color32 alert = 0xbf4040;
-static const Color32 warn = 0xffec27;
+static const uint32_t primary = 0xffffff;
+static const uint32_t dark = 0x5c5c5c;
+static const uint32_t alert = 0xbf4040;
+static const uint32_t warn = 0xffec27;
 
 static void cmdUnload(Console *console, Milk *milk, char *argument) {
 	UNUSED(console);
@@ -205,10 +205,10 @@ static void drawPlayingIndicator(Console *console, Milk *milk) {
 
 typedef struct {
 	char text[CHARS_PER_LINE];
-	Color32 color;
+	uint32_t color;
 } ConsoleLine;
 
-static Color32 getLogColor(LogType type) {
+static uint32_t getLogColor(LogType type) {
 	switch (type) {
 		case INFO: return dark;
 		case WARN: return warn;

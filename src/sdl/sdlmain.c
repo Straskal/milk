@@ -56,7 +56,7 @@ static void mixCallback(void *userData, uint8_t *stream, int numBytes) {
 }
 
 // TODO: Need our own BMP loader.
-static void loadBmp(const char *filename, Color32 *dest, size_t len) {
+static void loadBmp(const char *filename, uint32_t *dest, size_t len) {
   SDL_Surface *bmp = SDL_LoadBMP(filename);
   if (bmp == NULL) return;
   uint8_t *bmpPixels = (Uint8 *) bmp->pixels;

@@ -66,7 +66,7 @@ static int l_clip(lua_State *L) {
 
 static int l_clrs(lua_State *L) {
 	clearFramebuffer(&globalMilk->video,
-		(Color32)luaL_optinteger(L, 1, 0x000000));
+		(uint32_t)luaL_optinteger(L, 1, 0x000000));
 	return 0;
 }
 
@@ -74,7 +74,7 @@ static int l_pset(lua_State *L) {
 	blitPixel(&globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
-		(Color32)lua_tointeger(L, 3)
+		(uint32_t)lua_tointeger(L, 3)
 	);
 	return 0;
 }
@@ -85,7 +85,7 @@ static int l_line(lua_State *L) {
 		(int)lua_tointeger(L, 2),
 		(int)lua_tointeger(L, 3),
 		(int)lua_tointeger(L, 4),
-		(Color32)lua_tointeger(L, 5)
+		(uint32_t)lua_tointeger(L, 5)
 	);
 	return 0;
 }
@@ -96,7 +96,7 @@ static int l_rect(lua_State *L) {
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
 		(int)lua_tointeger(L, 4),
-		(Color32)lua_tointeger(L, 5)
+		(uint32_t)lua_tointeger(L, 5)
 	);
 	return 0;
 }
@@ -107,7 +107,7 @@ static int l_rectfill(lua_State *L) {
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
 		(int)lua_tointeger(L, 4),
-		(Color32)lua_tointeger(L, 5)
+		(uint32_t)lua_tointeger(L, 5)
 	);
 	return 0;
 }
@@ -121,7 +121,7 @@ static int l_spr(lua_State *L) {
 		(int)luaL_optinteger(L, 5, 1),
 		(int)luaL_optnumber(L, 6, 1.0),
 		(uint8_t)luaL_optinteger(L, 7, 0),
-		(Color32)luaL_optinteger(L, 8, 0x00),
+		(uint32_t)luaL_optinteger(L, 8, 0x00),
 		(ColorMode)luaL_optinteger(L, 9, Additive)
 	);
 	return 0;
@@ -134,7 +134,7 @@ static int l_font(lua_State *L) {
 		(int)floor(lua_tonumber(L, 3)),
 		lua_tostring(L, 4),
 		(int)floor(luaL_optinteger(L, 5, 1)),
-		(Color32)floor(luaL_optinteger(L, 6, 0xffffff))
+		(uint32_t)floor(luaL_optinteger(L, 6, 0xffffff))
 	);
 	return 1;
 }
