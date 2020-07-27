@@ -142,10 +142,10 @@ void blitFilledRectangle(Video *video, int x, int y, int w, int h, uint32_t colo
   }
 }
 
-static void blitBuffer(Video *video, const uint32_t *pixels, int x, int y, int w, int h, int pitch, int scale, uint8_t flip, uint32_t color, ColorMode mode) {
-  scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
-  int width = w * scale;
-  int height = h * scale;
+static void blitBuffer(Video *video, const uint32_t *pixels, int x, int y, int w, int h, int pitch, float scale, uint8_t flip, uint32_t color, ColorMode mode) {
+  scale = CLAMP(scale, 0.1, MAX_SCALE);
+  float width = w * scale;
+  float height = h * scale;
   int xRatio = FLOOR((w << 16) / width + 0.5);
   int yRatio = FLOOR((h << 16) / height + 0.5);
   int xPixelStart = IS_BIT_SET(flip, 1) ? width - 1 : 0;
@@ -176,7 +176,7 @@ static void blitBuffer(Video *video, const uint32_t *pixels, int x, int y, int w
 
 #define SPRITE_SHEET_CELLS ((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
 
-void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, uint8_t flip, uint32_t color, ColorMode mode) {
+void blitSprite(Video *video, int id, int x, int y, int w, int h, float scale, uint8_t flip, uint32_t color, ColorMode mode) {
   if (id >= 0 && id < SPRITE_SHEET_SQRSIZE) {
     int row = FLOOR(id / SPRITE_SHEET_CELLS);
     int column = FLOOR(id % SPRITE_SHEET_CELLS);

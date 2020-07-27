@@ -52,7 +52,7 @@ export class Explosions {
 
     draw(): void {
         for (const explosion of this._liveExplosions) {
-            spr(explosion.frame, explosion.x - 8, explosion.y - 8);
+            spr(explosion.frame, explosion.x - 8, explosion.y - 8, 1, 1, explosion.y / 224 + 0.5);
         }
     }
 

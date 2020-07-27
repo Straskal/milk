@@ -52,7 +52,7 @@ export class Bullets {
 
     draw(): void {
         for (const bullet of this._liveBullets) {
-            spr(bullet.sprite, bullet.x - 8, bullet.y - 8, 1, 1, 1, 0, 0x7ac7f2, 1);
+            spr(bullet.sprite, bullet.x - 8, bullet.y - 8, 1, 1, bullet.y / 224 + 0.5, 0, 0x7ac7f2, 1);
         }
     }
 

@@ -63,7 +63,7 @@ export class Enemies {
     draw(): void {
         for (let i = 0; i < PoolSize; i++) {
             const enemy = this._pool[i];
-            const scale = enemy.y / 224;
+            const scale = (enemy.y / 224) + 0.5;
             spr(enemy.sprite, enemy.x - 8, enemy.y - 8, 1, 1, scale, 0, enemy.color);
         }
     }

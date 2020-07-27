@@ -119,7 +119,7 @@ static int l_spr(lua_State *L) {
 		(int)floor(lua_tonumber(L, 3)),
 		(int)luaL_optinteger(L, 4, 1),
 		(int)luaL_optinteger(L, 5, 1),
-		(int)luaL_optnumber(L, 6, 1.0),
+		(float)luaL_optnumber(L, 6, 1.0),
 		(uint8_t)luaL_optinteger(L, 7, 0),
 		(uint32_t)luaL_optinteger(L, 8, 0x00),
 		(ColorMode)luaL_optinteger(L, 9, Additive)

@@ -53,7 +53,7 @@ void blitPixel(Video *video, int x, int y, uint32_t color);
 void blitLine(Video *video, int x0, int y0, int x1, int y1, uint32_t color);
 void blitRectangle(Video *video, int x, int y, int w, int h, uint32_t color);
 void blitFilledRectangle(Video *video, int x, int y, int w, int h, uint32_t color);
-void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, uint8_t flip, uint32_t color, ColorMode mode);
+void blitSprite(Video *video, int id, int x, int y, int w, int h, float scale, uint8_t flip, uint32_t color, ColorMode mode);
 int fontWidth(const char *text);
 void blitFont(Video *video, int id, int x, int y, const char *str, int scale, uint32_t color);
 
