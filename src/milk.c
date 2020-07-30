@@ -337,14 +337,12 @@ void loadCode(Milk *milk) {
 		milk->code.state = (void *)L;
 		luaL_openlibs(L);
 		pushApi(L);
-
 		luaL_newmetatable(L, BITMAP_META);
 		lua_pushcfunction(L, l_bitmap_gc);
 		lua_setfield(L, -2, "__gc");
 		lua_pushvalue(L, -1);
 		lua_setfield(L, -2, "__index");
 		lua_pop(L, 1);
-
 		if (luaL_dofile(L, "main.lua"))
 			LOG_ERROR(lua_tostring(L, -1));
 	}

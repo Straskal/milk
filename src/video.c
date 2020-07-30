@@ -208,9 +208,11 @@ void sprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h, fl
 #define IS_ASCII(c) (0 < c)
 
 void font(Video *video, Bitmap *bmp, int x, int y, const char *str, int scale, uint32_t color) {
+  int xCurrent = x;
+  int yCurrent = y;
+  char curr;
   uint32_t *fontPixels;
   int numColumns;
-
   if (!bmp) {
     fontPixels = video->embeddedFont;
     numColumns = 12;
@@ -218,10 +220,6 @@ void font(Video *video, Bitmap *bmp, int x, int y, const char *str, int scale, u
     fontPixels = bmp->pixels;
     numColumns = bmp->width / 8;
   }
-
-  int xCurrent = x;
-  int yCurrent = y;
-  char curr;
   while ((curr = *str++)) {
     if (!IS_ASCII(curr))
       curr = '?';
