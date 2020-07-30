@@ -59,22 +59,6 @@ if (WIN32)
 endif()
 target_link_libraries(milk PUBLIC ${SDL2_LIBRARY} ${LUA53_LIBRARIES})
 
-enable_testing()
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
-
-set(MILK_TEST_SRC_FILES
-	${MILK_SRC_FILES}
-	tests/audio_tests.h
-	tests/input_tests.h
-	tests/video_tests.h
-	tests/core/main.c
-	tests/core/milkassert.h
-)
-
-add_executable(milktests ${MILK_TEST_SRC_FILES})
-target_include_directories(milktests PUBLIC ${MILK_SRC_DIR})
-add_test(milktests milktests)
-
 if(WIN32)
 	if (MSVC)
 		set(MILK_LIBS_DIR ${CMAKE_SOURCE_DIR}/libs/msvc-x86)

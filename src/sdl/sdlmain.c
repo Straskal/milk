@@ -55,20 +55,6 @@ static void mixCallback(void *userData, uint8_t *stream, int numBytes) {
   mixSamplesIntoStream((Audio *) userData, (int16_t *) stream, (int) (numBytes / sizeof(int16_t)));
 }
 
-// TODO: Need our own BMP loader.
-static void loadBmp(const char *filename, uint32_t *dest, size_t len) {
-  SDL_Surface *bmp = SDL_LoadBMP(filename);
-  if (bmp == NULL) return;
-  uint8_t *bmpPixels = (Uint8 *) bmp->pixels;
-  for (size_t i = 0; i < len; i++) {
-    uint32_t b = *bmpPixels++;
-    uint32_t g = *bmpPixels++;
-    uint32_t r = *bmpPixels++;
-    dest[i] = (r << 16) | (g << 8) | (b);
-  }
-  SDL_FreeSurface(bmp);
-}
-
 static void startTextInput() {
   SDL_StartTextInput();
 }
@@ -83,7 +69,6 @@ static void setInterfaceFunctions() {
   milk->audio.unlock = unlockAudioDevice;
   console->input.startTextInput = startTextInput;
   console->input.stopTextInput = stopTextInput;
-  milk->video.loadBMP = loadBmp;
 }
 
 static void setupAudioDevice() {

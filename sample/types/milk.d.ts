@@ -4,6 +4,10 @@ declare let _init: () => void;
 declare let _update: () => void;
 declare let _draw: () => void;
 
+declare type Bitmap = any;
+
+declare function bitmap(filePath: string): Bitmap;
+declare function sprite(bmp: Bitmap, spriteId: number, x: number, y: number, width?: number, height?: number, scale?: number, flip?: 0 | 1 | 2 | 3, color?: number, mode?: 0 | 1 | 2): void;
 declare function btn(button: number): boolean;
 declare function btnp(button: number): boolean;
 declare function loadspr(filePath: string): void;

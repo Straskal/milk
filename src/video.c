@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <SDL.h>
+
 #include "common.h"
 #include "video.h"
 
@@ -30,24 +32,36 @@ void initializeVideo(Video *video) {
     #include "embed/font.inl"
   };
   memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
-  memset(&video->spriteSheet, 0x00, sizeof(video->spriteSheet));
-  memset(&video->fonts, 0x00, sizeof(video->fonts));
   memcpy(video->embeddedFont, embeddedFontData, sizeof(embeddedFontData));
   resetDrawState(video);
 }
 
 void disableVideo(Video *video) {
   memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
-  memset(&video->spriteSheet, 0x00, sizeof(video->spriteSheet));
-  memset(&video->fonts, 0x00, sizeof(video->fonts));
 }
 
-void loadSpriteSheet(Video *video, const char *path) {
-  video->loadBMP(path, video->spriteSheet, sizeof(video->spriteSheet) / sizeof(uint32_t));
+Bitmap *loadBitmap(const char *filePath) {
+  SDL_Surface *surface = SDL_LoadBMP(filePath);
+  if (surface == NULL) return NULL;
+  int length = surface->w * surface->h;
+  Bitmap *bitmap = (Bitmap*)malloc(sizeof(Bitmap));
+  bitmap->width = surface->w;
+  bitmap->height = surface->h;
+  bitmap->pixels = (uint32_t*)malloc(length * sizeof(uint32_t));
+  uint8_t *surfacePixels = (uint8_t *) surface->pixels;
+  for (int i = 0; i < length; i++) {
+    uint32_t b = *surfacePixels++;
+    uint32_t g = *surfacePixels++;
+    uint32_t r = *surfacePixels++;
+    bitmap->pixels[i] = (r << 16) | (g << 8) | (b);
+  }
+  SDL_FreeSurface(surface);
+  return bitmap;
 }
 
-void loadFont(Video *video, int id, const char *path) {
-  video->loadBMP(path, video->fonts[id], sizeof(video->fonts[id]) / sizeof(uint32_t));
+void freeBitmap(Bitmap *bitmap) {
+  free(bitmap->pixels);
+  free(bitmap);
 }
 
 void resetDrawState(Video *video) {
@@ -60,7 +74,7 @@ void resetDrawState(Video *video) {
   };
 }
 
-void setClippingRect(Video *video, int x, int y, int w, int h) {
+void clip(Video *video, int x, int y, int w, int h) {
   video->clipRect = (Rect) {
     .left = CLAMP(x, 0, FRAMEBUFFER_WIDTH),
     .right = CLAMP(x + w, 0, FRAMEBUFFER_WIDTH),
@@ -79,20 +93,20 @@ void clearFramebuffer(Video *video, uint32_t color) {
   }
 }
 
-void blitPixel(Video *video, int x, int y, uint32_t color) {
+void pixel(Video *video, int x, int y, uint32_t color) {
   Rect clip = video->clipRect;
   if (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
     video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
-void blitLine(Video *video, int x0, int y0, int x1, int y1, uint32_t color) {
+void line(Video *video, int x0, int y0, int x1, int y1, uint32_t color) {
   int xDistance = x1 - x0;
   int yDistance = y1 - y0;
   int xStep = SIGN(xDistance);
   int yStep = SIGN(yDistance);
   xDistance = abs(xDistance) << 1;
   yDistance = abs(xDistance) << 1;
-  blitPixel(video, x0, y0, color);
+  pixel(video, x0, y0, color);
   if (xDistance > yDistance) {
     int fraction = yDistance - (xDistance >> 1);
     while (x0 != x1) {
@@ -102,7 +116,7 @@ void blitLine(Video *video, int x0, int y0, int x1, int y1, uint32_t color) {
         fraction -= xDistance;
       }
       fraction += yDistance;
-      blitPixel(video, x0, y0, color);
+      pixel(video, x0, y0, color);
     }
   } else {
     int fraction = xDistance - (yDistance >> 1);
@@ -113,36 +127,36 @@ void blitLine(Video *video, int x0, int y0, int x1, int y1, uint32_t color) {
       }
       y0 += yStep;
       fraction += xDistance;
-      blitPixel(video, x0, y0, color);
+      pixel(video, x0, y0, color);
     }
   }
 }
 
 static void horizontalLine(Video *video, int x, int y, int w, uint32_t color) {
   for (int i = x; i <= x + w; i++)
-    blitPixel(video, i, y, color);
+    pixel(video, i, y, color);
 }
 
 static void verticalLine(Video *video, int x, int y, int h, uint32_t color) {
   for (int i = y; i <= y + h; i++)
-    blitPixel(video, x, i, color);
+    pixel(video, x, i, color);
 }
 
-void blitRectangle(Video *video, int x, int y, int w, int h, uint32_t color) {
+void rect(Video *video, int x, int y, int w, int h, uint32_t color) {
   horizontalLine(video, x, y, w, color);     // Top edge
   horizontalLine(video, x, y + h, w, color); // Bottom edge
   verticalLine(video, x, y, h, color);       // Left edge
   verticalLine(video, x + w, y, h, color);   // Right edge
 }
 
-void blitFilledRectangle(Video *video, int x, int y, int w, int h, uint32_t color) {
+void rectFill(Video *video, int x, int y, int w, int h, uint32_t color) {
   for (int i = y; i < y + h; i++) {
     for (int j = x; j < x + w; j++)
-      blitPixel(video, j, i, color);
+      pixel(video, j, i, color);
   }
 }
 
-static void blitBuffer(Video *video, const uint32_t *pixels, int x, int y, int w, int h, int pitch, float scale, uint8_t flip, uint32_t color, ColorMode mode) {
+static void blitBuffer(Video *video, uint32_t *pixels, int x, int y, int w, int h, int pitch, float scale, uint8_t flip, uint32_t color, ColorMode mode) {
   scale = CLAMP(scale, 0.1, MAX_SCALE);
   float width = w * scale;
   float height = h * scale;
@@ -168,26 +182,63 @@ static void blitBuffer(Video *video, const uint32_t *pixels, int x, int y, int w
             col = color; break;
           default: break;
         }
-        blitPixel(video, xDest, yDest, col);
+        pixel(video, xDest, yDest, col);
       }
     }
   }
 }
 
-#define SPRITE_SHEET_CELLS ((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
-
-void blitSprite(Video *video, int id, int x, int y, int w, int h, float scale, uint8_t flip, uint32_t color, ColorMode mode) {
-  if (id >= 0 && id < SPRITE_SHEET_SQRSIZE) {
-    int row = FLOOR(id / SPRITE_SHEET_CELLS);
-    int column = FLOOR(id % SPRITE_SHEET_CELLS);
-    w = CLAMP(w, 1, SPRITE_SHEET_CELLS - column);
-    h = CLAMP(h, 1, SPRITE_SHEET_CELLS - row);
-    int widthPx = w * SPRITE_SQRSIZE;
-    int heightPx = h * SPRITE_SQRSIZE;
-    int yPx = row * SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE;
-    int xPx = column * SPRITE_SQRSIZE;
-    uint32_t *pixels = &video->spriteSheet[yPx + xPx];
+void sprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h, float scale, uint8_t flip, uint32_t color, ColorMode mode) {
+  if (x >= 0 && y >= 0 && x <= FRAMEBUFFER_WIDTH && y <= FRAMEBUFFER_HEIGHT) {
+    int numRows = bmp->height / 8;
+    int numColumns = bmp->width / 8;
+    int row = FLOOR(index / numColumns);
+    int column = FLOOR(index % numColumns);
+    w = CLAMP(w, 1, numColumns - column);
+    h = CLAMP(h, 1, numRows - row);
+    int widthPx = w * 8;
+    int heightPx = h * 8;
+    int yPx = row * bmp->width * 8;
+    int xPx = column * 8;
+    uint32_t *pixels = &bmp->pixels[yPx = xPx];
     blitBuffer(video, pixels, x, y, widthPx, heightPx, SPRITE_SHEET_SQRSIZE, scale, flip, color, mode);
+  }
+}
+
+#define IS_ASCII(c) (0 < c)
+
+void font(Video *video, Bitmap *bmp, int x, int y, const char *str, int scale, uint32_t color) {
+  uint32_t *fontPixels;
+  int numColumns;
+
+  if (!bmp) {
+    fontPixels = video->embeddedFont;
+    numColumns = 12;
+  } else {
+    fontPixels = bmp->pixels;
+    numColumns = bmp->width / 8;
+  }
+
+  int xCurrent = x;
+  int yCurrent = y;
+  char curr;
+  while ((curr = *str++)) {
+    if (!IS_ASCII(curr))
+      curr = '?';
+    switch (curr) {
+      case '\n':
+        xCurrent = x;
+        yCurrent += FONT_CHAR_HEIGHT * scale; break;
+      case ' ':
+        xCurrent += FONT_CHAR_SPACING * scale; break;
+      default: {
+          int yPixel = FLOOR((curr - 33) / numColumns) * FONT_WIDTH * FONT_CHAR_HEIGHT;
+          int xPixel = FLOOR((curr - 33) % numColumns) * FONT_CHAR_WIDTH;
+          uint32_t *pixels = &fontPixels[yPixel + xPixel];
+          blitBuffer(video, pixels, xCurrent, yCurrent, FONT_CHAR_WIDTH, FONT_CHAR_HEIGHT, FONT_WIDTH, scale, 0, color, Solid);
+          xCurrent += (FONT_CHAR_WIDTH) * scale;
+        } break;
+    }
   }
 }
 
@@ -207,32 +258,4 @@ int fontWidth(const char *text) {
       width = currentWidth;
   }
   return width;
-}
-
-#define IS_ASCII(c) (0 < c)
-#define FONT_COLUMNS (FONT_WIDTH / FONT_CHAR_WIDTH)
-
-void blitFont(Video *video, int id, int x, int y, const char *str, int scale, uint32_t color) {
-  uint32_t *fontPixels = id == -1 ? video->embeddedFont : video->fonts[id];
-  int xCurrent = x;
-  int yCurrent = y;
-  char curr;
-  while ((curr = *str++)) {
-    if (!IS_ASCII(curr))
-      curr = '?';
-    switch (curr) {
-      case '\n':
-        xCurrent = x;
-        yCurrent += FONT_CHAR_HEIGHT * scale; break;
-      case ' ':
-        xCurrent += FONT_CHAR_SPACING * scale; break;
-      default: {
-          int yPixel = FLOOR((curr - 33) / FONT_COLUMNS) * FONT_WIDTH * FONT_CHAR_HEIGHT;
-          int xPixel = FLOOR((curr - 33) % FONT_COLUMNS) * FONT_CHAR_WIDTH;
-          uint32_t *pixels = &fontPixels[yPixel + xPixel];
-          blitBuffer(video, pixels, xCurrent, yCurrent, FONT_CHAR_WIDTH, FONT_CHAR_HEIGHT, FONT_WIDTH, scale, 0, color, Solid);
-          xCurrent += (FONT_CHAR_WIDTH) * scale;
-        } break;
-    }
-  }
 }

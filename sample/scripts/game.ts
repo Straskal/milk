@@ -22,6 +22,7 @@ export class Game {
     private _ticks = 0;
     private _stateStack: GameState[] = [];
     private _time = 0;
+    private _bitmap: Bitmap;
 
     public get ticks() {
         return this._ticks;
@@ -33,8 +34,9 @@ export class Game {
 
     public init(): void {
         loadfont(0, GameFont);
+        this._bitmap = bitmap("art/sprsheet.bmp");
         this._time = os.clock();
-        this.pushState(new GameplayState());
+        //this.pushState(new GameplayState());
     }
 
     public update(): void {
@@ -48,13 +50,17 @@ export class Game {
     }
 
     public draw(): void {
-        const length = this._stateStack.length;
-        for (let i = 0; i < length; i++) {
-            if (i < length - 1 && !this._stateStack[i + 1].drawBelow)
-                continue;
+        // const length = this._stateStack.length;
+        // for (let i = 0; i < length; i++) {
+        //     if (i < length - 1 && !this._stateStack[i + 1].drawBelow)
+        //         continue;
 
-            this._stateStack[i].draw(this);
-        }
+        //     this._stateStack[i].draw(this);
+        // }
+
+        clrs();
+
+        sprite(this._bitmap, 0, 10, 10, 2, 2);
 
         this._ticks++;
 

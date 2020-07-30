@@ -8,6 +8,12 @@
 #include "milk.h"
 #include "logs.h"
 
+#define BITMAP_META "bitmap"
+
+typedef struct {
+	void *handle;
+} LuaObject;
+
 static Milk *globalMilk;
 
 Milk *createMilk() {
@@ -27,6 +33,70 @@ void freeMilk(Milk *milk) {
 	free(milk);
 }
 
+static int l_bitmap(lua_State *L) {
+	const char *filePath = lua_tostring(L, 1);
+	Bitmap *bmp = loadBitmap(filePath);
+	if (!bmp)
+		lua_pushnil(L);
+	else {
+		LuaObject *luaObj = lua_newuserdata(L, sizeof(LuaObject));
+		luaObj->handle = (void *)bmp;
+		luaL_setmetatable(L, BITMAP_META);
+	}
+	return 1;
+}
+
+static int l_bitmap_gc(lua_State *L) {
+	LuaObject *luaObj = (LuaObject *)lua_touserdata(L, 1);
+	Bitmap *bmp = (Bitmap *)luaObj->handle;
+	freeBitmap(bmp);
+	return 0;
+}
+
+static int l_sprite(lua_State *L) {
+	LuaObject *luaObj = (LuaObject *)lua_touserdata(L, 1);
+	Bitmap *bmp = (Bitmap *)luaObj->handle;
+	sprite(
+		&globalMilk->video, bmp,
+		(int)lua_tointeger(L, 2),
+		(int)floor(lua_tonumber(L, 3)),
+		(int)floor(lua_tonumber(L, 4)),
+		(int)luaL_optinteger(L, 5, 1),
+		(int)luaL_optinteger(L, 6, 1),
+		(float)luaL_optnumber(L, 7, 1.0),
+		(uint8_t)luaL_optinteger(L, 8, 0),
+		(uint32_t)luaL_optinteger(L, 9, 0x00),
+		(ColorMode)luaL_optinteger(L, 10, Additive)
+	);
+	return 0;
+}
+
+static int l_tiles(lua_State *L) {
+	LuaObject *luaObj = (LuaObject *)lua_touserdata(L, 1);
+	Bitmap *bmp = (Bitmap *)luaObj->handle;
+	int x = lua_tointeger(L, 2);
+	int y = lua_tointeger(L, 3);
+	int w = lua_tointeger(L, 4);
+	lua_len(L, 5);
+	int len = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+	int xCurrent = x;
+	int i = 1;
+	while (len--) {
+		lua_rawgeti(L, 5, i);
+		int sprIndex = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+		sprite(&globalMilk->video, bmp, sprIndex, xCurrent, y, 2, 2, 1, 0, 0x00, Additive);
+		xCurrent += 16;
+		if (i++ % w == 0) {
+			xCurrent = x;
+			y += 16;
+		}
+	}
+
+	return 0;
+}
+
 static int l_btn(lua_State *L) {
 	lua_pushboolean(L,
 		isButtonDown(&globalMilk->input,
@@ -41,21 +111,8 @@ static int l_btnp(lua_State *L) {
 	return 1;
 }
 
-static int l_loadspr(lua_State *L) {
-	loadSpriteSheet(&globalMilk->video, lua_tostring(L, 1));
-	return 0;
-}
-
-static int l_loadfont(lua_State *L) {
-	loadFont(&globalMilk->video,
-		lua_tointeger(L, 1),
-		lua_tostring(L, 2)
-	);
-	return 0;
-}
-
 static int l_clip(lua_State *L) {
-	setClippingRect(&globalMilk->video,
+	clip(&globalMilk->video,
 		(int)lua_tointeger(L, 1),
 		(int)lua_tointeger(L, 2),
 		(int)lua_tointeger(L, 3),
@@ -71,7 +128,7 @@ static int l_clrs(lua_State *L) {
 }
 
 static int l_pset(lua_State *L) {
-	blitPixel(&globalMilk->video,
+	pixel(&globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(uint32_t)lua_tointeger(L, 3)
@@ -80,7 +137,7 @@ static int l_pset(lua_State *L) {
 }
 
 static int l_line(lua_State *L) {
-	blitLine(&globalMilk->video,
+	line(&globalMilk->video,
 		(int)lua_tointeger(L, 1),
 		(int)lua_tointeger(L, 2),
 		(int)lua_tointeger(L, 3),
@@ -91,7 +148,7 @@ static int l_line(lua_State *L) {
 }
 
 static int l_rect(lua_State *L) {
-	blitRectangle(&globalMilk->video,
+	rect(&globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
@@ -102,7 +159,7 @@ static int l_rect(lua_State *L) {
 }
 
 static int l_rectfill(lua_State *L) {
-	blitFilledRectangle(&globalMilk->video,
+	rectFill(&globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
@@ -112,24 +169,14 @@ static int l_rectfill(lua_State *L) {
 	return 0;
 }
 
-static int l_spr(lua_State *L) {
-	blitSprite(&globalMilk->video,
-		(int)lua_tointeger(L, 1),
-		(int)floor(lua_tonumber(L, 2)),
-		(int)floor(lua_tonumber(L, 3)),
-		(int)luaL_optinteger(L, 4, 1),
-		(int)luaL_optinteger(L, 5, 1),
-		(float)luaL_optnumber(L, 6, 1.0),
-		(uint8_t)luaL_optinteger(L, 7, 0),
-		(uint32_t)luaL_optinteger(L, 8, 0x00),
-		(ColorMode)luaL_optinteger(L, 9, Additive)
-	);
-	return 0;
-}
-
 static int l_font(lua_State *L) {
-	blitFont(&globalMilk->video,
-		(int)floor(lua_tonumber(L, 1)),
+	Bitmap *bmp = NULL;
+
+	LuaObject *luaObj = lua_touserdata(L, 1);
+	if (luaObj) bmp = luaObj->handle;
+
+	font(&globalMilk->video,
+		bmp,
 		(int)floor(lua_tonumber(L, 2)),
 		(int)floor(lua_tonumber(L, 3)),
 		lua_tostring(L, 4),
@@ -254,17 +301,17 @@ static void pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_S
 }
 
 static void pushApi(lua_State *L) {
+	pushApiFunction(L, "bitmap", l_bitmap);
+	pushApiFunction(L, "sprite", l_sprite);
+	pushApiFunction(L, "tiles", l_tiles);
 	pushApiFunction(L, "btn", l_btn);
 	pushApiFunction(L, "btnp", l_btnp);
-	pushApiFunction(L, "loadspr", l_loadspr);
-	pushApiFunction(L, "loadfont", l_loadfont);
 	pushApiFunction(L, "clip", l_clip);
 	pushApiFunction(L, "clrs", l_clrs);
 	pushApiFunction(L, "pset", l_pset);
 	pushApiFunction(L, "line", l_line);
 	pushApiFunction(L, "rect", l_rect);
 	pushApiFunction(L, "rectfill", l_rectfill);
-	pushApiFunction(L, "spr", l_spr);
 	pushApiFunction(L, "font", l_font);
 	pushApiFunction(L, "loadsnd", l_loadsnd);
 	pushApiFunction(L, "freesnd", l_freesnd);
@@ -290,6 +337,14 @@ void loadCode(Milk *milk) {
 		milk->code.state = (void *)L;
 		luaL_openlibs(L);
 		pushApi(L);
+
+		luaL_newmetatable(L, BITMAP_META);
+		lua_pushcfunction(L, l_bitmap_gc);
+		lua_setfield(L, -2, "__gc");
+		lua_pushvalue(L, -1);
+		lua_setfield(L, -2, "__index");
+		lua_pop(L, 1);
+
 		if (luaL_dofile(L, "main.lua"))
 			LOG_ERROR(lua_tostring(L, -1));
 	}

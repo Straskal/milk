@@ -183,11 +183,11 @@ static void drawCommandLine(Console *console, Milk *milk) {
 	int pointerWidth = fontWidth(pointer);
 	int x = 8;
 	int y = 10;
-	blitFont(video, -1, x, y, VERSION_HEADER, 1, primary);
-	blitFont(video, -1, x, (y += FONT_CHAR_HEIGHT), separator, 1, primary);
-	blitFont(video, -1, x, (y += FONT_CHAR_HEIGHT * 2), pointer, 1, primary);
-	blitFont(video, -1, (x += pointerWidth + 2), y, console->candidate, 1, primary);
-	if (ticks % 64 < 48) blitFilledRectangle(video, x + fontWidth(console->candidate), y, 6, 8, alert);
+	font(video, NULL, x, y, VERSION_HEADER, 1, primary);
+	font(video, NULL, x, (y += FONT_CHAR_HEIGHT), separator, 1, primary);
+	font(video, NULL, x, (y += FONT_CHAR_HEIGHT * 2), pointer, 1, primary);
+	font(video, NULL, (x += pointerWidth + 2), y, console->candidate, 1, primary);
+	if (ticks % 64 < 48) rectFill(video, x + fontWidth(console->candidate), y, 6, 8, alert);
 }
 
 static void drawPlayingIndicator(Console *console, Milk *milk) {
@@ -195,11 +195,11 @@ static void drawPlayingIndicator(Console *console, Milk *milk) {
 	const int padding = 8;
 	const int offset = size + padding;
 	if (console->isGameInitialized) {
-		blitFilledRectangle(&milk->video, FRAMEBUFFER_WIDTH - offset, offset, size, size, 0x00ff00);
-		blitPixel(&milk->video, FRAMEBUFFER_WIDTH - offset, offset, 0x00);
-		blitPixel(&milk->video, FRAMEBUFFER_WIDTH - padding - 1, offset, 0x00);
-		blitPixel(&milk->video, FRAMEBUFFER_WIDTH - offset, offset + 3, 0x00);
-		blitPixel(&milk->video, FRAMEBUFFER_WIDTH - padding - 1, offset + 3, 0x00);
+		rectFill(&milk->video, FRAMEBUFFER_WIDTH - offset, offset, size, size, 0x00ff00);
+		pixel(&milk->video, FRAMEBUFFER_WIDTH - offset, offset, 0x00);
+		pixel(&milk->video, FRAMEBUFFER_WIDTH - padding - 1, offset, 0x00);
+		pixel(&milk->video, FRAMEBUFFER_WIDTH - offset, offset + 3, 0x00);
+		pixel(&milk->video, FRAMEBUFFER_WIDTH - padding - 1, offset + 3, 0x00);
 	}
 }
 
@@ -248,7 +248,7 @@ static void drawLogLines(Milk *milk) {
 	int numLines;
 	getLogLines(LOG_GET(), lines, &numLines);
 	for (int i = 0; i < numLines; i++)
-		blitFont(&milk->video, -1, 8, LOG_START_HEIGHT + ((8 + 2) * i), lines[i].text, 1, lines[i].color);
+		font(&milk->video, NULL, 8, LOG_START_HEIGHT + ((8 + 2) * i), lines[i].text, 1, lines[i].color);
 }
 
 void drawConsole(Console *console, Milk *milk) {
