@@ -31,13 +31,15 @@ find_package(Lua53 REQUIRED)
 set(MILK_SRC_FILES
 	src/audio.c
 	src/audio.h
+	src/bitmap.c
+	src/bitmap.h
 	src/common.h
 	src/gamepad.c
 	src/gamepad.h
 	src/logs.c
 	src/logs.h
-	src/wav.c
-	src/wav.h
+	src/wave.c
+	src/wave.h
 	src/video.c
 	src/video.h
 	src/embed/font.inl

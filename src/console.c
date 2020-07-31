@@ -22,8 +22,6 @@ static void cmdUnload(Console *console, Milk *milk, char *argument) {
 	UNUSED(console);
 	UNUSED(argument);
 	unloadCode(milk);
-	unloadSound(&milk->audio, -1);
-	closeStream(&milk->audio, -1);
 	console->isGameInitialized = false;
 	LOG_INFO("Game has been unloaded");
 }
@@ -128,7 +126,7 @@ static void handleEscape(Console *console, Milk *milk) {
 	if (hasInput(&console->input, CONSOLE_INPUT_ESCAPE)) {
 		if (console->state != COMMAND) {
 			pauseSound(&milk->audio, -1);
-			pauseStream(&milk->audio, -1);
+			pauseStream(&milk->audio);
 			console->state = COMMAND;
 			console->input.startTextInput();
 		}	else {
@@ -138,7 +136,7 @@ static void handleEscape(Console *console, Milk *milk) {
 				console->isGameInitialized = true;
 			}
 			resumeSound(&milk->audio, -1);
-			resumeStream(&milk->audio, -1);
+			resumeStream(&milk->audio);
 			console->state = GAME;
 			console->input.stopTextInput();
 		}
@@ -156,7 +154,7 @@ static void handleInput(Console *console, Milk *milk) {
 static void haltOnError(Console *console, Milk *milk) {
 	if (console->lastErrorCount < LOG_GET()->errorCount) {
 		pauseSound(&milk->audio, -1);
-		pauseStream(&milk->audio, -1);
+		pauseStream(&milk->audio);
 		console->lastErrorCount = LOG_GET()->errorCount;
 		console->state = COMMAND;
 		console->input.startTextInput();
@@ -184,8 +182,8 @@ static void drawCommandLine(Console *console, Milk *milk) {
 	int x = 8;
 	int y = 10;
 	drawFont(video, NULL, x, y, VERSION_HEADER, 1, primary);
-	drawFont(video, NULL, x, (y += FONT_CHAR_HEIGHT), separator, 1, primary);
-	drawFont(video, NULL, x, (y += FONT_CHAR_HEIGHT * 2), pointer, 1, primary);
+	drawFont(video, NULL, x, (y += SPRITE_SIZE), separator, 1, primary);
+	drawFont(video, NULL, x, (y += SPRITE_SIZE * 2), pointer, 1, primary);
 	drawFont(video, NULL, (x += pointerWidth + 2), y, console->candidate, 1, primary);
 	if (ticks % 64 < 48) drawFilledRect(video, x + getFontWidth(console->candidate), y, 6, 8, alert);
 }

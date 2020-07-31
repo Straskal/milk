@@ -25,7 +25,7 @@ typedef struct {
   Gamepad gamepad;
 } Input;
 
-void initInput(Input *input);
+void initializeInput(Input *input);
 void updateButtonState(Input *input, ButtonState state);
 bool isButtonDown(Input *input, ButtonState button);
 bool isButtonPressed(Input *input, ButtonState button);

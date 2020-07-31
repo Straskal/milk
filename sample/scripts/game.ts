@@ -1,9 +1,3 @@
-import { SplashState } from "./splash/state";
-import { GameplayState } from "./gameplay/state";
-import { MainMenuState } from "./mainMenu/state";
-
-const GameFont = "art/font.bmp";
-
 export interface GameState {
     updateBelow: boolean;
     drawBelow: boolean;
@@ -21,8 +15,26 @@ export class Game {
 
     private _ticks = 0;
     private _stateStack: GameState[] = [];
-    private _time = 0;
-    private _bitmap: Bitmap;
+    private _bitmap!: Bitmap;
+    private _music!: Stream;
+    private _xPos: number = 0;
+    private _tiles = [
+        40, 40, 40, 40, 40,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40,  0,  0,  6,  0,  0,  0,  0,  6,  0,  0, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40,  0,  0, 08,  0,  0,  0,  0,  6,  0,  0, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40,  0,  0,  0,  0,  0,  2,  0,  0,  0,  0, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40, 42, 42, 42, 42, 42, 42, 42, 42, 42, 42, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+        40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+    ];
 
     public get ticks() {
         return this._ticks;
@@ -33,39 +45,29 @@ export class Game {
     }
 
     public init(): void {
-        loadfont(0, GameFont);
-        this._bitmap = bitmap("art/sprsheet.bmp");
-        this._time = os.clock();
-        //this.pushState(new GameplayState());
+        this._bitmap = bitmap("art/town_tiles.bmp");
+        this._music = stream("sounds/02 Underclocked (underunderclocked mix).wav");
+        playstream(this._music, 128, true);
     }
 
     public update(): void {
         for (let i = this._stateStack.length - 1; i >= 0; i--) {
             const state = this._stateStack[i];
             state.update(this);
-
             if (!state.updateBelow)
                 break;
         }
+
+        if (btn(3))
+            this._xPos -= 1;
+        if (btn(4))
+            this._xPos += 1;
     }
 
     public draw(): void {
-        // const length = this._stateStack.length;
-        // for (let i = 0; i < length; i++) {
-        //     if (i < length - 1 && !this._stateStack[i + 1].drawBelow)
-        //         continue;
-
-        //     this._stateStack[i].draw(this);
-        // }
-
         clrs();
-
-        sprite(this._bitmap, 0, 10, 10, 2, 2);
-
+        tiles(this._bitmap, this._tiles, this._xPos, 0, 2, 2, 20);
         this._ticks++;
-
-        const fps = this.ticks / (os.clock() - this._time);
-        font(0, 190, 10, string.format("fps %.0f", fps));
     }
 
     public peek(): GameState {

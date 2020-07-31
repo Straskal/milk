@@ -1,12 +1,13 @@
 #include <stdint.h>
 
+#include "audio.h"
 #include "common.h"
-#include "wav.h"
+#include "wave.h"
 
-#define RIFF_MARKER_LE 0x46464952 // "RIFF"
-#define WAVE_MARKER_LE 0x45564157 // "WAVE"
-#define FORMAT_MARKER_LE 0x20746d66  // "fmt0"
-#define DATA_MARKER_LE 0x61746164    // "data"
+#define RIFF_MARKER_LE 0x46464952   // "RIFF"
+#define WAVE_MARKER_LE 0x45564157   // "WAVE"
+#define FORMAT_MARKER_LE 0x20746d66 // "fmt0"
+#define DATA_MARKER_LE 0x61746164   // "data"
 
 #define PCM 1
 #define MONO 1
@@ -55,93 +56,85 @@ static bool readWavHeader(WavHeader *header, FILE *file) {
       && VALID_CHANNEL_COUNT(header->format.channels) && VALID_SAMPLE_SIZE(header->format.bitsPerSample);
 }
 
-bool loadWavSound(SoundData *soundData, const char *filename) {
+Wave *loadWave(const char *filename) {
   FILE *file = NULL;
   WavHeader header;
   if ((file = fopen(filename, "rb")) == NULL)
-    return -1;
+    return NULL;
   if (!readWavHeader(&header, file)) {
     fclose(file);
-    return -1;
+    return NULL;
   }
   int sampleSize = header.format.channels * header.format.bitsPerSample / 8;
   int sampleCount = (int)header.data.size / sampleSize;
   int signalSize = sampleSize * sampleCount;
-  int16_t *samples = (int16_t *) calloc(1, (size_t)signalSize);
+  int16_t *samples = malloc((size_t)signalSize);
   if (fread(samples, signalSize, 1, file) != 1) {
     free(samples);
     fclose(file);
-    return false;
+    return NULL;
   }
-  soundData->samples = samples;
-  soundData->sampleCount = (int) (signalSize / sizeof(int16_t));
-  soundData->channelCount = header.format.channels;
+  Wave *wave = malloc(sizeof(Wave));
+  wave->samples = samples;
+  wave->sampleCount = (int) (signalSize / sizeof(int16_t));
+  wave->channelCount = header.format.channels;
   fclose(file);
-  return true;
+  return wave;
 }
 
-void freeWavSound(SoundData *soundData) {
-  free(soundData->samples);
-  soundData->samples = NULL;
-  soundData->sampleCount = 0;
-  soundData->channelCount = 0;
+void freeWave(Wave *wave) {
+  free(wave->samples);
+  free(wave);
 }
 
-bool openWavStream(SoundStreamData *streamData, const char *filename)
-{
+WaveStream *openWaveStream(const char *filename) {
   FILE *file = NULL;
   WavHeader header;
   if ((file = fopen(filename, "rb")) == NULL)
-    return false;
+    return NULL;
   if (!readWavHeader(&header, file)) {
     fclose(file);
-    return false;
+    return NULL;
   }
   uint32_t sampleSize = header.format.channels * header.format.bitsPerSample / 8;
   uint32_t sampleCount = header.data.size / sampleSize;
   uint32_t signalSize = sampleSize * sampleCount;
-  streamData->file = file;
-  streamData->chunk = (int16_t *) calloc(1, AUDIO_CHUNK_SIZE);
-  streamData->sampleCount = 0;
-  streamData->channelCount = header.format.channels;
-  streamData->start = ftell(file);
-  streamData->end = streamData->start + (long) signalSize;
-  return true;
+  WaveStream *waveStream = malloc(sizeof(WaveStream));
+  waveStream->chunk = calloc(1, AUDIO_CHUNK_SIZE);
+  waveStream->file = file;
+  waveStream->sampleCount = 0;
+  waveStream->channelCount = header.format.channels;
+  waveStream->start = ftell(file);
+  waveStream->end = waveStream->start + (long) signalSize;
+  return waveStream;
 }
 
-void closeWavStream(SoundStreamData *streamData)
-{
-  free(streamData->chunk);
-  fclose(streamData->file);
-  streamData->file = NULL;
-  streamData->chunk = NULL;
-  streamData->sampleCount = 0;
-  streamData->channelCount = 0;
-  streamData->position = 0;
-  streamData->start = 0;
-  streamData->end = 0;
+void closeWaveStream(WaveStream *waveStream) {
+  fclose(waveStream->file);
+  free(waveStream->chunk);
+  free(waveStream);
 }
 
-bool wavStreamRead(SoundStreamData *streamData, int numSamples, bool loop) {
+bool readWaveStream(WaveStream *waveStream, int numSamples, bool loop) {
   long totalBytesRead = 0;
   long requestedBytes = numSamples * (long)sizeof(int16_t);
-  long remainingBytes = streamData->end - streamData->position;
+  long remainingBytes = waveStream->end - waveStream->position;
   long bytesToRead = MIN(remainingBytes, requestedBytes);
-  fread(streamData->chunk, (size_t)bytesToRead, 1, streamData->file);
+  fread(waveStream->chunk, (size_t)bytesToRead, 1, waveStream->file);
   totalBytesRead += bytesToRead;
-  bool finished = ftell(streamData->file) == streamData->end;
+  bool finished = ftell(waveStream->file) == waveStream->end;
   if (finished && loop) {
     bytesToRead = requestedBytes - remainingBytes;
-    fseek(streamData->file, streamData->start, SEEK_SET);
-    fread(streamData->chunk + (bytesToRead / sizeof(int16_t)) + 1, (size_t)bytesToRead, 1, streamData->file);
+    fseek(waveStream->file, waveStream->start, SEEK_SET);
+    fread(waveStream->chunk + (bytesToRead / sizeof(int16_t)) + 1, (size_t)bytesToRead, 1, waveStream->file);
     totalBytesRead += bytesToRead;
   }
-  streamData->sampleCount = (int) (totalBytesRead / sizeof(int16_t));
-  streamData->position = ftell(streamData->file);
+  waveStream->sampleCount = (int) (totalBytesRead / sizeof(int16_t));
+  waveStream->position = ftell(waveStream->file);
   return finished && !loop;
 }
 
-void wavStreamSeekStart(SoundStreamData *streamData) {
-  fseek(streamData->file, streamData->start, SEEK_SET);
-  streamData->position = streamData->start;
+void waveStreamSeekStart(WaveStream *waveStream) {
+  fseek(waveStream->file, waveStream->start, SEEK_SET);
+  waveStream->position = waveStream->start;
 }

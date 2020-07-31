@@ -4,17 +4,15 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "bitmap.h"
+
 #define FRAMERATE 50
 #define FRAMEBUFFER_WIDTH 320
 #define FRAMEBUFFER_HEIGHT 224
-#define WINDOW_WIDTH (FRAMEBUFFER_WIDTH * 3)
-#define WINDOW_HEIGHT (FRAMEBUFFER_HEIGHT * 3)
 #define SPRITE_SIZE 8
-#define FONT_WIDTH 96
-#define FONT_HEIGHT 64
-#define FONT_CHAR_WIDTH 8
-#define FONT_CHAR_HEIGHT 8
-#define FONT_CHAR_SPACING 6
+#define EMBED_FONT_WIDTH 96
+#define EMBED_FONT_HEIGHT 64
+#define FONT_SPRITE_SPACING 6
 
 typedef enum {
   Additive,
@@ -30,22 +28,14 @@ typedef struct {
 } Rect;
 
 typedef struct {
-  uint32_t *pixels;
-  int width;
-  int height;
-} Bitmap;
-
-typedef struct {
   uint32_t framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
-  uint32_t embeddedFont[FONT_WIDTH * FONT_HEIGHT];
+  uint32_t embeddedFont[EMBED_FONT_WIDTH * EMBED_FONT_HEIGHT];
   uint32_t colorKey;
   Rect clipRect;
 } Video;
 
 void initializeVideo(Video *video);
 void disableVideo(Video *video);
-Bitmap *loadBitmap(const char *filePath);
-void freeBitmap(Bitmap *bitmap);
 void resetDrawState(Video *video);
 void setClip(Video *video, int x, int y, int w, int h);
 void clearFramebuffer(Video *video, uint32_t color);

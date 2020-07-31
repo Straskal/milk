@@ -5,7 +5,9 @@
 #include "milk.h"
 
 #define SDL_FIRST_AVAILABLE_RENDERER -1
-#define MILK_FRAMEBUF_PITCH (FRAMEBUFFER_WIDTH * 4)
+#define FRAMEBUFFER_PITCH (FRAMEBUFFER_WIDTH * sizeof(uint32_t))
+#define WINDOW_WIDTH (FRAMEBUFFER_WIDTH * 3)
+#define WINDOW_HEIGHT (FRAMEBUFFER_HEIGHT * 3)
 
 static Milk *milk;
 static Console *console;
@@ -153,7 +155,7 @@ static void loopFrame() {
 }
 
 static void flipFramebuffer() {
-  SDL_UpdateTexture(frontBufferTexture, NULL, (void *) milk->video.framebuffer, MILK_FRAMEBUF_PITCH);
+  SDL_UpdateTexture(frontBufferTexture, NULL, (void *) milk->video.framebuffer, FRAMEBUFFER_PITCH);
   SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
   SDL_RenderPresent(renderer);
 }

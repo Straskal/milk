@@ -1,7 +1,7 @@
 #include "common.h"
 #include "gamepad.h"
 
-void initInput(Input *input) {
+void initializeInput(Input *input) {
   input->gamepad.buttonState = BTN_NONE;
   input->gamepad.previousButtonState = BTN_NONE;
 }
