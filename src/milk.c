@@ -56,7 +56,7 @@ static int l_bitmap_gc(lua_State *L) {
 static int l_sprite(lua_State *L) {
 	LuaObject *luaObj = (LuaObject *)lua_touserdata(L, 1);
 	Bitmap *bmp = (Bitmap *)luaObj->handle;
-	sprite(
+	drawSprite(
 		&globalMilk->video, bmp,
 		(int)lua_tointeger(L, 2),
 		(int)floor(lua_tonumber(L, 3)),
@@ -86,7 +86,7 @@ static int l_tiles(lua_State *L) {
 		lua_rawgeti(L, 5, i);
 		int sprIndex = lua_tointeger(L, -1);
 		lua_pop(L, 1);
-		sprite(&globalMilk->video, bmp, sprIndex, xCurrent, y, 2, 2, 1, 0, 0x00, Additive);
+		drawSprite(&globalMilk->video, bmp, sprIndex, xCurrent, y, 2, 2, 1, 0, 0x00, Additive);
 		xCurrent += 16;
 		if (i++ % w == 0) {
 			xCurrent = x;
@@ -112,7 +112,7 @@ static int l_btnp(lua_State *L) {
 }
 
 static int l_clip(lua_State *L) {
-	clip(&globalMilk->video,
+	setClip(&globalMilk->video,
 		(int)lua_tointeger(L, 1),
 		(int)lua_tointeger(L, 2),
 		(int)lua_tointeger(L, 3),
@@ -128,7 +128,7 @@ static int l_clrs(lua_State *L) {
 }
 
 static int l_pset(lua_State *L) {
-	pixel(&globalMilk->video,
+	drawPixel(&globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(uint32_t)lua_tointeger(L, 3)
@@ -137,7 +137,7 @@ static int l_pset(lua_State *L) {
 }
 
 static int l_line(lua_State *L) {
-	line(&globalMilk->video,
+	drawLine(&globalMilk->video,
 		(int)lua_tointeger(L, 1),
 		(int)lua_tointeger(L, 2),
 		(int)lua_tointeger(L, 3),
@@ -148,7 +148,7 @@ static int l_line(lua_State *L) {
 }
 
 static int l_rect(lua_State *L) {
-	rect(&globalMilk->video,
+	drawRect(&globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
@@ -159,7 +159,7 @@ static int l_rect(lua_State *L) {
 }
 
 static int l_rectfill(lua_State *L) {
-	rectFill(&globalMilk->video,
+	drawFilledRect(&globalMilk->video,
 		(int)floor(lua_tonumber(L, 1)),
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
@@ -175,7 +175,7 @@ static int l_font(lua_State *L) {
 	LuaObject *luaObj = lua_touserdata(L, 1);
 	if (luaObj) bmp = luaObj->handle;
 
-	font(&globalMilk->video,
+	drawFont(&globalMilk->video,
 		bmp,
 		(int)floor(lua_tonumber(L, 2)),
 		(int)floor(lua_tonumber(L, 3)),

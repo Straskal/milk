@@ -9,7 +9,7 @@
 #define FRAMEBUFFER_HEIGHT 224
 #define WINDOW_WIDTH (FRAMEBUFFER_WIDTH * 3)
 #define WINDOW_HEIGHT (FRAMEBUFFER_HEIGHT * 3)
-#define FONTS_MAX 2
+#define SPRITE_SIZE 8
 #define FONT_WIDTH 96
 #define FONT_HEIGHT 64
 #define FONT_CHAR_WIDTH 8
@@ -47,14 +47,14 @@ void disableVideo(Video *video);
 Bitmap *loadBitmap(const char *filePath);
 void freeBitmap(Bitmap *bitmap);
 void resetDrawState(Video *video);
-void clip(Video *video, int x, int y, int w, int h);
+void setClip(Video *video, int x, int y, int w, int h);
 void clearFramebuffer(Video *video, uint32_t color);
-void pixel(Video *video, int x, int y, uint32_t color);
-void line(Video *video, int x0, int y0, int x1, int y1, uint32_t color);
-void rect(Video *video, int x, int y, int w, int h, uint32_t color);
-void rectFill(Video *video, int x, int y, int w, int h, uint32_t color);
-void sprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h, float scale, uint8_t flip, uint32_t color, ColorMode mode);
-void font(Video *video, Bitmap *bmp, int x, int y, const char *str, int scale, uint32_t color);
-int fontWidth(const char *text);
+void drawPixel(Video *video, int x, int y, uint32_t color);
+void drawLine(Video *video, int x0, int y0, int x1, int y1, uint32_t color);
+void drawRect(Video *video, int x, int y, int w, int h, uint32_t color);
+void drawFilledRect(Video *video, int x, int y, int w, int h, uint32_t color);
+void drawSprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h, float scale, uint8_t flip, uint32_t color, ColorMode mode);
+void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *str, int scale, uint32_t color);
+int getFontWidth(const char *text);
 
 #endif
