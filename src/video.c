@@ -40,6 +40,7 @@ void disableVideo(Video *video) {
   memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
 }
 
+// TODO: Remove SDL and write custom loader.
 Bitmap *loadBitmap(const char *filePath) {
   SDL_Surface *surface = SDL_LoadBMP(filePath);
   if (surface == NULL) return NULL;
@@ -87,10 +88,9 @@ void clip(Video *video, int x, int y, int w, int h) {
 
 void clearFramebuffer(Video *video, uint32_t color) {
   Rect clip = video->clipRect;
-  for (int y = clip.top; y < clip.bottom; y++) {
-    for (int x = clip.left; x < clip.right; x++)
-      video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
-  }
+  size_t width = (clip.right - clip.left) * sizeof(uint32_t);
+  for (int y = clip.top; y < clip.bottom; y++)
+    memset(&video->framebuffer[FRAMEBUFFER_POS(clip.left, y)], color, width);
 }
 
 void pixel(Video *video, int x, int y, uint32_t color) {
@@ -200,8 +200,8 @@ void sprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h, fl
     int heightPx = h * 8;
     int yPx = row * bmp->width * 8;
     int xPx = column * 8;
-    uint32_t *pixels = &bmp->pixels[yPx = xPx];
-    blitBuffer(video, pixels, x, y, widthPx, heightPx, SPRITE_SHEET_SQRSIZE, scale, flip, color, mode);
+    uint32_t *pixels = &bmp->pixels[yPx + xPx];
+    blitBuffer(video, pixels, x, y, widthPx, heightPx, bmp->width, scale, flip, color, mode);
   }
 }
 
