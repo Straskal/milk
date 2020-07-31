@@ -121,7 +121,7 @@ void setMasterVolume(Audio *audio, int volume) {
   audio->masterVolume = CLAMP(volume, 0, MAX_VOLUME);
 }
 
-static void mixSamples(int16_t *destination, const int16_t *source, int numSamples, int numChannels, int volume) {
+static void __mixSamples(int16_t *destination, const int16_t *source, int numSamples, int numChannels, int volume) {
   int16_t sourceSample, destSample;
   while (numSamples--) {
     sourceSample = (*source++ * volume) / MAX_VOLUME;
@@ -140,7 +140,7 @@ void mixSamplesIntoStream(Audio *audio, int16_t *stream, int numSamples) {
     WaveStream *streamData = audio->streamSlot.data;
     if (streamData->channelCount == 1) numSamples /= 2;
     bool finished = readWaveStream(streamData, numSamples, audio->streamSlot.loop);
-    mixSamples(stream, streamData->chunk, streamData->sampleCount, streamData->channelCount, audio->streamSlot.volume);
+    __mixSamples(stream, streamData->chunk, streamData->sampleCount, streamData->channelCount, audio->streamSlot.volume);
     if (finished) audio->streamSlot.state = STOPPED;
   }
   SoundSlot *slots = audio->soundSlots;
@@ -149,7 +149,7 @@ void mixSamplesIntoStream(Audio *audio, int16_t *stream, int numSamples) {
       if (slots[i].remainingSamples > 0) {
         int samplesToMix = MIN(slots[i].remainingSamples, numSamples);
         if (slots[i].soundData->channelCount == 1) samplesToMix /= 2;
-        mixSamples(stream, slots[i].position, samplesToMix, slots[i].soundData->channelCount, slots[i].volume);
+        __mixSamples(stream, slots[i].position, samplesToMix, slots[i].soundData->channelCount, slots[i].volume);
         slots[i].position += samplesToMix;
         slots[i].remainingSamples -= samplesToMix;
       } else {

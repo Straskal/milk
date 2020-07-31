@@ -313,43 +313,43 @@ static int l_exit(lua_State *L) {
 	return 0;
 }
 
-static void __register_milk(lua_State *L, Milk *milk) {
+static void __pushMilkToRegistry(lua_State *L, Milk *milk) {
 	lua_pushlightuserdata(L, (void *)&MilkRegistryKey);
 	lua_pushlightuserdata(L, (void *)milk);
 	lua_settable(L, LUA_REGISTRYINDEX);
 }
 
-static void __push_api_func(lua_State *L, const char *name, int(*api_func)(lua_State *)) {
+static void __pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_State *)) {
 	lua_pushcfunction(L, api_func);
 	lua_setglobal(L, name);
 }
 
-static void __push_api(lua_State *L) {
-	__push_api_func(L, "btn", l_btn);
-	__push_api_func(L, "btnp", l_btnp);
-	__push_api_func(L, "bitmap", l_bitmap);
-	__push_api_func(L, "clip", l_clip);
-	__push_api_func(L, "clrs", l_clrs);
-	__push_api_func(L, "pset", l_pset);
-	__push_api_func(L, "line", l_line);
-	__push_api_func(L, "rect", l_rect);
-	__push_api_func(L, "rectfill", l_rectfill);
-	__push_api_func(L, "sprite", l_sprite);
-	__push_api_func(L, "tiles", l_tiles);
-	__push_api_func(L, "font", l_font);
-	__push_api_func(L, "wave", l_wave);
-	__push_api_func(L, "stream", l_wavestream);
-	__push_api_func(L, "play", l_play);
-  __push_api_func(L, "pause", l_pause);
-	__push_api_func(L, "stop", l_stop);
-	__push_api_func(L, "resume", l_resume);
-	__push_api_func(L, "playstream", l_playstream);
-  __push_api_func(L, "stopstream", l_stopstream);
-  __push_api_func(L, "pausestream", l_pausestream);
-  __push_api_func(L, "resumestream", l_resumestream);
-	__push_api_func(L, "sndslot", l_sndslot);
-	__push_api_func(L, "vol", l_vol);
-	__push_api_func(L, "exit", l_exit);
+static void __pushApi(lua_State *L) {
+	__pushApiFunction(L, "btn", l_btn);
+	__pushApiFunction(L, "btnp", l_btnp);
+	__pushApiFunction(L, "bitmap", l_bitmap);
+	__pushApiFunction(L, "clip", l_clip);
+	__pushApiFunction(L, "clrs", l_clrs);
+	__pushApiFunction(L, "pset", l_pset);
+	__pushApiFunction(L, "line", l_line);
+	__pushApiFunction(L, "rect", l_rect);
+	__pushApiFunction(L, "rectfill", l_rectfill);
+	__pushApiFunction(L, "sprite", l_sprite);
+	__pushApiFunction(L, "tiles", l_tiles);
+	__pushApiFunction(L, "font", l_font);
+	__pushApiFunction(L, "wave", l_wave);
+	__pushApiFunction(L, "stream", l_wavestream);
+	__pushApiFunction(L, "play", l_play);
+  __pushApiFunction(L, "pause", l_pause);
+	__pushApiFunction(L, "stop", l_stop);
+	__pushApiFunction(L, "resume", l_resume);
+	__pushApiFunction(L, "playstream", l_playstream);
+  __pushApiFunction(L, "stopstream", l_stopstream);
+  __pushApiFunction(L, "pausestream", l_pausestream);
+  __pushApiFunction(L, "resumestream", l_resumestream);
+	__pushApiFunction(L, "sndslot", l_sndslot);
+	__pushApiFunction(L, "vol", l_vol);
+	__pushApiFunction(L, "exit", l_exit);
 }
 
 static void __registerLuaObj(lua_State *L, const char* name, lua_CFunction gc) {
@@ -366,8 +366,8 @@ void loadCode(Milk *milk) {
 		lua_State *L = luaL_newstate();
 		milk->code.state = (void *)L;
 		luaL_openlibs(L);
-		__register_milk(L, milk);
-		__push_api(L);
+		__pushMilkToRegistry(L, milk);
+		__pushApi(L);
 		__registerLuaObj(L, BITMAP_META, l_bitmap_gc);
 		__registerLuaObj(L, WAVE_META, l_wave_gc);
 		__registerLuaObj(L, WAVESTREAM_META, l_wavestream_gc);

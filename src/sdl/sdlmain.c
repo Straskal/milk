@@ -16,7 +16,7 @@ static SDL_Renderer *renderer;
 static SDL_Texture *frontBufferTexture;
 static SDL_AudioDeviceID audioDevice;
 
-static void initModules() {
+static void __initModules() {
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
     printf("Error initializing SDL: %s", SDL_GetError());
     exit(1);
@@ -32,7 +32,7 @@ static void initModules() {
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
 }
 
-static void freeModules() {
+static void __freeModules() {
   unloadCode(milk);
   SDL_CloseAudioDevice(audioDevice);
   SDL_DestroyTexture(frontBufferTexture);
@@ -43,44 +43,44 @@ static void freeModules() {
   SDL_Quit();
 }
 
-static void lockAudioDevice() {
+static void __lockAudioDevice() {
   SDL_LockAudioDevice(audioDevice);
 }
 
-static void unlockAudioDevice() {
+static void __unlockAudioDevice() {
   SDL_UnlockAudioDevice(audioDevice);
 }
 
-static void mixCallback(void *userData, uint8_t *stream, int numBytes) {
+static void __mixCallback(void *userData, uint8_t *stream, int numBytes) {
   // SDL doesn't guarantee that the output buffer is silent.
   memset(stream, 0, (size_t)numBytes);
   mixSamplesIntoStream((Audio *) userData, (int16_t *) stream, (int) (numBytes / sizeof(int16_t)));
 }
 
-static void startTextInput() {
+static void __startTextInput() {
   SDL_StartTextInput();
 }
 
-static void stopTextInput() {
+static void __stopTextInput() {
   SDL_StopTextInput();
 }
 
 // TODO: This should be made clearer.
-static void setInterfaceFunctions() {
-  milk->audio.lock = lockAudioDevice;
-  milk->audio.unlock = unlockAudioDevice;
-  console->input.startTextInput = startTextInput;
-  console->input.stopTextInput = stopTextInput;
+static void __setInterfaceFunctions() {
+  milk->audio.lock = __lockAudioDevice;
+  milk->audio.unlock = __unlockAudioDevice;
+  console->input.startTextInput = __startTextInput;
+  console->input.stopTextInput = __stopTextInput;
 }
 
-static void setupAudioDevice() {
+static void __setupAudioDevice() {
   SDL_AudioSpec wantedSpec;
   SDL_AudioSpec actualSpec;
   wantedSpec.freq = AUDIO_FREQUENCY;
   wantedSpec.format = AUDIO_S16LSB;
   wantedSpec.channels = AUDIO_OUTPUT_CHANNELS;
   wantedSpec.samples = 4096;
-  wantedSpec.callback = mixCallback;
+  wantedSpec.callback = __mixCallback;
   wantedSpec.userdata = (void *) &milk->audio;
   audioDevice = SDL_OpenAudioDevice(NULL, 0, &wantedSpec, &actualSpec, 0);
   if (wantedSpec.format != actualSpec.format || wantedSpec.channels != actualSpec.channels
@@ -92,7 +92,7 @@ static void setupAudioDevice() {
   SDL_PauseAudioDevice(audioDevice, noDontPauseIt_PlayItInstead);
 }
 
-static void pollInput() {
+static void __pollInput() {
   ButtonState btnState = BTN_NONE;
 
 #ifdef BUILD_WITH_CONSOLE
@@ -144,7 +144,7 @@ static void pollInput() {
   updateButtonState(&milk->input, btnState);
 }
 
-static void loopFrame() {
+static void __loopFrame() {
 #ifdef BUILD_WITH_CONSOLE
   updateConsole(console, milk);
   drawConsole(console, milk);
@@ -154,7 +154,7 @@ static void loopFrame() {
 #endif
 }
 
-static void flipFramebuffer() {
+static void __flipFramebuffer() {
   SDL_UpdateTexture(frontBufferTexture, NULL, (void *) milk->video.framebuffer, FRAMEBUFFER_PITCH);
   SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
   SDL_RenderPresent(renderer);
@@ -163,10 +163,10 @@ static void flipFramebuffer() {
 int main(int argc, char *argv[]) {
   UNUSED(argc);
   UNUSED(argv);
-  atexit(freeModules);
-  initModules();
-  setInterfaceFunctions();
-  setupAudioDevice();
+  atexit(__freeModules);
+  __initModules();
+  __setInterfaceFunctions();
+  __setupAudioDevice();
 
 #ifndef BUILD_WITH_CONSOLE
   loadCode(milk);
@@ -177,9 +177,9 @@ int main(int argc, char *argv[]) {
   Uint64 accumulator = 0;
   while (!milk->shouldQuit) {
     accumulator += deltaTime;
-    pollInput();
-    loopFrame();
-    flipFramebuffer();
+    __pollInput();
+    __loopFrame();
+    __flipFramebuffer();
     Sint64 delay = accumulator - SDL_GetPerformanceCounter();
     if (delay < 0) accumulator -= delay;
     else SDL_Delay((Uint32)(delay * 1000 / SDL_GetPerformanceFrequency()));

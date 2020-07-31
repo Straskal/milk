@@ -49,7 +49,7 @@ typedef struct {
   DataChunk data;
 } WavHeader;
 
-static bool readWavHeader(WavHeader *header, FILE *file) {
+static bool __readHeader(WavHeader *header, FILE *file) {
   return fread(header, sizeof(WavHeader), 1, file) == 1 && VALID_FORMAT_TYPE(header->format.type)
       && VALID_RIFF_MARKER(header->riff.riff) && VALID_WAVE_MARKER(header->riff.wave)
       && VALID_FORMAT_MARKER(header->format.marker) && VALID_DATA_MARKER(header->data.marker)
@@ -61,7 +61,7 @@ Wave *loadWave(const char *filename) {
   WavHeader header;
   if ((file = fopen(filename, "rb")) == NULL)
     return NULL;
-  if (!readWavHeader(&header, file)) {
+  if (!__readHeader(&header, file)) {
     fclose(file);
     return NULL;
   }
@@ -92,7 +92,7 @@ WaveStream *openWaveStream(const char *filename) {
   WavHeader header;
   if ((file = fopen(filename, "rb")) == NULL)
     return NULL;
-  if (!readWavHeader(&header, file)) {
+  if (!__readHeader(&header, file)) {
     fclose(file);
     return NULL;
   }

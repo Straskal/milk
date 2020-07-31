@@ -18,7 +18,7 @@ static const uint32_t dark = 0x5c5c5c;
 static const uint32_t alert = 0xbf4040;
 static const uint32_t warn = 0xffec27;
 
-static void cmdUnload(Console *console, Milk *milk, char *argument) {
+static void __cmdUnload(Console *console, Milk *milk, char *argument) {
 	UNUSED(console);
 	UNUSED(argument);
 	unloadCode(milk);
@@ -26,7 +26,7 @@ static void cmdUnload(Console *console, Milk *milk, char *argument) {
 	LOG_INFO("Game has been unloaded");
 }
 
-static void cmdClear(Console *console, Milk *milk, char *argument) {
+static void __cmdClear(Console *console, Milk *milk, char *argument) {
 	UNUSED(console);
 	UNUSED(milk);
 	UNUSED(argument);
@@ -34,7 +34,7 @@ static void cmdClear(Console *console, Milk *milk, char *argument) {
 	console->lastErrorCount = 0;
 }
 
-static void cmdQuit(Console *console, Milk *milk, char *argument) {
+static void __cmdQuit(Console *console, Milk *milk, char *argument) {
 	UNUSED(console);
 	UNUSED(argument);
 	milk->shouldQuit = true;
@@ -46,12 +46,12 @@ typedef struct {
 } Command;
 
 static Command commands[] = {
-	{"unload", cmdUnload},
-	{"clear", cmdClear},
-	{"quit", cmdQuit},
+	{"unload", __cmdUnload},
+	{"clear", __cmdClear},
+	{"quit", __cmdQuit},
 };
 
-static void resetCandidate(Console *console) {
+static void __resetCandidate(Console *console) {
 	memset(console->candidate, 0, COMMAND_MAX_LENGTH);
 	console->candidateLength = 0;
 }
@@ -59,7 +59,7 @@ static void resetCandidate(Console *console) {
 Console *createConsole() {
 	Console *console = calloc(1, sizeof(Console));
 	console->state = COMMAND;
-	resetCandidate(console);
+	__resetCandidate(console);
 	return console;
 }
 
@@ -67,42 +67,42 @@ void freeConsole(Console *console) {
 	free(console);
 }
 
-static bool hasInputContinuous(ConsoleInput *input, ConsoleInputState inputState) {
+static bool __hasInputContinuous(ConsoleInput *input, ConsoleInputState inputState) {
 	return IS_BIT_SET(input->state, inputState);
 }
 
-static bool hasInput(ConsoleInput *input, ConsoleInputState inputState) {
+static bool __hasInput(ConsoleInput *input, ConsoleInputState inputState) {
 	ConsoleInputState currentState = input->state;
 	ConsoleInputState previousState = input->previousState;
 	return IS_BIT_SET(currentState, inputState) && !IS_BIT_SET(previousState, inputState);
 }
 
-static void handleBackspace(Console *console) {
-	if (hasInputContinuous(&console->input, CONSOLE_INPUT_BACK) && console->candidateLength > 0)
+static void __handleBackspace(Console *console) {
+	if (__hasInputContinuous(&console->input, CONSOLE_INPUT_BACK) && console->candidateLength > 0)
 		console->candidate[--console->candidateLength] = '\0';
 }
 
-static void handleCharacterInput(Console *console) {
-	if (hasInputContinuous(&console->input, CONSOLE_INPUT_CHAR) && console->candidateLength < COMMAND_MAX_LENGTH - 1) 	{
+static void __handleCharacterInput(Console *console) {
+	if (__hasInputContinuous(&console->input, CONSOLE_INPUT_CHAR) && console->candidateLength < COMMAND_MAX_LENGTH - 1) 	{
 		console->candidate[console->candidateLength] = console->input.currentChar;
 		console->candidate[++console->candidateLength] = '\0';
 	}
 }
 
-static void handleGoToPreviousCommand(Console *console, Milk *milk) {
+static void __handleGoToPreviousCommand(Console *console, Milk *milk) {
 	if (isButtonPressed(&milk->input, BTN_UP) && console->previousCommandLength > 0) {
 		strcpy(console->candidate, console->previousCommand);
 		console->candidateLength = console->previousCommandLength;
 	}
 }
 
-static void handleClearCandidate(Console *console, Milk *milk) {
+static void __handleClearCandidate(Console *console, Milk *milk) {
 	if (isButtonPressed(&milk->input, BTN_DOWN))
-		resetCandidate(console);
+		__resetCandidate(console);
 }
 
-static void handleEnter(Console *console, Milk *milk) {
-	if (hasInput(&console->input, CONSOLE_INPUT_ENTER) && console->candidateLength > 0) {
+static void __handleEnter(Console *console, Milk *milk) {
+	if (__hasInput(&console->input, CONSOLE_INPUT_ENTER) && console->candidateLength > 0) {
 		int numCommands = sizeof(commands) / sizeof(Command);
 		char tempCandidate[COMMAND_MAX_LENGTH];
 		strcpy(tempCandidate, console->candidate);
@@ -113,17 +113,17 @@ static void handleEnter(Console *console, Milk *milk) {
 				commands[numCommands].execute(console, milk, token);
 				strcpy(console->previousCommand, console->candidate);
 				console->previousCommandLength = console->candidateLength;
-				resetCandidate(console);
+				__resetCandidate(console);
 				return;
 			}
 		}
 		LOG_WARN("Unknown command");
-		resetCandidate(console);
+		__resetCandidate(console);
 	}
 }
 
-static void handleEscape(Console *console, Milk *milk) {
-	if (hasInput(&console->input, CONSOLE_INPUT_ESCAPE)) {
+static void __handleEscape(Console *console, Milk *milk) {
+	if (__hasInput(&console->input, CONSOLE_INPUT_ESCAPE)) {
 		if (console->state != COMMAND) {
 			pauseSound(&milk->audio, -1);
 			pauseStream(&milk->audio);
@@ -143,15 +143,15 @@ static void handleEscape(Console *console, Milk *milk) {
 	}
 }
 
-static void handleInput(Console *console, Milk *milk) {
-	handleBackspace(console);
-	handleCharacterInput(console);
-	handleGoToPreviousCommand(console, milk);
-	handleClearCandidate(console, milk);
-	handleEnter(console, milk);
+static void __handleInput(Console *console, Milk *milk) {
+	__handleBackspace(console);
+	__handleCharacterInput(console);
+	__handleGoToPreviousCommand(console, milk);
+	__handleClearCandidate(console, milk);
+	__handleEnter(console, milk);
 }
 
-static void haltOnError(Console *console, Milk *milk) {
+static void __haltOnError(Console *console, Milk *milk) {
 	if (console->lastErrorCount < LOG_GET()->errorCount) {
 		pauseSound(&milk->audio, -1);
 		pauseStream(&milk->audio);
@@ -162,19 +162,19 @@ static void haltOnError(Console *console, Milk *milk) {
 }
 
 void updateConsole(Console *console, Milk *milk) {
-	handleEscape(console, milk);
+	__handleEscape(console, milk);
 	switch (console->state) {
 		case COMMAND:
-			handleInput(console, milk);	break;
+			__handleInput(console, milk);	break;
 		case GAME:
 			invokeUpdate(&milk->code);
-			haltOnError(console, milk);
+			__haltOnError(console, milk);
 			break;
 		default: break;
 	}
 }
 
-static void drawCommandLine(Console *console, Milk *milk) {
+static void __drawCommandLine(Console *console, Milk *milk) {
 	Video *video = &milk->video;
 	static const char *separator = "------------------------------";
 	static const char *pointer = ">";
@@ -188,7 +188,7 @@ static void drawCommandLine(Console *console, Milk *milk) {
 	if (ticks % 64 < 48) drawFilledRect(video, x + getFontWidth(console->candidate), y, 6, 8, alert);
 }
 
-static void drawPlayingIndicator(Console *console, Milk *milk) {
+static void __drawPlayingIndicator(Console *console, Milk *milk) {
 	const int size = 4;
 	const int padding = 8;
 	const int offset = size + padding;
@@ -206,7 +206,7 @@ typedef struct {
 	uint32_t color;
 } ConsoleLine;
 
-static uint32_t getLogColor(LogType type) {
+static uint32_t __getLogColor(LogType type) {
 	switch (type) {
 		case INFO: return dark;
 		case WARN: return warn;
@@ -215,7 +215,7 @@ static uint32_t getLogColor(LogType type) {
 	}
 }
 
-static void getLogLines(Logs *logs, ConsoleLine *lines, int *numLines) {
+static void __getLogLines(Logs *logs, ConsoleLine *lines, int *numLines) {
 	int currentLine = 0;
 	for (int i = logs->count - 1; i >= 0; i--) {
 		if (currentLine == MAX_LINES - 1)	break;
@@ -230,7 +230,7 @@ static void getLogLines(Logs *logs, ConsoleLine *lines, int *numLines) {
 				size_t lineLength = remainingLength > CHARS_PER_LINE - 1 ? CHARS_PER_LINE - 1 : remainingLength;
 				strncpy(lines[currentLine].text, messageText, lineLength);
 				lines[currentLine].text[lineLength] = '\0';
-				lines[currentLine].color = getLogColor(logs->messages[i].type);
+				lines[currentLine].color = __getLogColor(logs->messages[i].type);
 				messageLength -= lineLength;
 				messageText += lineLength;
 				currentLine++;
@@ -241,10 +241,10 @@ static void getLogLines(Logs *logs, ConsoleLine *lines, int *numLines) {
 	*numLines = currentLine;
 }
 
-static void drawLogLines(Milk *milk) {
+static void __drawLogLines(Milk *milk) {
 	ConsoleLine lines[MAX_LINES];
 	int numLines;
-	getLogLines(LOG_GET(), lines, &numLines);
+	__getLogLines(LOG_GET(), lines, &numLines);
 	for (int i = 0; i < numLines; i++)
 		drawFont(&milk->video, NULL, 8, LOG_START_HEIGHT + ((8 + 2) * i), lines[i].text, 1, lines[i].color);
 }
@@ -253,13 +253,13 @@ void drawConsole(Console *console, Milk *milk) {
 	switch (console->state) {
 		case COMMAND:
 			clearFramebuffer(&milk->video, 0x000000);
-			drawCommandLine(console, milk);
-			drawPlayingIndicator(console, milk);
-			drawLogLines(milk);
+			__drawCommandLine(console, milk);
+			__drawPlayingIndicator(console, milk);
+			__drawLogLines(milk);
 			break;
 		case GAME:
 			invokeDraw(&milk->code);
-			haltOnError(console, milk);
+			__haltOnError(console, milk);
 			break;
 		default: break;
 	}
