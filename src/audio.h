@@ -40,9 +40,6 @@ typedef struct {
 	SoundSlot soundSlots[MAX_SOUND_SLOTS];
 	StreamSlot streamSlot;
 	int masterVolume;
-
-	void (*lock)();
-	void (*unlock)();
 } Audio;
 
 void initializeAudio(Audio *audio);

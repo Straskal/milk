@@ -38,6 +38,7 @@ set(MILK_SRC_FILES
 	src/gamepad.h
 	src/logs.c
 	src/logs.h
+	src/platform.h
 	src/wave.c
 	src/wave.h
 	src/video.c

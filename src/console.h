@@ -16,9 +16,6 @@ typedef enum {
 } ConsoleInputState;
 
 typedef struct {
-  void (*startTextInput)();
-  void (*stopTextInput)();
-
   ConsoleInputState state;
   ConsoleInputState previousState;
   char currentChar;

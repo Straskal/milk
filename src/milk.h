@@ -5,6 +5,7 @@
 
 #include "audio.h"
 #include "gamepad.h"
+#include "platform.h"
 #include "video.h"
 
 typedef struct {
@@ -16,7 +17,6 @@ typedef struct {
 	Video video;
 	Audio audio;
 	Code  code;
-	bool  shouldQuit;
 } Milk;
 
 Milk *createMilk();

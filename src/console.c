@@ -1,6 +1,7 @@
 #include "common.h"
 #include "console.h"
 #include "logs.h"
+#include "platform.h"
 
 #include <ctype.h>
 #include <string.h>
@@ -36,8 +37,9 @@ static void __cmdClear(Console *console, Milk *milk, char *argument) {
 
 static void __cmdQuit(Console *console, Milk *milk, char *argument) {
 	UNUSED(console);
+	UNUSED(milk);
 	UNUSED(argument);
-	milk->shouldQuit = true;
+	SET_BIT(getPlatform()->flags, PLATFORM_QUIT);
 }
 
 typedef struct {
@@ -128,7 +130,7 @@ static void __handleEscape(Console *console, Milk *milk) {
 			pauseSound(&milk->audio, -1);
 			pauseStream(&milk->audio);
 			console->state = COMMAND;
-			console->input.startTextInput();
+			getPlatform()->startTextInput();
 		}	else {
 			if (!console->isGameInitialized) {
 				loadCode(milk);
@@ -138,7 +140,7 @@ static void __handleEscape(Console *console, Milk *milk) {
 			resumeSound(&milk->audio, -1);
 			resumeStream(&milk->audio);
 			console->state = GAME;
-			console->input.stopTextInput();
+			getPlatform()->stopTextInput();
 		}
 	}
 }
@@ -157,7 +159,7 @@ static void __haltOnError(Console *console, Milk *milk) {
 		pauseStream(&milk->audio);
 		console->lastErrorCount = LOG_GET()->errorCount;
 		console->state = COMMAND;
-		console->input.startTextInput();
+		getPlatform()->startTextInput();
 	}
 }
 

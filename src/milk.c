@@ -8,6 +8,7 @@
 #include "common.h"
 #include "logs.h"
 #include "milk.h"
+#include "platform.h"
 
 #define BITMAP_META "bitmap"
 #define WAVE_META "wave"
@@ -21,7 +22,6 @@ typedef struct {
 
 Milk *createMilk() {
 	Milk *milk = malloc(sizeof(Milk));
-	milk->shouldQuit = false;
 	milk->code.state = NULL;
 	initializeInput(&milk->input);
 	initializeVideo(&milk->video);
@@ -309,7 +309,7 @@ static int l_vol(lua_State *L) {
 
 static int l_exit(lua_State *L) {
 	UNUSED(L);
-	__getMilkFromReg(L)->shouldQuit = true;
+	SET_BIT(getPlatform()->flags, PLATFORM_QUIT);
 	return 0;
 }
 

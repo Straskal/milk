@@ -10,5 +10,6 @@
 #define FLOOR(x) (floor((double)(x)))
 #define SIGN(x) ((x > 0) - (x < 0))
 #define IS_BIT_SET(val, bit) ((val & bit) > 0)
+#define SET_BIT(val, bit) (val |= bit)
 
 #endif
