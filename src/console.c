@@ -22,7 +22,7 @@ static const uint32_t warn = 0xffec27;
 static void __cmdUnload(Console *console, Milk *milk, char *argument) {
 	UNUSED(console);
 	UNUSED(argument);
-	disableCode(milk);
+	unloadScripts(milk);
 	console->isGameInitialized = false;
 	LOG_INFO("Game has been unloaded");
 }
@@ -133,7 +133,7 @@ static void __handleEscape(Console *console, Milk *milk) {
 			platform_startTextInput();
 		}	else {
 			if (!console->isGameInitialized) {
-				initializeCode(milk);
+				loadScripts(milk);
 				console->isGameInitialized = true;
 			}
 			resumeSound(&milk->audio, -1);
@@ -248,7 +248,8 @@ void updateConsole(Console *console, Milk *milk) {
 			__drawLogLines(milk);
 			break;
 		case GAME:
-			updateCode(&milk->code);
+			invokeUpdate(milk);
+			invokeDraw(milk);
 			__haltOnError(console, milk);
 			break;
 		default: break;

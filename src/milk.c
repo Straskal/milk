@@ -297,7 +297,7 @@ static int l_exit(lua_State *L) {
 	return 0;
 }
 
-static void __pushMilkToRegistry(lua_State *L, Milk *milk) {
+static void __registerMilk(lua_State *L, Milk *milk) {
 	lua_pushlightuserdata(L, (void *)&MilkRegistryKey);
 	lua_pushlightuserdata(L, (void *)milk);
 	lua_settable(L, LUA_REGISTRYINDEX);
@@ -308,7 +308,7 @@ static void __pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua
 	lua_setglobal(L, name);
 }
 
-static void __pushApi(lua_State *L) {
+static void __registerApiFunctions(lua_State *L) {
 	__pushApiFunction(L, "btn", l_btn);
 	__pushApiFunction(L, "btnp", l_btnp);
 	__pushApiFunction(L, "bitmap", l_bitmap);
@@ -336,7 +336,7 @@ static void __pushApi(lua_State *L) {
 	__pushApiFunction(L, "exit", l_exit);
 }
 
-static void __registerLuaObj(lua_State *L, const char* name, lua_CFunction gc) {
+static void __registerMetatable(lua_State *L, const char* name, lua_CFunction gc) {
 	luaL_newmetatable(L, name);
 	lua_pushcfunction(L, gc);
 	lua_setfield(L, -2, "__gc");
@@ -351,55 +351,56 @@ Milk *createMilk() {
 	initializeInput(&milk->input);
 	initializeVideo(&milk->video);
 	initializeAudio(&milk->audio);
-	milk->code.state = NULL;
-	//initializeCode(milk);
 	return milk;
 }
 
 void freeMilk(Milk *milk) {
-	disableCode(milk);
 	disableAudio(&milk->audio);
 	disableVideo(&milk->video);
 	free(milk);
 }
 
-void initializeCode(Milk *milk) {
-	if (milk->code.state == NULL) 	{
-		lua_State *L = luaL_newstate();
-		milk->code.state = (void *)L;
-		luaL_openlibs(L);
-		__pushMilkToRegistry(L, milk);
-		__pushApi(L);
-		__registerLuaObj(L, BITMAP_META, l_bitmap_gc);
-		__registerLuaObj(L, WAVE_META, l_wave_gc);
-		__registerLuaObj(L, WAVESTREAM_META, l_wavestream_gc);
-		if (luaL_dofile(L, "main.lua"))
-			LOG_ERROR(lua_tostring(L, -1));
-		lua_getglobal(L, "_init");
-		if (lua_pcall(L, 0, 0, 0) != 0) {
-			LOG_ERROR(lua_tostring(L, -1));
-			lua_pop(L, -1);
-		}
+void loadScripts(Milk *milk) {
+	lua_State *L = luaL_newstate();
+	milk->code.state = (void *)L;
+	luaL_openlibs(L);
+	__registerMilk(L, milk);
+	__registerApiFunctions(L);
+	__registerMetatable(L, BITMAP_META, l_bitmap_gc);
+	__registerMetatable(L, WAVE_META, l_wave_gc);
+	__registerMetatable(L, WAVESTREAM_META, l_wavestream_gc);
+	if (luaL_dofile(L, "main.lua"))
+		LOG_ERROR(lua_tostring(L, -1));
+}
+
+void unloadScripts(Milk *milk) {
+	lua_close(milk->code.state);
+	milk->code.state = NULL;
+}
+
+void invokeInit(Milk *milk) {
+	lua_State *L = milk->code.state;
+	lua_getglobal(L, "_init");
+	if (lua_pcall(L, 0, 0, 0) != 0) {
+		LOG_ERROR(lua_tostring(L, -1));
+		lua_pop(L, -1);
 	}
 }
 
-void disableCode(Milk *milk) {
-	if (milk->code.state != NULL) {
-		lua_close(milk->code.state);
-		milk->code.state = NULL;
-	}
-}
-
-void updateCode(Code *code) {
-	lua_State *L = code->state;
+void invokeUpdate(Milk *milk) {
+	lua_State *L = milk->code.state;
 	lua_getglobal(L, "_update");
 	if (lua_pcall(L, 0, 0, 0) != 0) {
 		LOG_ERROR(lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
-	resetDrawState(video_addr(L));
+}
+
+void invokeDraw(Milk *milk) {
+	resetDrawState(&milk->video);
+	lua_State *L = milk->code.state;
 	lua_getglobal(L, "_draw");
-	if (lua_pcall(L, 0, 0, 0) != 0)	{
+	if (lua_pcall(L, 0, 0, 0) != 0) {
 		LOG_ERROR(lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}

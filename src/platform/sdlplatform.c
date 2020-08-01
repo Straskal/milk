@@ -18,7 +18,7 @@ static SDL_Texture *frontBufferTexture;
 static SDL_AudioDeviceID audioDevice;
 
 static void __freeModules() {
-  disableCode(milk);
+  unloadScripts(milk);
   SDL_CloseAudioDevice(audioDevice);
   SDL_DestroyTexture(frontBufferTexture);
   SDL_DestroyRenderer(renderer);
@@ -96,15 +96,14 @@ int main(int argc, char *argv[]) {
   const Uint64 deltaTime = SDL_GetPerformanceFrequency() / FRAMERATE;
   Uint64 accumulator = 0;
 
+  loadScripts(milk);
+  invokeInit(milk);
+
   while (running) {
     accumulator += deltaTime;
 
     {
       ButtonState btnState = BTN_NONE;
-
-#ifdef BUILD_WITH_CONSOLE
-      ConsoleInputState consoleInputState = CONSOLE_INPUT_NONE;
-#endif
 
       SDL_Event event;
       while (SDL_PollEvent(&event)) {
@@ -112,21 +111,6 @@ int main(int argc, char *argv[]) {
         case SDL_QUIT:
           platform_close();
           break;
-#ifdef BUILD_WITH_CONSOLE
-        case SDL_KEYDOWN:
-          switch (event.key.keysym.sym) {
-          case SDLK_BACKSPACE:
-            consoleInputState |= CONSOLE_INPUT_BACK;
-            break;
-          default:
-            break;
-          }
-          break;
-        case SDL_TEXTINPUT:
-          consoleInputState |= CONSOLE_INPUT_CHAR;
-          console->input.currentChar = event.text.text[0];
-          break;
-#endif
         default:
           break;
         }
@@ -151,23 +135,12 @@ int main(int argc, char *argv[]) {
       if (kbState[SDL_SCANCODE_V])
         btnState |= BTN_Y;
 
-#ifdef BUILD_WITH_CONSOLE
-      if (kbState[SDL_SCANCODE_RETURN])
-        consoleInputState |= CONSOLE_INPUT_ENTER;
-      if (kbState[SDL_SCANCODE_ESCAPE])
-        consoleInputState |= CONSOLE_INPUT_ESCAPE;
-      console->input.previousState = console->input.state;
-      console->input.state = consoleInputState;
-#endif
-
       updateButtonState(&milk->input, btnState);
     }
+
     {
-#ifdef BUILD_WITH_CONSOLE
-      updateConsole(console, milk);
-#else
-      updateCode(&milk->code);
-#endif
+      invokeUpdate(milk);
+      invokeDraw(milk);
     }
 
     {
