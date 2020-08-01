@@ -1,7 +1,6 @@
 #include <SDL.h>
 
 #include "common.h"
-#include "console.h"
 #include "milk.h"
 
 #define SDL_FIRST_AVAILABLE_RENDERER -1
@@ -11,19 +10,16 @@
 
 static bool running;
 static Milk *milk;
-static Console *console;
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 static SDL_Texture *frontBufferTexture;
 static SDL_AudioDeviceID audioDevice;
 
 static void __freeModules() {
-  unloadScripts(milk);
   SDL_CloseAudioDevice(audioDevice);
   SDL_DestroyTexture(frontBufferTexture);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
-  freeConsole(console);
   freeMilk(milk);
   SDL_Quit();
 }
@@ -65,7 +61,6 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
     milk = createMilk();
-    console = createConsole();
     window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT,
                               SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
@@ -83,7 +78,7 @@ int main(int argc, char *argv[]) {
     wantedSpec.channels = AUDIO_OUTPUT_CHANNELS;
     wantedSpec.samples = 4096;
     wantedSpec.callback = __mixCallback;
-    wantedSpec.userdata = (void *)&milk->audio;
+    wantedSpec.userdata = (void *)&milk->modules.audio;
     audioDevice = SDL_OpenAudioDevice(NULL, 0, &wantedSpec, &actualSpec, 0);
     if (wantedSpec.format != actualSpec.format || wantedSpec.channels != actualSpec.channels
     || wantedSpec.freq != actualSpec.freq || wantedSpec.samples != actualSpec.samples) {
@@ -93,11 +88,10 @@ int main(int argc, char *argv[]) {
     SDL_PauseAudioDevice(audioDevice, 0);
   }
 
+  initializeMilk(milk);
+
   const Uint64 deltaTime = SDL_GetPerformanceFrequency() / FRAMERATE;
   Uint64 accumulator = 0;
-
-  loadScripts(milk);
-  invokeInit(milk);
 
   while (running) {
     accumulator += deltaTime;
@@ -135,19 +129,19 @@ int main(int argc, char *argv[]) {
       if (kbState[SDL_SCANCODE_V])
         btnState |= BTN_Y;
 
-      updateButtonState(&milk->input, btnState);
+      updateButtonState(&milk->modules.input, btnState);
     }
 
     {
-      invokeUpdate(milk);
-      invokeDraw(milk);
+      updateMilk(milk);
+      drawMilk(milk);
     }
 
     {
       int pitch;
       uint32_t *frontBuffer = NULL;
       SDL_LockTexture(frontBufferTexture, NULL, (void **)&frontBuffer, &pitch);
-      flipFramebuffer(&milk->video, frontBuffer);
+      flipFramebuffer(&milk->modules.video, frontBuffer);
       SDL_UnlockTexture(frontBufferTexture);
       SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
       SDL_RenderPresent(renderer);

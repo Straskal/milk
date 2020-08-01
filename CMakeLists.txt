@@ -29,6 +29,8 @@ find_package(SDL2 REQUIRED)
 find_package(Lua53 REQUIRED)
 
 set(MILK_SRC_FILES
+	src/api.c
+	src/api.h
 	src/audio.c
 	src/audio.h
 	src/bitmap.c
@@ -47,8 +49,6 @@ set(MILK_SRC_FILES
 )
 
 set(MILK_MAIN_SRC_FILES
-	src/console.c
-	src/console.h
 	src/milk.c
 	src/milk.h
 	src/platform/sdlplatform.c
