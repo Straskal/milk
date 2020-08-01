@@ -55,6 +55,7 @@ int main(int argc, char *argv[]) {
   atexit(__freeModules);
   running = true;
 
+  // Module initialization
   {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
       printf("Error initializing SDL: %s", SDL_GetError());
@@ -70,6 +71,7 @@ int main(int argc, char *argv[]) {
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
   }
 
+  // Audio device setup
   {
     SDL_AudioSpec wantedSpec;
     SDL_AudioSpec actualSpec;
@@ -96,6 +98,7 @@ int main(int argc, char *argv[]) {
   while (running) {
     accumulator += deltaTime;
 
+    // Poll input events
     {
       ButtonState btnState = BTN_NONE;
 
@@ -132,11 +135,13 @@ int main(int argc, char *argv[]) {
       updateButtonState(&milk->modules.input, btnState);
     }
 
+    // Update and draw
     {
       updateMilk(milk);
       drawMilk(milk);
     }
 
+    // Flip the framebuffer
     {
       int pitch;
       uint32_t *frontBuffer = NULL;
@@ -147,6 +152,7 @@ int main(int argc, char *argv[]) {
       SDL_RenderPresent(renderer);
     }
 
+    // Moderate framerate
     Sint64 delay = accumulator - SDL_GetPerformanceCounter();
     if (delay < 0)
       accumulator -= delay;
