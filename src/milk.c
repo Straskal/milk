@@ -293,7 +293,7 @@ static int l_vol(lua_State *L) {
 
 static int l_exit(lua_State *L) {
 	UNUSED(L);
-	SET_BIT(getPlatform()->flags, PLATFORM_QUIT);
+	platform_close();
 	return 0;
 }
 
@@ -361,12 +361,6 @@ void freeMilk(Milk *milk) {
 	disableAudio(&milk->audio);
 	disableVideo(&milk->video);
 	free(milk);
-}
-
-void singleMilkFrame(Milk *milk) {
-	getPlatform()->pollInput();
-	updateCode(&milk->code);
-	getPlatform()->flipFramebuffer(milk->video.framebuffer);
 }
 
 void initializeCode(Milk *milk) {

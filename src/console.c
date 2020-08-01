@@ -39,7 +39,7 @@ static void __cmdQuit(Console *console, Milk *milk, char *argument) {
 	UNUSED(console);
 	UNUSED(milk);
 	UNUSED(argument);
-	SET_BIT(getPlatform()->flags, PLATFORM_QUIT);
+	platform_close();
 }
 
 typedef struct {
@@ -130,7 +130,7 @@ static void __handleEscape(Console *console, Milk *milk) {
 			pauseSound(&milk->audio, -1);
 			pauseStream(&milk->audio);
 			console->state = COMMAND;
-			getPlatform()->startTextInput();
+			platform_startTextInput();
 		}	else {
 			if (!console->isGameInitialized) {
 				initializeCode(milk);
@@ -139,7 +139,7 @@ static void __handleEscape(Console *console, Milk *milk) {
 			resumeSound(&milk->audio, -1);
 			resumeStream(&milk->audio);
 			console->state = GAME;
-			getPlatform()->stopTextInput();
+			platform_stopTextInput();
 		}
 	}
 }
@@ -158,7 +158,7 @@ static void __haltOnError(Console *console, Milk *milk) {
 		pauseStream(&milk->audio);
 		console->lastErrorCount = LOG_GET()->errorCount;
 		console->state = COMMAND;
-		getPlatform()->startTextInput();
+		platform_startTextInput();
 	}
 }
 

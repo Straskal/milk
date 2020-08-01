@@ -1,20 +1,10 @@
 #ifndef __PLATFORM_H__
 #define __PLATFORM_H__
 
-typedef enum {
-  PLATFORM_QUIT = 1 << 0,
-} PlatformFlags;
-
-typedef struct {
-  PlatformFlags flags;
-  void (*pollInput)();
-  void (*flipFramebuffer)();
-  void (*startTextInput)();
-	void (*stopTextInput)();
-  void (*lockAudioDevice)();
-	void (*unlockAudioDevice)();
-} Platform;
-
-Platform *getPlatform();
+void platform_close();
+void platform_lockAudioDevice();
+void platform_unlockAudioDevice();
+void platform_startTextInput();
+void platform_stopTextInput();
 
 #endif

@@ -22,19 +22,19 @@ void disableAudio(Audio *audio) {
 
 void playSound(Audio *audio, Wave *wave, int slotId, int volume) {
   if (slotId >= 0 && slotId < MAX_SOUND_SLOTS) {
-    getPlatform()->lockAudioDevice();
+    platform_lockAudioDevice();
     SoundSlot *slot = &audio->soundSlots[slotId];
     slot->state = PLAYING;
     slot->soundData = wave;
     slot->position = wave->samples;
     slot->remainingSamples = wave->sampleCount;
     slot->volume = CLAMP(volume, 0, MAX_VOLUME);
-    getPlatform()->unlockAudioDevice();
+    platform_unlockAudioDevice();
   }
 }
 
 void stopSound(Audio *audio, int slotId) {
-  getPlatform()->lockAudioDevice();
+  platform_lockAudioDevice();
   SoundSlot *slots = audio->soundSlots;
   for (int i = 0; i < MAX_SOUND_SLOTS; i++) {
     if ((slotId == -1 || slotId == i) && slots[i].state == PLAYING) {
@@ -45,11 +45,11 @@ void stopSound(Audio *audio, int slotId) {
       slots[i].volume = 0;
     }
   }
-  getPlatform()->unlockAudioDevice();
+  platform_unlockAudioDevice();
 }
 
 void stopInstances(Audio *audio, Wave *wave) {
-  getPlatform()->lockAudioDevice();
+  platform_lockAudioDevice();
   SoundSlot *slots = audio->soundSlots;
   for (int i = 0; i < MAX_SOUND_SLOTS; i++) {
     if (slots[i].soundData == wave) {
@@ -60,27 +60,27 @@ void stopInstances(Audio *audio, Wave *wave) {
       slots[i].volume = 0;
     }
   }
-  getPlatform()->unlockAudioDevice();
+  platform_unlockAudioDevice();
 }
 
 void pauseSound(Audio *audio, int slotId) {
-  getPlatform()->lockAudioDevice();
+  platform_lockAudioDevice();
   SoundSlot *slots = audio->soundSlots;
   for (int i = 0; i < MAX_SOUND_SLOTS; i++) {
     if ((slotId == -1 || slotId == i) && slots[i].state == PLAYING)
       slots[i].state = PAUSED;
   }
-  getPlatform()->unlockAudioDevice();
+  platform_unlockAudioDevice();
 }
 
 void resumeSound(Audio *audio, int slotId) {
-  getPlatform()->lockAudioDevice();
+  platform_lockAudioDevice();
   SoundSlot *slots = audio->soundSlots;
   for (int i = 0; i < MAX_SOUND_SLOTS; i++) {
     if ((slotId == -1 || slotId == i) && slots[i].state == PAUSED)
       slots[i].state = PLAYING;
   }
-  getPlatform()->unlockAudioDevice();
+  platform_unlockAudioDevice();
 }
 
 SoundState getSoundState(Audio *audio, int slotId) {
@@ -88,34 +88,34 @@ SoundState getSoundState(Audio *audio, int slotId) {
 }
 
 void playStream(Audio *audio, WaveStream *waveStream, int volume, bool loop) {
-  getPlatform()->lockAudioDevice();
+  platform_lockAudioDevice();
   waveStreamSeekStart(waveStream);
   audio->streamSlot.data = waveStream;
   audio->streamSlot.state = PLAYING;
   audio->streamSlot.volume = CLAMP(volume, 0, MAX_VOLUME);
   audio->streamSlot.loop = loop;
-  getPlatform()->unlockAudioDevice();
+  platform_unlockAudioDevice();
 }
 
 void stopStream(Audio *audio) {
-  getPlatform()->lockAudioDevice();
+  platform_lockAudioDevice();
   if (audio->streamSlot.state == PLAYING)
     audio->streamSlot.state = STOPPED;
-  getPlatform()->unlockAudioDevice();
+  platform_unlockAudioDevice();
 }
 
 void pauseStream(Audio *audio) {
-  getPlatform()->lockAudioDevice();
+  platform_lockAudioDevice();
   if (audio->streamSlot.state == PLAYING)
     audio->streamSlot.state = PAUSED;
-  getPlatform()->unlockAudioDevice();
+  platform_unlockAudioDevice();
 }
 
 void resumeStream(Audio *audio) {
-  getPlatform()->lockAudioDevice();
+  platform_lockAudioDevice();
   if (audio->streamSlot.state == PAUSED)
     audio->streamSlot.state = PLAYING;
-  getPlatform()->unlockAudioDevice();
+  platform_unlockAudioDevice();
 }
 
 void setMasterVolume(Audio *audio, int volume) {
