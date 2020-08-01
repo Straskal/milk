@@ -16,6 +16,19 @@ static SDL_Renderer *renderer;
 static SDL_Texture *frontBufferTexture;
 static SDL_AudioDeviceID audioDevice;
 
+static void __freeModules() {
+  disableCode(milk);
+  SDL_CloseAudioDevice(audioDevice);
+  SDL_DestroyTexture(frontBufferTexture);
+  SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
+  freeConsole(console);
+  freeMilk(milk);
+  SDL_Quit();
+}
+
+extern Platform platform;
+
 static void __lockAudioDevice() {
   SDL_LockAudioDevice(audioDevice);
 }
@@ -30,35 +43,6 @@ static void __startTextInput() {
 
 static void __stopTextInput() {
   SDL_StopTextInput();
-}
-
-static Platform platform = {
-    .lockAudioDevice = __lockAudioDevice,
-    .unlockAudioDevice = __unlockAudioDevice,
-    .startTextInput = __startTextInput,
-    .stopTextInput = __stopTextInput,
-    .flags = 0
-};
-
-Platform *getPlatform() {
-  return &platform;
-}
-
-static void __freeModules() {
-  unloadCode(milk);
-  SDL_CloseAudioDevice(audioDevice);
-  SDL_DestroyTexture(frontBufferTexture);
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(window);
-  freeConsole(console);
-  freeMilk(milk);
-  SDL_Quit();
-}
-
-static void __mixCallback(void *userData, uint8_t *stream, int numBytes) {
-  // SDL doesn't guarantee that the output buffer is silent.
-  memset(stream, 0, (size_t)numBytes);
-  mixSamplesIntoStream((Audio *) userData, (int16_t *) stream, (int) (numBytes / sizeof(int16_t)));
 }
 
 static void __pollInput() {
@@ -113,20 +97,41 @@ static void __pollInput() {
   updateButtonState(&milk->input, btnState);
 }
 
+static void __flipFramebuffer() {
+  int pitch;
+  uint32_t *frontBuffer = NULL;
+  SDL_LockTexture(frontBufferTexture, NULL, (void **)&frontBuffer, &pitch);
+  flipFramebuffer(&milk->video, frontBuffer);
+  SDL_UnlockTexture(frontBufferTexture);
+  SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
+  SDL_RenderPresent(renderer);
+}
+
+Platform platform = {
+    .pollInput = __pollInput,
+    .flipFramebuffer = __flipFramebuffer,
+    .lockAudioDevice = __lockAudioDevice,
+    .unlockAudioDevice = __unlockAudioDevice,
+    .startTextInput = __startTextInput,
+    .stopTextInput = __stopTextInput,
+    .flags = 0
+};
+
+Platform *getPlatform() {
+  return &platform;
+}
+
+static void __mixCallback(void *userData, uint8_t *stream, int numBytes) {
+  memset(stream, 0, (size_t)numBytes);
+  mixSamplesIntoStream((Audio *) userData, (int16_t *) stream, (int) (numBytes / sizeof(int16_t)));
+}
+
 static void __frame() {
 #ifdef BUILD_WITH_CONSOLE
   updateConsole(console, milk);
-  drawConsole(console, milk);
 #else
-  invokeUpdate(&milk->code);
-  invokeDraw(&milk->code);
+  updateCode(&milk->code);
 #endif
-}
-
-static void __flipFramebuffer() {
-  SDL_UpdateTexture(frontBufferTexture, NULL, (void *) milk->video.framebuffer, FRAMEBUFFER_PITCH);
-  SDL_RenderCopy(renderer, frontBufferTexture, NULL, NULL);
-  SDL_RenderPresent(renderer);
 }
 
 int main(int argc, char *argv[]) {
@@ -142,7 +147,7 @@ int main(int argc, char *argv[]) {
   window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT,
                             SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
   renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
-  frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC,
+  frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
                                          FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
   SDL_RenderSetLogicalSize(renderer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
@@ -160,14 +165,7 @@ int main(int argc, char *argv[]) {
     printf("Audio device is not supported.");
     exit(1);
   }
-  const int noDontPauseIt_PlayItInstead = 0;
-  SDL_PauseAudioDevice(audioDevice, noDontPauseIt_PlayItInstead);
-
-#ifndef BUILD_WITH_CONSOLE
-  loadCode(milk);
-  invokeInit(&milk->code);
-#endif
-
+  SDL_PauseAudioDevice(audioDevice, 0);
   const Uint64 deltaTime = SDL_GetPerformanceFrequency() / FRAMERATE;
   Uint64 accumulator = 0;
   while (!IS_BIT_SET(platform.flags, PLATFORM_QUIT)) {

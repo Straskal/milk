@@ -40,6 +40,5 @@ typedef struct {
 Console *createConsole();
 void freeConsole(Console *console);
 void updateConsole(Console *console, Milk *milk);
-void drawConsole(Console *console, Milk *milk);
 
 #endif

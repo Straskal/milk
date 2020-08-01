@@ -21,10 +21,8 @@ typedef struct {
 
 Milk *createMilk();
 void freeMilk(Milk *milk);
-void loadCode(Milk *milk);
-void unloadCode(Milk *milk);
-void invokeInit(Code *code);
-void invokeUpdate(Code *code);
-void invokeDraw(Code *code);
+void initializeCode(Milk *milk);
+void disableCode(Milk *milk);
+void updateCode(Code *code);
 
 #endif

@@ -20,22 +20,6 @@ typedef struct {
 	void *handle;
 } LuaObject;
 
-Milk *createMilk() {
-	Milk *milk = malloc(sizeof(Milk));
-	milk->code.state = NULL;
-	initializeInput(&milk->input);
-	initializeVideo(&milk->video);
-	initializeAudio(&milk->audio);
-	LOG_INIT();
-	return milk;
-}
-
-void freeMilk(Milk *milk) {
-	disableAudio(&milk->audio);
-	disableVideo(&milk->video);
-	free(milk);
-}
-
 static Milk *__getMilkFromReg(lua_State *L) {
 	lua_pushlightuserdata(L, (void *)&MilkRegistryKey);
 	lua_gettable(L, LUA_REGISTRYINDEX);
@@ -361,7 +345,31 @@ static void __registerLuaObj(lua_State *L, const char* name, lua_CFunction gc) {
 	lua_pop(L, 1);
 }
 
-void loadCode(Milk *milk) {
+Milk *createMilk() {
+	LOG_INIT();
+	Milk *milk = malloc(sizeof(Milk));
+	initializeInput(&milk->input);
+	initializeVideo(&milk->video);
+	initializeAudio(&milk->audio);
+	milk->code.state = NULL;
+	//initializeCode(milk);
+	return milk;
+}
+
+void freeMilk(Milk *milk) {
+	disableCode(milk);
+	disableAudio(&milk->audio);
+	disableVideo(&milk->video);
+	free(milk);
+}
+
+void singleMilkFrame(Milk *milk) {
+	getPlatform()->pollInput();
+	updateCode(&milk->code);
+	getPlatform()->flipFramebuffer(milk->video.framebuffer);
+}
+
+void initializeCode(Milk *milk) {
 	if (milk->code.state == NULL) 	{
 		lua_State *L = luaL_newstate();
 		milk->code.state = (void *)L;
@@ -373,36 +381,28 @@ void loadCode(Milk *milk) {
 		__registerLuaObj(L, WAVESTREAM_META, l_wavestream_gc);
 		if (luaL_dofile(L, "main.lua"))
 			LOG_ERROR(lua_tostring(L, -1));
+		lua_getglobal(L, "_init");
+		if (lua_pcall(L, 0, 0, 0) != 0) {
+			LOG_ERROR(lua_tostring(L, -1));
+			lua_pop(L, -1);
+		}
 	}
 }
 
-void unloadCode(Milk *milk) {
+void disableCode(Milk *milk) {
 	if (milk->code.state != NULL) {
-		lua_close((lua_State *)milk->code.state);
+		lua_close(milk->code.state);
 		milk->code.state = NULL;
 	}
 }
 
-void invokeInit(Code *code) {
-	lua_State *L = (lua_State *)code->state;
-	lua_getglobal(L, "_init");
-	if (lua_pcall(L, 0, 0, 0) != 0) {
-		LOG_ERROR(lua_tostring(L, -1));
-		lua_pop(L, -1);
-	}
-}
-
-void invokeUpdate(Code *code) {
-	lua_State *L = (lua_State *)code->state;
+void updateCode(Code *code) {
+	lua_State *L = code->state;
 	lua_getglobal(L, "_update");
 	if (lua_pcall(L, 0, 0, 0) != 0) {
 		LOG_ERROR(lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
-}
-
-void invokeDraw(Code *code) {
-	lua_State *L = code->state;
 	resetDrawState(video_addr(L));
 	lua_getglobal(L, "_draw");
 	if (lua_pcall(L, 0, 0, 0) != 0)	{

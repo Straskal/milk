@@ -22,7 +22,7 @@ static const uint32_t warn = 0xffec27;
 static void __cmdUnload(Console *console, Milk *milk, char *argument) {
 	UNUSED(console);
 	UNUSED(argument);
-	unloadCode(milk);
+	disableCode(milk);
 	console->isGameInitialized = false;
 	LOG_INFO("Game has been unloaded");
 }
@@ -133,8 +133,7 @@ static void __handleEscape(Console *console, Milk *milk) {
 			getPlatform()->startTextInput();
 		}	else {
 			if (!console->isGameInitialized) {
-				loadCode(milk);
-				invokeInit(&milk->code);
+				initializeCode(milk);
 				console->isGameInitialized = true;
 			}
 			resumeSound(&milk->audio, -1);
@@ -160,19 +159,6 @@ static void __haltOnError(Console *console, Milk *milk) {
 		console->lastErrorCount = LOG_GET()->errorCount;
 		console->state = COMMAND;
 		getPlatform()->startTextInput();
-	}
-}
-
-void updateConsole(Console *console, Milk *milk) {
-	__handleEscape(console, milk);
-	switch (console->state) {
-		case COMMAND:
-			__handleInput(console, milk);	break;
-		case GAME:
-			invokeUpdate(&milk->code);
-			__haltOnError(console, milk);
-			break;
-		default: break;
 	}
 }
 
@@ -251,16 +237,18 @@ static void __drawLogLines(Milk *milk) {
 		drawFont(&milk->video, NULL, 8, LOG_START_HEIGHT + ((8 + 2) * i), lines[i].text, 1, lines[i].color);
 }
 
-void drawConsole(Console *console, Milk *milk) {
+void updateConsole(Console *console, Milk *milk) {
+	__handleEscape(console, milk);
 	switch (console->state) {
 		case COMMAND:
+			__handleInput(console, milk);
 			clearFramebuffer(&milk->video, 0x000000);
 			__drawCommandLine(console, milk);
 			__drawPlayingIndicator(console, milk);
 			__drawLogLines(milk);
 			break;
 		case GAME:
-			invokeDraw(&milk->code);
+			updateCode(&milk->code);
 			__haltOnError(console, milk);
 			break;
 		default: break;

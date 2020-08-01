@@ -223,3 +223,7 @@ int getFontWidth(const char *text) {
   }
   return width;
 }
+
+void flipFramebuffer(Video *video, uint32_t *frontBuffer) {
+  memcpy(frontBuffer, video->framebuffer, sizeof(video->framebuffer));
+}

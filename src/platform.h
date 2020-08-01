@@ -7,6 +7,8 @@ typedef enum {
 
 typedef struct {
   PlatformFlags flags;
+  void (*pollInput)();
+  void (*flipFramebuffer)();
   void (*startTextInput)();
 	void (*stopTextInput)();
   void (*lockAudioDevice)();
