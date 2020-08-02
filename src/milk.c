@@ -19,20 +19,23 @@ static void __resetCandidate(Console *console)
 
 static void __toggleConsole(Milk *milk)
 {
-	if (!(milk->console.isEnabled && hasError()))
+	Console *console = &milk->console;
+	Modules *modules = &milk->modules;
+
+	if (!(console->isEnabled && hasError()))
 	{
-		milk->console.isEnabled = !milk->console.isEnabled;
-		if (milk->console.isEnabled)
+		console->isEnabled = !console->isEnabled;
+		if (console->isEnabled)
 		{
-			__resetCandidate(&milk->console);
-			pauseSound(&milk->modules.audio, -1);
-			pauseStream(&milk->modules.audio);
+			__resetCandidate(console);
+			pauseSound(&modules->audio, -1);
+			pauseStream(&modules->audio);
 			platform_startTextInput();
 		}
 		else
 		{
-			resumeSound(&milk->modules.audio, -1);
-			resumeStream(&milk->modules.audio);
+			resumeSound(&modules->audio, -1);
+			resumeStream(&modules->audio);
 			platform_stopTextInput();
 		}
 	}
@@ -40,11 +43,14 @@ static void __toggleConsole(Milk *milk)
 
 static void __cmdReload(Milk *milk)
 {
+	ScriptEnv *env = &milk->scripts;
+	Modules *modules = &milk->modules;
+
 	clearError();
-	closeScriptEnv(&milk->scripts);
-	openScriptEnv(&milk->scripts, &milk->modules);
-	loadEntryPoint(&milk->scripts);
-	invokeInit(&milk->scripts);
+	closeScriptEnv(env);
+	openScriptEnv(env, modules);
+	loadEntryPoint(env);
+	invokeInit(env);
 	__toggleConsole(milk);
 }
 
@@ -100,20 +106,23 @@ static void __executeCommand(Milk *milk)
 
 static void __updateConsole(Milk *milk)
 {
-	if (isExtDown(&milk->modules.input, INPUT_BACK) && milk->console.candidateLength > 0)
+	Console *console = &milk->console;
+	Modules *modules = &milk->modules;
+
+	if (isExtDown(&modules->input, INPUT_BACK) && console->candidateLength > 0)
 	{
-		milk->console.candidate[--milk->console.candidateLength] = '\0';
+		console->candidate[--console->candidateLength] = '\0';
 	}
-	if (isExtDown(&milk->modules.input, INPUT_CHAR) && milk->console.candidateLength < COMMAND_MAX_LENGTH - 1)
+	if (isExtDown(&modules->input, INPUT_CHAR) && console->candidateLength < COMMAND_MAX_LENGTH - 1)
 	{
-		milk->console.candidate[milk->console.candidateLength] = milk->modules.input.extended.inChar;
-		milk->console.candidate[++milk->console.candidateLength] = '\0';
+		console->candidate[console->candidateLength] = modules->input.extended.inChar;
+		console->candidate[++console->candidateLength] = '\0';
 	}
-	if (isButtonPressed(&milk->modules.input, BTN_DOWN))
+	if (isButtonPressed(&modules->input, BTN_DOWN))
 	{
-		__resetCandidate(&milk->console);
+		__resetCandidate(console);
 	}
-	if (isExtPressed(&milk->modules.input, INPUT_ENTER))
+	if (isExtPressed(&modules->input, INPUT_ENTER))
 	{
 		__executeCommand(milk);
 	}
@@ -129,21 +138,24 @@ static void __drawPanel(Video *video, const char *title, int x, int y, int w, in
 
 static void __drawConsole(Milk *milk)
 {
+	Console *console = &milk->console;
+	Video *video = &milk->modules.video;
+
 	// Error panel
+	if (hasError())
 	{
-		if (hasError())
-		{
-			__drawPanel(&milk->modules.video, "ERROR", 0, CONSOLE_Y - 79, FRAMEBUFFER_WIDTH, 80);
-			drawWrappedFont(&milk->modules.video, NULL, 5, CONSOLE_Y - 79 + 20, getError(), 1, 0xbf4040, FRAMEBUFFER_WIDTH - 5);
-		}
+		__drawPanel(video, "ERROR", 0, CONSOLE_Y - 79, FRAMEBUFFER_WIDTH, 80);
+		drawWrappedFont(video, NULL, 5, CONSOLE_Y - 79 + 20, getError(), 1, 0xbf4040, FRAMEBUFFER_WIDTH - 5);
 	}
+
 	// Console panel
+	__drawPanel(video, "COMMAND CONSOLE", 0, CONSOLE_Y, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT - CONSOLE_Y);
+	drawFont(video, NULL, 5, CONSOLE_Y + 20, "~", 1, 0xffffff);
+	drawFont(video, NULL, 18, CONSOLE_Y + 20, console->candidate, 1, 0xffffff);
+	if (console->ticks % 64 < 48)
 	{
-		__drawPanel(&milk->modules.video, "COMMAND CONSOLE", 0, CONSOLE_Y, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT - CONSOLE_Y);
-		drawFont(&milk->modules.video, NULL, 5, CONSOLE_Y + 20, "~", 1, 0xffffff);
-		drawFont(&milk->modules.video, NULL, 18, CONSOLE_Y + 20, milk->console.candidate, 1, 0xffffff);
-		if (milk->console.ticks % 64 < 48)
-			drawFilledRect(&milk->modules.video, 18 + getFontWidth(milk->console.candidate), CONSOLE_Y + 20, 6, 8, 0xbf4040);
+		int candidateWidth = getFontWidth(console->candidate);
+		drawFilledRect(video, 18 + candidateWidth, CONSOLE_Y + 20, 6, 8, 0xbf4040);
 	}
 }
 
