@@ -4,7 +4,6 @@
 #include "audio.h"
 #include "common.h"
 #include "platform.h"
-#include "wave.h"
 
 #define S16_MAX 32767
 #define S16_MIN -32768
