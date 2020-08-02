@@ -366,14 +366,14 @@ void closeScriptEnv(Scripts *scripts) {
 void loadEntryPoint(Scripts *scripts) {
 	lua_State *L = scripts->state;
 	if (luaL_dofile(L, "main.lua"))
-		LOG_ERROR(lua_tostring(L, -1));
+		logError(lua_tostring(L, -1));
 }
 
 void invokeInit(Scripts *scripts) {
 	lua_State *L = scripts->state;
 	lua_getglobal(L, "_init");
 	if (lua_pcall(L, 0, 0, 0) != 0) {
-		LOG_ERROR(lua_tostring(L, -1));
+		logError(lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }
@@ -382,7 +382,7 @@ void invokeUpdate(Scripts *scripts) {
 	lua_State *L = scripts->state;
 	lua_getglobal(L, "_update");
 	if (lua_pcall(L, 0, 0, 0) != 0) {
-		LOG_ERROR(lua_tostring(L, -1));
+		logError(lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }
@@ -391,7 +391,7 @@ void invokeDraw(Scripts *scripts) {
 	lua_State *L = scripts->state;
 	lua_getglobal(L, "_draw");
 	if (lua_pcall(L, 0, 0, 0) != 0) {
-		LOG_ERROR(lua_tostring(L, -1));
+		logError(lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }

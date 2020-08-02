@@ -206,6 +206,30 @@ void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *str, int scal
   }
 }
 
+int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, const char *str, int scale, uint32_t color, int width) {
+  int height = SPRITE_SIZE;
+  char text[1024];
+  memset(text, 0, sizeof(text));
+  strcpy(text, str);
+  int xCurrent = x;
+  int yCurrent = y;
+  int wrapAt = x + width;
+  char *token = strtok(text, " ");
+  while (token) {
+    int tokenWidth = getFontWidth(token);
+    int newWidth = xCurrent + tokenWidth + FONT_SPRITE_SPACING;
+    if (newWidth > wrapAt) {
+      xCurrent = x;
+      yCurrent += SPRITE_SIZE;
+      height += SPRITE_SIZE;
+    }
+    drawFont(video, bmp, xCurrent, yCurrent, token, scale, color);
+    xCurrent += tokenWidth + FONT_SPRITE_SPACING;
+    token = strtok(NULL, " ");
+  }
+  return height;
+}
+
 int getFontWidth(const char *text) {
   int currentWidth = 0, width = 0;
   char curr;

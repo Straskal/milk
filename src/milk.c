@@ -6,7 +6,7 @@
 #include "platform.h"
 
 #ifdef BUILD_WITH_CONSOLE
-#define CONSOLE_Y 112
+#define CONSOLE_Y (FRAMEBUFFER_HEIGHT - 36)
 
 typedef struct Console Console;
 typedef enum State State;
@@ -17,6 +17,8 @@ static void __resetCandidate(Milk *milk) {
 }
 
 static void __toggleConsole(Milk *milk) {
+	if (milk->console.isEnabled && hasError())
+		return;
 	milk->console.isEnabled = !milk->console.isEnabled;
 	if (milk->console.isEnabled) {
 		__resetCandidate(milk);
@@ -32,6 +34,7 @@ static void __toggleConsole(Milk *milk) {
 
 static void __cmdReload(Milk *milk, char *argument) {
 	UNUSED(argument);
+	clearError();
 	closeScriptEnv(&milk->scripts);
 	openScriptEnv(&milk->scripts, &milk->modules);
 	loadEntryPoint(&milk->scripts);
@@ -40,6 +43,7 @@ static void __cmdReload(Milk *milk, char *argument) {
 }
 
 static void __cmdFullscreen(Milk *milk, char *argument) {
+	UNUSED(milk);
 	UNUSED(argument);
 	platform_toggleFullscreen();
 }
@@ -96,21 +100,32 @@ static void __updateConsole(Milk *milk) {
 	}
 }
 
+static void __drawPanel(Video *video, const char *title, int x, int y, int w, int h) {
+	setClip(video, x, y, w, h);
+	clearFramebuffer(video, 0x40318d);
+	drawRect(video, x, y, w - 1, h - 1, 0xffffff);
+	drawFont(video, NULL, x + 5, y + 5, title, 1, 0x7869c4);
+}
+
 static void __drawConsole(Milk *milk) {
-	setClip(&milk->modules.video, 0, CONSOLE_Y, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT - CONSOLE_Y);
-	clearFramebuffer(&milk->modules.video, 0x40318d);
-	drawRect(&milk->modules.video, 0, CONSOLE_Y, FRAMEBUFFER_WIDTH - 1, FRAMEBUFFER_HEIGHT - CONSOLE_Y - 1, 0xffffff);
-	drawFont(&milk->modules.video, NULL, 5, CONSOLE_Y + 5, "COMMAND CONSOLE", 1, 0x7869c4);
-	drawFont(&milk->modules.video, NULL, 5, CONSOLE_Y + 20, "~", 1, 0xffffff);
-	drawFont(&milk->modules.video, NULL, 18, CONSOLE_Y + 20, milk->console.candidate, 1, 0xffffff);
-	if (milk->console.ticks % 64 < 48)
-		drawFilledRect(&milk->modules.video, 18 + getFontWidth(milk->console.candidate), CONSOLE_Y + 20, 6, 8, 0xbf4040);
+	{
+		if (hasError()) {
+			__drawPanel(&milk->modules.video, "ERROR", 0, CONSOLE_Y - 79, FRAMEBUFFER_WIDTH, 80);
+			drawWrappedFont(&milk->modules.video, NULL, 5, CONSOLE_Y - 79 + 20, getError(), 1, 0xbf4040, FRAMEBUFFER_WIDTH - 5);
+		}
+	}
+	{
+		__drawPanel(&milk->modules.video, "COMMAND CONSOLE", 0, CONSOLE_Y, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT - CONSOLE_Y);
+		drawFont(&milk->modules.video, NULL, 5, CONSOLE_Y + 20, "~", 1, 0xffffff);
+		drawFont(&milk->modules.video, NULL, 18, CONSOLE_Y + 20, milk->console.candidate, 1, 0xffffff);
+		if (milk->console.ticks % 64 < 48)
+			drawFilledRect(&milk->modules.video, 18 + getFontWidth(milk->console.candidate), CONSOLE_Y + 20, 6, 8, 0xbf4040);
+	}
 }
 
 #endif // BUILD_WITH_CONSOLE
 
 Milk *createMilk() {
-	LOG_INIT();
 	Milk *milk = malloc(sizeof(Milk));
 	initializeInput(&milk->modules.input);
 	initializeVideo(&milk->modules.video);
@@ -143,6 +158,8 @@ void initializeMilk(Milk *milk) {
 
 void updateMilk(Milk *milk) {
 #ifdef BUILD_WITH_CONSOLE
+	if (hasError() && !milk->console.isEnabled)
+		__toggleConsole(milk);
 	if (isExtPressed(&milk->modules.input, INPUT_ESCAPE))
 		__toggleConsole(milk);
 	if (!milk->console.isEnabled)
