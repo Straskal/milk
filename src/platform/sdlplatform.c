@@ -8,15 +8,20 @@
 #define WINDOW_WIDTH (FRAMEBUFFER_WIDTH * 3)
 #define WINDOW_HEIGHT (FRAMEBUFFER_HEIGHT * 3)
 
-static bool running;
-static bool fullscreen;
+static enum PlatformFlags {
+  NONE = 0,
+  RUNNING = 1 << 0,
+  FULLSCREEN = 1 << 1
+} PlatformFlags = NONE;
+
 static Milk *milk;
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 static SDL_Texture *frontBufferTexture;
 static SDL_AudioDeviceID audioDevice;
 
-static void __freeModules() {
+static void __freeModules()
+{
   SDL_CloseAudioDevice(audioDevice);
   SDL_DestroyTexture(frontBufferTexture);
   SDL_DestroyRenderer(renderer);
@@ -25,46 +30,54 @@ static void __freeModules() {
   SDL_Quit();
 }
 
-void platform_close() {
-  running = false;
+void platform_close()
+{
+  UNSET_BIT(PlatformFlags, RUNNING);
 }
 
-void platform_lockAudioDevice() {
+void platform_lockAudioDevice()
+{
   SDL_LockAudioDevice(audioDevice);
 }
 
-void platform_unlockAudioDevice() {
+void platform_unlockAudioDevice()
+{
   SDL_UnlockAudioDevice(audioDevice);
 }
 
-void platform_startTextInput() {
+void platform_startTextInput()
+{
   SDL_StartTextInput();
 }
 
-void platform_stopTextInput() {
+void platform_stopTextInput()
+{
   SDL_StopTextInput();
 }
 
-void platform_toggleFullscreen() {
-  fullscreen = !fullscreen;
-  SDL_SetWindowFullscreen(window, !fullscreen ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
+void platform_toggleFullscreen()
+{
+  TOGGLE_BIT(PlatformFlags, FULLSCREEN);
+  SDL_SetWindowFullscreen(window, CHECK_BIT(PlatformFlags, FULLSCREEN) ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
 }
 
-static void __mixCallback(void *userData, uint8_t *stream, int numBytes) {
+static void __mixCallback(void *userData, uint8_t *stream, int numBytes)
+{
   memset(stream, 0, (size_t)numBytes);
   mixSamplesIntoStream((Audio *)userData, (int16_t *)stream, (int)(numBytes / sizeof(int16_t)));
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   UNUSED(argc);
   UNUSED(argv);
   atexit(__freeModules);
-  running = true;
-  fullscreen = false;
+  SET_BIT(PlatformFlags, RUNNING);
 
   // Module initialization
   {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
+    {
       printf("Error initializing SDL: %s", SDL_GetError());
       exit(1);
     }
@@ -89,8 +102,8 @@ int main(int argc, char *argv[]) {
     wantedSpec.callback = __mixCallback;
     wantedSpec.userdata = (void *)&milk->modules.audio;
     audioDevice = SDL_OpenAudioDevice(NULL, 0, &wantedSpec, &actualSpec, 0);
-    if (wantedSpec.format != actualSpec.format || wantedSpec.channels != actualSpec.channels
-    || wantedSpec.freq != actualSpec.freq || wantedSpec.samples != actualSpec.samples) {
+    if (wantedSpec.format != actualSpec.format || wantedSpec.channels != actualSpec.channels || wantedSpec.freq != actualSpec.freq || wantedSpec.samples != actualSpec.samples)
+    {
       printf("Audio device is not supported.");
       exit(1);
     }
@@ -102,7 +115,8 @@ int main(int argc, char *argv[]) {
   const Uint64 deltaTime = SDL_GetPerformanceFrequency() / FRAMERATE;
   Uint64 accumulator = 0;
 
-  while (running) {
+  while (CHECK_BIT(PlatformFlags, RUNNING))
+  {
     accumulator += deltaTime;
 
     // Poll input events
@@ -112,29 +126,33 @@ int main(int argc, char *argv[]) {
       char inChar = 0;
 
       SDL_Event event;
-      while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-        case SDL_QUIT:
-          platform_close();
-          break;
-        case SDL_KEYDOWN:
-          switch (event.key.keysym.sym) {
-            case SDLK_BACKSPACE:
-              extState |= INPUT_BACK;
-              break;
-            default:
-              break;
-          }
-          break;
-        case SDL_TEXTINPUT:
-          extState |= INPUT_CHAR;
-          inChar = event.text.text[0];
-          break;
-        default:
-          break;
+      while (SDL_PollEvent(&event))
+      {
+        switch (event.type)
+        {
+          case SDL_QUIT:
+            platform_close();
+            break;
+          case SDL_KEYDOWN:
+            switch (event.key.keysym.sym)
+            {
+              case SDLK_BACKSPACE:
+                extState |= INPUT_BACK;
+                break;
+              default:
+                break;
+            }
+            break;
+          case SDL_TEXTINPUT:
+            extState |= INPUT_CHAR;
+            inChar = event.text.text[0];
+            break;
+          default:
+            break;
         }
       }
       const Uint8 *kbState = SDL_GetKeyboardState(NULL);
+
       if (kbState[SDL_SCANCODE_P])
         btnState |= BTN_START;
       if (kbState[SDL_SCANCODE_UP])

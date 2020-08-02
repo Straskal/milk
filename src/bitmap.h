@@ -3,7 +3,8 @@
 
 #include <stdint.h>
 
-typedef struct {
+typedef struct
+{
   uint32_t *pixels;
   int width;
   int height;

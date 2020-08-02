@@ -4,13 +4,15 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-typedef struct {
-	int16_t *samples;
+typedef struct
+{
+  int16_t *samples;
   int channelCount;
-	int sampleCount;
+  int sampleCount;
 } Wave;
 
-typedef struct {
+typedef struct
+{
   long position;
   long start;
   long end;

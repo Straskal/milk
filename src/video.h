@@ -14,20 +14,23 @@
 #define EMBED_FONT_HEIGHT 64
 #define FONT_SPRITE_SPACING 6
 
-typedef enum {
+typedef enum
+{
   Additive,
   Average,
   Solid,
 } ColorMode;
 
-typedef struct {
+typedef struct
+{
   int top;
   int bottom;
   int left;
   int right;
 } Rect;
 
-typedef struct {
+typedef struct
+{
   uint32_t framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
   uint32_t embeddedFont[EMBED_FONT_WIDTH * EMBED_FONT_HEIGHT];
   uint32_t colorKey;

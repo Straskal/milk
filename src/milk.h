@@ -3,18 +3,19 @@
 
 #include "api.h"
 
-typedef struct {
+typedef struct
+{
 	Modules modules;
 	Scripts scripts;
 
 #ifdef BUILD_WITH_CONSOLE
 #define COMMAND_MAX_LENGTH 36
-	struct Console {
-		int ticks;
-		bool isEnabled;
+	struct Console
+	{
 		char candidate[COMMAND_MAX_LENGTH];
 		int candidateLength;
-		int lastErrorCount;
+		int ticks;
+		bool isEnabled;
 	} console;
 #endif
 } Milk;

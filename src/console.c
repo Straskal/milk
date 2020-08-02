@@ -70,13 +70,13 @@ void freeConsole(Console *console) {
 }
 
 static bool __hasInputContinuous(ConsoleInput *input, ConsoleInputState inputState) {
-	return IS_BIT_SET(input->state, inputState);
+	return CHECK_BIT(input->state, inputState);
 }
 
 static bool __hasInput(ConsoleInput *input, ConsoleInputState inputState) {
 	ConsoleInputState currentState = input->state;
 	ConsoleInputState previousState = input->previousState;
-	return IS_BIT_SET(currentState, inputState) && !IS_BIT_SET(previousState, inputState);
+	return CHECK_BIT(currentState, inputState) && !CHECK_BIT(previousState, inputState);
 }
 
 static void __handleBackspace(Console *console) {

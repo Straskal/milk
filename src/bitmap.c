@@ -2,11 +2,13 @@
 
 #include "bitmap.h"
 
-Bitmap *loadBitmap(const char *filePath) {
+Bitmap *loadBitmap(const char *filePath)
+{
   SDL_Surface *surface = SDL_LoadBMP(filePath);
   if (!surface)
     return NULL;
-  if (surface->format->format != SDL_PIXELFORMAT_BGR24) {
+  if (surface->format->format != SDL_PIXELFORMAT_BGR24)
+  {
     SDL_FreeSurface(surface);
     return NULL;
   }
@@ -16,7 +18,8 @@ Bitmap *loadBitmap(const char *filePath) {
   bitmap->width = surface->w;
   bitmap->height = surface->h;
   uint8_t *surfacePixels = surface->pixels;
-  for (int i = 0; i < length; i++) {
+  for (int i = 0; i < length; i++)
+  {
     uint32_t b = *surfacePixels++;
     uint32_t g = *surfacePixels++;
     uint32_t r = *surfacePixels++;
@@ -26,7 +29,8 @@ Bitmap *loadBitmap(const char *filePath) {
   return bitmap;
 }
 
-void freeBitmap(Bitmap *bitmap) {
+void freeBitmap(Bitmap *bitmap)
+{
   free(bitmap->pixels);
   free(bitmap);
 }

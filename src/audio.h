@@ -15,31 +15,35 @@
 #define MAX_SOUND_SLOTS 16
 #define MAX_VOLUME 128
 
-typedef enum {
+typedef enum
+{
   STOPPED,
   PLAYING,
   PAUSED
 } SoundState;
 
-typedef struct {
-	Wave *soundData;
-	SoundState state;
-	int volume;
-	int remainingSamples;
+typedef struct
+{
+  Wave *soundData;
+  SoundState state;
+  int volume;
+  int remainingSamples;
   int16_t *position;
 } SoundSlot;
 
-typedef struct {
+typedef struct
+{
   WaveStream *data;
   SoundState state;
   int volume;
   bool loop;
 } StreamSlot;
 
-typedef struct {
-	SoundSlot soundSlots[MAX_SOUND_SLOTS];
-	StreamSlot streamSlot;
-	int masterVolume;
+typedef struct
+{
+  SoundSlot soundSlots[MAX_SOUND_SLOTS];
+  StreamSlot streamSlot;
+  int masterVolume;
 } Audio;
 
 void initializeAudio(Audio *audio);

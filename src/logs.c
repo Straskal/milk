@@ -2,22 +2,27 @@
 
 #include "logs.h"
 
-static struct {
+static struct
+{
   char error[1024];
 } LogContext;
 
-void logError(const char *message) {
+void logError(const char *message)
+{
   strcpy(LogContext.error, message);
 }
 
-bool hasError() {
+bool hasError()
+{
   return strlen(LogContext.error) > 0;
 }
 
-const char *getError() {
+const char *getError()
+{
   return LogContext.error;
 }
 
-void clearError() {
+void clearError()
+{
   memset(LogContext.error, 0, sizeof(LogContext.error));
 }

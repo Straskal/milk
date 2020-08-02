@@ -17,11 +17,13 @@ static const char ModuleRegistryKey = 'k';
 #define WAVE_META "wave"
 #define WAVESTREAM_META "wavestream"
 
-typedef struct {
+typedef struct
+{
 	void *handle;
 } LuaObject;
 
-static Modules *__getModules(lua_State *L) {
+static Modules *__getModules(lua_State *L)
+{
 	lua_pushlightuserdata(L, (void *)&ModuleRegistryKey);
 	lua_gettable(L, LUA_REGISTRYINDEX);
 	Modules *modules = lua_touserdata(L, -1);
@@ -33,21 +35,25 @@ static Modules *__getModules(lua_State *L) {
 #define audio_addr(L) (&__getModules(L)->audio)
 #define video_addr(L) (&__getModules(L)->video)
 
-static int l_btn(lua_State *L) {
+static int l_btn(lua_State *L)
+{
 	lua_pushboolean(L, isButtonDown(input_addr(L), (ButtonState)(1 << lua_tointeger(L, 1))));
 	return 1;
 }
 
-static int l_btnp(lua_State *L) {
+static int l_btnp(lua_State *L)
+{
 	lua_pushboolean(L, isButtonPressed(input_addr(L), (ButtonState)(1 << lua_tointeger(L, 1))));
 	return 1;
 }
 
-static int l_bitmap(lua_State *L) {
+static int l_bitmap(lua_State *L)
+{
 	Bitmap *bmp = loadBitmap(lua_tostring(L, 1));
 	if (!bmp)
 		lua_pushnil(L);
-	else {
+	else
+	{
 		LuaObject *luaObj = lua_newuserdata(L, sizeof(LuaObject));
 		luaObj->handle = bmp;
 		luaL_setmetatable(L, BITMAP_META);
@@ -55,89 +61,92 @@ static int l_bitmap(lua_State *L) {
 	return 1;
 }
 
-static int l_bitmap_gc(lua_State *L) {
+static int l_bitmap_gc(lua_State *L)
+{
 	LuaObject *luaObj = lua_touserdata(L, 1);
 	Bitmap *bmp = luaObj->handle;
 	freeBitmap(bmp);
 	return 0;
 }
 
-static int l_clip(lua_State *L) {
+static int l_clip(lua_State *L)
+{
 	setClip(video_addr(L),
-		lua_tointeger(L, 1),
-		lua_tointeger(L, 2),
-		lua_tointeger(L, 3),
-		lua_tointeger(L, 4)
-	);
+					lua_tointeger(L, 1),
+					lua_tointeger(L, 2),
+					lua_tointeger(L, 3),
+					lua_tointeger(L, 4));
 	return 0;
 }
 
-static int l_clrs(lua_State *L) {
+static int l_clrs(lua_State *L)
+{
 	clearFramebuffer(video_addr(L), (uint32_t)luaL_optinteger(L, 1, 0x000000));
 	return 0;
 }
 
-static int l_pset(lua_State *L) {
+static int l_pset(lua_State *L)
+{
 	drawPixel(video_addr(L),
-		(int)FLOOR(lua_tonumber(L, 1)),
-		(int)FLOOR(lua_tonumber(L, 2)),
-		(uint32_t)lua_tointeger(L, 3)
-	);
+						(int)FLOOR(lua_tonumber(L, 1)),
+						(int)FLOOR(lua_tonumber(L, 2)),
+						(uint32_t)lua_tointeger(L, 3));
 	return 0;
 }
 
-static int l_line(lua_State *L) {
+static int l_line(lua_State *L)
+{
 	drawLine(video_addr(L),
-		(int)lua_tointeger(L, 1),
-		(int)lua_tointeger(L, 2),
-		(int)lua_tointeger(L, 3),
-		(int)lua_tointeger(L, 4),
-		(uint32_t)lua_tointeger(L, 5)
-	);
+					 (int)lua_tointeger(L, 1),
+					 (int)lua_tointeger(L, 2),
+					 (int)lua_tointeger(L, 3),
+					 (int)lua_tointeger(L, 4),
+					 (uint32_t)lua_tointeger(L, 5));
 	return 0;
 }
 
-static int l_rect(lua_State *L) {
+static int l_rect(lua_State *L)
+{
 	drawRect(video_addr(L),
-		(int)floor(lua_tonumber(L, 1)),
-		(int)floor(lua_tonumber(L, 2)),
-		(int)lua_tointeger(L, 3),
-		(int)lua_tointeger(L, 4),
-		(uint32_t)lua_tointeger(L, 5)
-	);
+					 (int)floor(lua_tonumber(L, 1)),
+					 (int)floor(lua_tonumber(L, 2)),
+					 (int)lua_tointeger(L, 3),
+					 (int)lua_tointeger(L, 4),
+					 (uint32_t)lua_tointeger(L, 5));
 	return 0;
 }
 
-static int l_rectfill(lua_State *L) {
+static int l_rectfill(lua_State *L)
+{
 	drawFilledRect(video_addr(L),
-		(int)floor(lua_tonumber(L, 1)),
-		(int)floor(lua_tonumber(L, 2)),
-		(int)lua_tointeger(L, 3),
-		(int)lua_tointeger(L, 4),
-		(uint32_t)lua_tointeger(L, 5)
-	);
+								 (int)floor(lua_tonumber(L, 1)),
+								 (int)floor(lua_tonumber(L, 2)),
+								 (int)lua_tointeger(L, 3),
+								 (int)lua_tointeger(L, 4),
+								 (uint32_t)lua_tointeger(L, 5));
 	return 0;
 }
 
-static int l_sprite(lua_State *L) {
+static int l_sprite(lua_State *L)
+{
 	LuaObject *luaObj = (LuaObject *)lua_touserdata(L, 1);
 	Bitmap *bmp = (Bitmap *)luaObj->handle;
 	drawSprite(
-		video_addr(L), bmp,
-		(int)lua_tointeger(L, 2),
-		(int)floor(lua_tonumber(L, 3)),
-		(int)floor(lua_tonumber(L, 4)),
-		(int)luaL_optinteger(L, 5, 1),
-		(int)luaL_optinteger(L, 6, 1),
-		(float)luaL_optnumber(L, 7, 1.0),
-		(uint8_t)luaL_optinteger(L, 8, 0),
-		(uint32_t)luaL_optinteger(L, 9, 0x00),
-		(ColorMode)luaL_optinteger(L, 10, Additive)
-	);
+			video_addr(L), bmp,
+			(int)lua_tointeger(L, 2),
+			(int)floor(lua_tonumber(L, 3)),
+			(int)floor(lua_tonumber(L, 4)),
+			(int)luaL_optinteger(L, 5, 1),
+			(int)luaL_optinteger(L, 6, 1),
+			(float)luaL_optnumber(L, 7, 1.0),
+			(uint8_t)luaL_optinteger(L, 8, 0),
+			(uint32_t)luaL_optinteger(L, 9, 0x00),
+			(ColorMode)luaL_optinteger(L, 10, Additive));
 	return 0;
 }
 
-static int l_tiles(lua_State *L) {
+static int l_tiles(lua_State *L)
+{
 	Video *video = video_addr(L);
 	LuaObject *luaObj = (LuaObject *)lua_touserdata(L, 1);
 	Bitmap *bmp = (Bitmap *)luaObj->handle;
@@ -151,14 +160,16 @@ static int l_tiles(lua_State *L) {
 	lua_pop(L, 1);
 	int xCurrent = x;
 	int i = 1;
-	while (len--) {
+	while (len--)
+	{
 		lua_rawgeti(L, 2, i);
 		int sprIndex = lua_tointeger(L, -1);
 		lua_pop(L, 1);
 		if (sprIndex > -1)
 			drawSprite(video, bmp, sprIndex, xCurrent, y, w, h, 1, 0, 0x00, Additive);
 		xCurrent += w * SPRITE_SIZE;
-		if (i++ % pitch == 0) {
+		if (i++ % pitch == 0)
+		{
 			xCurrent = x;
 			y += h * SPRITE_SIZE;
 		}
@@ -166,25 +177,28 @@ static int l_tiles(lua_State *L) {
 	return 0;
 }
 
-static int l_font(lua_State *L) {
+static int l_font(lua_State *L)
+{
 	Bitmap *bmp = NULL;
 	LuaObject *luaObj = lua_touserdata(L, 1);
-	if (luaObj) bmp = luaObj->handle;
+	if (luaObj)
+		bmp = luaObj->handle;
 	drawFont(video_addr(L), bmp,
-		(int)floor(lua_tonumber(L, 2)),
-		(int)floor(lua_tonumber(L, 3)),
-		lua_tostring(L, 4),
-		(int)floor(luaL_optinteger(L, 5, 1)),
-		(uint32_t)floor(luaL_optinteger(L, 6, 0xffffff))
-	);
+					 (int)floor(lua_tonumber(L, 2)),
+					 (int)floor(lua_tonumber(L, 3)),
+					 lua_tostring(L, 4),
+					 (int)floor(luaL_optinteger(L, 5, 1)),
+					 (uint32_t)floor(luaL_optinteger(L, 6, 0xffffff)));
 	return 1;
 }
 
-static int l_wave(lua_State *L) {
+static int l_wave(lua_State *L)
+{
 	Wave *wave = loadWave(lua_tostring(L, 1));
 	if (!wave)
 		lua_pushnil(L);
-	else {
+	else
+	{
 		LuaObject *luaObj = lua_newuserdata(L, sizeof(LuaObject));
 		luaObj->handle = wave;
 		luaL_setmetatable(L, WAVE_META);
@@ -192,7 +206,8 @@ static int l_wave(lua_State *L) {
 	return 1;
 }
 
-static int l_wave_gc(lua_State *L) {
+static int l_wave_gc(lua_State *L)
+{
 	LuaObject *luaObj = lua_touserdata(L, 1);
 	Wave *wave = luaObj->handle;
 	stopInstances(audio_addr(L), wave);
@@ -200,12 +215,14 @@ static int l_wave_gc(lua_State *L) {
 	return 0;
 }
 
-static int l_wavestream(lua_State *L) {
+static int l_wavestream(lua_State *L)
+{
 	const char *filePath = lua_tostring(L, 1);
 	WaveStream *waveStream = openWaveStream(filePath);
 	if (!waveStream)
 		lua_pushnil(L);
-	else {
+	else
+	{
 		LuaObject *luaObj = lua_newuserdata(L, sizeof(LuaObject));
 		luaObj->handle = waveStream;
 		luaL_setmetatable(L, WAVESTREAM_META);
@@ -213,7 +230,8 @@ static int l_wavestream(lua_State *L) {
 	return 1;
 }
 
-static int l_wavestream_gc(lua_State *L) {
+static int l_wavestream_gc(lua_State *L)
+{
 	LuaObject *luaObj = lua_touserdata(L, 1);
 	WaveStream *waveStream = luaObj->handle;
 	if (__getModules(L)->audio.streamSlot.data == waveStream)
@@ -222,95 +240,105 @@ static int l_wavestream_gc(lua_State *L) {
 	return 0;
 }
 
-static int l_play(lua_State *L) {
+static int l_play(lua_State *L)
+{
 	LuaObject *luaObj = lua_touserdata(L, 1);
 	Wave *wave = luaObj->handle;
 	playSound(audio_addr(L), wave, (int)lua_tointeger(L, 2), (int)lua_tointeger(L, 3));
 	return 0;
 }
 
-static int l_pause(lua_State *L) {
-  pauseSound(audio_addr(L),
-    (int)lua_tointeger(L, 1)
-  );
-  return 0;
+static int l_pause(lua_State *L)
+{
+	pauseSound(audio_addr(L),
+						 (int)lua_tointeger(L, 1));
+	return 0;
 }
 
-static int l_resume(lua_State *L) {
+static int l_resume(lua_State *L)
+{
 	resumeSound(audio_addr(L),
-		(int)lua_tointeger(L, 1)
-	);
+							(int)lua_tointeger(L, 1));
 	return 0;
 }
 
-static int l_stop(lua_State *L) {
+static int l_stop(lua_State *L)
+{
 	stopSound(audio_addr(L),
-		(int)lua_tointeger(L, 1)
-	);
+						(int)lua_tointeger(L, 1));
 	return 0;
 }
 
-static int l_sndslot(lua_State *L) {
+static int l_sndslot(lua_State *L)
+{
 	lua_pushinteger(L,
-		getSoundState(audio_addr(L), (int)lua_tointeger(L, 1))
-	);
+									getSoundState(audio_addr(L), (int)lua_tointeger(L, 1)));
 	return 1;
 }
 
-static int l_playstream(lua_State *L) {
+static int l_playstream(lua_State *L)
+{
 	LuaObject *luaObj = lua_touserdata(L, 1);
 	WaveStream *waveStream = luaObj->handle;
-  bool loop = false;
-  if (lua_isboolean(L, 3)) loop = lua_toboolean(L, 3);
+	bool loop = false;
+	if (lua_isboolean(L, 3))
+		loop = lua_toboolean(L, 3);
 	playStream(audio_addr(L),
-		waveStream,
-		(int)lua_tointeger(L, 2),
-    loop
-	);
+						 waveStream,
+						 (int)lua_tointeger(L, 2),
+						 loop);
 	return 0;
 }
 
-static int l_stopstream(lua_State *L) {
-  UNUSED(L);
-  stopStream(audio_addr(L));
-  return 0;
+static int l_stopstream(lua_State *L)
+{
+	UNUSED(L);
+	stopStream(audio_addr(L));
+	return 0;
 }
 
-static int l_pausestream(lua_State *L) {
-  UNUSED(L);
-  pauseStream(audio_addr(L));
-  return 0;
+static int l_pausestream(lua_State *L)
+{
+	UNUSED(L);
+	pauseStream(audio_addr(L));
+	return 0;
 }
 
-static int l_resumestream(lua_State *L) {
-  UNUSED(L);
-  resumeStream(audio_addr(L));
-  return 0;
+static int l_resumestream(lua_State *L)
+{
+	UNUSED(L);
+	resumeStream(audio_addr(L));
+	return 0;
 }
 
-static int l_vol(lua_State *L) {
+static int l_vol(lua_State *L)
+{
 	setMasterVolume(audio_addr(L), lua_tointeger(L, 1));
 	return 0;
 }
 
-static int l_exit(lua_State *L) {
+static int l_exit(lua_State *L)
+{
 	UNUSED(L);
 	platform_close();
 	return 0;
 }
 
-static void __registerModules(lua_State *L, Modules *modules) {
+static void __registerModules(lua_State *L, Modules *modules)
+{
 	lua_pushlightuserdata(L, (void *)&ModuleRegistryKey);
 	lua_pushlightuserdata(L, (void *)modules);
 	lua_settable(L, LUA_REGISTRYINDEX);
 }
 
-static void __pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_State *)) {
+static void __pushApiFunction(lua_State *L, const char *name, int (*api_func)(lua_State *))
+{
 	lua_pushcfunction(L, api_func);
 	lua_setglobal(L, name);
 }
 
-static void __registerApiFunctions(lua_State *L) {
+static void __registerApiFunctions(lua_State *L)
+{
 	__pushApiFunction(L, "btn", l_btn);
 	__pushApiFunction(L, "btnp", l_btnp);
 	__pushApiFunction(L, "bitmap", l_bitmap);
@@ -326,19 +354,20 @@ static void __registerApiFunctions(lua_State *L) {
 	__pushApiFunction(L, "wave", l_wave);
 	__pushApiFunction(L, "stream", l_wavestream);
 	__pushApiFunction(L, "play", l_play);
-  __pushApiFunction(L, "pause", l_pause);
+	__pushApiFunction(L, "pause", l_pause);
 	__pushApiFunction(L, "stop", l_stop);
 	__pushApiFunction(L, "resume", l_resume);
 	__pushApiFunction(L, "playstream", l_playstream);
-  __pushApiFunction(L, "stopstream", l_stopstream);
-  __pushApiFunction(L, "pausestream", l_pausestream);
-  __pushApiFunction(L, "resumestream", l_resumestream);
+	__pushApiFunction(L, "stopstream", l_stopstream);
+	__pushApiFunction(L, "pausestream", l_pausestream);
+	__pushApiFunction(L, "resumestream", l_resumestream);
 	__pushApiFunction(L, "sndslot", l_sndslot);
 	__pushApiFunction(L, "vol", l_vol);
 	__pushApiFunction(L, "exit", l_exit);
 }
 
-static void __registerMetatable(lua_State *L, const char* name, lua_CFunction gc) {
+static void __registerMetatable(lua_State *L, const char *name, lua_CFunction gc)
+{
 	luaL_newmetatable(L, name);
 	lua_pushcfunction(L, gc);
 	lua_setfield(L, -2, "__gc");
@@ -347,7 +376,8 @@ static void __registerMetatable(lua_State *L, const char* name, lua_CFunction gc
 	lua_pop(L, 1);
 }
 
-void openScriptEnv(Scripts *scripts, Modules *modules) {
+void openScriptEnv(Scripts *scripts, Modules *modules)
+{
 	lua_State *L = luaL_newstate();
 	scripts->state = (void *)L;
 	luaL_openlibs(L);
@@ -358,39 +388,47 @@ void openScriptEnv(Scripts *scripts, Modules *modules) {
 	__registerMetatable(L, WAVESTREAM_META, l_wavestream_gc);
 }
 
-void closeScriptEnv(Scripts *scripts) {
+void closeScriptEnv(Scripts *scripts)
+{
 	lua_close(scripts->state);
 	scripts->state = NULL;
 }
 
-void loadEntryPoint(Scripts *scripts) {
+void loadEntryPoint(Scripts *scripts)
+{
 	lua_State *L = scripts->state;
 	if (luaL_dofile(L, "main.lua"))
 		logError(lua_tostring(L, -1));
 }
 
-void invokeInit(Scripts *scripts) {
+void invokeInit(Scripts *scripts)
+{
 	lua_State *L = scripts->state;
 	lua_getglobal(L, "_init");
-	if (lua_pcall(L, 0, 0, 0) != 0) {
+	if (lua_pcall(L, 0, 0, 0) != 0)
+	{
 		logError(lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }
 
-void invokeUpdate(Scripts *scripts) {
+void invokeUpdate(Scripts *scripts)
+{
 	lua_State *L = scripts->state;
 	lua_getglobal(L, "_update");
-	if (lua_pcall(L, 0, 0, 0) != 0) {
+	if (lua_pcall(L, 0, 0, 0) != 0)
+	{
 		logError(lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}
 }
 
-void invokeDraw(Scripts *scripts) {
+void invokeDraw(Scripts *scripts)
+{
 	lua_State *L = scripts->state;
 	lua_getglobal(L, "_draw");
-	if (lua_pcall(L, 0, 0, 0) != 0) {
+	if (lua_pcall(L, 0, 0, 0) != 0)
+	{
 		logError(lua_tostring(L, -1));
 		lua_pop(L, -1);
 	}

@@ -5,13 +5,15 @@
 #include "gamepad.h"
 #include "video.h"
 
-typedef struct Modules {
+typedef struct Modules
+{
   Input input;
   Video video;
   Audio audio;
 } Modules;
 
-typedef struct {
+typedef struct
+{
   void *state;
 } Scripts;
 
