@@ -19,27 +19,27 @@ static void __resetCandidate(Console *console)
 
 static void __toggleConsole(Milk *milk)
 {
-	if (milk->console.isEnabled && hasError())
-		return;
-	milk->console.isEnabled = !milk->console.isEnabled;
-	if (milk->console.isEnabled)
+	if (!(milk->console.isEnabled && hasError()))
 	{
-		__resetCandidate(&milk->console);
-		pauseSound(&milk->modules.audio, -1);
-		pauseStream(&milk->modules.audio);
-		platform_startTextInput();
-	}
-	else
-	{
-		resumeSound(&milk->modules.audio, -1);
-		resumeStream(&milk->modules.audio);
-		platform_stopTextInput();
+		milk->console.isEnabled = !milk->console.isEnabled;
+		if (milk->console.isEnabled)
+		{
+			__resetCandidate(&milk->console);
+			pauseSound(&milk->modules.audio, -1);
+			pauseStream(&milk->modules.audio);
+			platform_startTextInput();
+		}
+		else
+		{
+			resumeSound(&milk->modules.audio, -1);
+			resumeStream(&milk->modules.audio);
+			platform_stopTextInput();
+		}
 	}
 }
 
-static void __cmdReload(Milk *milk, char *argument)
+static void __cmdReload(Milk *milk)
 {
-	UNUSED(argument);
 	clearError();
 	closeScriptEnv(&milk->scripts);
 	openScriptEnv(&milk->scripts, &milk->modules);
@@ -48,27 +48,26 @@ static void __cmdReload(Milk *milk, char *argument)
 	__toggleConsole(milk);
 }
 
-static void __cmdFullscreen(Milk *milk, char *argument)
+static void __cmdFullscreen(Milk *milk)
 {
 	UNUSED(milk);
-	UNUSED(argument);
 	platform_toggleFullscreen();
 }
 
-static void __cmdQuit(Milk *milk, char *argument)
+static void __cmdQuit(Milk *milk)
 {
 	UNUSED(milk);
-	UNUSED(argument);
 	platform_close();
 }
 
 typedef struct
 {
 	char *cmd;
-	void (*execute)(Milk *, char *);
+	void (*execute)(Milk *);
 } Command;
 
-static Command commands[] = {
+static Command commands[] =
+{
 	{"reload", __cmdReload},
 	{"fullscreen", __cmdFullscreen},
 	{"quit", __cmdQuit},
@@ -84,34 +83,39 @@ static void __disableConsole(Milk *milk)
 	memset(&milk->console, 0, sizeof(milk->console));
 }
 
+static void __executeCommand(Milk *milk)
+{
+	static int numCommands = sizeof(commands) / sizeof(Command);
+
+	while (numCommands--)
+	{
+		if (strcmp(milk->console.candidate, commands[numCommands].cmd) == 0)
+		{
+			commands[numCommands].execute(milk);
+			break;
+		}
+	}
+	__resetCandidate(&milk->console);
+}
+
 static void __updateConsole(Milk *milk)
 {
 	if (isExtDown(&milk->modules.input, INPUT_BACK) && milk->console.candidateLength > 0)
+	{
 		milk->console.candidate[--milk->console.candidateLength] = '\0';
+	}
 	if (isExtDown(&milk->modules.input, INPUT_CHAR) && milk->console.candidateLength < COMMAND_MAX_LENGTH - 1)
 	{
 		milk->console.candidate[milk->console.candidateLength] = milk->modules.input.extended.inChar;
 		milk->console.candidate[++milk->console.candidateLength] = '\0';
 	}
 	if (isButtonPressed(&milk->modules.input, BTN_DOWN))
+	{
 		__resetCandidate(&milk->console);
+	}
 	if (isExtPressed(&milk->modules.input, INPUT_ENTER))
 	{
-		int numCommands = sizeof(commands) / sizeof(Command);
-		char tempCandidate[COMMAND_MAX_LENGTH];
-		strcpy(tempCandidate, milk->console.candidate);
-		char *token = strtok(tempCandidate, " ");
-		while (numCommands--)
-		{
-			if (strcmp(token, commands[numCommands].cmd) == 0)
-			{
-				token = strtok(NULL, " ");
-				commands[numCommands].execute(milk, token);
-				__resetCandidate(&milk->console);
-				return;
-			}
-		}
-		__resetCandidate(&milk->console);
+		__executeCommand(milk);
 	}
 }
 

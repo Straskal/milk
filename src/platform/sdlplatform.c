@@ -8,11 +8,11 @@
 #define WINDOW_WIDTH (FRAMEBUFFER_WIDTH * 3)
 #define WINDOW_HEIGHT (FRAMEBUFFER_HEIGHT * 3)
 
-static enum PlatformFlags {
+static enum flags {
   NONE = 0,
   RUNNING = 1 << 0,
   FULLSCREEN = 1 << 1
-} PlatformFlags = NONE;
+} flags = NONE;
 
 static Milk *milk;
 static SDL_Window *window;
@@ -32,7 +32,7 @@ static void __freeModules()
 
 void platform_close()
 {
-  UNSET_BIT(PlatformFlags, RUNNING);
+  UNSET_BIT(flags, RUNNING);
 }
 
 void platform_lockAudioDevice()
@@ -57,8 +57,8 @@ void platform_stopTextInput()
 
 void platform_toggleFullscreen()
 {
-  TOGGLE_BIT(PlatformFlags, FULLSCREEN);
-  SDL_SetWindowFullscreen(window, CHECK_BIT(PlatformFlags, FULLSCREEN) ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+  TOGGLE_BIT(flags, FULLSCREEN);
+  SDL_SetWindowFullscreen(window, CHECK_BIT(flags, FULLSCREEN) ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
 }
 
 static void __mixCallback(void *userData, uint8_t *stream, int numBytes)
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
   UNUSED(argc);
   UNUSED(argv);
   atexit(__freeModules);
-  SET_BIT(PlatformFlags, RUNNING);
+  SET_BIT(flags, RUNNING);
 
   // Module initialization
   {
@@ -82,11 +82,18 @@ int main(int argc, char *argv[])
       exit(1);
     }
     milk = createMilk();
-    window = SDL_CreateWindow("milk", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT,
-                              SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    renderer = SDL_CreateRenderer(window, SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED);
-    frontBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
-                                           FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+    window = SDL_CreateWindow("milk",
+      SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+      WINDOW_WIDTH, WINDOW_HEIGHT,
+      SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI
+    );
+    renderer = SDL_CreateRenderer(window,
+      SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED
+    );
+    frontBufferTexture = SDL_CreateTexture(renderer,
+      SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
+      FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT
+    );
     SDL_RenderSetLogicalSize(renderer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
   }
@@ -102,7 +109,8 @@ int main(int argc, char *argv[])
     wantedSpec.callback = __mixCallback;
     wantedSpec.userdata = (void *)&milk->modules.audio;
     audioDevice = SDL_OpenAudioDevice(NULL, 0, &wantedSpec, &actualSpec, 0);
-    if (wantedSpec.format != actualSpec.format || wantedSpec.channels != actualSpec.channels || wantedSpec.freq != actualSpec.freq || wantedSpec.samples != actualSpec.samples)
+    if (wantedSpec.format != actualSpec.format || wantedSpec.channels != actualSpec.channels
+    || wantedSpec.freq != actualSpec.freq || wantedSpec.samples != actualSpec.samples)
     {
       printf("Audio device is not supported.");
       exit(1);
@@ -115,7 +123,7 @@ int main(int argc, char *argv[])
   const Uint64 deltaTime = SDL_GetPerformanceFrequency() / FRAMERATE;
   Uint64 accumulator = 0;
 
-  while (CHECK_BIT(PlatformFlags, RUNNING))
+  while (CHECK_BIT(flags, RUNNING))
   {
     accumulator += deltaTime;
 

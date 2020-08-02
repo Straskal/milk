@@ -1,12 +1,12 @@
 #ifndef __MILK_H__
 #define __MILK_H__
 
-#include "api.h"
+#include "scriptenv.h"
 
 typedef struct
 {
 	Modules modules;
-	Scripts scripts;
+	ScriptEnv scripts;
 
 #ifdef BUILD_WITH_CONSOLE
 #define COMMAND_MAX_LENGTH 36

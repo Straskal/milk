@@ -55,7 +55,10 @@ typedef struct
 
 static bool __readHeader(WavHeader *header, FILE *file)
 {
-  return fread(header, sizeof(WavHeader), 1, file) == 1 && VALID_FORMAT_TYPE(header->format.type) && VALID_RIFF_MARKER(header->riff.riff) && VALID_WAVE_MARKER(header->riff.wave) && VALID_FORMAT_MARKER(header->format.marker) && VALID_DATA_MARKER(header->data.marker) && VALID_CHANNEL_COUNT(header->format.channels) && VALID_SAMPLE_SIZE(header->format.bitsPerSample);
+  return fread(header, sizeof(WavHeader), 1, file) == 1 && VALID_FORMAT_TYPE(header->format.type)
+  && VALID_RIFF_MARKER(header->riff.riff) && VALID_WAVE_MARKER(header->riff.wave)
+  && VALID_FORMAT_MARKER(header->format.marker) && VALID_DATA_MARKER(header->data.marker)
+  && VALID_CHANNEL_COUNT(header->format.channels) && VALID_SAMPLE_SIZE(header->format.bitsPerSample);
 }
 
 Wave *loadWave(const char *filename)

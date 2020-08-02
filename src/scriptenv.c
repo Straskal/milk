@@ -4,12 +4,12 @@
 #include <math.h>
 #include <stdint.h>
 
-#include "api.h"
 #include "bitmap.h"
 #include "common.h"
 #include "logs.h"
 #include "milk.h"
 #include "platform.h"
+#include "scriptenv.h"
 
 static const char ModuleRegistryKey = 'k';
 
@@ -376,10 +376,10 @@ static void __registerMetatable(lua_State *L, const char *name, lua_CFunction gc
 	lua_pop(L, 1);
 }
 
-void openScriptEnv(Scripts *scripts, Modules *modules)
+void openScriptEnv(ScriptEnv *scriptEnv, Modules *modules)
 {
 	lua_State *L = luaL_newstate();
-	scripts->state = (void *)L;
+	scriptEnv->state = (void *)L;
 	luaL_openlibs(L);
 	__registerModules(L, modules);
 	__registerApiFunctions(L);
@@ -388,22 +388,22 @@ void openScriptEnv(Scripts *scripts, Modules *modules)
 	__registerMetatable(L, WAVESTREAM_META, l_wavestream_gc);
 }
 
-void closeScriptEnv(Scripts *scripts)
+void closeScriptEnv(ScriptEnv *scriptEnv)
 {
-	lua_close(scripts->state);
-	scripts->state = NULL;
+	lua_close(scriptEnv->state);
+	scriptEnv->state = NULL;
 }
 
-void loadEntryPoint(Scripts *scripts)
+void loadEntryPoint(ScriptEnv *scriptEnv)
 {
-	lua_State *L = scripts->state;
+	lua_State *L = scriptEnv->state;
 	if (luaL_dofile(L, "main.lua"))
 		logError(lua_tostring(L, -1));
 }
 
-void invokeInit(Scripts *scripts)
+void invokeInit(ScriptEnv *scriptEnv)
 {
-	lua_State *L = scripts->state;
+	lua_State *L = scriptEnv->state;
 	lua_getglobal(L, "_init");
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
@@ -412,9 +412,9 @@ void invokeInit(Scripts *scripts)
 	}
 }
 
-void invokeUpdate(Scripts *scripts)
+void invokeUpdate(ScriptEnv *scriptEnv)
 {
-	lua_State *L = scripts->state;
+	lua_State *L = scriptEnv->state;
 	lua_getglobal(L, "_update");
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
@@ -423,9 +423,9 @@ void invokeUpdate(Scripts *scripts)
 	}
 }
 
-void invokeDraw(Scripts *scripts)
+void invokeDraw(ScriptEnv *scriptEnv)
 {
-	lua_State *L = scripts->state;
+	lua_State *L = scriptEnv->state;
 	lua_getglobal(L, "_draw");
 	if (lua_pcall(L, 0, 0, 0) != 0)
 	{
