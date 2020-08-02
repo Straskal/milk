@@ -6,6 +6,17 @@
 typedef struct {
 	Modules modules;
 	Scripts scripts;
+
+#ifdef BUILD_WITH_CONSOLE
+#define COMMAND_MAX_LENGTH 36
+	struct Console {
+		int ticks;
+		bool isEnabled;
+		char candidate[COMMAND_MAX_LENGTH];
+		int candidateLength;
+		int lastErrorCount;
+	} console;
+#endif
 } Milk;
 
 Milk *createMilk();

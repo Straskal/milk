@@ -3,6 +3,7 @@
     "files.associations": {
         "type_traits": "c",
         "cmath": "c",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "limits": "cpp"
     }
 }

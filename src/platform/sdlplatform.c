@@ -101,12 +101,27 @@ int main(int argc, char *argv[]) {
     // Poll input events
     {
       ButtonState btnState = BTN_NONE;
+      ExtendedInputState extState = INPUT_NONE;
+      char inChar = 0;
 
       SDL_Event event;
       while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_QUIT:
           platform_close();
+          break;
+        case SDL_KEYDOWN:
+          switch (event.key.keysym.sym) {
+            case SDLK_BACKSPACE:
+              extState |= INPUT_BACK;
+              break;
+            default:
+              break;
+          }
+          break;
+        case SDL_TEXTINPUT:
+          extState |= INPUT_CHAR;
+          inChar = event.text.text[0];
           break;
         default:
           break;
@@ -131,8 +146,13 @@ int main(int argc, char *argv[]) {
         btnState |= BTN_X;
       if (kbState[SDL_SCANCODE_V])
         btnState |= BTN_Y;
+      if (kbState[SDL_SCANCODE_RETURN])
+        extState |= INPUT_ENTER;
+      if (kbState[SDL_SCANCODE_ESCAPE])
+        extState |= INPUT_ESCAPE;
 
       updateButtonState(&milk->modules.input, btnState);
+      updateExtendedInputState(&milk->modules.input, extState, inChar);
     }
 
     // Update and draw

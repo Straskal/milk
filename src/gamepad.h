@@ -16,6 +16,20 @@ typedef enum {
   BTN_Y     = 1 << 8,
 } ButtonState;
 
+typedef enum {
+  INPUT_NONE    = 0 << 0,
+  INPUT_CHAR    = 1 << 0,
+  INPUT_BACK    = 1 << 1,
+  INPUT_ENTER   = 1 << 2,
+  INPUT_ESCAPE  = 1 << 3
+} ExtendedInputState;
+
+typedef struct {
+  ExtendedInputState state;
+  ExtendedInputState previousState;
+  char inChar;
+} ExtendedInput;
+
 typedef struct {
   ButtonState buttonState;
   ButtonState previousButtonState;
@@ -23,11 +37,15 @@ typedef struct {
 
 typedef struct {
   Gamepad gamepad;
+  ExtendedInput extended;
 } Input;
 
 void initializeInput(Input *input);
 void updateButtonState(Input *input, ButtonState state);
+void updateExtendedInputState(Input *input, ExtendedInputState state, char inChar);
 bool isButtonDown(Input *input, ButtonState button);
 bool isButtonPressed(Input *input, ButtonState button);
+bool isExtDown(Input *input, ExtendedInputState in);
+bool isExtPressed(Input *input, ExtendedInputState in);
 
 #endif

@@ -99,8 +99,10 @@ void playStream(Audio *audio, WaveStream *waveStream, int volume, bool loop) {
 
 void stopStream(Audio *audio) {
   platform_lockAudioDevice();
-  if (audio->streamSlot.state == PLAYING)
-    audio->streamSlot.state = STOPPED;
+  audio->streamSlot.state = STOPPED;
+  audio->streamSlot.data = NULL;
+  audio->streamSlot.volume = 0;
+  audio->streamSlot.loop = false;
   platform_unlockAudioDevice();
 }
 
