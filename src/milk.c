@@ -91,7 +91,7 @@ static void __disableConsole(Milk *milk)
 
 static void __executeCommand(Milk *milk)
 {
-	static int numCommands = sizeof(commands) / sizeof(Command);
+	int numCommands = sizeof(commands) / sizeof(Command);
 
 	while (numCommands--)
 	{
@@ -149,7 +149,7 @@ static void __drawConsole(Milk *milk)
 	}
 
 	// Console panel
-	__drawPanel(video, "COMMAND CONSOLE", 0, CONSOLE_Y, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT - CONSOLE_Y);
+	__drawPanel(video, "TERMINAL", 0, CONSOLE_Y, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT - CONSOLE_Y);
 	drawFont(video, NULL, 5, CONSOLE_Y + 20, "~", 1, 0xffffff);
 	drawFont(video, NULL, 18, CONSOLE_Y + 20, console->candidate, 1, 0xffffff);
 	if (console->ticks % 64 < 48)

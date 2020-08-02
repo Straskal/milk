@@ -17,6 +17,12 @@ export class Game {
     private _stateStack: GameState[] = [];
     private _bitmap!: Bitmap;
     private _music!: Stream;
+    private _omrs!: Bitmap;
+    private _omrsFrame = 0;
+    private _omrsTimer = 0;
+    private _omrsFrames = [
+        0, 4, 8, 12, 64, 68
+    ];
     private _xPos: number = 0;
     private _tiles = [
         40, 40, 40, 40, 40,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 40, 40, 40, 40, 40,
@@ -45,6 +51,7 @@ export class Game {
     }
 
     public init(): void {
+        this._omrs = bitmap("art/omrs.bmp");
         this._bitmap = bitmap("art/town_tiles.bmp");
         this._music = stream("sounds/02 Underclocked (underunderclocked mix).wav");
         playstream(this._music, 128, true);
@@ -58,6 +65,12 @@ export class Game {
                 break;
         }
 
+        if (this.ticks > this._omrsTimer) {
+            if (++this._omrsFrame > 5)
+                this._omrsFrame = 0;
+            this._omrsTimer += 5;
+        }
+
         if (btn(3))
             this._xPos -= 1;
         if (btn(4))
@@ -67,6 +80,7 @@ export class Game {
     public draw(): void {
         clrs();
         tiles(this._bitmap, this._tiles, this._xPos, 0, 2, 2, 20);
+        sprite(this._omrs, this._omrsFrames[this._omrsFrame], 100, 100, 4, 4);
         this._ticks++;
     }
 
