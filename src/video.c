@@ -6,6 +6,13 @@
 #include "common.h"
 #include "video.h"
 
+// Possible improvements:
+//  - Clip buffers before writing them to frame buffer.
+//    All drawing functions right now use drawPixel(), which does a clip check for each pixel being drawn. *ew*.
+//
+//  - Use RLE encoded pixel buffers to enable working with rows of pixels.
+//    Right now, milk is doing color key checks and blending on individual pixels.
+
 #define RMASK 0x00ff0000
 #define GMASK 0x0000ff00
 #define BMASK 0x000000ff
@@ -26,7 +33,6 @@
 #define MIN_SCALE 0.1f
 #define MAX_SCALE 5.0f
 
-#define FRAMEBUF_COORD2INDEX(x, y) ((y * FRAMEBUFFER_WIDTH) + x)
 #define IS_ASCII(c) (0 < c)
 
 void initializeVideo(Video *video)
@@ -61,21 +67,21 @@ void setClip(Video *video, int x, int y, int w, int h)
   video->clipRect.bottom = CLAMP(y + h, 0, FRAMEBUFFER_HEIGHT);
 }
 
+#define FRAMEBUFFER_POS(x, y) (y * FRAMEBUFFER_WIDTH + x)
+
 void clearFramebuffer(Video *video, uint32_t color)
 {
   Rect clip = video->clipRect;
   for (int y = clip.top; y < clip.bottom; y++)
-  {
     for (int x = clip.left; x < clip.right; x++)
-      video->framebuffer[FRAMEBUF_COORD2INDEX(x, y)] = color;
-  }
+      video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
 void drawPixel(Video *video, int x, int y, uint32_t color)
 {
   Rect clip = video->clipRect;
   if (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
-    video->framebuffer[FRAMEBUF_COORD2INDEX(x, y)] = color;
+    video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
 void drawLine(Video *video, int x0, int y0, int x1, int y1, uint32_t color)
@@ -148,7 +154,17 @@ void drawFilledRect(Video *video, int x, int y, int w, int h, uint32_t color)
   }
 }
 
-static void __drawBuffer(Video *video, uint32_t *pixels, int x, int y, int w, int h, int pitch, float scale, uint8_t flip, uint32_t color, ColorMode mode)
+#define BLEND_COLOR(color, blendColor, mode)\
+  do {\
+    switch (mode) {\
+    case Average: color = AVERAGE_COLORS(color, blendColor); break;\
+    case Additive: color = ADD_COLORS(color, blendColor); break;\
+    case Solid: color = blendColor; break;\
+    default: break;\
+    }\
+  } while(0)
+
+static void __drawBuffer(Video *video, uint32_t *buffer, int x, int y, int w, int h, int pitch, float scale, uint8_t flip, uint32_t color, ColorMode mode)
 {
   scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
   float width = w * scale;
@@ -159,30 +175,21 @@ static void __drawBuffer(Video *video, uint32_t *pixels, int x, int y, int w, in
   int yPixelStart = CHECK_BIT(flip, 2) ? height - 1 : 0;
   int xStep = CHECK_BIT(flip, 1) ? -1 : 1;
   int yStep = CHECK_BIT(flip, 2) ? -1 : 1;
+  int yEnd = FLOOR(y + height);
+  int xEnd = FLOOR(x + width);
   int xSource, ySource, xDest, yDest;
-  for (yDest = y, ySource = yPixelStart; yDest < y + height; yDest++, ySource += yStep)
+
+  for (yDest = y, ySource = yPixelStart; yDest < yEnd; yDest++, ySource += yStep)
   {
-    for (xDest = x, xSource = xPixelStart; xDest < x + width; xDest++, xSource += xStep)
+    for (xDest = x, xSource = xPixelStart; xDest < xEnd; xDest++, xSource += xStep)
     {
       int xNearest = (xSource * xRatio) >> 16;
       int yNearest = (ySource * yRatio) >> 16;
-      uint32_t col = pixels[yNearest * pitch + xNearest];
+      uint32_t col = buffer[yNearest * pitch + xNearest];
+
       if (col != video->colorKey)
       {
-        switch (mode)
-        {
-          case Average:
-            col = AVERAGE_COLORS(col, color);
-            break;
-          case Additive:
-            col = ADD_COLORS(col, color);
-            break;
-          case Solid:
-            col = color;
-            break;
-          default:
-            break;
-        }
+        BLEND_COLOR(col, color, mode);
         drawPixel(video, xDest, yDest, col);
       }
     }
@@ -197,57 +204,65 @@ void drawSprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h
   int column = FLOOR(index % numColumns);
   w = CLAMP(w, 1, numColumns - column);
   h = CLAMP(h, 1, numRows - row);
-  uint32_t *buffer = &bmp->pixels[(row * bmp->width * SPRITE_SIZE) + (column * SPRITE_SIZE)];
+  uint32_t *buffer = &bmp->pixels[row * bmp->width * SPRITE_SIZE + column * SPRITE_SIZE];
   __drawBuffer(video, buffer, x, y, w * SPRITE_SIZE, h * SPRITE_SIZE, bmp->width, scale, flip, color, mode);
 }
 
-void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *str, int scale, uint32_t color)
+#define GET_FONT_BUFFER(video, bmp, buffer, pitch, numColumns)\
+  do {\
+    if (!bmp) {\
+      buffer = video->embeddedFont;\
+      pitch = EMBED_FONT_WIDTH;\
+      numColumns = EMBED_FONT_WIDTH / SPRITE_SIZE;\
+    }\
+    else {\
+      buffer = bmp->pixels;\
+      pitch = bmp->width;\
+      numColumns = bmp->width / SPRITE_SIZE;\
+    }\
+  } while (0)
+
+void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int scale, uint32_t color)
 {
-  uint32_t *fontPixels;
+  uint32_t *buffer;
   int pitch, numColumns;
-  if (!bmp)
-  {
-    fontPixels = video->embeddedFont;
-    pitch = EMBED_FONT_WIDTH;
-    numColumns = EMBED_FONT_WIDTH / SPRITE_SIZE;
-  }
-  else
-  {
-    fontPixels = bmp->pixels;
-    pitch = bmp->width;
-    numColumns = bmp->width / SPRITE_SIZE;
-  }
+  GET_FONT_BUFFER(video, bmp, buffer, pitch, numColumns);
+
+  char curr;
   int xCurrent = x;
   int yCurrent = y;
-  char curr;
-  while ((curr = *str++))
+
+  while ((curr = *text++))
   {
     if (!IS_ASCII(curr))
       curr = '?';
     switch (curr)
     {
-      case '\n':
-        xCurrent = x;
-        yCurrent += SPRITE_SIZE * scale;
-        break;
-      case ' ':
-        xCurrent += FONT_SPRITE_SPACING * scale;
-        break;
-      default:
-      {
-        int yPixel = FLOOR((curr - 33) / numColumns) * EMBED_FONT_WIDTH * SPRITE_SIZE;
-        int xPixel = FLOOR((curr - 33) % numColumns) * SPRITE_SIZE;
-        uint32_t *chPixels = &fontPixels[yPixel + xPixel];
-        __drawBuffer(video, chPixels, xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, pitch, scale, 0, color, Solid);
-        xCurrent += SPRITE_SIZE * scale;
-      }
+    case '\n':
+      xCurrent = x;
+      yCurrent += SPRITE_SIZE * scale;
       break;
+    case ' ':
+      xCurrent += FONT_SPRITE_SPACING * scale;
+      break;
+    default:
+    {
+      int yPixel = FLOOR((curr - 33) / numColumns) * pitch * SPRITE_SIZE;
+      int xPixel = FLOOR((curr - 33) % numColumns) * SPRITE_SIZE;
+      __drawBuffer(video, &buffer[yPixel + xPixel], xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, pitch, scale, 0, color, Solid);
+      xCurrent += SPRITE_SIZE * scale;
+    }
+    break;
     }
   }
 }
 
 int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, const char *str, int scale, uint32_t color, int width)
 {
+  uint32_t *buffer;
+  int pitch, numColumns;
+  GET_FONT_BUFFER(video, bmp, buffer, pitch, numColumns);
+
   int height = SPRITE_SIZE;
   char text[1024];
   memset(text, 0, sizeof(text));
@@ -256,18 +271,45 @@ int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, const char *str, in
   int yCurrent = y;
   int wrapAt = x + width;
   char *token = strtok(text, " ");
-  while (token)
-  {
+
+  while (token) {
     int tokenWidth = getFontWidth(token);
-    int newWidth = xCurrent + tokenWidth + FONT_SPRITE_SPACING;
-    if (newWidth > wrapAt)
-    {
-      xCurrent = x;
-      yCurrent += SPRITE_SIZE;
-      height += SPRITE_SIZE;
-    }
-    drawFont(video, bmp, xCurrent, yCurrent, token, scale, color);
-    xCurrent += tokenWidth + FONT_SPRITE_SPACING;
+    do {
+      if (tokenWidth > width) {
+        int remainingSpace = (wrapAt - xCurrent) / SPRITE_SIZE;
+        for (int i = 0; i < remainingSpace; i++) {
+          char curr = *token++;
+          if (!IS_ASCII(curr))
+            curr = '?';
+          int yPixel = FLOOR((curr - 33) / numColumns) * pitch * SPRITE_SIZE;
+          int xPixel = FLOOR((curr - 33) % numColumns) * SPRITE_SIZE;
+          __drawBuffer(video, &buffer[yPixel + xPixel], xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, pitch, scale, 0, color, Solid);
+          xCurrent += SPRITE_SIZE;
+        }
+        xCurrent = x;
+        yCurrent += SPRITE_SIZE;
+        height += SPRITE_SIZE;
+        tokenWidth = getFontWidth(token);
+      } else {
+        int newWidth = xCurrent + tokenWidth + FONT_SPRITE_SPACING;
+        if (newWidth > wrapAt) {
+          xCurrent = x;
+          yCurrent += SPRITE_SIZE;
+          height += SPRITE_SIZE;
+        }
+        char curr;
+        while ((curr = *token++)) {
+          if (!IS_ASCII(curr))
+            curr = '?';
+          int yPixel = FLOOR((curr - 33) / numColumns) * pitch * SPRITE_SIZE;
+          int xPixel = FLOOR((curr - 33) % numColumns) * SPRITE_SIZE;
+          __drawBuffer(video, &buffer[yPixel + xPixel], xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, pitch, scale, 0, color, Solid);
+          xCurrent += SPRITE_SIZE;
+        }
+        xCurrent += FONT_SPRITE_SPACING;
+        tokenWidth = 0;
+      }
+    } while (tokenWidth > 0);
     token = strtok(NULL, " ");
   }
   return height;
@@ -275,6 +317,9 @@ int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, const char *str, in
 
 int getFontWidth(const char *text)
 {
+  if (!text || *text == '\0')
+    return 0;
+
   int currentWidth = 0, width = 0;
   char curr;
   while ((curr = *text++))
