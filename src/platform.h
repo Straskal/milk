@@ -8,5 +8,6 @@ void platform_lockAudioDevice();
 void platform_unlockAudioDevice();
 void platform_startTextInput();
 void platform_stopTextInput();
+void platform_toggleFullscreen();
 
 #endif

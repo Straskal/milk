@@ -9,6 +9,7 @@
 #define WINDOW_HEIGHT (FRAMEBUFFER_HEIGHT * 3)
 
 static bool running;
+static bool fullscreen;
 static Milk *milk;
 static SDL_Window *window;
 static SDL_Renderer *renderer;
@@ -44,6 +45,11 @@ void platform_stopTextInput() {
   SDL_StopTextInput();
 }
 
+void platform_toggleFullscreen() {
+  fullscreen = !fullscreen;
+  SDL_SetWindowFullscreen(window, !fullscreen ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
+}
+
 static void __mixCallback(void *userData, uint8_t *stream, int numBytes) {
   memset(stream, 0, (size_t)numBytes);
   mixSamplesIntoStream((Audio *)userData, (int16_t *)stream, (int)(numBytes / sizeof(int16_t)));
@@ -54,6 +60,7 @@ int main(int argc, char *argv[]) {
   UNUSED(argv);
   atexit(__freeModules);
   running = true;
+  fullscreen = false;
 
   // Module initialization
   {

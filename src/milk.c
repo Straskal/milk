@@ -6,7 +6,7 @@
 #include "platform.h"
 
 #ifdef BUILD_WITH_CONSOLE
-#define CONSOLE_Y 180
+#define CONSOLE_Y 112
 
 typedef struct Console Console;
 typedef enum State State;
@@ -39,6 +39,11 @@ static void __cmdReload(Milk *milk, char *argument) {
 	__toggleConsole(milk);
 }
 
+static void __cmdFullscreen(Milk *milk, char *argument) {
+	UNUSED(argument);
+	platform_toggleFullscreen();
+}
+
 static void __cmdQuit(Milk *milk, char *argument) {
 	UNUSED(milk);
 	UNUSED(argument);
@@ -52,6 +57,7 @@ typedef struct {
 
 static Command commands[] = {
 	{"reload", __cmdReload},
+	{"fullscreen", __cmdFullscreen},
 	{"quit", __cmdQuit},
 };
 
@@ -92,14 +98,16 @@ static void __updateConsole(Milk *milk) {
 
 static void __drawConsole(Milk *milk) {
 	setClip(&milk->modules.video, 0, CONSOLE_Y, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT - CONSOLE_Y);
-	clearFramebuffer(&milk->modules.video, 0x1d2b53);
+	clearFramebuffer(&milk->modules.video, 0x40318d);
 	drawRect(&milk->modules.video, 0, CONSOLE_Y, FRAMEBUFFER_WIDTH - 1, FRAMEBUFFER_HEIGHT - CONSOLE_Y - 1, 0xffffff);
-	drawFont(&milk->modules.video, NULL, 5, CONSOLE_Y + 5, milk->console.candidate, 1, 0xffffff);
+	drawFont(&milk->modules.video, NULL, 5, CONSOLE_Y + 5, "COMMAND CONSOLE", 1, 0x7869c4);
+	drawFont(&milk->modules.video, NULL, 5, CONSOLE_Y + 20, "~", 1, 0xffffff);
+	drawFont(&milk->modules.video, NULL, 18, CONSOLE_Y + 20, milk->console.candidate, 1, 0xffffff);
 	if (milk->console.ticks % 64 < 48)
-		drawFilledRect(&milk->modules.video, 5 + getFontWidth(milk->console.candidate), CONSOLE_Y + 5, 6, 8, 0xbf4040);
+		drawFilledRect(&milk->modules.video, 18 + getFontWidth(milk->console.candidate), CONSOLE_Y + 20, 6, 8, 0xbf4040);
 }
 
-#endif
+#endif // BUILD_WITH_CONSOLE
 
 Milk *createMilk() {
 	LOG_INIT();
