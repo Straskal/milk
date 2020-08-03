@@ -171,7 +171,7 @@ static void __drawBuffer(Video *video, uint32_t *buffer, int x, int y, int w, in
   scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
   float width = w * scale;
   float height = h * scale;
-  // Shift down 16 bits to float -> int improve precision.
+  // Shift down 16 bits to improve float -> int precision.
   // Add 0.5 to account for rounding errors.
   int xRatio = FLOOR((w << 16) / width + 0.5f);
   int yRatio = FLOOR((h << 16) / height + 0.5f);
