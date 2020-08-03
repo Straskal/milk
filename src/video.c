@@ -250,6 +250,11 @@ void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int sca
   }
 }
 
+// Wrapping text is pretty straight forward:
+//  - Read through the string and mark the last space that was found.
+//  - When hitting max line length, revert back to initial line position.
+//  - Read and draw up until the last space marked.
+//  - Repeat until string has been fully read.
 int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int width, const char *text, int scale, uint32_t color)
 {
   if (!text || width < 0) return 0;
