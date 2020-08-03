@@ -257,18 +257,19 @@ int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, const char *str, in
   int pitch, numColumns;
   GET_FONT_BUFFER(video, bmp, buffer, pitch, numColumns);
   int yCurrent = y;
-  int maxLineLength = width / SPRITE_SIZE;
+  int maxLineLength = FLOOR(width / SPRITE_SIZE);
   while (*str)
   {
     const char *lineStart = str;
-    const char *lineEnd = str;
+    const char *lineEnd = NULL;
     int lineLength = 0;
     char currChar;
     while ((currChar = *str++))
     {
-      if (currChar == ' ' || *lineEnd != ' ') lineEnd = str;
+      if (currChar == ' ') lineEnd = str;
       if (lineLength++ > maxLineLength || currChar == '\n') break;
     }
+    if (!lineEnd || lineLength <= maxLineLength) lineEnd = str;
     str = lineStart;
     int xCurrent = x;
     while (str != lineEnd)
@@ -287,7 +288,6 @@ int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, const char *str, in
     }
     yCurrent += SPRITE_SIZE;
   }
-
   return (yCurrent - y) / SPRITE_SIZE;
 }
 
