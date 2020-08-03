@@ -133,7 +133,7 @@ static void __drawPanel(Video *video, const char *title, int x, int y, int w, in
 	setClip(video, x, y, w, h);
 	clearFramebuffer(video, 0x40318d);
 	drawRect(video, x, y, w - 1, h - 1, 0xffffff);
-	draw(video, NULL, x + 5, y + 5, title, 1, 0x7869c4);
+	drawFont(video, NULL, x + 5, y + 5, title, 1, 0x7869c4);
 }
 
 static void __drawConsole(Milk *milk)
