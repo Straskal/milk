@@ -228,8 +228,7 @@ void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int sca
   int yCurrent = y;
   while ((curr = *text++))
   {
-    if (!IS_ASCII(curr))
-      curr = '?';
+    if (!IS_ASCII(curr)) curr = '?';
     switch (curr)
     {
     case '\n':
@@ -270,7 +269,7 @@ int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int width, const ch
       if (currChar == ' ') lineEnd = str;
       if (lineLength++ > maxLineLength || currChar == '\n') break;
     }
-    if (!lineEnd || currChar == '\0') lineEnd = str - 1;
+    if (!lineEnd || !currChar) lineEnd = str - 1;
     str = lineStart;
     int xCurrent = x;
     while (str != lineEnd)
