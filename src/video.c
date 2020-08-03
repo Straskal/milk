@@ -146,10 +146,8 @@ void drawRect(Video *video, int x, int y, int w, int h, uint32_t color)
 void drawFilledRect(Video *video, int x, int y, int w, int h, uint32_t color)
 {
   for (int i = y; i < y + h; i++)
-  {
     for (int j = x; j < x + w; j++)
       drawPixel(video, j, i, color);
-  }
 }
 
 #define BLEND_COLOR(color, blendColor, mode)\
