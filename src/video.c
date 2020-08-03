@@ -178,7 +178,6 @@ static void __drawBuffer(Video *video, uint32_t *buffer, int x, int y, int w, in
   int yEnd = FLOOR(y + height);
   int xEnd = FLOOR(x + width);
   int xSource, ySource, xDest, yDest;
-
   for (yDest = y, ySource = yPixelStart; yDest < yEnd; yDest++, ySource += yStep)
   {
     for (xDest = x, xSource = xPixelStart; xDest < xEnd; xDest++, xSource += xStep)
@@ -186,7 +185,6 @@ static void __drawBuffer(Video *video, uint32_t *buffer, int x, int y, int w, in
       int xNearest = (xSource * xRatio) >> 16;
       int yNearest = (ySource * yRatio) >> 16;
       uint32_t col = buffer[yNearest * pitch + xNearest];
-
       if (col != video->colorKey)
       {
         BLEND_COLOR(col, color, mode);
@@ -227,11 +225,9 @@ void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int sca
   uint32_t *buffer;
   int pitch, numColumns;
   GET_FONT_BUFFER(video, bmp, buffer, pitch, numColumns);
-
   char curr;
   int xCurrent = x;
   int yCurrent = y;
-
   while ((curr = *text++))
   {
     if (!IS_ASCII(curr))
