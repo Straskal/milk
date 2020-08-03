@@ -133,7 +133,7 @@ static void __drawPanel(Video *video, const char *title, int x, int y, int w, in
 	setClip(video, x, y, w, h);
 	clearFramebuffer(video, 0x40318d);
 	drawRect(video, x, y, w - 1, h - 1, 0xffffff);
-	drawFont(video, NULL, x + 5, y + 5, title, 1, 0x7869c4);
+	draw(video, NULL, x + 5, y + 5, title, 1, 0x7869c4);
 }
 
 static void __drawConsole(Milk *milk)
@@ -145,11 +145,11 @@ static void __drawConsole(Milk *milk)
 	if (hasError())
 	{
 		__drawPanel(video, "ERROR", 0, CONSOLE_Y - 79, FRAMEBUFFER_WIDTH, 80);
-		drawWrappedFont(video, NULL, 5, CONSOLE_Y - 79 + 20, getError(), 1, 0xbf4040, FRAMEBUFFER_WIDTH - 5);
+		drawWrappedFont(video, NULL, 5, CONSOLE_Y - 79 + 20, getError(), 1, 0xbf4040, FRAMEBUFFER_WIDTH - 40);
 	}
 
 	// Console panel
-	__drawPanel(video, "TERMINAL", 0, CONSOLE_Y, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT - CONSOLE_Y);
+	__drawPanel(video, "TERM\nINAL", 0, CONSOLE_Y, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT - CONSOLE_Y);
 	drawFont(video, NULL, 5, CONSOLE_Y + 20, "~", 1, 0xffffff);
 	drawFont(video, NULL, 18, CONSOLE_Y + 20, console->candidate, 1, 0xffffff);
 	if (console->ticks % 64 < 48)

@@ -262,57 +262,39 @@ int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, const char *str, in
   uint32_t *buffer;
   int pitch, numColumns;
   GET_FONT_BUFFER(video, bmp, buffer, pitch, numColumns);
-
-  int height = SPRITE_SIZE;
-  char text[1024];
-  memset(text, 0, sizeof(text));
-  strcpy(text, str);
-  int xCurrent = x;
   int yCurrent = y;
-  int wrapAt = x + width;
-  char *token = strtok(text, " ");
-
-  while (token) {
-    int tokenWidth = getFontWidth(token);
-    do {
-      if (tokenWidth > width) {
-        int remainingSpace = (wrapAt - xCurrent) / SPRITE_SIZE;
-        for (int i = 0; i < remainingSpace; i++) {
-          char curr = *token++;
-          if (!IS_ASCII(curr))
-            curr = '?';
-          int yPixel = FLOOR((curr - 33) / numColumns) * pitch * SPRITE_SIZE;
-          int xPixel = FLOOR((curr - 33) % numColumns) * SPRITE_SIZE;
-          __drawBuffer(video, &buffer[yPixel + xPixel], xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, pitch, scale, 0, color, Solid);
-          xCurrent += SPRITE_SIZE;
-        }
-        xCurrent = x;
-        yCurrent += SPRITE_SIZE;
-        height += SPRITE_SIZE;
-        tokenWidth = getFontWidth(token);
-      } else {
-        int newWidth = xCurrent + tokenWidth + FONT_SPRITE_SPACING;
-        if (newWidth > wrapAt) {
-          xCurrent = x;
-          yCurrent += SPRITE_SIZE;
-          height += SPRITE_SIZE;
-        }
-        char curr;
-        while ((curr = *token++)) {
-          if (!IS_ASCII(curr))
-            curr = '?';
-          int yPixel = FLOOR((curr - 33) / numColumns) * pitch * SPRITE_SIZE;
-          int xPixel = FLOOR((curr - 33) % numColumns) * SPRITE_SIZE;
-          __drawBuffer(video, &buffer[yPixel + xPixel], xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, pitch, scale, 0, color, Solid);
-          xCurrent += SPRITE_SIZE;
-        }
-        xCurrent += FONT_SPRITE_SPACING;
-        tokenWidth = 0;
+  int maxLineLength = width / SPRITE_SIZE;
+  while (*str)
+  {
+    const char *lineStart = str;
+    const char *lineEnd = str;
+    int lineLength = 0;
+    char currChar;
+    while ((currChar = *str++))
+    {
+      if (currChar == ' ' || *lineEnd != ' ') lineEnd = str;
+      if (lineLength++ > maxLineLength || currChar == '\n') break;
+    }
+    str = lineStart;
+    int xCurrent = x;
+    while (str != lineEnd)
+    {
+      currChar = *str++;
+      if (currChar == '\n') continue;
+      if (currChar != ' ')
+      {
+        if (!IS_ASCII(currChar)) currChar = '?';
+        int yPixel = FLOOR((currChar - 33) / numColumns) * pitch * SPRITE_SIZE;
+        int xPixel = FLOOR((currChar - 33) % numColumns) * SPRITE_SIZE;
+        __drawBuffer(video, &buffer[yPixel + xPixel], xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, pitch, scale, 0, color, Solid);
+        xCurrent += SPRITE_SIZE * scale;
       }
-    } while (tokenWidth > 0);
-    token = strtok(NULL, " ");
+      else xCurrent += FONT_SPRITE_SPACING;
+    }
+    yCurrent += SPRITE_SIZE;
   }
-  return height;
+
+  return (yCurrent - y) / SPRITE_SIZE;
 }
 
 int getFontWidth(const char *text)
