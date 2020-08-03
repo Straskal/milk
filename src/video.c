@@ -33,8 +33,6 @@
 #define MIN_SCALE 0.1f
 #define MAX_SCALE 5.0f
 
-#define IS_ASCII(c) (0 < c)
-
 void initializeVideo(Video *video)
 {
   uint32_t embeddedFontData[] = {
@@ -219,6 +217,8 @@ void drawSprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h
       numColumns = bmp->width / SPRITE_SIZE;\
     }\
   } while (0)
+
+#define IS_ASCII(c) (0 < c)
 
 void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int scale, uint32_t color)
 {
