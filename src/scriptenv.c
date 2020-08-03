@@ -192,6 +192,23 @@ static int l_font(lua_State *L)
 	return 1;
 }
 
+static int l_fontwrap(lua_State *L)
+{
+	Bitmap *bmp = NULL;
+	LuaObject *luaObj = lua_touserdata(L, 1);
+	if (luaObj)	bmp = luaObj->handle;
+	drawWrappedFont
+		(video_addr(L), bmp,
+		(int)floor(lua_tonumber(L, 2)),
+		(int)floor(lua_tonumber(L, 3)),
+		(int)floor(lua_tonumber(L, 4)),
+		lua_tostring(L, 5),
+		(int)floor(luaL_optinteger(L, 6, 1)),
+		(uint32_t)floor(luaL_optinteger(L, 7, 0xffffff))
+	);
+	return 1;
+}
+
 static int l_wave(lua_State *L)
 {
 	Wave *wave = loadWave(lua_tostring(L, 1));
@@ -351,6 +368,7 @@ static void __registerApiFunctions(lua_State *L)
 	__pushApiFunction(L, "sprite", l_sprite);
 	__pushApiFunction(L, "tiles", l_tiles);
 	__pushApiFunction(L, "font", l_font);
+	__pushApiFunction(L, "fontwrap", l_fontwrap);
 	__pushApiFunction(L, "wave", l_wave);
 	__pushApiFunction(L, "stream", l_wavestream);
 	__pushApiFunction(L, "play", l_play);

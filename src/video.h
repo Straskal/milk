@@ -48,7 +48,7 @@ void drawRect(Video *video, int x, int y, int w, int h, uint32_t color);
 void drawFilledRect(Video *video, int x, int y, int w, int h, uint32_t color);
 void drawSprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h, float scale, uint8_t flip, uint32_t color, ColorMode mode);
 void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int scale, uint32_t color);
-int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, const char *str, int scale, uint32_t color, int width);
+int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int width, const char *str, int scale, uint32_t color);
 int getFontWidth(const char *text);
 void flipFramebuffer(Video *video, uint32_t *frontBuffer);
 

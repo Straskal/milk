@@ -251,8 +251,9 @@ void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int sca
   }
 }
 
-int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, const char *str, int scale, uint32_t color, int width)
+int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int width, const char *str, int scale, uint32_t color)
 {
+  if (!str || width < 0) return 0;
   uint32_t *buffer;
   int pitch, numColumns;
   GET_FONT_BUFFER(video, bmp, buffer, pitch, numColumns);
@@ -269,7 +270,7 @@ int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, const char *str, in
       if (currChar == ' ') lineEnd = str;
       if (lineLength++ > maxLineLength || currChar == '\n') break;
     }
-    if (!lineEnd || lineLength <= maxLineLength) lineEnd = str;
+    if (!lineEnd || currChar == '\0') lineEnd = str - 1;
     str = lineStart;
     int xCurrent = x;
     while (str != lineEnd)
