@@ -250,31 +250,35 @@ void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int sca
   }
 }
 
-int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int width, const char *str, int scale, uint32_t color)
+int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int width, const char *text, int scale, uint32_t color)
 {
-  if (!str || width < 0) return 0;
+  if (!text || width < 0) return 0;
   uint32_t *buffer;
   int pitch, numColumns;
   GET_FONT_BUFFER(video, bmp, buffer, pitch, numColumns);
   int yCurrent = y;
   int maxLineLength = FLOOR(width / SPRITE_SIZE);
-  while (*str)
+  while (*text)
   {
-    const char *lineStart = str;
+    const char *lineStart = text;
     const char *lineEnd = NULL;
     int lineLength = 0;
     char currChar;
-    while ((currChar = *str++))
+    int xCurrent = x;
+    while ((currChar = *text++))
     {
-      if (currChar == ' ') lineEnd = str;
+      // If we run into a space, then mark the char in front of the space as the line end.
+      // Then, if we run into the max width or a newline, break the loop.
+      if (currChar == ' ') lineEnd = text;
       if (lineLength++ > maxLineLength || currChar == '\n') break;
     }
-    if (!lineEnd || !currChar) lineEnd = str - 1;
-    str = lineStart;
-    int xCurrent = x;
-    while (str != lineEnd)
+    // If we've reached max line length before running into a space,
+    // or we've reached the end of the string, then the lineEnd is where we stopped reading.
+    if (!lineEnd || !currChar) lineEnd = text - 1;
+    text = lineStart; // Move the text pointer back to the last line start position, and then draw from lineStart -> lineEnd.
+    while (text != lineEnd)
     {
-      currChar = *str++;
+      currChar = *text++;
       if (currChar == '\n') continue;
       if (currChar != ' ')
       {
