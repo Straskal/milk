@@ -30,9 +30,6 @@
 #define ADD_COLORS(col1, col2) \
   ((ADD_COMP(r_comp(col1), r_comp(col2)) << 16) | (ADD_COMP(g_comp(col1), g_comp(col2)) << 8) | ADD_COMP(b_comp(col1), b_comp(col2)))
 
-#define MIN_SCALE 0.1f
-#define MAX_SCALE 5.0f
-
 void initializeVideo(Video *video)
 {
   uint32_t embeddedFontData[] = {
@@ -150,6 +147,8 @@ void drawFilledRect(Video *video, int x, int y, int w, int h, uint32_t color)
       drawPixel(video, j, i, color);
 }
 
+// Using a macro for blending has less overhead than a function call.
+// This is being called inside of a very tight loop where we blend each individual pixel.
 #define BLEND_COLOR(color, blendColor, mode)\
   do {\
     switch (mode) {\
@@ -160,13 +159,23 @@ void drawFilledRect(Video *video, int x, int y, int w, int h, uint32_t color)
     }\
   } while(0)
 
+#define MIN_SCALE 0.1f
+#define MAX_SCALE 5.0f
+
+// Scaling is done at the time of drawing.
+//  - Calculate the width : scaled width ratio.
+//  - Using the ratio to determine closest neighboring pixel in the buffer.
+//  - Draw the closest neighboring pixel.
 static void __drawBuffer(Video *video, uint32_t *buffer, int x, int y, int w, int h, int pitch, float scale, uint8_t flip, uint32_t color, ColorMode mode)
 {
   scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
   float width = w * scale;
   float height = h * scale;
+  // Shift down 16 bits to float -> int improve precision.
+  // Add 0.5 to account for rounding errors.
   int xRatio = FLOOR((w << 16) / width + 0.5f);
   int yRatio = FLOOR((h << 16) / height + 0.5f);
+  // Use flip information to determine the direction to iterate through buffer.
   int xPixelStart = CHECK_BIT(flip, 1) ? width - 1 : 0;
   int yPixelStart = CHECK_BIT(flip, 2) ? height - 1 : 0;
   int xStep = CHECK_BIT(flip, 1) ? -1 : 1;
