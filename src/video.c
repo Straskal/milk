@@ -220,30 +220,23 @@ void drawSprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h
   __drawBuffer(video, buffer, x, y, w * SPRITE_SIZE, h * SPRITE_SIZE, bmp->width, scale, flip, color, mode);
 }
 
-#define GET_FONT_BUFFER(video, bmp, buffer, pitch, numColumns)\
-  do {\
-    if (!bmp) {\
-      buffer = embeddedFontData;\
-      pitch = EMBED_FONT_WIDTH;\
-      numColumns = EMBED_FONT_WIDTH / SPRITE_SIZE;\
-    } else {\
-      buffer = bmp->pixels;\
-      pitch = bmp->width;\
-      numColumns = bmp->width / SPRITE_SIZE;\
-    }\
-  } while (0)
-
 #define IS_ASCII(c) (0 < c)
 
 void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int scale, uint32_t color)
 {
-  uint32_t *buffer;
-  int pitch, numColumns;
-  GET_FONT_BUFFER(video, bmp, buffer, pitch, numColumns);
+  if (!text || scale <= 0)
+    return;
 
-  char curr;
+  Bitmap bitmap = bmp ? *bmp : (Bitmap) {
+    .pixels = embeddedFontData,
+    .width  = EMBED_FONT_WIDTH,
+    .height = EMBED_FONT_HEIGHT
+  };
+
+  int numColumns = bitmap.width / SPRITE_SIZE;
   int xCurrent = x;
   int yCurrent = y;
+  char curr;
 
   while ((curr = *text))
   {
@@ -252,82 +245,90 @@ void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int sca
 
     switch (curr)
     {
-    case '\n':
-      xCurrent = x;
-      yCurrent += SPRITE_SIZE * scale;
+      case '\n':
+        xCurrent = x;
+        yCurrent += SPRITE_SIZE * scale;
+        break;
+      case ' ':
+        xCurrent += FONT_SPRITE_SPACING * scale;
+        break;
+      default:
+      {
+        int yPixel = FLOOR((curr - 33) / numColumns) * bitmap.width * SPRITE_SIZE;
+        int xPixel = FLOOR((curr - 33) % numColumns) * SPRITE_SIZE;
+
+        __drawBuffer(video, &bitmap.pixels[yPixel + xPixel], xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, bitmap.width, scale, 0, color, Solid);
+
+        xCurrent += SPRITE_SIZE * scale;
+      }
       break;
-    case ' ':
-      xCurrent += FONT_SPRITE_SPACING * scale;
-      break;
-    default:
-    {
-      int yPixel = FLOOR((curr - 33) / numColumns) * pitch * SPRITE_SIZE;
-      int xPixel = FLOOR((curr - 33) % numColumns) * SPRITE_SIZE;
-      __drawBuffer(video, &buffer[yPixel + xPixel], xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, pitch, scale, 0, color, Solid);
-      xCurrent += SPRITE_SIZE * scale;
-    }
-    break;
     }
     text++;
   }
 }
 
-int drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int width, const char *text, int scale, uint32_t color) {
-  if (!text || width < 1)
-    return 0;
+static int __wrapSeek(const char *text, int maxLength)
+{
+  int lineLength  = 0;
+  int breakLength = 0;
+  char c;
 
-  uint32_t *buffer;
-  int pitch, numColumns;
-  GET_FONT_BUFFER(video, bmp, buffer, pitch, numColumns);
+  while ((c = *text) && lineLength < maxLength)
+  {
+    text++;
+    lineLength++;
 
+    if (c == ' ')
+      breakLength = lineLength;
+  }
+
+  return breakLength == 0 || !c ? lineLength : breakLength;
+}
+
+void drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int w, const char *text, int scale, uint32_t color)
+{
+  if (!text || scale <= 0 || w < SPRITE_SIZE)
+    return;
+
+  Bitmap bitmap = bmp ? *bmp : (Bitmap) {
+    .pixels = embeddedFontData,
+    .width  = EMBED_FONT_WIDTH,
+    .height = EMBED_FONT_HEIGHT
+  };
+
+  int numColumns = bitmap.width / SPRITE_SIZE;
+  int maxLineLength = FLOOR(w / SPRITE_SIZE);
   int yCurrent = y;
-  int maxLineLength = FLOOR(width / SPRITE_SIZE);
 
   while (*text)
   {
-    const char *lineStart = text;
-    const char *lineEnd   = NULL;
-    int lineLength        = 0;
-    char currChar;
-
-    while ((currChar = *text))
-    {
-      text++;
-      if (currChar == ' ')
-        lineEnd = text;
-      if (lineLength++ > maxLineLength - 1 || currChar == '\n')
-        break;
-    }
-    if (!lineEnd)
-      lineEnd = text;
-
-    text = lineStart;
+    int length = __wrapSeek(text, maxLineLength);
     int xCurrent = x;
 
-    while (text != lineEnd)
+    for (int i = 0; i < length; i++, text++)
     {
-      currChar = *text++;
+      char c = *text;
 
-      if (currChar == '\n')
+      if (c == '\n' || (i == 0 && c == ' '))
         continue;
 
-      if (currChar != ' ')
+      if (c != ' ')
       {
-        if (!IS_ASCII(currChar))
-          currChar = '?';
+        if (!IS_ASCII(c))
+          c = '?';
 
-        int yPixel = FLOOR((currChar - 33) / numColumns) * pitch * SPRITE_SIZE;
-        int xPixel = FLOOR((currChar - 33) % numColumns) * SPRITE_SIZE;
+        int yPixel = FLOOR((c - 33) / numColumns) * bitmap.width * SPRITE_SIZE;
+        int xPixel = FLOOR((c - 33) % numColumns) * SPRITE_SIZE;
 
-        __drawBuffer(video, &buffer[yPixel + xPixel], xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, pitch, scale, 0, color, Solid);
+        __drawBuffer(video, &bitmap.pixels[yPixel + xPixel], xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, bitmap.width, scale, 0, color, Solid);
 
         xCurrent += SPRITE_SIZE * scale;
       }
       else xCurrent += FONT_SPRITE_SPACING;
     }
+
     yCurrent += SPRITE_SIZE;
   }
-  return (yCurrent - y) / SPRITE_SIZE;
 }
 
 int getFontWidth(const char *text)
@@ -357,6 +358,7 @@ int getFontWidth(const char *text)
   return width;
 }
 
-void flipFramebuffer(Video *video, uint32_t *frontBuffer) {
+void flipFramebuffer(Video *video, uint32_t *frontBuffer)
+{
   memcpy(frontBuffer, video->framebuffer, sizeof(video->framebuffer));
 }
