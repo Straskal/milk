@@ -37,7 +37,7 @@
 #define BLEND_ADDITIVE(col1, col2)\
   ((ADD_COMP(r_comp(col1), r_comp(col2)) << 16) | (ADD_COMP(g_comp(col1), g_comp(col2)) << 8) | ADD_COMP(b_comp(col1), b_comp(col2)))
 
-#define EMBED_FONT_WIDTH 96
+#define EMBED_FONT_WIDTH  96
 #define EMBED_FONT_HEIGHT 64
 
 static uint32_t embeddedFontData[] =
