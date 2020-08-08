@@ -194,12 +194,12 @@ static void __drawBuffer(Video *video, uint32_t *buffer, int x, int y, int w, in
     {
       int xNearest = (xSource * xRatio) >> 16;
       int yNearest = (ySource * yRatio) >> 16;
-      uint32_t col = buffer[yNearest * pitch + xNearest];
+      uint32_t pixel = buffer[yNearest * pitch + xNearest];
 
-      if (col != video->colorKey)
+      if (pixel != video->colorKey)
       {
-        BLEND_COLOR(col, color, mode);
-        drawPixel(video, xDest, yDest, col);
+        BLEND_COLOR(pixel, color, mode);
+        drawPixel(video, xDest, yDest, pixel);
       }
     }
   }
