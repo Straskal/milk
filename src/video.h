@@ -10,8 +10,6 @@
 #define FRAMEBUFFER_WIDTH 320
 #define FRAMEBUFFER_HEIGHT 224
 #define SPRITE_SIZE 8
-#define EMBED_FONT_WIDTH 96
-#define EMBED_FONT_HEIGHT 64
 #define FONT_SPRITE_SPACING 6
 
 typedef enum
@@ -24,21 +22,19 @@ typedef enum
 typedef struct
 {
   int top;
-  int bottom;
   int left;
+  int bottom;
   int right;
 } Rect;
 
 typedef struct
 {
   uint32_t framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
-  uint32_t embeddedFont[EMBED_FONT_WIDTH * EMBED_FONT_HEIGHT];
   uint32_t colorKey;
   Rect clipRect;
 } Video;
 
 void initializeVideo(Video *video);
-void disableVideo(Video *video);
 void resetDrawState(Video *video);
 void setClip(Video *video, int x, int y, int w, int h);
 void clearFramebuffer(Video *video, uint32_t color);
