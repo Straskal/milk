@@ -176,21 +176,21 @@ static void __drawBuffer(Video *video, uint32_t *buffer, int x, int y, int w, in
   if (scale <= 0)
     return;
 
-  float width   = w * scale;
-  float height  = h * scale;
-  int xRatio    = FLOOR((w << 16) / width + 0.5f);
-  int yRatio    = FLOOR((h << 16) / height + 0.5f);
+  float scaledWidth   = w * scale;
+  float scaledHeight  = h * scale;
 
-  int xPixelStart   = CHECK_BIT(flip, 1) ? width - 1 : 0;
-  int yPixelStart   = CHECK_BIT(flip, 2) ? height - 1 : 0;
   int xStep         = CHECK_BIT(flip, 1) ? -1 : 1;
   int yStep         = CHECK_BIT(flip, 2) ? -1 : 1;
-  int yEnd          = FLOOR(y + height);
-  int xEnd          = FLOOR(x + width);
+  int ySourceStart  = CHECK_BIT(flip, 2) ? scaledHeight - 1 : 0;
+  int xSourceStart  = CHECK_BIT(flip, 1) ? scaledWidth - 1 : 0;
+  int yDestEnd      = FLOOR(y + scaledHeight);
+  int xDestEnd      = FLOOR(x + scaledWidth);
+  int xRatio        = FLOOR((w << 16) / scaledWidth + 0.5f);
+  int yRatio        = FLOOR((h << 16) / scaledHeight + 0.5f);
 
-  for (int yDest = y, ySource = yPixelStart; yDest < yEnd; yDest++, ySource += yStep)
+  for (int yDest = y, ySource = ySourceStart; yDest < yDestEnd; yDest++, ySource += yStep)
   {
-    for (int xDest = x, xSource = xPixelStart; xDest < xEnd; xDest++, xSource += xStep)
+    for (int xDest = x, xSource = xSourceStart; xDest < xDestEnd; xDest++, xSource += xStep)
     {
       int xNearest = (xSource * xRatio) >> 16;
       int yNearest = (ySource * yRatio) >> 16;
