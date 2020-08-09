@@ -151,16 +151,15 @@ void drawFilledRect(Video *video, int x, int y, int w, int h, uint32_t color)
 
 #define NORM(val, min, max) ((val - min) / (max - min))
 
-static uint32_t __blend(uint32_t dest, uint32_t src)
-{
-  unsigned char a = A_COMP(src);
-  double normalA  = (double)a / 255;
-  unsigned char r = R_COMP(src) * normalA + R_COMP(dest) * (1 - normalA);
-  unsigned char g = G_COMP(src) * normalA + G_COMP(dest) * (1 - normalA);
-  unsigned char b = B_COMP(src) * normalA + B_COMP(dest) * (1 - normalA);
-
-  return (a << 24) | (r << 16) | (g << 8) | b;
-}
+#define BLEND(dest, src)\
+  do {\
+    unsigned char a = A_COMP(src);\
+    double normalA  = (double)a / 255;\
+    unsigned char r = R_COMP(src) * normalA + R_COMP(dest) * (1 - normalA);\
+    unsigned char g = G_COMP(src) * normalA + G_COMP(dest) * (1 - normalA);\
+    unsigned char b = B_COMP(src) * normalA + B_COMP(dest) * (1 - normalA);\
+    dest = (a << 24) | (r << 16) | (g << 8) | b;\
+  } while(0)
 
 static void __drawBuffer(Video *video, uint32_t *buffer, int x, int y, int w, int h, int pitch, float scale, uint8_t flip, uint32_t color)
 {
@@ -188,7 +187,10 @@ static void __drawBuffer(Video *video, uint32_t *buffer, int x, int y, int w, in
       uint32_t pixel = buffer[yNearest * pitch + xNearest];
 
       if (pixel != video->colorKey)
-        drawPixel(video, xDest, yDest, __blend(pixel, color));
+      {
+        BLEND(pixel, color);
+        drawPixel(video, xDest, yDest, pixel);
+      }
     }
   }
 }
