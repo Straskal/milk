@@ -19,7 +19,7 @@ declare function rectfill(x: number, y: number, width: number, height: number, c
 declare function bitmap(filePath: string): Bitmap;
 declare function sprite(bmp: Bitmap, spriteId: number, x: number, y: number, width?: number, height?: number, scale?: number, flip?: 0 | 1 | 2 | 3, color?: number, mode?: 0 | 1 | 2): void;
 declare function tiles(bmp: Bitmap, data: number[], x: number, y: number, width: number, height: number, pitch: number): void;
-declare function font(bmp: Bitmap, x: number, y: number, text: string, scale?: number, color?: number): void;
+declare function font(bmp: Bitmap | null, x: number, y: number, text: string, scale?: number, color?: number): void;
 declare function wave(filePath: string): Wave;
 declare function play(wave: Wave, slotId: number, volume: number): void;
 declare function stop(slotId: number): void;

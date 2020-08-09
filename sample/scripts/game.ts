@@ -24,6 +24,20 @@ export class Game {
     private static _anim = new AnimationSystem();
     private static _draw = new DrawSystem();
 
+    private static tileBmp: Bitmap;
+    private static tileData = [
+         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    ];
+
     static get ticks() {
         return this._ticks;
     }
@@ -33,6 +47,8 @@ export class Game {
     }
 
     static init(): void {
+        this.tileBmp = bitmap("art/LOTP.bmp");
+
         let player = new Entity();
         player.flags |= EntityFlags.PLAYER;
 
@@ -41,16 +57,21 @@ export class Game {
         position.y = 10;
 
         let sprite = new Sprite();
-        sprite.bmp = bitmap("art/omrs.bmp");
-        sprite.w = 4;
-        sprite.h = 4;
+        sprite.bmp = bitmap("art/peasant.bmp");
+        sprite.w = 2;
+        sprite.h = 3;
 
         let animations = new Animations();
         let idle = {
-            frames: [0, 4, 8, 12, 64, 68 ],
-            name: "idle"
+            frames: [0],
+            speed: 0
+        };
+        let walk = {
+            frames: [2, 4],
+            speed: 12
         };
         animations.animations.set("idle", idle);
+        animations.animations.set("walk", walk);
         animations.current = idle;
 
         player.components.push(position);
@@ -76,6 +97,7 @@ export class Game {
 
     static draw(): void {
         clrs();
+        tiles(this.tileBmp, this.tileData, 0, 0, 2, 2, 13);
         this._draw.update(this._ticks);
         this._ticks++;
     }

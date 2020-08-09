@@ -1,5 +1,5 @@
 import { Entity, EntityFlags } from "./entity";
-import { Animations, Sprite, Position } from "./components";
+import { Animations, Sprite, Position, setAnimation } from "./components";
 
 export interface ISystem {
     onEntityAdded(e: Entity): void;
@@ -9,6 +9,7 @@ export interface ISystem {
 
 interface PlayerSystemEntity {
     position: Position;
+    animations: Animations;
 }
 
 export class PlayerSystem implements ISystem {
@@ -19,7 +20,8 @@ export class PlayerSystem implements ISystem {
     onEntityAdded(e: Entity): void {
         if ((e.flags & EntityFlags.PLAYER) == EntityFlags.PLAYER) {
             this.player = {
-                position: <Position>e.getComponentOfType(Position)
+                position: <Position>e.getComponentOfType(Position),
+                animations: <Animations>e.getComponentOfType(Animations)
             };
             this.entity = e;
         }
@@ -27,16 +29,29 @@ export class PlayerSystem implements ISystem {
     onEntityRemoved(e: Entity): void {
     }
     update(_: number): void {
+        let mvx = 0;
+        let mvy = 0;
+
         if (!this.player)
             return;
         if (btn(1))
-            this.player.position.y -= 1;
+            mvy -= 1;
         if (btn(2))
-            this.player.position.y += 1;
+            mvy += 1;
         if (btn(3))
-            this.player.position.x -= 1;
+            mvx -= 1;
         if (btn(4))
-            this.player.position.x += 1;
+            mvx += 1;
+
+        this.player.position.x += mvx;
+        this.player.position.y += mvy;
+
+        if (mvx == 0 && mvy == 0) {
+            setAnimation(this.player.animations, "idle");
+        } else {
+            setAnimation(this.player.animations, "walk");
+        }
+
     }
 }
 
@@ -73,14 +88,11 @@ export class AnimationSystem implements ISystem {
             const e = this.entities[i];
             const anim = e.animations;
             const sprite = e.sprite;
-
             if (ticks > anim.timer) {
-                anim.timer = ticks + 6;
-                anim.currentFrame++;
-                if (anim.currentFrame > anim.current.frames.length) {
+                if (++anim.currentFrame > anim.current.frames.length - 1)
                     anim.currentFrame = 0;
-                }
                 sprite.sprite = anim.current.frames[anim.currentFrame];
+                anim.timer = ticks + anim.current.speed;
             }
         }
     }
@@ -117,6 +129,7 @@ export class DrawSystem implements ISystem {
     update(_: number): void {
         for (let i = 0; i < this.entities.length; i++) {
             const de = this.entities[i];
+            font(null, 10, 10, de.sprite.sprite.toString())
             sprite(de.sprite.bmp, de.sprite.sprite, de.position.x, de.position.y, de.sprite.w, de.sprite.h);
         }
     }
