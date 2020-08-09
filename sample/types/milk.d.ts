@@ -17,7 +17,7 @@ declare function line(x0: number, y0: number, x1: number, y1: number, color: num
 declare function rect(x: number, y: number, width: number, height: number, color: number): void;
 declare function rectfill(x: number, y: number, width: number, height: number, color: number): void;
 declare function bitmap(filePath: string): Bitmap;
-declare function sprite(bmp: Bitmap, spriteId: number, x: number, y: number, width?: number, height?: number, scale?: number, flip?: 0 | 1 | 2 | 3, color?: number, mode?: 0 | 1 | 2): void;
+declare function sprite(bmp: Bitmap, spriteId: number, x: number, y: number, width?: number, height?: number, scale?: number, flip?: number, color?: number, mode?: 0 | 1 | 2): void;
 declare function tiles(bmp: Bitmap, data: number[], x: number, y: number, width: number, height: number, pitch: number): void;
 declare function font(bmp: Bitmap | null, x: number, y: number, text: string, scale?: number, color?: number): void;
 declare function wave(filePath: string): Wave;

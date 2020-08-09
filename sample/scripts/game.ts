@@ -62,17 +62,22 @@ export class Game {
         sprite.h = 3;
 
         let animations = new Animations();
-        let idle = {
-            frames: [0],
-            speed: 0
+        let walkUp = {
+            frames: [8, 10],
+            speed: 12
         };
-        let walk = {
+        let walkDown = {
             frames: [2, 4],
             speed: 12
         };
-        animations.animations.set("idle", idle);
-        animations.animations.set("walk", walk);
-        animations.current = idle;
+        let walkRight = {
+            frames: [12, 14],
+            speed: 12
+        };
+        animations.animations.set("walkUp", walkUp);
+        animations.animations.set("walkDown", walkDown);
+        animations.animations.set("walkRight", walkRight);
+        animations.current = walkDown;
 
         player.components.push(position);
         player.components.push(sprite);

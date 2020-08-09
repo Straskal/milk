@@ -8,6 +8,7 @@ export class Sprite {
     sprite = 0;
     w = 0;
     h = 0;
+    flip = 0;
 }
 
 export interface Animation {
@@ -16,6 +17,7 @@ export interface Animation {
 }
 
 export class Animations {
+    enabled = true;
     animations: Map<string, Animation> = new Map();
     current!: Animation;
     currentFrame = 0;

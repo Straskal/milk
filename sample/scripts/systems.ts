@@ -9,6 +9,7 @@ export interface ISystem {
 
 interface PlayerSystemEntity {
     position: Position;
+    sprite: Sprite;
     animations: Animations;
 }
 
@@ -21,6 +22,7 @@ export class PlayerSystem implements ISystem {
         if ((e.flags & EntityFlags.PLAYER) == EntityFlags.PLAYER) {
             this.player = {
                 position: <Position>e.getComponentOfType(Position),
+                sprite: <Sprite>e.getComponentOfType(Sprite),
                 animations: <Animations>e.getComponentOfType(Animations)
             };
             this.entity = e;
@@ -34,24 +36,41 @@ export class PlayerSystem implements ISystem {
 
         if (!this.player)
             return;
-        if (btn(1))
+
+        if (btn(1)) {
             mvy -= 1;
-        if (btn(2))
+        }
+        if (btn(2)) {
             mvy += 1;
-        if (btn(3))
+        }
+        if (btn(3)) {
             mvx -= 1;
-        if (btn(4))
+            this.player.sprite.flip = 1;
+        }
+        if (btn(4)) {
             mvx += 1;
+            this.player.sprite.flip = 0;
+        }
 
         this.player.position.x += mvx;
         this.player.position.y += mvy;
 
-        if (mvx == 0 && mvy == 0) {
-            setAnimation(this.player.animations, "idle");
-        } else {
-            setAnimation(this.player.animations, "walk");
-        }
+        mvx = math.abs(mvx);
 
+        if (mvx == 0 && mvy == 0)
+            this.player.animations.enabled = false;
+        else
+            this.player.animations.enabled = true;
+
+        if (mvx > 0) {
+            setAnimation(this.player.animations, "walkRight");
+        }
+        else if (mvy > 0){
+            setAnimation(this.player.animations, "walkDown");
+        }
+        else if (mvy < 0){
+            setAnimation(this.player.animations, "walkUp");
+        }
     }
 }
 
@@ -87,6 +106,8 @@ export class AnimationSystem implements ISystem {
         for (let i = 0; i < this.entities.length; i++) {
             const e = this.entities[i];
             const anim = e.animations;
+            if (!anim.enabled)
+                continue;
             const sprite = e.sprite;
             if (ticks > anim.timer) {
                 if (++anim.currentFrame > anim.current.frames.length - 1)
@@ -130,7 +151,7 @@ export class DrawSystem implements ISystem {
         for (let i = 0; i < this.entities.length; i++) {
             const de = this.entities[i];
             font(null, 10, 10, de.sprite.sprite.toString())
-            sprite(de.sprite.bmp, de.sprite.sprite, de.position.x, de.position.y, de.sprite.w, de.sprite.h);
+            sprite(de.sprite.bmp, de.sprite.sprite, de.position.x, de.position.y, de.sprite.w, de.sprite.h, 1, de.sprite.flip);
         }
     }
 }
