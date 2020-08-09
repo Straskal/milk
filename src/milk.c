@@ -145,7 +145,7 @@ static void __drawConsole(Milk *milk)
 	if (hasError())
 	{
 		__drawPanel(video, "ERROR", 0, CONSOLE_Y - 79, FRAMEBUFFER_WIDTH, 80);
-		drawWrappedFont(video, NULL, 5, CONSOLE_Y - 79 + 20, FRAMEBUFFER_WIDTH - 10, getError(), 1, 0xbf4040);
+		drawWrappedFont(video, NULL, 5, CONSOLE_Y - 79 + 20, FRAMEBUFFER_WIDTH - 10, getError(), 1, 0xffbf4040);
 	}
 
 	// Console panel

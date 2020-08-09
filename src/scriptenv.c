@@ -37,13 +37,23 @@ static Modules *__getModules(lua_State *L)
 
 static int l_btn(lua_State *L)
 {
-	lua_pushboolean(L, isButtonDown(input_addr(L), (ButtonState)(1 << lua_tointeger(L, 1))));
+	lua_pushboolean(L,
+		isButtonDown(
+			input_addr(L),
+			(ButtonState)(1 << lua_tointeger(L, 1))
+		)
+	);
 	return 1;
 }
 
 static int l_btnp(lua_State *L)
 {
-	lua_pushboolean(L, isButtonPressed(input_addr(L), (ButtonState)(1 << lua_tointeger(L, 1))));
+	lua_pushboolean(L,
+		isButtonPressed(
+			input_addr(L),
+			(ButtonState)(1 << lua_tointeger(L, 1))
+		)
+	);
 	return 1;
 }
 
@@ -51,7 +61,10 @@ static int l_bitmap(lua_State *L)
 {
 	Bitmap *bmp = loadBitmap(lua_tostring(L, 1));
 	if (!bmp)
-		lua_pushnil(L);
+	{
+		lua_pushstring(L, getError());
+		return lua_error(L);
+	}
 	else
 	{
 		LuaObject *luaObj = lua_newuserdata(L, sizeof(LuaObject));
@@ -63,7 +76,7 @@ static int l_bitmap(lua_State *L)
 
 static int l_bitmap_gc(lua_State *L)
 {
-	LuaObject *luaObj = lua_touserdata(L, 1);
+	LuaObject *luaObj = luaL_checkudata(L, 1, BITMAP_META);
 	Bitmap *bmp = luaObj->handle;
 	freeBitmap(bmp);
 	return 0;
@@ -71,11 +84,13 @@ static int l_bitmap_gc(lua_State *L)
 
 static int l_clip(lua_State *L)
 {
-	setClip(video_addr(L),
-					lua_tointeger(L, 1),
-					lua_tointeger(L, 2),
-					lua_tointeger(L, 3),
-					lua_tointeger(L, 4));
+	setClip(
+		video_addr(L),
+		lua_tointeger(L, 1),
+		lua_tointeger(L, 2),
+		lua_tointeger(L, 3),
+		lua_tointeger(L, 4)
+	);
 	return 0;
 }
 
@@ -101,76 +116,90 @@ static int l_pset(lua_State *L)
 
 static int l_line(lua_State *L)
 {
-	drawLine(video_addr(L),
-					 (int)lua_tointeger(L, 1),
-					 (int)lua_tointeger(L, 2),
-					 (int)lua_tointeger(L, 3),
-					 (int)lua_tointeger(L, 4),
-					 (uint32_t)lua_tointeger(L, 5));
+	drawLine(
+		video_addr(L),
+		(int)lua_tointeger(L, 1),
+		(int)lua_tointeger(L, 2),
+		(int)lua_tointeger(L, 3),
+		(int)lua_tointeger(L, 4),
+		(uint32_t)lua_tointeger(L, 5)
+	);
 	return 0;
 }
 
 static int l_rect(lua_State *L)
 {
-	drawRect(video_addr(L),
-					 (int)floor(lua_tonumber(L, 1)),
-					 (int)floor(lua_tonumber(L, 2)),
-					 (int)lua_tointeger(L, 3),
-					 (int)lua_tointeger(L, 4),
-					 (uint32_t)lua_tointeger(L, 5));
+	drawRect(
+		video_addr(L),
+		(int)floor(lua_tonumber(L, 1)),
+		(int)floor(lua_tonumber(L, 2)),
+		(int)lua_tointeger(L, 3),
+		(int)lua_tointeger(L, 4),
+		(uint32_t)lua_tointeger(L, 5)
+	);
 	return 0;
 }
 
 static int l_rectfill(lua_State *L)
 {
-	drawFilledRect(video_addr(L),
-								 (int)floor(lua_tonumber(L, 1)),
-								 (int)floor(lua_tonumber(L, 2)),
-								 (int)lua_tointeger(L, 3),
-								 (int)lua_tointeger(L, 4),
-								 (uint32_t)lua_tointeger(L, 5));
+	drawFilledRect(
+		video_addr(L),
+		(int)floor(lua_tonumber(L, 1)),
+		(int)floor(lua_tonumber(L, 2)),
+		(int)lua_tointeger(L, 3),
+		(int)lua_tointeger(L, 4),
+		(uint32_t)lua_tointeger(L, 5)
+	);
 	return 0;
 }
 
 static int l_sprite(lua_State *L)
 {
-	LuaObject *luaObj = (LuaObject *)lua_touserdata(L, 1);
+	LuaObject *luaObj = luaL_checkudata(L, 1, BITMAP_META);
 	Bitmap *bmp = (Bitmap *)luaObj->handle;
+
 	drawSprite(
-			video_addr(L), bmp,
-			(int)lua_tointeger(L, 2),
-			(int)floor(lua_tonumber(L, 3)),
-			(int)floor(lua_tonumber(L, 4)),
-			(int)luaL_optinteger(L, 5, 1),
-			(int)luaL_optinteger(L, 6, 1),
-			(float)luaL_optnumber(L, 7, 1.0),
-			(uint8_t)luaL_optinteger(L, 8, 0),
-			(uint32_t)luaL_optinteger(L, 9, 0x00));
+		video_addr(L), bmp,
+		(int)lua_tointeger(L, 2),
+		(int)floor(lua_tonumber(L, 3)),
+		(int)floor(lua_tonumber(L, 4)),
+		(int)luaL_optinteger(L, 5, 1),
+		(int)luaL_optinteger(L, 6, 1),
+		(float)luaL_optnumber(L, 7, 1.0),
+		(uint8_t)luaL_optinteger(L, 8, 0),
+		(uint32_t)luaL_optinteger(L, 9, 0x00)
+	);
 	return 0;
 }
 
 static int l_tiles(lua_State *L)
 {
 	Video *video = video_addr(L);
-	LuaObject *luaObj = (LuaObject *)lua_touserdata(L, 1);
+	LuaObject *luaObj = luaL_checkudata(L, 1, BITMAP_META);
 	Bitmap *bmp = (Bitmap *)luaObj->handle;
+
 	int x = lua_tointeger(L, 3);
 	int y = lua_tointeger(L, 4);
 	int w = lua_tointeger(L, 5);
 	int h = lua_tointeger(L, 6);
+
 	int pitch = lua_tointeger(L, 7);
 	lua_len(L, 2);
 	int len = lua_tointeger(L, -1);
 	lua_pop(L, 1);
+
 	int xCurrent = x;
 	int i = 1;
+
 	while (len--)
 	{
 		lua_rawgeti(L, 2, i);
 		int sprIndex = lua_tointeger(L, -1);
 		lua_pop(L, 1);
+
 		if (sprIndex > -1)
 			drawSprite(video, bmp, sprIndex, xCurrent, y, w, h, 1, 0, 0x00);
+
 		xCurrent += w * SPRITE_SIZE;
 		if (i++ % pitch == 0)
 		{
@@ -184,23 +213,34 @@ static int l_tiles(lua_State *L)
 static int l_font(lua_State *L)
 {
 	Bitmap *bmp = NULL;
-	LuaObject *luaObj = lua_touserdata(L, 1);
-	if (luaObj)
-		bmp = luaObj->handle;
-	drawFont(video_addr(L), bmp,
-					 (int)floor(lua_tonumber(L, 2)),
-					 (int)floor(lua_tonumber(L, 3)),
-					 lua_tostring(L, 4),
-					 (int)floor(luaL_optinteger(L, 5, 1)),
-					 (uint32_t)floor(luaL_optinteger(L, 6, 0xffffff)));
+	if (!lua_isnil(L, 1))
+	{
+		LuaObject *luaObj = luaL_checkudata(L, 1, BITMAP_META);
+		if (luaObj)
+			bmp = luaObj->handle;
+	}
+
+	drawFont(
+		video_addr(L), bmp,
+		(int)floor(lua_tonumber(L, 2)),
+		(int)floor(lua_tonumber(L, 3)),
+		lua_tostring(L, 4),
+		(int)floor(luaL_optinteger(L, 5, 1)),
+		(uint32_t)floor(luaL_optinteger(L, 6, 0xffffff))
+	);
 	return 1;
 }
 
 static int l_fontwrap(lua_State *L)
 {
 	Bitmap *bmp = NULL;
-	LuaObject *luaObj = lua_touserdata(L, 1);
-	if (luaObj)	bmp = luaObj->handle;
+	if (!lua_isnil(L, 1))
+	{
+		LuaObject *luaObj = luaL_checkudata(L, 1, BITMAP_META);
+		if (luaObj)
+			bmp = luaObj->handle;
+	}
+
 	drawWrappedFont
 		(video_addr(L), bmp,
 		(int)floor(lua_tonumber(L, 2)),
@@ -271,29 +311,39 @@ static int l_play(lua_State *L)
 
 static int l_pause(lua_State *L)
 {
-	pauseSound(audio_addr(L),
-						 (int)lua_tointeger(L, 1));
+	pauseSound(
+		audio_addr(L),
+		(int)lua_tointeger(L, 1)
+	);
 	return 0;
 }
 
 static int l_resume(lua_State *L)
 {
-	resumeSound(audio_addr(L),
-							(int)lua_tointeger(L, 1));
+	resumeSound(
+		audio_addr(L),
+		(int)lua_tointeger(L, 1)
+	);
 	return 0;
 }
 
 static int l_stop(lua_State *L)
 {
-	stopSound(audio_addr(L),
-						(int)lua_tointeger(L, 1));
+	stopSound(
+		audio_addr(L),
+		(int)lua_tointeger(L, 1)
+	);
 	return 0;
 }
 
 static int l_sndslot(lua_State *L)
 {
 	lua_pushinteger(L,
-									getSoundState(audio_addr(L), (int)lua_tointeger(L, 1)));
+		getSoundState(
+			audio_addr(L),
+			(int)lua_tointeger(L, 1)
+		)
+	);
 	return 1;
 }
 
@@ -301,13 +351,17 @@ static int l_playstream(lua_State *L)
 {
 	LuaObject *luaObj = lua_touserdata(L, 1);
 	WaveStream *waveStream = luaObj->handle;
+
 	bool loop = false;
 	if (lua_isboolean(L, 3))
 		loop = lua_toboolean(L, 3);
-	playStream(audio_addr(L),
-						 waveStream,
-						 (int)lua_tointeger(L, 2),
-						 loop);
+
+	playStream(
+		audio_addr(L),
+		waveStream,
+		(int)lua_tointeger(L, 2),
+		loop
+	);
 	return 0;
 }
 

@@ -1,14 +1,19 @@
 #include <SDL.h>
 
+#include "logs.h"
 #include "bitmap.h"
 
 Bitmap *loadBitmap(const char *filePath)
 {
   SDL_Surface *surface = SDL_LoadBMP(filePath);
   if (!surface)
+  {
+    logErrorf("Error loading image. Could not find: \"%s\"", filePath);
     return NULL;
+  }
   if (surface->format->format != SDL_PIXELFORMAT_BGR24)
   {
+    logErrorf("Error loading image. Incorrect format: \"%s\"", filePath);
     SDL_FreeSurface(surface);
     return NULL;
   }

@@ -1,28 +1,37 @@
+#include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "logs.h"
 
-static struct
+static char error[1024];
+
+void logErrorf(const char *format, ...)
 {
-  char error[1024];
-} LogContext;
+  memset(error, 0, sizeof(error));
+  va_list va;
+  va_start(va, format);
+  vsprintf(error, format, va);
+  va_end(va);
+}
 
 void logError(const char *message)
 {
-  strcpy(LogContext.error, message);
+  memset(error, 0, sizeof(error));
+  strcpy(error, message);
 }
 
 bool hasError()
 {
-  return strlen(LogContext.error) > 0;
+  return strlen(error) > 0;
 }
 
 const char *getError()
 {
-  return LogContext.error;
+  return error;
 }
 
 void clearError()
 {
-  memset(LogContext.error, 0, sizeof(LogContext.error));
+  memset(error, 0, sizeof(error));
 }
