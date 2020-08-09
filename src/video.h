@@ -12,13 +12,6 @@
 #define SPRITE_SIZE 8
 #define FONT_SPRITE_SPACING 6
 
-typedef enum
-{
-  Additive,
-  Average,
-  Solid,
-} ColorMode;
-
 typedef struct
 {
   int top;
@@ -42,7 +35,7 @@ void drawPixel(Video *video, int x, int y, uint32_t color);
 void drawLine(Video *video, int x0, int y0, int x1, int y1, uint32_t color);
 void drawRect(Video *video, int x, int y, int w, int h, uint32_t color);
 void drawFilledRect(Video *video, int x, int y, int w, int h, uint32_t color);
-void drawSprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h, float scale, uint8_t flip, uint32_t color, ColorMode mode);
+void drawSprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h, float scale, uint8_t flip, uint32_t color);
 void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int scale, uint32_t color);
 void drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int w, const char *text, int scale, uint32_t color);
 int getFontWidth(const char *text);

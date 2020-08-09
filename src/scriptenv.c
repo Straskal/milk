@@ -81,16 +81,21 @@ static int l_clip(lua_State *L)
 
 static int l_clrs(lua_State *L)
 {
-	clearFramebuffer(video_addr(L), (uint32_t)luaL_optinteger(L, 1, 0x000000));
+	clearFramebuffer(
+		video_addr(L),
+		(uint32_t)luaL_optinteger(L, 1, 0x000000)
+	);
 	return 0;
 }
 
 static int l_pset(lua_State *L)
 {
-	drawPixel(video_addr(L),
-						(int)FLOOR(lua_tonumber(L, 1)),
-						(int)FLOOR(lua_tonumber(L, 2)),
-						(uint32_t)lua_tointeger(L, 3));
+	drawPixel(
+		video_addr(L),
+		(int)FLOOR(lua_tonumber(L, 1)),
+		(int)FLOOR(lua_tonumber(L, 2)),
+		(uint32_t)lua_tointeger(L, 3)
+	);
 	return 0;
 }
 
@@ -140,8 +145,7 @@ static int l_sprite(lua_State *L)
 			(int)luaL_optinteger(L, 6, 1),
 			(float)luaL_optnumber(L, 7, 1.0),
 			(uint8_t)luaL_optinteger(L, 8, 0),
-			(uint32_t)luaL_optinteger(L, 9, 0x00),
-			(ColorMode)luaL_optinteger(L, 10, Additive));
+			(uint32_t)luaL_optinteger(L, 9, 0x00));
 	return 0;
 }
 
@@ -166,7 +170,7 @@ static int l_tiles(lua_State *L)
 		int sprIndex = lua_tointeger(L, -1);
 		lua_pop(L, 1);
 		if (sprIndex > -1)
-			drawSprite(video, bmp, sprIndex, xCurrent, y, w, h, 1, 0, 0x00, Additive);
+			drawSprite(video, bmp, sprIndex, xCurrent, y, w, h, 1, 0, 0x00);
 		xCurrent += w * SPRITE_SIZE;
 		if (i++ % pitch == 0)
 		{
