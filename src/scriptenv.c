@@ -470,14 +470,19 @@ void closeScriptEnv(ScriptEnv *scriptEnv)
 	scriptEnv->state = NULL;
 }
 
-void loadEntryPoint(ScriptEnv *scriptEnv)
+bool loadEntryPoint(ScriptEnv *scriptEnv)
 {
 	lua_State *L = scriptEnv->state;
 	if (luaL_dofile(L, "main.lua"))
+	{
 		logError(lua_tostring(L, -1));
+		lua_pop(L, -1);
+		return false;
+	}
+	return true;
 }
 
-void invokeInit(ScriptEnv *scriptEnv)
+bool invokeInit(ScriptEnv *scriptEnv)
 {
 	lua_State *L = scriptEnv->state;
 	lua_getglobal(L, "_init");
@@ -485,7 +490,9 @@ void invokeInit(ScriptEnv *scriptEnv)
 	{
 		logError(lua_tostring(L, -1));
 		lua_pop(L, -1);
+		return false;
 	}
+	return true;
 }
 
 void invokeUpdate(ScriptEnv *scriptEnv)

@@ -1,6 +1,8 @@
 #ifndef __API_H__
 #define __API_H__
 
+#include <stdbool.h>
+
 #include "audio.h"
 #include "gamepad.h"
 #include "video.h"
@@ -19,8 +21,8 @@ typedef struct
 
 void openScriptEnv(ScriptEnv *scriptEnv, Modules *modules);
 void closeScriptEnv(ScriptEnv *scriptEnv);
-void loadEntryPoint(ScriptEnv *scriptEnv);
-void invokeInit(ScriptEnv *scriptEnv);
+bool loadEntryPoint(ScriptEnv *scriptEnv);
+bool invokeInit(ScriptEnv *scriptEnv);
 void invokeUpdate(ScriptEnv *scriptEnv);
 void invokeDraw(ScriptEnv *scriptEnv);
 

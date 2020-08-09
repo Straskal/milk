@@ -49,9 +49,12 @@ static void __cmdReload(Milk *milk)
 	clearError();
 	closeScriptEnv(env);
 	openScriptEnv(env, modules);
-	loadEntryPoint(env);
-	invokeInit(env);
-	__toggleConsole(milk);
+
+	if (loadEntryPoint(env))
+	{
+		invokeInit(env);
+		__toggleConsole(milk);
+	}
 }
 
 static void __cmdFullscreen(Milk *milk)
@@ -190,8 +193,8 @@ void freeMilk(Milk *milk)
 
 void initializeMilk(Milk *milk)
 {
-	loadEntryPoint(&milk->scripts);
-	invokeInit(&milk->scripts);
+	if (loadEntryPoint(&milk->scripts))
+		invokeInit(&milk->scripts);
 }
 
 void updateMilk(Milk *milk)
