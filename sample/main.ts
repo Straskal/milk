@@ -6,8 +6,6 @@
 
 import { Game } from "./scripts/game";
 
-let game = new Game();
-
-_init = () => game.init();
-_update = () => game.update();
-_draw = () => game.draw();
+_init   = () => Game.init();
+_update = () => Game.update();
+_draw   = () => Game.draw();

@@ -1,3 +1,7 @@
+import { AnimationSystem, DrawSystem } from "./systems";
+import { Entity } from "./entity";
+import { Position, Animations, Sprite } from "./components";
+
 export interface GameState {
     updateBelow: boolean;
     drawBelow: boolean;
@@ -13,79 +17,72 @@ export interface GameState {
  */
 export class Game {
 
-    private _ticks = 0;
-    private _stateStack: GameState[] = [];
-    private _bitmap!: Bitmap;
-    private _music!: Stream;
-    private _omrs!: Bitmap;
-    private _omrsFrame = 0;
-    private _omrsTimer = 0;
-    private _omrsFrames = [
-        0, 4, 8, 12, 64, 68
-    ];
-    private _xPos: number = 0;
-    private _tiles = [
-        0, 0, 8, 0, 0, 0, 0, 0, 0, 2, 0,
-        0, 0, 8, 0, 0, 0, 10, 0, 0, 2, 0,
-        0, 0, 8, 10, 0, 0, 0, 0, 0, 0, 0,
-        8, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 8, 0, 0, 0, 10, 0, 0, 0, 0,
-        0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0
-    ];
+    private static _ticks = 0;
+    private static _stateStack: GameState[] = [];
 
-    public get ticks() {
+    private static _anim = new AnimationSystem();
+    private static _draw = new DrawSystem();
+
+    static get ticks() {
         return this._ticks;
     }
 
-    public set ticks(value: number) {
+    static set ticks(value: number) {
         this._ticks = value;
     }
 
-    public init(): void {
-        this._omrs = bitmap("art/omrs.bmp");
-        this._bitmap = bitmap("art/LOTP.bmp");
-        this._music = stream("sounds/02 Underclocked (underunderclocked mix).wav");
-        //playstream(this._music, 128, true);
+    static init(): void {
+        let e = new Entity();
+        let p = new Position();
+        p.x = 10;
+        p.y = 10;
+        let s = new Sprite();
+        s.bmp = bitmap("art/omrs.bmp");
+        s.w = 4;
+        s.h = 4;
+        let a = new Animations();
+        let idle = {
+            frames: [0, 4, 8, 12, 64, 68 ],
+            name: "idle"
+        };
+        a.animations.set("idle", idle);
+        a.current = idle;
+
+        e.components.push(p);
+        e.components.push(s);
+        e.components.push(a);
+
+        this._anim.onEntityAdded(e);
+        this._draw.onEntityAdded(e);
     }
 
-    public update(): void {
+    static update(): void {
+        this._anim.update(this.ticks);
+
         for (let i = this._stateStack.length - 1; i >= 0; i--) {
             const state = this._stateStack[i];
             state.update(this);
             if (!state.updateBelow)
                 break;
         }
-
-        if (this.ticks > this._omrsTimer) {
-            if (++this._omrsFrame > 5)
-                this._omrsFrame = 0;
-            this._omrsTimer += 5;
-        }
-
-        if (btn(3))
-            this._xPos -= 1;
-        if (btn(4))
-            this._xPos += 1;
     }
 
-    public draw(): void {
+    static draw(): void {
         clrs();
-        tiles(this._bitmap, this._tiles, this._xPos, 0, 2, 2, 11);
-        sprite(this._omrs, this._omrsFrames[this._omrsFrame], 100, 60, 4, 4);
+        this._draw.update(this._ticks);
         this._ticks++;
     }
 
-    public peek(): GameState {
+    static peek(): GameState {
         return this._stateStack[this._stateStack.length - 1];
     }
 
-    public pushState(state: GameState): void {
+    static pushState(state: GameState): void {
         state.enter(this);
         this._stateStack.push(state);
     }
 
-    public popState(): void {
+    static popState(): void {
         const top = this._stateStack.pop();
         top?.exit(this);
     }
