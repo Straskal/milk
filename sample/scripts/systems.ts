@@ -1,10 +1,43 @@
-import { Entity } from "./entity";
+import { Entity, EntityFlags } from "./entity";
 import { Animations, Sprite, Position } from "./components";
 
 export interface ISystem {
     onEntityAdded(e: Entity): void;
     onEntityRemoved(e: Entity): void;
     update(ticks: number): void;
+}
+
+interface PlayerSystemEntity {
+    position: Position;
+}
+
+export class PlayerSystem implements ISystem {
+
+    entity: Entity | undefined;
+    player: PlayerSystemEntity | undefined;
+
+    onEntityAdded(e: Entity): void {
+        if ((e.flags & EntityFlags.PLAYER) == EntityFlags.PLAYER) {
+            this.player = {
+                position: <Position>e.getComponentOfType(Position)
+            };
+            this.entity = e;
+        }
+    }
+    onEntityRemoved(e: Entity): void {
+    }
+    update(_: number): void {
+        if (!this.player)
+            return;
+        if (btn(1))
+            this.player.position.y -= 1;
+        if (btn(2))
+            this.player.position.y += 1;
+        if (btn(3))
+            this.player.position.x -= 1;
+        if (btn(4))
+            this.player.position.x += 1;
+    }
 }
 
 interface AnimationSystemEntity {
@@ -81,7 +114,7 @@ export class DrawSystem implements ISystem {
 
         }
      }
-    update(ticks: number): void {
+    update(_: number): void {
         for (let i = 0; i < this.entities.length; i++) {
             const de = this.entities[i];
             sprite(de.sprite.bmp, de.sprite.sprite, de.position.x, de.position.y, de.sprite.w, de.sprite.h);

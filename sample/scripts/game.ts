@@ -1,5 +1,5 @@
-import { AnimationSystem, DrawSystem } from "./systems";
-import { Entity } from "./entity";
+import { AnimationSystem, DrawSystem, PlayerSystem } from "./systems";
+import { Entity, EntityFlags } from "./entity";
 import { Position, Animations, Sprite } from "./components";
 
 export interface GameState {
@@ -20,6 +20,7 @@ export class Game {
     private static _ticks = 0;
     private static _stateStack: GameState[] = [];
 
+    private static _player = new PlayerSystem();
     private static _anim = new AnimationSystem();
     private static _draw = new DrawSystem();
 
@@ -32,31 +33,37 @@ export class Game {
     }
 
     static init(): void {
-        let e = new Entity();
-        let p = new Position();
-        p.x = 10;
-        p.y = 10;
-        let s = new Sprite();
-        s.bmp = bitmap("art/omrs.bmp");
-        s.w = 4;
-        s.h = 4;
-        let a = new Animations();
+        let player = new Entity();
+        player.flags |= EntityFlags.PLAYER;
+
+        let position = new Position();
+        position.x = 10;
+        position.y = 10;
+
+        let sprite = new Sprite();
+        sprite.bmp = bitmap("art/omrs.bmp");
+        sprite.w = 4;
+        sprite.h = 4;
+
+        let animations = new Animations();
         let idle = {
             frames: [0, 4, 8, 12, 64, 68 ],
             name: "idle"
         };
-        a.animations.set("idle", idle);
-        a.current = idle;
+        animations.animations.set("idle", idle);
+        animations.current = idle;
 
-        e.components.push(p);
-        e.components.push(s);
-        e.components.push(a);
+        player.components.push(position);
+        player.components.push(sprite);
+        player.components.push(animations);
 
-        this._anim.onEntityAdded(e);
-        this._draw.onEntityAdded(e);
+        this._player.onEntityAdded(player);
+        this._anim.onEntityAdded(player);
+        this._draw.onEntityAdded(player);
     }
 
     static update(): void {
+        this._player.update(this.ticks);
         this._anim.update(this.ticks);
 
         for (let i = this._stateStack.length - 1; i >= 0; i--) {
