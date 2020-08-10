@@ -1,5 +1,3 @@
-type Component<T> = T | null;
-
 export interface Components {
     position: Position;
     sprite: Sprite;
