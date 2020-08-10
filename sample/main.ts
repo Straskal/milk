@@ -5,7 +5,8 @@
 // }
 
 import { Game } from "./scripts/game";
+import { GameplayState } from "./scripts/states/gameplayState";
 
-_init   = () => Game.init();
+_init   = () => Game.init(new GameplayState());
 _update = () => Game.update();
 _draw   = () => Game.draw();
