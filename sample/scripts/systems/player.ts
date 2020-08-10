@@ -2,6 +2,11 @@ import { setAnimation } from "../components";
 import { Entity, EntityFlags } from "../entity";
 import { SystemBase } from "./base";
 
+const isButtonDown = btn;
+const abs = math.abs;
+
+const PlayerSpeed = 1;
+
 export class PlayerSystem extends SystemBase {
 
     onEntityAdded(e: Entity): void {
@@ -14,47 +19,39 @@ export class PlayerSystem extends SystemBase {
     }
     update(_: number): void {
         for (let i = 0; i < this.entities.length; i++) {
-            const pos = this.entities[i].components.position;
-            const spr = this.entities[i].components.sprite;
-            const anims = this.entities[i].components.animations;
+            const components = this.entities[i].components;
+            const pos = components.position!;
+            const spr = components.sprite!;
+            const anims = components.animations!;
 
             let mvx = 0;
             let mvy = 0;
 
-            if (btn(1)) {
-                mvy -= 1;
+            if (isButtonDown(1)) {
+                mvy -= PlayerSpeed;
             }
-            if (btn(2)) {
-                mvy += 1;
+            if (isButtonDown(2)) {
+                mvy += PlayerSpeed;
             }
-            if (btn(3)) {
-                mvx -= 1;
+            if (isButtonDown(3)) {
+                mvx -= PlayerSpeed;
                 spr.flip = 1;
             }
-            if (btn(4)) {
-                mvx += 1;
+            if (isButtonDown(4)) {
+                mvx += PlayerSpeed;
                 spr.flip = 0;
             }
 
             pos.x += mvx;
             pos.y += mvy;
+            anims.enabled = mvx != 0 || mvy != 0;
 
-            mvx = math.abs(mvx);
-
-            if (mvx == 0 && mvy == 0)
-                anims.enabled = false;
-            else
-                anims.enabled = true;
-
-            if (mvx > 0) {
+            if (abs(mvx) > 0)
                 setAnimation(anims, "walkRight");
-            }
-            else if (mvy > 0){
+            else if (mvy > 0)
                 setAnimation(anims, "walkDown");
-            }
-            else if (mvy < 0){
+            else if (mvy < 0)
                 setAnimation(anims, "walkUp");
-            }
         }
     }
 }

@@ -1,7 +1,7 @@
 export interface Components {
-    position: Position;
-    sprite: Sprite;
-    animations: Animations;
+    position?: Position;
+    sprite?: Sprite;
+    animations?: Animations;
 }
 
 export interface Position {
