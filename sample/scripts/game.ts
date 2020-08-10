@@ -1,6 +1,7 @@
-import { AnimationSystem, DrawSystem, PlayerSystem } from "./systems";
 import { Entity, EntityFlags } from "./entity";
-import { Position, Animations, Sprite } from "./components";
+import { PlayerSystem } from "./systems/player";
+import { AnimationSystem } from "./systems/animation";
+import { DrawSystem } from "./systems/render";
 
 export interface GameState {
     updateBelow: boolean;
@@ -20,9 +21,9 @@ export class Game {
     private static _ticks = 0;
     private static _stateStack: GameState[] = [];
 
-    private static _player = new PlayerSystem();
-    private static _anim = new AnimationSystem();
-    private static _draw = new DrawSystem();
+    private static _player: PlayerSystem;
+    private static _anim: AnimationSystem;
+    private static _draw: DrawSystem;
 
     private static tileBmp: Bitmap;
     private static tileData = [
@@ -47,21 +48,28 @@ export class Game {
     }
 
     static init(): void {
+        this._player = new PlayerSystem();
+        this._anim = new AnimationSystem();
+        this._draw = new DrawSystem();
+
         this.tileBmp = bitmap("art/LOTP.bmp");
 
         let player = new Entity();
         player.flags |= EntityFlags.PLAYER;
 
-        let position = new Position();
-        position.x = 10;
-        position.y = 10;
+        player.components.position = {
+            x: 10,
+            y: 10
+        };
 
-        let sprite = new Sprite();
-        sprite.bmp = bitmap("art/peasant.bmp");
-        sprite.w = 2;
-        sprite.h = 3;
+        player.components.sprite = {
+            bmp: bitmap("art/peasant.bmp"),
+            sprite: 0,
+            w: 2,
+            h: 3,
+            flip: 0
+        };
 
-        let animations = new Animations();
         let walkUp = {
             frames: [8, 10],
             speed: 12
@@ -74,14 +82,18 @@ export class Game {
             frames: [12, 14],
             speed: 12
         };
-        animations.animations.set("walkUp", walkUp);
-        animations.animations.set("walkDown", walkDown);
-        animations.animations.set("walkRight", walkRight);
-        animations.current = walkDown;
 
-        player.components.push(position);
-        player.components.push(sprite);
-        player.components.push(animations);
+        player.components.animations = {
+            enabled: true,
+            animations: new Map([
+                ["walkUp", walkUp],
+                ["walkDown", walkDown],
+                ["walkRight", walkRight]
+            ]),
+            current: walkDown,
+            currentFrame: 0,
+            timer: 0
+        };
 
         this._player.onEntityAdded(player);
         this._anim.onEntityAdded(player);

@@ -1,14 +1,22 @@
-export class Position {
-    x = 0;
-    y = 0;
+type Component<T> = T | null;
+
+export interface Components {
+    position: Position;
+    sprite: Sprite;
+    animations: Animations;
 }
 
-export class Sprite {
-    bmp!: Bitmap;
-    sprite = 0;
-    w = 0;
-    h = 0;
-    flip = 0;
+export interface Position {
+    x: number;
+    y: number
+}
+
+export interface Sprite {
+    bmp: Bitmap;
+    sprite: number;
+    w: number
+    h: number
+    flip: number
 }
 
 export interface Animation {
@@ -16,12 +24,12 @@ export interface Animation {
     speed: number;
 }
 
-export class Animations {
-    enabled = true;
-    animations: Map<string, Animation> = new Map();
-    current!: Animation;
-    currentFrame = 0;
-    timer = 0;
+export interface Animations {
+    enabled: boolean;
+    animations: Map<string, Animation>;
+    current: Animation;
+    currentFrame: number;
+    timer: number;
 }
 
 export function setAnimation(animations: Animations, animName: string): void {
