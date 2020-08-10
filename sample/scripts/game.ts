@@ -25,34 +25,6 @@ export class Game {
     private static _anim: AnimationSystem;
     private static _draw: DrawSystem;
 
-    private static tileBmp: Bitmap;
-    private static tileData = [
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    ];
-
     static get ticks() {
         return this._ticks;
     }
@@ -66,13 +38,15 @@ export class Game {
         this._anim = new AnimationSystem();
         this._draw = new DrawSystem();
 
-        this.tileBmp = bitmap("art/LOTP.bmp");
-
         let player = new Entity();
         player.flags |= EntityFlags.PLAYER;
         player.components.position = {
             x: 10,
             y: 10
+        };
+        player.components.collision = {
+            w: 16,
+            h: 16
         };
         player.components.sprite = {
             bmp: bitmap("art/peasant.bmp"),
@@ -105,40 +79,6 @@ export class Game {
             timer: 0
         };
 
-        let addOldman = function(x: number, y: number) {
-            let oldMan = new Entity();
-
-            oldMan.components.position = {
-                x: x,
-                y: y
-            };
-            oldMan.components.sprite = {
-                bmp: bitmap("art/omrs.bmp"),
-                sprite: 0,
-                w: 4,
-                h: 4,
-                flip: 0
-            };
-            oldMan.components.animations = {
-                enabled: true,
-                animations: new Map([
-                    ["idle", {frames: [0, 4, 8, 12, 64, 68], speed: 12}],
-                ]),
-                current: {frames: [0, 4, 8, 12, 64, 68], speed: 6},
-                currentFrame: 0,
-                timer: 0
-            };
-
-            Game._anim.onEntityAdded(oldMan);
-            Game._draw.onEntityAdded(oldMan);
-        }
-
-        for (let i = 10; i < 300; i += 32) {
-            for (let j = 10; j < 224; j += 32) {
-                addOldman(j, i);
-            }
-        }
-
         this._player.onEntityAdded(player);
         this._anim.onEntityAdded(player);
         this._draw.onEntityAdded(player);
@@ -158,7 +98,6 @@ export class Game {
 
     static draw(): void {
         clrs();
-        tiles(this.tileBmp, this.tileData, 0, 0, 2, 2, 26);
         this._draw.update(this._ticks);
         this._ticks++;
     }

@@ -27,12 +27,10 @@ export class PlayerSystem extends SystemBase {
             let mvx = 0;
             let mvy = 0;
 
-            if (isButtonDown(1)) {
+            if (isButtonDown(1))
                 mvy -= PlayerSpeed;
-            }
-            if (isButtonDown(2)) {
+            if (isButtonDown(2))
                 mvy += PlayerSpeed;
-            }
             if (isButtonDown(3)) {
                 mvx -= PlayerSpeed;
                 spr.flip = 1;

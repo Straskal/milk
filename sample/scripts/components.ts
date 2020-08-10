@@ -1,12 +1,25 @@
+/** The ultimate data structure for components. */
 export interface Components {
     position?: Position;
     sprite?: Sprite;
     animations?: Animations;
+    collision?: Collision;
+    velocity?: Velocity;
 }
 
 export interface Position {
     x: number;
-    y: number
+    y: number;
+}
+
+export interface Velocity {
+    x: number;
+    y: number;
+}
+
+export interface Collision {
+    w: number;
+    h: number;
 }
 
 export interface Sprite {
