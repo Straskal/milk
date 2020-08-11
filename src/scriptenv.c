@@ -178,8 +178,8 @@ static int l_tiles(lua_State *L)
 	LuaObject *luaObj = luaL_checkudata(L, 1, BITMAP_META);
 	Bitmap *bmp = (Bitmap *)luaObj->handle;
 
-	int x = lua_tointeger(L, 3);
-	int y = lua_tointeger(L, 4);
+	int x = FLOOR(lua_tonumber(L, 3));
+	int y = FLOOR(lua_tonumber(L, 4));
 	int w = lua_tointeger(L, 5);
 	int h = lua_tointeger(L, 6);
 

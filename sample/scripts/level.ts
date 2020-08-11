@@ -1,27 +1,8 @@
 import { newWorld } from "./libs/bump";
-import { Sprite } from "./sprite";
+import { Sprite, updateSpriteComponents, drawSprites } from "./sprite";
 import { Game, GameState } from "./game";
-
-const drawSprite = sprite;
-const max = math.max;
-const min = math.min;
-
-function clamp(val: number, lower: number, upper: number): number {
-    if (lower > upper) {
-        lower = upper;
-        upper = lower;
-    }
-    return max(lower, min(upper, val))
-}
-
-export interface Tilemap {
-    bmp: Bitmap;
-    data: number[];
-    collisions: number[];
-    width: number;
-    cellWidth: number;
-    cellHeight: number;
-}
+import { animateSprites } from "./common/animation";
+import { drawTilemap, clampScreenToMap, Tilemap } from "./tilemap";
 
 export class Level implements GameState {
 
@@ -60,7 +41,7 @@ export class Level implements GameState {
 
     add(sprite: Sprite): void {
         this.sprites.push(sprite);
-        if (sprite.updateHandlers)
+        if (sprite.behaviors)
             this.updated.push(sprite);
         if (sprite.animations)
             this.animated.push(sprite);
@@ -75,43 +56,13 @@ export class Level implements GameState {
     }
 
     update(): void {
-        // Update handlers
-        for (let i = 0; i < this.updated.length; i++) {
-            const sprite = this.updated[i];
-            const handlers = sprite.updateHandlers!;
-
-            for (let c = 0; c < handlers.length; c++) {
-                handlers[i].update(sprite);
-            }
-        }
-
-        // Animations
-        for (let i = 0; i < this.animated.length; i++) {
-            const spr = this.animated[i];
-            const anim = spr.animations!;
-
-            if (!anim.enabled)
-                continue;
-
-            if (Game.ticks > anim.timer) {
-                if (++anim.currentFrame > anim.current.frames.length - 1)
-                    anim.currentFrame = 0;
-
-                spr.index = anim.current.frames[anim.currentFrame];
-                anim.timer = Game.ticks + anim.current.speed;
-            }
-        }
+        updateSpriteComponents(this.updated);
+        animateSprites(this.animated, Game.ticks);
     }
 
     draw(): void {
-        const map = this.map;
-        const max = this.map.width * 16 - 320;
-        this.x = clamp(this.x, 0, max);
-        this.y = clamp(this.y, 0, 0);
-        tiles(map.bmp, map.data, -this.x, -this.y, map.cellWidth, map.cellHeight, map.width);
-        for (let i = 0; i < this.sprites.length; i++) {
-            const spr = this.sprites[i];
-            drawSprite(spr.bmp!, spr.index, spr.x - this.x, spr.y - this.y, spr.width, spr.height, 1, spr.flip);
-        }
+        [this.x, this.y] = clampScreenToMap(this.map, this.x, this.y);
+        drawTilemap(this.map, this.x, this.y);
+        drawSprites(this.sprites, this.x, this.y);
     }
 }

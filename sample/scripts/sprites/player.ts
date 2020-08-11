@@ -1,12 +1,13 @@
-import { UpdateHandler, Sprite, setAnimation } from "../sprite";
+import { Behavior, Sprite } from "../sprite";
 import { Level } from "../level";
+import { setAnimation } from "../common/animation";
 
 const isButtonDown = btn;
 const abs = math.abs;
 
 const PlayerSpeed = 1;
 
-export class Player implements UpdateHandler {
+export class Player implements Behavior {
 
     update(sprite: Sprite): void {
         const anims = sprite.animations!;
@@ -28,8 +29,8 @@ export class Player implements UpdateHandler {
         }
 
         Level.current.moveAndCollide(sprite, mvx, mvy);
-        Level.current.x = sprite.x - 144;
-        Level.current.y = sprite.y - 96;
+        Level.current.x = sprite.x - 384 / 2;
+        Level.current.y = sprite.y - 216 / 2;
 
         anims.enabled = mvx != 0 || mvy != 0;
 
