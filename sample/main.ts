@@ -5,11 +5,11 @@
 // }
 
 import { Game } from "./scripts/game";
-import { Level } from "./scripts/level";
-import { Sprite } from "./scripts/sprite";
-import { Player } from "./scripts/sprites/player";
-import { AssetManager } from "./scripts/assets";
-import { Tilemap } from "./scripts/tilemap";
+import { Level } from "./scripts/states/level";
+import { Sprite } from "./scripts/core/sprite";
+import { Player } from "./scripts/behaviors/player";
+import { AssetManager } from "./scripts/core/assets";
+import { Tilemap } from "./scripts/core/tilemap";
 
 let map = <Tilemap> {
     bmp: AssetManager.loadBitmap("art/LOTP.bmp"),

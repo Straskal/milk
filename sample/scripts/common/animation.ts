@@ -1,4 +1,4 @@
-import { Sprite } from "../sprite";
+import { Sprite } from "../core/sprite";
 
 export interface Animation {
     frames: number[];

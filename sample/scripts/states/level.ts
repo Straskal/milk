@@ -1,8 +1,8 @@
-import { newWorld } from "./libs/bump";
-import { Sprite, updateSpriteComponents, drawSprites } from "./sprite";
-import { Game, GameState } from "./game";
-import { animateSprites } from "./common/animation";
-import { drawTilemap, clampScreenToMap, Tilemap } from "./tilemap";
+import { newWorld } from "../libs/bump";
+import { Sprite, updateSpriteComponents, drawSprites } from "../core/sprite";
+import { Game, GameState } from "../game";
+import { animateSprites } from "../common/animation";
+import { drawTilemap, clampScreenToMap, Tilemap } from "../core/tilemap";
 
 export class Level implements GameState {
 

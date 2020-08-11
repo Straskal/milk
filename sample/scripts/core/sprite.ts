@@ -1,4 +1,4 @@
-import { Animations } from "./common/animation";
+import { Animations } from "../common/animation";
 
 const drawSprite = sprite;
 
