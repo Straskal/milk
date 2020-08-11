@@ -1,33 +1,24 @@
-/** The ultimate data structure for components. */
-export interface Components {
-    position?: Position;
-    sprite?: Sprite;
-    animations?: Animations;
-    collision?: Collision;
-    velocity?: Velocity;
-}
-
-export interface Position {
-    x: number;
-    y: number;
-}
-
-export interface Velocity {
-    x: number;
-    y: number;
-}
-
-export interface Collision {
-    w: number;
-    h: number;
-}
-
 export interface Sprite {
+    x: number
+    y: number
     bmp: Bitmap;
-    sprite: number;
-    w: number
-    h: number
+    index: number
+    width: number
+    height: number
     flip: number
+
+    updateHandlers?: UpdateHandler[];
+    animations?: Animations;
+    body?: Body;
+}
+
+export interface UpdateHandler {
+    update(sprite: Sprite): void;
+}
+
+export interface Body {
+    width: number;
+    height: number;
 }
 
 export interface Animation {

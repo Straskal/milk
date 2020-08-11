@@ -90,12 +90,12 @@ int main(int argc, char *argv[])
     renderer = SDL_CreateRenderer(window,
       SDL_FIRST_AVAILABLE_RENDERER, SDL_RENDERER_ACCELERATED
     );
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
+    SDL_RenderSetLogicalSize(renderer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
     frontBufferTexture = SDL_CreateTexture(renderer,
       SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
       FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT
     );
-    SDL_RenderSetLogicalSize(renderer, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
   }
 
   // Audio device setup

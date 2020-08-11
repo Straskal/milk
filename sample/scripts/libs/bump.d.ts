@@ -32,14 +32,12 @@ interface BumpWorld {
     update(item: any, x: number, y: number, w?: number, h?: number): void;
 
     /** @tupleReturn */
-    /** returns actualX, actualY, collisions, numCollisions */
     move(item: any,
         goalX: number,
         goalY: number,
         filter?: (item: any, other: any) => false | "touch" | "cross" | "slide" | "bounce"): [number, number, BumpCollision[], number];
 
         /** @tupleReturn */
-    /** returns actualX, actualY, collisions, numCollisions */
     check(item: any,
         goalX: number,
         goalY: number,
