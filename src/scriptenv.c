@@ -167,7 +167,7 @@ static int l_sprite(lua_State *L)
 		(int)luaL_optinteger(L, 6, 1),
 		(float)luaL_optnumber(L, 7, 1.0),
 		(uint8_t)luaL_optinteger(L, 8, 0),
-		(uint32_t)luaL_optinteger(L, 9, 0x00)
+		(uint32_t)luaL_optinteger(L, 9, 0)
 	);
 	return 0;
 }
@@ -198,7 +198,7 @@ static int l_tiles(lua_State *L)
 		lua_pop(L, 1);
 
 		if (sprIndex > -1)
-			drawSprite(video, bmp, sprIndex, xCurrent, y, w, h, 1, 0, 0x00);
+			drawSprite(video, bmp, sprIndex, xCurrent, y, w, h, 1, 0, 0);
 
 		xCurrent += w * SPRITE_SIZE;
 		if (i++ % pitch == 0)
@@ -226,7 +226,7 @@ static int l_font(lua_State *L)
 		(int)floor(lua_tonumber(L, 3)),
 		lua_tostring(L, 4),
 		(int)floor(luaL_optinteger(L, 5, 1)),
-		(uint32_t)floor(luaL_optinteger(L, 6, 0xffffff))
+		(uint32_t)floor(luaL_optinteger(L, 6, 0xffffffff))
 	);
 	return 1;
 }
@@ -248,7 +248,7 @@ static int l_fontwrap(lua_State *L)
 		(int)floor(lua_tonumber(L, 4)),
 		lua_tostring(L, 5),
 		(int)floor(luaL_optinteger(L, 6, 1)),
-		(uint32_t)floor(luaL_optinteger(L, 7, 0xffffff))
+		(uint32_t)floor(luaL_optinteger(L, 7, 0xffffffff))
 	);
 	return 1;
 }

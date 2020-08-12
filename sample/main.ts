@@ -5,11 +5,12 @@
 // }
 
 import { Game } from "./scripts/game";
-import { Level } from "./scripts/states/level";
+import { Level } from "./scripts/core/level";
 import { Sprite } from "./scripts/core/sprite";
 import { Player } from "./scripts/behaviors/player";
 import { AssetManager } from "./scripts/core/assets";
 import { Tilemap } from "./scripts/core/tilemap";
+import { DebugDraw } from "./scripts/editor/debugDraw";
 
 let map = <Tilemap> {
     bmp: AssetManager.loadBitmap("art/LOTP.bmp"),
@@ -90,21 +91,21 @@ let player = <Sprite> {
     },
     body: {
         width: 16,
-        height: 16
+        height: 24
     }
 };
 
 let other = <Sprite> {
     x: 50,
     y: 50,
-    bmp: bitmap("art/peasant.bmp"),
+    bmp: AssetManager.loadBitmap("art/peasant.bmp"),
     index: 0,
     width: 2,
     height: 3,
     flip: 0,
     body: {
         width: 16,
-        height: 16
+        height: 24
     }
 };
 
@@ -113,6 +114,6 @@ level.map = map;
 level.add(player);
 level.add(other);
 
-_init   = () => Game.init(level);
+_init   = () => {Game.init(level); Game.pushState(new DebugDraw());};
 _update = () => Game.update();
 _draw   = () => Game.draw();

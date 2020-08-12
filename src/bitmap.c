@@ -28,7 +28,7 @@ Bitmap *loadBitmap(const char *filePath)
     uint32_t b = *surfacePixels++;
     uint32_t g = *surfacePixels++;
     uint32_t r = *surfacePixels++;
-    bitmap->pixels[i] = (r << 16) | (g << 8) | (b);
+    bitmap->pixels[i] = (255 << 24) | (r << 16) | (g << 8) | (b);
   }
   SDL_FreeSurface(surface);
   return bitmap;

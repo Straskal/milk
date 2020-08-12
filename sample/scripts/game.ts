@@ -49,6 +49,14 @@ export class Game {
         this._ticks++;
     }
 
+    static getState<T extends GameState>(ctor: Function): T | null {
+        for (let i = 0; i < this._stateStack.length; i++) {
+            if (this._stateStack[i] instanceof ctor)
+                return this._stateStack[i] as T;
+        }
+        return null;
+    }
+
     static peek(): GameState {
         return this._stateStack[this._stateStack.length - 1];
     }

@@ -1,5 +1,5 @@
 import { Behavior, Sprite } from "../core/sprite";
-import { Level } from "../states/level";
+import { Level } from "../core/level";
 import { setAnimation } from "../common/animation";
 
 const isButtonDown = btn;

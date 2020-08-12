@@ -36,7 +36,7 @@ void initializeVideo(Video *video)
 
 void resetDrawState(Video *video)
 {
-  video->colorKey         = 0;
+  video->colorKey         = 0xff000000;
   video->clipRect.top     = 0;
   video->clipRect.left    = 0;
   video->clipRect.bottom  = FRAMEBUFFER_HEIGHT;
