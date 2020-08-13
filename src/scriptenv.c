@@ -132,7 +132,7 @@ static int l_bitmap(lua_State *L)
 
 static int l_bitmap_gc(lua_State *L)
 {
-	LuaObject *luaObj = luaL_checkudata(L, 1, BITMAP_META);
+	LuaObject *luaObj = lua_touserdata(L, 1);
 	Bitmap *bmp = luaObj->handle;
 	freeBitmap(bmp);
 	return 0;
@@ -212,7 +212,7 @@ static int l_rectfill(lua_State *L)
 static int l_sprite(lua_State *L)
 {
 	LuaObject *luaObj = luaL_checkudata(L, 1, BITMAP_META);
-	Bitmap *bmp = (Bitmap *)luaObj->handle;
+	Bitmap *bmp = luaObj->handle;
 
 	drawSprite(
 		video_addr(L), bmp,
@@ -232,12 +232,14 @@ static int l_tiles(lua_State *L)
 {
 	Video *video = video_addr(L);
 	LuaObject *luaObj = luaL_checkudata(L, 1, BITMAP_META);
-	Bitmap *bmp = (Bitmap *)luaObj->handle;
+	Bitmap *bmp = luaObj->handle;
 
 	int x = FLOOR(lua_tonumber(L, 3));
 	int y = FLOOR(lua_tonumber(L, 4));
 	int w = lua_tointeger(L, 5);
 	int h = lua_tointeger(L, 6);
+	int wPix = w * SPRITE_SIZE;
+	int hPix = h * SPRITE_SIZE;
 
 	int pitch = lua_tointeger(L, 7);
 	lua_len(L, 2);
@@ -247,16 +249,22 @@ static int l_tiles(lua_State *L)
 	int xCurrent = x;
 	int i = 1;
 
+	Rect clip = video->clipRect;
+
 	while (len--)
 	{
 		lua_rawgeti(L, 2, i);
 		int sprIndex = lua_tointeger(L, -1);
 		lua_pop(L, 1);
 
-		if (sprIndex > -1)
+		int right = xCurrent + wPix;
+		int bottom = y + hPix;
+
+		if (sprIndex > -1 && (right > clip.left || xCurrent < clip.right) && (bottom > clip.top || y < clip.top))
 			drawSprite(video, bmp, sprIndex, xCurrent, y, w, h, 1, 0, 0);
 
 		xCurrent += w * SPRITE_SIZE;
+
 		if (i++ % pitch == 0)
 		{
 			xCurrent = x;
