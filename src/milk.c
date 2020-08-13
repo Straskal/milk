@@ -112,7 +112,7 @@ static void __updateConsole(Milk *milk)
 	Console *console = &milk->console;
 	Modules *modules = &milk->modules;
 
-	if (isKeyDown(&modules->input, KEY_BACKSPACE) && console->candidateLength > 0)
+	if (platform_backspace() && console->candidateLength > 0)
 	{
 		console->candidate[--console->candidateLength] = '\0';
 	}
