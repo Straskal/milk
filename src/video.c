@@ -153,12 +153,11 @@ void drawFilledRect(Video *video, int x, int y, int w, int h, uint32_t color)
 
 #define BLEND(dest, src)\
   do {\
-    unsigned char a = A_COMP(src);\
-    double normalA  = (double)a / 255;\
+    double normalA  = (double)A_COMP(src) / 255;\
     unsigned char r = R_COMP(src) * normalA + R_COMP(dest) * (1 - normalA);\
     unsigned char g = G_COMP(src) * normalA + G_COMP(dest) * (1 - normalA);\
     unsigned char b = B_COMP(src) * normalA + B_COMP(dest) * (1 - normalA);\
-    dest = (a << 24) | (r << 16) | (g << 8) | b;\
+    dest = (255 << 24) | (r << 16) | (g << 8) | b;\
   } while(0)
 
 static void __drawBuffer(Video *video, uint32_t *buffer, int x, int y, int w, int h, int pitch, float scale, uint8_t flip, uint32_t color)
@@ -195,6 +194,8 @@ static void __drawBuffer(Video *video, uint32_t *buffer, int x, int y, int w, in
   }
 }
 
+#define BUFFER_CHUNK(bmp, row, column) (&bmp->pixels[row * bmp->width * SPRITE_SIZE + column * SPRITE_SIZE])
+
 void drawSprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h, float scale, uint8_t flip, uint32_t color)
 {
   int numRows     = bmp->height / SPRITE_SIZE;
@@ -205,9 +206,7 @@ void drawSprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h
   w = CLAMP(w, 1, numColumns - column);
   h = CLAMP(h, 1, numRows - row);
 
-  uint32_t *buffer = &bmp->pixels[row * bmp->width * SPRITE_SIZE + column * SPRITE_SIZE];
-
-  __drawBuffer(video, buffer, x, y, w * SPRITE_SIZE, h * SPRITE_SIZE, bmp->width, scale, flip, color);
+  __drawBuffer(video, BUFFER_CHUNK(bmp, row, column), x, y, w * SPRITE_SIZE, h * SPRITE_SIZE, bmp->width, scale, flip, color);
 }
 
 #define IS_ASCII(c) (0 < c)
@@ -244,10 +243,10 @@ void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int sca
         break;
       default:
       {
-        int yPixel = FLOOR((curr - 33) / numColumns) * bitmap.width * SPRITE_SIZE;
-        int xPixel = FLOOR((curr - 33) % numColumns) * SPRITE_SIZE;
+        int row = FLOOR((curr - 33) / numColumns);
+        int col = FLOOR((curr - 33) % numColumns);
 
-        __drawBuffer(video, &bitmap.pixels[yPixel + xPixel], xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, bitmap.width, scale, 0, color);
+        __drawBuffer(video, BUFFER_CHUNK(bmp, row, col), xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, bitmap.width, scale, 0, color);
 
         xCurrent += SPRITE_SIZE * scale;
       }
@@ -307,10 +306,10 @@ void drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int w, const char 
         if (!IS_ASCII(c))
           c = '?';
 
-        int yPixel = FLOOR((c - 33) / numColumns) * bitmap.width * SPRITE_SIZE;
-        int xPixel = FLOOR((c - 33) % numColumns) * SPRITE_SIZE;
+        int row = FLOOR((c - 33) / numColumns);
+        int col = FLOOR((c - 33) % numColumns);
 
-        __drawBuffer(video, &bitmap.pixels[yPixel + xPixel], xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, bitmap.width, scale, 0, color);
+        __drawBuffer(video, BUFFER_CHUNK(bmp, row, col), xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, bitmap.width, scale, 0, color);
 
         xCurrent += SPRITE_SIZE * scale;
       }
