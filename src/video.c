@@ -1,7 +1,6 @@
 #include <math.h>
 #include <stdbool.h>
 #include <string.h>
-#include <SDL.h>
 
 #include "common.h"
 #include "video.h"
