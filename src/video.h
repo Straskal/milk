@@ -39,6 +39,5 @@ void drawSprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h
 void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int scale, uint32_t color);
 void drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int w, const char *text, int scale, uint32_t color);
 int getFontWidth(const char *text);
-void flipFramebuffer(Video *video, uint32_t *frontBuffer);
 
 #endif

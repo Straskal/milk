@@ -40,7 +40,7 @@ static int l_btn(lua_State *L)
 	lua_pushboolean(L,
 		isButtonDown(
 			input_addr(L),
-			(ButtonState)(1 << lua_tointeger(L, 1))
+			(ButtonState)(lua_tointeger(L, 1))
 		)
 	);
 	return 1;
@@ -51,7 +51,63 @@ static int l_btnp(lua_State *L)
 	lua_pushboolean(L,
 		isButtonPressed(
 			input_addr(L),
-			(ButtonState)(1 << lua_tointeger(L, 1))
+			(ButtonState)(lua_tointeger(L, 1))
+		)
+	);
+	return 1;
+}
+
+static int l_key(lua_State *L)
+{
+	lua_pushboolean(L,
+		isKeyDown(
+			input_addr(L),
+			(lua_tointeger(L, 1))
+		)
+	);
+	return 1;
+}
+
+static int l_keyp(lua_State *L)
+{
+	lua_pushboolean(L,
+		isKeyPressed(
+			input_addr(L),
+			(lua_tointeger(L, 1))
+		)
+	);
+	return 1;
+}
+
+static int l_mouse(lua_State *L)
+{
+	Input *input = input_addr(L);
+	Mouse *mouse = &input->mouse;
+
+	lua_pushnumber(L, mouse->x);
+	lua_pushnumber(L, mouse->y);
+	lua_pushnumber(L, mouse->scroll);
+
+	return 3;
+}
+
+static int l_mousebtn(lua_State *L)
+{
+	lua_pushboolean(L,
+		isMouseDown(
+			input_addr(L),
+			lua_tointeger(L, 1)
+		)
+	);
+	return 1;
+}
+
+static int l_mousebtnp(lua_State *L)
+{
+	lua_pushboolean(L,
+		isMousePressed(
+			input_addr(L),
+			lua_tointeger(L, 1)
 		)
 	);
 	return 1;
@@ -414,8 +470,13 @@ static void __pushApiFunction(lua_State *L, const char *name, int (*api_func)(lu
 
 static void __registerApiFunctions(lua_State *L)
 {
+	__pushApiFunction(L, "key", l_key);
+	__pushApiFunction(L, "keyp", l_keyp);
 	__pushApiFunction(L, "btn", l_btn);
 	__pushApiFunction(L, "btnp", l_btnp);
+	__pushApiFunction(L, "mouse", l_mouse);
+	__pushApiFunction(L, "mousebtn", l_mousebtn);
+	__pushApiFunction(L, "mousebtnp", l_mousebtnp);
 	__pushApiFunction(L, "bitmap", l_bitmap);
 	__pushApiFunction(L, "clip", l_clip);
 	__pushApiFunction(L, "clrs", l_clrs);

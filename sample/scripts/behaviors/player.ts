@@ -2,10 +2,10 @@ import { Behavior, Sprite } from "../core/sprite";
 import { Level } from "../core/level";
 import { setAnimation } from "../common/animation";
 
+const PlayerSpeed = 1;
+
 const isButtonDown = btn;
 const abs = math.abs;
-
-const PlayerSpeed = 1;
 
 export class Player implements Behavior {
 

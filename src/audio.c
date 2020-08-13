@@ -165,14 +165,19 @@ void mixSamplesIntoStream(Audio *audio, int16_t *stream, int numSamples)
   if (audio->streamSlot.state == PLAYING)
   {
     WaveStream *streamData = audio->streamSlot.data;
+
     if (streamData->channelCount == 1)
       numSamples /= 2;
+
     bool finished = readWaveStream(streamData, numSamples, audio->streamSlot.loop);
     __mixSamples(stream, streamData->chunk, streamData->sampleCount, streamData->channelCount, audio->streamSlot.volume);
+
     if (finished)
       audio->streamSlot.state = STOPPED;
   }
+
   SoundSlot *slots = audio->soundSlots;
+
   for (int i = 0; i < MAX_SOUND_SLOTS; i++)
   {
     if (slots[i].state == PLAYING)
@@ -180,8 +185,10 @@ void mixSamplesIntoStream(Audio *audio, int16_t *stream, int numSamples)
       if (slots[i].remainingSamples > 0)
       {
         int samplesToMix = MIN(slots[i].remainingSamples, numSamples);
+
         if (slots[i].soundData->channelCount == 1)
           samplesToMix /= 2;
+
         __mixSamples(stream, slots[i].position, samplesToMix, slots[i].soundData->channelCount, slots[i].volume);
         slots[i].position += samplesToMix;
         slots[i].remainingSamples -= samplesToMix;

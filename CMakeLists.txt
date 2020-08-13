@@ -34,8 +34,8 @@ set(MILK_SRC_FILES
 	src/bitmap.c
 	src/bitmap.h
 	src/common.h
-	src/gamepad.c
-	src/gamepad.h
+	src/input.c
+	src/input.h
 	src/logs.c
 	src/logs.h
 	src/platform.h

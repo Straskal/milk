@@ -114,6 +114,6 @@ level.map = map;
 level.add(player);
 level.add(other);
 
-_init   = () => {Game.init(level); Game.pushState(new DebugDraw());};
+_init   = () => {Game.init(level);};
 _update = () => Game.update();
 _draw   = () => Game.draw();

@@ -112,20 +112,25 @@ static void __updateConsole(Milk *milk)
 	Console *console = &milk->console;
 	Modules *modules = &milk->modules;
 
-	if (isExtDown(&modules->input, INPUT_BACK) && console->candidateLength > 0)
+	if (isKeyDown(&modules->input, KEY_BACKSPACE) && console->candidateLength > 0)
 	{
 		console->candidate[--console->candidateLength] = '\0';
 	}
-	if (isExtDown(&modules->input, INPUT_CHAR) && console->candidateLength < COMMAND_MAX_LENGTH - 1)
+
+	char inChar;
+
+	if (platform_getCharInput(&inChar) && console->candidateLength < COMMAND_MAX_LENGTH - 1)
 	{
-		console->candidate[console->candidateLength] = modules->input.extended.inChar;
+		console->candidate[console->candidateLength] = inChar;
 		console->candidate[++console->candidateLength] = '\0';
 	}
-	if (isButtonPressed(&modules->input, BTN_DOWN))
+
+	if (isKeyPressed(&modules->input, KEY_DOWN))
 	{
 		__resetCandidate(console);
 	}
-	if (isExtPressed(&modules->input, INPUT_ENTER))
+
+	if (isKeyPressed(&modules->input, KEY_RETURN))
 	{
 		__executeCommand(milk);
 	}
@@ -202,7 +207,7 @@ void updateMilk(Milk *milk)
 #ifdef BUILD_WITH_CONSOLE
 	if (hasError() && !milk->console.isEnabled)
 		__toggleConsole(milk);
-	if (isExtPressed(&milk->modules.input, INPUT_ESCAPE))
+	if (isKeyPressed(&milk->modules.input, KEY_ESCAPE))
 		__toggleConsole(milk);
 	if (!milk->console.isEnabled)
 		invokeUpdate(&milk->scripts);
