@@ -1,55 +1,43 @@
 #ifndef __VIDEO_H__
 #define __VIDEO_H__
 
+#include <stdint.h>
 #include <stdlib.h>
 
-#include "common.h"
+#include "bitmap.h"
 
 #define FRAMERATE 50
-#define FRAMEBUFFER_WIDTH 256
-#define FRAMEBUFFER_HEIGHT 224
-#define WINDOW_WIDTH (FRAMEBUFFER_WIDTH * 3)
-#define WINDOW_HEIGHT (FRAMEBUFFER_HEIGHT * 3)
-#define SPRITE_SHEET_SQRSIZE 256
-#define SPRITE_SQRSIZE 16
-#define FONT_WIDTH 128
-#define FONT_HEIGHT 48
-#define CHAR_WIDTH 8
-#define CHAR_HEIGHT 8
+#define FRAMEBUFFER_WIDTH 384
+#define FRAMEBUFFER_HEIGHT 216
+#define SPRITE_SIZE 8
+#define FONT_SPRITE_SPACING 6
 
-typedef u32 Color32;
-
-typedef struct rect
+typedef struct
 {
   int top;
-  int bottom;
   int left;
+  int bottom;
   int right;
 } Rect;
 
-typedef struct video
+typedef struct
 {
-  Color32 framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
-  Color32 spriteSheet[SPRITE_SHEET_SQRSIZE * SPRITE_SHEET_SQRSIZE];
-  Color32 font[FONT_WIDTH * FONT_HEIGHT];
-  Color32 colorKey;
+  uint32_t framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
+  uint32_t colorKey;
   Rect clipRect;
-
-  void (*loadBMP)(const char *, Color32 *, size_t);
 } Video;
 
 void initializeVideo(Video *video);
-void disableVideo(Video *video);
-void loadSpriteSheet(Video *video, const char *path);
-void loadFont(Video *video, const char *path);
 void resetDrawState(Video *video);
-void setClippingRect(Video *video, int x, int y, int w, int h);
-void clearFramebuffer(Video *video, Color32 color);
-void blitPixel(Video *video, int x, int y, Color32 color);
-void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color);
-void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color);
-void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color);
-void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 flip);
-void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, int scale, Color32 color);
+void setClip(Video *video, int x, int y, int w, int h);
+void clearFramebuffer(Video *video, uint32_t color);
+void drawPixel(Video *video, int x, int y, uint32_t color);
+void drawLine(Video *video, int x0, int y0, int x1, int y1, uint32_t color);
+void drawRect(Video *video, int x, int y, int w, int h, uint32_t color);
+void drawFilledRect(Video *video, int x, int y, int w, int h, uint32_t color);
+void drawSprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h, float scale, uint8_t flip, uint32_t color);
+void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int scale, uint32_t color);
+void drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int w, const char *text, int scale, uint32_t color);
+int getFontWidth(const char *text);
 
 #endif

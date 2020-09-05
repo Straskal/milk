@@ -2,90 +2,87 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "embed/font.h"
+#include "common.h"
 #include "video.h"
 
-static void initializeMemory(Video *video)
+/**
+ * Milk handles drawing, clipping, and blending pixels on a per pixel basis.
+ * Although this isn't very efficient, it hasn't been much of an issue so far.
+ *
+ * Possible improvements:
+ *  * Clip buffers before writing them to the framebuffer.
+ *    Right now, clipping is applied per pixel, which isn't exactly efficient.
+ *
+ *  * RLE encode pixel buffers to process rows of pixels.
+ *    Blending and blitting can be applied to an entire row at once.
+ *
+ * - ST
+*/
+
+#define EMBED_FONT_WIDTH  96
+#define EMBED_FONT_HEIGHT 64
+
+static uint32_t embeddedFontData[] =
 {
-  memset(&video->framebuffer, 0x00, sizeof(video->framebuffer));
-  memset(&video->spriteSheet, 0x00, sizeof(video->spriteSheet));
-  memcpy(&video->font, DEFAULT_FONT_DATA, sizeof(video->font));
-}
+  #include "embed/font.inl"
+};
 
 void initializeVideo(Video *video)
 {
-  initializeMemory(video);
-
+  memset(&video->framebuffer, 0, sizeof(video->framebuffer));
   resetDrawState(video);
-}
-
-void disableVideo(Video *video)
-{
-  initializeMemory(video);
-}
-
-void loadSpriteSheet(Video *video, const char *path)
-{
-  video->loadBMP(path, video->spriteSheet, sizeof(video->spriteSheet) / sizeof(Color32));
-}
-
-void loadFont(Video *video, const char *path)
-{
-  video->loadBMP(path, video->font, sizeof(video->font) / sizeof(Color32));
 }
 
 void resetDrawState(Video *video)
 {
-  video->colorKey = 0x00;
-  video->clipRect.top = 0;
-  video->clipRect.left = 0;
-  video->clipRect.bottom = FRAMEBUFFER_HEIGHT;
-  video->clipRect.right = FRAMEBUFFER_WIDTH;
+  video->colorKey         = 0xff000000;
+  video->clipRect.top     = 0;
+  video->clipRect.left    = 0;
+  video->clipRect.bottom  = FRAMEBUFFER_HEIGHT;
+  video->clipRect.right   = FRAMEBUFFER_WIDTH;
 }
 
-void setClippingRect(Video *video, int x, int y, int w, int h)
+void setClip(Video *video, int x, int y, int w, int h)
 {
-  video->clipRect.left = CLAMP(x, 0, FRAMEBUFFER_WIDTH);
-  video->clipRect.right = CLAMP(x + w, 0, FRAMEBUFFER_WIDTH);
-  video->clipRect.top = CLAMP(y, 0, FRAMEBUFFER_HEIGHT);
-  video->clipRect.bottom = CLAMP(y + h, 0, FRAMEBUFFER_HEIGHT);
+  video->clipRect.left    = CLAMP(x, 0, FRAMEBUFFER_WIDTH);
+  video->clipRect.right   = CLAMP(x + w, 0, FRAMEBUFFER_WIDTH);
+  video->clipRect.top     = CLAMP(y, 0, FRAMEBUFFER_HEIGHT);
+  video->clipRect.bottom  = CLAMP(y + h, 0, FRAMEBUFFER_HEIGHT);
 }
 
-// Transform an x and y coordinate to a framebuffer index.
-#define FRAMEBUFFER_POS(x, y) ((FRAMEBUFFER_WIDTH * y) + x)
+#define FRAMEBUFFER_POS(x, y) (y * FRAMEBUFFER_WIDTH + x)
 
-void clearFramebuffer(Video *video, Color32 color)
+void clearFramebuffer(Video *video, uint32_t color)
 {
   Rect clip = video->clipRect;
+  int length = clip.right - clip.left;
 
   for (int y = clip.top; y < clip.bottom; y++)
   {
-    for (int x = clip.left; x < clip.right; x++)
-      video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
+    int start = FRAMEBUFFER_POS(clip.left, y);
+    int end = start + length;
+
+    for (int x = start; x < end; x++)
+      video->framebuffer[x] = color;
   }
 }
 
-// Evaluates to true if the given coordinates are within the clipping rectangle.
-#define WITHIN_CLIP_RECT(clip, x, y) (clip.left <= x && x < clip.right && clip.top <= y && y < clip.bottom)
-
-void blitPixel(Video *video, int x, int y, Color32 color)
+void drawPixel(Video *video, int x, int y, uint32_t color)
 {
-  if (WITHIN_CLIP_RECT(video->clipRect, x, y))
-    video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
+  if (video->clipRect.left <= x  && x < video->clipRect.right && video->clipRect.top <= y && y < video->clipRect.bottom)
+      video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
 }
 
-// The bresenham line drawing algorithm is pretty much THE line drawing algorithm.
-// A simple web search will give you all the information that you need about it.
-// This is a slightly modified version to handle the case when y1 < y0 or x1 < x0.
-static void bresenhamLine(Video *video, int x0, int y0, int x1, int y1, Color32 color)
+void drawLine(Video *video, int x0, int y0, int x1, int y1, uint32_t color)
 {
   int xDistance = x1 - x0;
   int yDistance = y1 - y0;
-  int xStep = SIGN(xDistance);
-  int yStep = SIGN(yDistance);
-  xDistance = abs(xDistance) << 1;
-  yDistance = abs(xDistance) << 1;
-  blitPixel(video, x0, y0, color);
+  int xStep     = SIGN(xDistance);
+  int yStep     = SIGN(yDistance);
+  xDistance     = abs(xDistance) << 1;
+  yDistance     = abs(xDistance) << 1;
+
+  drawPixel(video, x0, y0, color);
 
   if (xDistance > yDistance)
   {
@@ -99,7 +96,7 @@ static void bresenhamLine(Video *video, int x0, int y0, int x1, int y1, Color32 
         fraction -= xDistance;
       }
       fraction += yDistance;
-      blitPixel(video, x0, y0, color);
+      drawPixel(video, x0, y0, color);
     }
   }
   else
@@ -114,164 +111,240 @@ static void bresenhamLine(Video *video, int x0, int y0, int x1, int y1, Color32 
       }
       y0 += yStep;
       fraction += xDistance;
-      blitPixel(video, x0, y0, color);
+      drawPixel(video, x0, y0, color);
     }
   }
 }
 
-void blitLine(Video *video, int x0, int y0, int x1, int y1, Color32 color)
-{
-  bresenhamLine(video, x0, y0, x1, y1, color);
-}
-
-static void horizontalLine(Video *video, int x, int y, int w, Color32 color)
+static void __horizontalLine(Video *video, int x, int y, int w, uint32_t color)
 {
   for (int i = x; i <= x + w; i++)
-    blitPixel(video, i, y, color);
+    drawPixel(video, i, y, color);
 }
 
-static void verticalLine(Video *video, int x, int y, int h, Color32 color)
+static void __verticalLine(Video *video, int x, int y, int h, uint32_t color)
 {
   for (int i = y; i <= y + h; i++)
-    blitPixel(video, x, i, color);
+    drawPixel(video, x, i, color);
 }
 
-void blitRectangle(Video *video, int x, int y, int w, int h, Color32 color)
+void drawRect(Video *video, int x, int y, int w, int h, uint32_t color)
 {
-  horizontalLine(video, x, y, w, color); // Top edge
-  horizontalLine(video, x, y + h, w, color); // Bottom edge
-  verticalLine(video, x, y, h, color); // Left edge
-  verticalLine(video, x + w, y, h, color); // Right edge
+  __horizontalLine(video, x, y, w, color);     // Top edge
+  __horizontalLine(video, x, y + h, w, color); // Bottom edge
+  __verticalLine(video, x, y, h, color);       // Left edge
+  __verticalLine(video, x + w, y, h, color);   // Right edge
 }
 
-void blitFilledRectangle(Video *video, int x, int y, int w, int h, Color32 color)
+void drawFilledRect(Video *video, int x, int y, int w, int h, uint32_t color)
 {
   for (int i = y; i < y + h; i++)
-  {
     for (int j = x; j < x + w; j++)
-      blitPixel(video, j, i, color);
-  }
+      drawPixel(video, j, i, color);
 }
 
-// To be honest, these values are kind of arbitrary.
-#define MIN_SCALE 1
-#define MAX_SCALE 5
+#define A_COMP(color) ((color & 0xff000000) >> 24)
+#define R_COMP(color) ((color & 0x00ff0000) >> 16)
+#define G_COMP(color) ((color & 0x0000ff00) >> 8)
+#define B_COMP(color) ((color & 0x000000ff))
 
-// Nearest neighbor scaling is almost exactly what it sounds like.
-// A simple web search will give more detailed information.
-// First it determines the ratio between the old size and the scaled size.
-// Using this ratio, it calculates the nearest neighboring pixel to the original pixel, and uses that to fill in the blanks.
-// This results is very pixelated, scaled images, which is perfect for pixel art.
-static void nearestNeighbor(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip, const Color32 *color)
+#define NORM(val, min, max) ((val - min) / (max - min))
+
+#define BLEND(dest, src)\
+  do {\
+    double normalA  = (double)A_COMP(src) / 255;\
+    unsigned char r = R_COMP(src) * normalA + R_COMP(dest) * (1 - normalA);\
+    unsigned char g = G_COMP(src) * normalA + G_COMP(dest) * (1 - normalA);\
+    unsigned char b = B_COMP(src) * normalA + B_COMP(dest) * (1 - normalA);\
+    dest = (255 << 24) | (r << 16) | (g << 8) | b;\
+  } while(0)
+
+static void __drawBuffer(Video *video, uint32_t *buffer, int x, int y, int w, int h, int pitch, float scale, uint8_t flip, uint32_t color)
 {
-  scale = CLAMP(scale, MIN_SCALE, MAX_SCALE);
+  if (scale <= 0)
+    return;
 
-  int width = w * scale;
-  int height = h * scale;
-  int xRatio = (int) floor((double) (w << 16) / width + 0.5);
-  int yRatio = (int) floor((double) (h << 16) / height + 0.5);
+  float scaledWidth   = w * scale;
+  float scaledHeight  = h * scale;
 
-  bool isXFlipped = IS_BIT_SET(flip, 1);
-  bool isYFlipped = IS_BIT_SET(flip, 2);
-  int xPixelStart = isXFlipped ? width - 1 : 0;
-  int yPixelStart = isYFlipped ? height - 1 : 0;
-  int xStep = isXFlipped ? -1 : 1;
-  int yStep = isYFlipped ? -1 : 1;
+  int xStep         = CHECK_BIT(flip, 1) ? -1 : 1;
+  int yStep         = CHECK_BIT(flip, 2) ? -1 : 1;
+  int ySourceStart  = CHECK_BIT(flip, 2) ? scaledHeight - 1 : 0;
+  int xSourceStart  = CHECK_BIT(flip, 1) ? scaledWidth - 1 : 0;
+  int yDestEnd      = FLOOR(y + scaledHeight);
+  int xDestEnd      = FLOOR(x + scaledWidth);
+  int xRatio        = FLOOR((w << 16) / scaledWidth + 0.5f);
+  int yRatio        = FLOOR((h << 16) / scaledHeight + 0.5f);
 
-  int xPixel, yPixel, xFramebuffer, yFramebuffer;
-  for (yFramebuffer = y, yPixel = yPixelStart; yFramebuffer < y + height; yFramebuffer++, yPixel += yStep)
+  for (int yDest = y, ySource = ySourceStart; yDest < yDestEnd; yDest++, ySource += yStep)
   {
-    for (xFramebuffer = x, xPixel = xPixelStart; xFramebuffer < x + width; xFramebuffer++, xPixel += xStep)
+    for (int xDest = x, xSource = xSourceStart; xDest < xDestEnd; xDest++, xSource += xStep)
     {
-      int xNearest = (xPixel * xRatio) >> 16;
-      int yNearest = (yPixel * yRatio) >> 16;
-      Color32 col = pixels[yNearest * pitch + xNearest];
+      int xNearest = (xSource * xRatio) >> 16;
+      int yNearest = (ySource * yRatio) >> 16;
+      uint32_t pixel = buffer[yNearest * pitch + xNearest];
 
-      if (col != video->colorKey)
-        blitPixel(video, xFramebuffer, yFramebuffer, color != NULL ? *color : col);
+      if (pixel != video->colorKey)
+      {
+        BLEND(pixel, color);
+        drawPixel(video, xDest, yDest, pixel);
+      }
     }
   }
 }
 
-static void blitRect(Video *video, const Color32 *pixels, int x, int y, int w, int h, int pitch, int scale, u8 flip,
-                     const Color32 *color)
+#define BUFFER_CHUNK(bmp, row, column) (&bmp->pixels[row * bmp->width * SPRITE_SIZE + column * SPRITE_SIZE])
+
+void drawSprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h, float scale, uint8_t flip, uint32_t color)
 {
-  nearestNeighbor(video, pixels, x, y, w, h, pitch, scale, flip, color);
+  int numRows     = bmp->height / SPRITE_SIZE;
+  int numColumns  = bmp->width / SPRITE_SIZE;
+  int row         = FLOOR(index / numColumns);
+  int column      = FLOOR(index % numColumns);
+
+  w = CLAMP(w, 1, numColumns - column);
+  h = CLAMP(h, 1, numRows - row);
+
+  __drawBuffer(video, BUFFER_CHUNK(bmp, row, column), x, y, w * SPRITE_SIZE, h * SPRITE_SIZE, bmp->width, scale, flip, color);
 }
 
-// Number of colums in the sprite sheet
-#define SPRSHEET_COLUMNS ((int)(SPRITE_SHEET_SQRSIZE / SPRITE_SQRSIZE))
-
-// The size of each row, in pixels.
-#define SPRSHEET_ROW_SIZE ((int)(SPRITE_SHEET_SQRSIZE * SPRITE_SQRSIZE))
-
-// Transform a row and column into a sprite sheet index.
-#define SPRSHEET_POS(x, y) (y * SPRSHEET_ROW_SIZE + x * SPRITE_SQRSIZE)
-
-static bool isSpriteIndexWithinBounds(int index)
-{
-  return index >= 0 && index < SPRITE_SHEET_SQRSIZE;
-}
-
-void blitSprite(Video *video, int id, int x, int y, int w, int h, int scale, u8 flip)
-{
-  if (isSpriteIndexWithinBounds(id))
-  {
-    int width = w * SPRITE_SQRSIZE;
-    int height = h * SPRITE_SQRSIZE;
-    int row = (int) floor((double) id / SPRSHEET_COLUMNS);
-    int col = (int) floor((double) (id % SPRSHEET_COLUMNS));
-    Color32 *pixels = &video->spriteSheet[SPRSHEET_POS(col, row)];
-    blitRect(video, pixels, x, y, width, height, SPRITE_SHEET_SQRSIZE, scale, flip, NULL);
-  }
-}
-
-// Number of columns in the font
-#define FONT_COLUMNS ((int)(FONT_WIDTH / CHAR_WIDTH))
-
-// The size of each row, in pixels.
-#define FONT_ROW_SIZE ((int)(FONT_WIDTH * CHAR_HEIGHT))
-
-// Transform a row and column into a font index.
-#define FONT_POS(x, y) (y * FONT_ROW_SIZE + x * CHAR_WIDTH)
-
-// Evaluates to true if the given character is ASCII.
-// We're using signed chars, which cap at 128.
 #define IS_ASCII(c) (0 < c)
 
-// Evaluates to true if the given character is a newline.
-#define IS_NEWLINE(c) (c == '\n')
-
-void blitSpriteFont(Video *video, const Color32 *pixels, int x, int y, const char *str, int scale, Color32 color)
+void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int scale, uint32_t color)
 {
-  if (str == NULL)
+  if (!text || scale <= 0)
     return;
 
-  int charWidth = (int) floor((double) CHAR_WIDTH * scale);
-  int charHeight = (int) floor((double) CHAR_HEIGHT * scale);
+  Bitmap bitmap = bmp ? *bmp : (Bitmap) {
+    .pixels = embeddedFontData,
+    .width  = EMBED_FONT_WIDTH,
+    .height = EMBED_FONT_HEIGHT
+  };
+
+  int numColumns = bitmap.width / SPRITE_SIZE;
   int xCurrent = x;
   int yCurrent = y;
   char curr;
 
-  while ((curr = *str++) != '\0')
+  while ((curr = *text))
   {
-    if (!IS_NEWLINE(curr))
-    {
-      // If the given character is not ASCII, we will display a '?'. Problem solved.
-      if (!IS_ASCII(curr))
-        curr = '?';
+    if (!IS_ASCII(curr))
+      curr = '?';
 
-      // bitmap font starts at ASCII character 32 (SPACE)
-      int row = (int) floor((double) (curr - 32) / FONT_COLUMNS);
-      int col = (int) floor((double) ((curr - 32) % FONT_COLUMNS));
-      const Color32 *pixelStart = &pixels[FONT_POS(col, row)];
-      blitRect(video, pixelStart, xCurrent, yCurrent, CHAR_WIDTH, CHAR_HEIGHT, FONT_WIDTH, scale, 0, &color);
-      xCurrent += charWidth;
-    }
-    else
+    switch (curr)
     {
-      xCurrent = x;
-      yCurrent += charHeight;
+      case '\n':
+        xCurrent = x;
+        yCurrent += SPRITE_SIZE * scale;
+        break;
+      case ' ':
+        xCurrent += FONT_SPRITE_SPACING * scale;
+        break;
+      default:
+      {
+        int row = FLOOR((curr - 33) / numColumns);
+        int col = FLOOR((curr - 33) % numColumns);
+
+        __drawBuffer(video, BUFFER_CHUNK(bmp, row, col), xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, bitmap.width, scale, 0, color);
+
+        xCurrent += SPRITE_SIZE * scale;
+      }
+      break;
     }
+    text++;
   }
+}
+
+static int __wrapSeek(const char *text, int maxLength)
+{
+  int lineLength  = 0;
+  int breakLength = 0;
+  char c;
+
+  while ((c = *text) && lineLength < maxLength)
+  {
+    text++;
+    lineLength++;
+
+    if (c == ' ')
+      breakLength = lineLength;
+  }
+
+  return breakLength == 0 || !c ? lineLength : breakLength;
+}
+
+void drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int w, const char *text, int scale, uint32_t color)
+{
+  if (!text || scale <= 0 || w < SPRITE_SIZE)
+    return;
+
+  Bitmap bitmap = bmp ? *bmp : (Bitmap) {
+    .pixels = embeddedFontData,
+    .width  = EMBED_FONT_WIDTH,
+    .height = EMBED_FONT_HEIGHT
+  };
+
+  int numColumns = bitmap.width / SPRITE_SIZE;
+  int maxLineLength = FLOOR(w / SPRITE_SIZE);
+  int yCurrent = y;
+
+  while (*text)
+  {
+    int length = __wrapSeek(text, maxLineLength);
+    int xCurrent = x;
+
+    for (int i = 0; i < length; i++, text++)
+    {
+      char c = *text;
+
+      if (c == '\n' || (i == 0 && c == ' '))
+        continue;
+
+      if (c != ' ')
+      {
+        if (!IS_ASCII(c))
+          c = '?';
+
+        int row = FLOOR((c - 33) / numColumns);
+        int col = FLOOR((c - 33) % numColumns);
+
+        __drawBuffer(video, BUFFER_CHUNK(bmp, row, col), xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, bitmap.width, scale, 0, color);
+
+        xCurrent += SPRITE_SIZE * scale;
+      }
+      else xCurrent += FONT_SPRITE_SPACING;
+    }
+
+    yCurrent += SPRITE_SIZE;
+  }
+}
+
+int getFontWidth(const char *text)
+{
+  if (!text || *text == '\0')
+    return 0;
+
+  int currentWidth = 0, width = 0;
+  char curr;
+
+  while ((curr = *text)) {
+    switch (curr)
+    {
+    case ' ':
+      currentWidth += FONT_SPRITE_SPACING;
+      break;
+    case '\n':
+      currentWidth = 0;
+      break;
+    default:
+      currentWidth += SPRITE_SIZE;
+      break;
+    }
+
+    if (currentWidth > width)
+      width = currentWidth;
+
+    text++;
+  }
+  return width;
 }

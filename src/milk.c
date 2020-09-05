@@ -1,370 +1,235 @@
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-#include <math.h>
+#include <string.h>
 
-#include "milk.h"
+#include "common.h"
 #include "logs.h"
+#include "milk.h"
+#include "platform.h"
 
-static Milk *globalMilk;
+#ifdef BUILD_WITH_CONSOLE
+#define CONSOLE_Y (FRAMEBUFFER_HEIGHT - 36)
+
+typedef struct Console Console;
+typedef enum State State;
+
+static void __resetCandidate(Console *console)
+{
+	memset(console->candidate, 0, COMMAND_MAX_LENGTH);
+	console->candidateLength = 0;
+}
+
+static void __toggleConsole(Milk *milk)
+{
+	Console *console = &milk->console;
+	Modules *modules = &milk->modules;
+
+	if (!(console->isEnabled && hasError()))
+	{
+		console->isEnabled = !console->isEnabled;
+		if (console->isEnabled)
+		{
+			__resetCandidate(console);
+			pauseSound(&modules->audio, -1);
+			pauseStream(&modules->audio);
+			platform_startTextInput();
+		}
+		else
+		{
+			resumeSound(&modules->audio, -1);
+			resumeStream(&modules->audio);
+			platform_stopTextInput();
+		}
+	}
+}
+
+static void __cmdReload(Milk *milk)
+{
+	ScriptEnv *env = &milk->scripts;
+	Modules *modules = &milk->modules;
+
+	clearError();
+	closeScriptEnv(env);
+	openScriptEnv(env, modules);
+
+	if (loadEntryPoint(env))
+	{
+		invokeInit(env);
+		__toggleConsole(milk);
+	}
+}
+
+static void __cmdFullscreen(Milk *milk)
+{
+	UNUSED(milk);
+	platform_toggleFullscreen();
+}
+
+static void __cmdQuit(Milk *milk)
+{
+	UNUSED(milk);
+	platform_close();
+}
+
+typedef struct
+{
+	char *cmd;
+	void (*execute)(Milk *);
+} Command;
+
+static Command commands[] =
+{
+	{"reload", __cmdReload},
+	{"fullscreen", __cmdFullscreen},
+	{"quit", __cmdQuit},
+};
+
+static void __initializeConsole(Milk *milk)
+{
+	memset(&milk->console, 0, sizeof(milk->console));
+}
+
+static void __disableConsole(Milk *milk)
+{
+	memset(&milk->console, 0, sizeof(milk->console));
+}
+
+static void __executeCommand(Milk *milk)
+{
+	int numCommands = sizeof(commands) / sizeof(Command);
+
+	while (numCommands--)
+	{
+		if (strcmp(milk->console.candidate, commands[numCommands].cmd) == 0)
+		{
+			commands[numCommands].execute(milk);
+			break;
+		}
+	}
+	__resetCandidate(&milk->console);
+}
+
+static void __updateConsole(Milk *milk)
+{
+	Console *console = &milk->console;
+	Modules *modules = &milk->modules;
+
+	if (platform_backspace() && console->candidateLength > 0)
+	{
+		console->candidate[--console->candidateLength] = '\0';
+	}
+
+	char inChar;
+
+	if (platform_getCharInput(&inChar) && console->candidateLength < COMMAND_MAX_LENGTH - 1)
+	{
+		console->candidate[console->candidateLength] = inChar;
+		console->candidate[++console->candidateLength] = '\0';
+	}
+
+	if (isKeyPressed(&modules->input, KEY_DOWN))
+	{
+		__resetCandidate(console);
+	}
+
+	if (isKeyPressed(&modules->input, KEY_RETURN))
+	{
+		__executeCommand(milk);
+	}
+}
+
+static void __drawPanel(Video *video, const char *title, int x, int y, int w, int h)
+{
+	setClip(video, x, y, w, h);
+	clearFramebuffer(video, 0x40318d);
+	drawRect(video, x, y, w - 1, h - 1, 0xffffff);
+	drawFont(video, NULL, x + 5, y + 5, title, 1, 0x7869c4);
+}
+
+static void __drawConsole(Milk *milk)
+{
+	Console *console = &milk->console;
+	Video *video = &milk->modules.video;
+
+	// Error panel
+	if (hasError())
+	{
+		__drawPanel(video, "ERROR", 0, CONSOLE_Y - 79, FRAMEBUFFER_WIDTH, 80);
+		drawWrappedFont(video, NULL, 5, CONSOLE_Y - 79 + 20, FRAMEBUFFER_WIDTH - 10, getError(), 1, 0xffbf4040);
+	}
+
+	// Console panel
+	__drawPanel(video, "TERMINAL", 0, CONSOLE_Y, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT - CONSOLE_Y);
+	drawFont(video, NULL, 5, CONSOLE_Y + 20, "~", 1, 0xffffff);
+	drawFont(video, NULL, 18, CONSOLE_Y + 20, console->candidate, 1, 0xffffff);
+	if (console->ticks % 64 < 48)
+	{
+		int candidateWidth = getFontWidth(console->candidate);
+		drawFilledRect(video, 18 + candidateWidth, CONSOLE_Y + 20, 6, 8, 0xbf4040);
+	}
+}
+
+#endif // BUILD_WITH_CONSOLE
 
 Milk *createMilk()
 {
-	Milk *milk = (Milk *)malloc(sizeof(Milk));
-	milk->shouldQuit = false;
-	milk->code.state = NULL;
+	Milk *milk = malloc(sizeof(Milk));
+	initializeInput(&milk->modules.input);
+	initializeVideo(&milk->modules.video);
+	initializeAudio(&milk->modules.audio);
 
-	initInput(&milk->input);
-	initializeVideo(&milk->video);
-	initializeAudio(&milk->audio);
+#ifdef BUILD_WITH_CONSOLE
+	__initializeConsole(milk);
+#endif
 
-	LOG_INIT();
+	openScriptEnv(&milk->scripts, &milk->modules);
 	return milk;
 }
 
 void freeMilk(Milk *milk)
 {
-	disableAudio(&milk->audio);
-	disableVideo(&milk->video);
+	closeScriptEnv(&milk->scripts);
+
+#ifdef BUILD_WITH_CONSOLE
+	__disableConsole(milk);
+#endif
+
+	disableAudio(&milk->modules.audio);
 	free(milk);
 }
 
-static int l_btn(lua_State *L)
+void initializeMilk(Milk *milk)
 {
-	lua_pushboolean(L, isButtonDown(&globalMilk->input, (ButtonState)(1 << lua_tointeger(L, 1))));
-	return 1;
+	if (loadEntryPoint(&milk->scripts))
+		invokeInit(&milk->scripts);
 }
 
-static int l_btnp(lua_State *L)
+void updateMilk(Milk *milk)
 {
-	lua_pushboolean(L, isButtonPressed(&globalMilk->input, (ButtonState)(1 << lua_tointeger(L, 1))));
-	return 1;
+#ifdef BUILD_WITH_CONSOLE
+	if (hasError() && !milk->console.isEnabled)
+		__toggleConsole(milk);
+	if (isKeyPressed(&milk->modules.input, KEY_ESCAPE))
+		__toggleConsole(milk);
+	if (!milk->console.isEnabled)
+		invokeUpdate(&milk->scripts);
+	else
+		__updateConsole(milk);
+#else
+	invokeUpdate(&milk->scripts);
+#endif
 }
 
-static int l_loadspr(lua_State *L)
+void drawMilk(Milk *milk)
 {
-	loadSpriteSheet(&globalMilk->video, lua_tostring(L, 1));
-	return 0;
-}
+	resetDrawState(&milk->modules.video);
+#ifdef BUILD_WITH_CONSOLE
+	if (!milk->console.isEnabled)
+		invokeDraw(&milk->scripts);
+	else
+		__drawConsole(milk);
 
-static int l_loadfont(lua_State *L)
-{
-	loadFont(&globalMilk->video, lua_tostring(L, 1));
-	return 0;
-}
-
-static int l_clip(lua_State *L)
-{
-	setClippingRect(&globalMilk->video,
-		(int)lua_tointeger(L, 1),
-		(int)lua_tointeger(L, 2),
-		(int)lua_tointeger(L, 3),
-		(int)lua_tointeger(L, 4)
-	);
-	return 0;
-}
-
-static int l_clrs(lua_State *L)
-{
-	clearFramebuffer(&globalMilk->video, (Color32)luaL_optinteger(L, 1, 0x000000));
-	return 0;
-}
-
-static int l_pset(lua_State *L)
-{
-	blitPixel(&globalMilk->video,
-		(int)floor(lua_tonumber(L, 1)),
-		(int)floor(lua_tonumber(L, 2)),
-		(Color32)lua_tointeger(L, 3)
-	);
-	return 0;
-}
-
-static int l_line(lua_State *L)
-{
-	blitLine(&globalMilk->video,
-		(int)lua_tointeger(L, 1),
-		(int)lua_tointeger(L, 2),
-		(int)lua_tointeger(L, 3),
-		(int)lua_tointeger(L, 4),
-		(Color32)lua_tointeger(L, 5)
-	);
-	return 0;
-}
-
-static int l_rect(lua_State *L)
-{
-	blitRectangle(&globalMilk->video,
-		(int)floor(lua_tonumber(L, 1)),
-		(int)floor(lua_tonumber(L, 2)),
-		(int)lua_tointeger(L, 3),
-		(int)lua_tointeger(L, 4),
-		(Color32)lua_tointeger(L, 5)
-	);
-	return 0;
-}
-
-static int l_rectfill(lua_State *L)
-{
-	blitFilledRectangle(&globalMilk->video,
-		(int)floor(lua_tonumber(L, 1)),
-		(int)floor(lua_tonumber(L, 2)),
-		(int)lua_tointeger(L, 3),
-		(int)lua_tointeger(L, 4),
-		(Color32)lua_tointeger(L, 5)
-	);
-	return 0;
-}
-
-static int l_spr(lua_State *L)
-{
-	blitSprite(&globalMilk->video,
-		(int)lua_tointeger(L, 1),
-		(int)floor(lua_tonumber(L, 2)),
-		(int)floor(lua_tonumber(L, 3)),
-		(int)luaL_optinteger(L, 4, 1),
-		(int)luaL_optinteger(L, 5, 1),
-		(int)luaL_optnumber(L, 6, 1.0),
-		(u8)luaL_optinteger(L, 7, 0)
-	);
-	return 0;
-}
-
-static int l_sprfont(lua_State *L)
-{
-	blitSpriteFont(&globalMilk->video, globalMilk->video.font,
-		(int)floor(lua_tonumber(L, 1)),
-		(int)floor(lua_tonumber(L, 2)),
-		lua_tostring(L, 3),
-		(int)luaL_optnumber(L, 4, 1.0),
-		(Color32)luaL_optinteger(L, 5, 0xffffff)
-	);
-	return 1;
-}
-
-static int l_loadsnd(lua_State *L)
-{
-	loadSound(&globalMilk->audio,
-		(int)lua_tointeger(L, 1),
-		lua_tostring(L, 2)
-	);
-	return 0;
-}
-
-static int l_freesnd(lua_State *L)
-{
-	unloadSound(&globalMilk->audio,
-		(int)lua_tointeger(L, 1)
-	);
-	return 0;
-}
-
-static int l_play(lua_State *L)
-{
-	playSound(&globalMilk->audio,
-		(int)lua_tointeger(L, 1),
-		(int)lua_tointeger(L, 2),
-		(int)lua_tointeger(L, 3)
-	);
-	return 0;
-}
-
-static int l_pause(lua_State *L)
-{
-  pauseSound(&globalMilk->audio,
-    (int)lua_tointeger(L, 1)
-  );
-  return 0;
-}
-
-static int l_resume(lua_State *L)
-{
-	resumeSound(&globalMilk->audio,
-		(int)lua_tointeger(L, 1)
-	);
-	return 0;
-}
-
-static int l_stop(lua_State *L)
-{
-	stopSound(&globalMilk->audio,
-		(int)lua_tointeger(L, 1)
-	);
-	return 0;
-}
-
-static int l_sndslot(lua_State *L)
-{
-	lua_pushinteger(L,
-		getSoundState(&globalMilk->audio, (int)lua_tointeger(L, 1))
-	);
-	return 1;
-}
-
-static int l_openstream(lua_State *L)
-{
-	openStream(&globalMilk->audio,
-		(int)lua_tointeger(L, 1),
-		lua_tostring(L, 2)
-	);
-	return 0;
-}
-
-static int l_closestream(lua_State *L)
-{
-  closeStream(&globalMilk->audio,
-		(int)lua_tointeger(L, 1)
-  );
-  return 0;
-}
-
-static int l_playstream(lua_State *L)
-{
-  bool loop = false;
-
-  if (lua_isboolean(L, 3))
-    loop = lua_toboolean(L, 3);
-
-	playStream(&globalMilk->audio,
-		(int)lua_tointeger(L, 1),
-		(int)lua_tointeger(L, 2),
-    loop
-	);
-	return 0;
-}
-
-static int l_stopstream(lua_State *L)
-{
-  UNUSED(L);
-  stopStream(&globalMilk->audio, lua_tointeger(L, 1));
-  return 0;
-}
-
-static int l_pausestream(lua_State *L)
-{
-  UNUSED(L);
-  pauseStream(&globalMilk->audio, lua_tointeger(L, 1));
-  return 0;
-}
-
-static int l_resumestream(lua_State *L)
-{
-  UNUSED(L);
-  resumeStream(&globalMilk->audio, lua_tointeger(L, 1));
-  return 0;
-}
-
-static int l_vol(lua_State *L)
-{
-	setMasterVolume(&globalMilk->audio,
-		(u8)lua_tointeger(L, 1)
-	);
-	return 0;
-}
-
-static int l_exit(lua_State *L)
-{
-	(void)L;
-	globalMilk->shouldQuit = true;
-	return 0;
-}
-
-static void pushApiFunction(lua_State *L, const char *name, int(*api_func)(lua_State *))
-{
-	lua_pushcfunction(L, api_func);
-	lua_setglobal(L, name);
-}
-
-static void pushApi(lua_State *L)
-{
-	pushApiFunction(L, "btn", l_btn);
-	pushApiFunction(L, "btnp", l_btnp);
-	pushApiFunction(L, "loadspr", l_loadspr);
-	pushApiFunction(L, "loadfont", l_loadfont);
-	pushApiFunction(L, "clip", l_clip);
-	pushApiFunction(L, "clrs", l_clrs);
-	pushApiFunction(L, "pset", l_pset);
-	pushApiFunction(L, "line", l_line);
-	pushApiFunction(L, "rect", l_rect);
-	pushApiFunction(L, "rectfill", l_rectfill);
-	pushApiFunction(L, "spr", l_spr);
-	pushApiFunction(L, "sprfont", l_sprfont);
-	pushApiFunction(L, "loadsnd", l_loadsnd);
-	pushApiFunction(L, "freesnd", l_freesnd);
-	pushApiFunction(L, "play", l_play);
-  pushApiFunction(L, "pause", l_pause);
-	pushApiFunction(L, "stop", l_stop);
-	pushApiFunction(L, "resume", l_resume);
-	pushApiFunction(L, "openstream", l_openstream);
-  pushApiFunction(L, "closestream", l_closestream);
-	pushApiFunction(L, "playstream", l_playstream);
-  pushApiFunction(L, "stopstream", l_stopstream);
-  pushApiFunction(L, "pausestream", l_pausestream);
-  pushApiFunction(L, "resumestream", l_resumestream);
-	pushApiFunction(L, "sndslot", l_sndslot);
-	pushApiFunction(L, "vol", l_vol);
-	pushApiFunction(L, "exit", l_exit);
-}
-
-void loadCode(Milk *milk)
-{
-	if (milk->code.state == NULL)
-	{
-		lua_State *L = luaL_newstate();
-		globalMilk = milk;
-		milk->code.state = (void *)L;
-		luaL_openlibs(L);
-		pushApi(L);
-
-		if (luaL_dofile(L, "main.lua"))
-			LOG_ERROR(lua_tostring(L, -1));
-	}
-}
-
-void unloadCode(Milk *milk)
-{
-	if (milk->code.state != NULL)
-	{
-		lua_close((lua_State *)milk->code.state);
-		milk->code.state = NULL;
-		globalMilk = NULL;
-	}
-}
-
-void invokeInit(Code *code)
-{
-	lua_State *L = (lua_State *)code->state;
-	lua_getglobal(L, "_init");
-
-	if (lua_pcall(L, 0, 0, 0) != 0)
-	{
-		LOG_ERROR(lua_tostring(L, -1));
-		lua_pop(L, -1);
-	}
-}
-
-void invokeUpdate(Code *code)
-{
-	lua_State *L = (lua_State *)code->state;
-	lua_getglobal(L, "_update");
-
-	if (lua_pcall(L, 0, 0, 0) != 0)
-	{
-		LOG_ERROR(lua_tostring(L, -1));
-		lua_pop(L, -1);
-	}
-}
-
-void invokeDraw(Code *code)
-{
-	resetDrawState(&globalMilk->video);
-
-	lua_State *L = (lua_State *)code->state;
-	lua_getglobal(L, "_draw");
-
-	if (lua_pcall(L, 0, 0, 0) != 0)
-	{
-		LOG_ERROR(lua_tostring(L, -1));
-		lua_pop(L, -1);
-	}
+	milk->console.ticks++;
+#else
+	resetDrawState(&milk->modules.video);
+	invokeDraw(&milk->scripts);
+#endif
 }

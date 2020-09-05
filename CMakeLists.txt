@@ -31,25 +31,27 @@ find_package(Lua53 REQUIRED)
 set(MILK_SRC_FILES
 	src/audio.c
 	src/audio.h
+	src/bitmap.c
+	src/bitmap.h
 	src/common.h
-	src/gamepad.c
-	src/gamepad.h
+	src/input.c
+	src/input.h
 	src/logs.c
 	src/logs.h
-	src/wav.c
-	src/wav.h
+	src/platform.h
+	src/scriptenv.c
+	src/scriptenv.h
+	src/wave.c
+	src/wave.h
 	src/video.c
 	src/video.h
-	src/embed/font.c
-	src/embed/font.h
+	src/embed/font.inl
 )
 
 set(MILK_MAIN_SRC_FILES
-	src/console.c
-	src/console.h
 	src/milk.c
 	src/milk.h
-	src/sdl/sdlmain.c
+	src/platform/sdlplatform.c
 )
 
 add_executable(milk ${MILK_SRC_FILES} ${MILK_MAIN_SRC_FILES})
@@ -59,22 +61,6 @@ if (WIN32)
 	target_link_directories(milk PUBLIC ${SDL2_INCLUDE_DIR} ${LUA53_INCLUDE_DIR} ${MILK_SRC_DIR})
 endif()
 target_link_libraries(milk PUBLIC ${SDL2_LIBRARY} ${LUA53_LIBRARIES})
-
-enable_testing()
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
-
-set(MILK_TEST_SRC_FILES
-	${MILK_SRC_FILES}
-	tests/audio_tests.h
-	tests/input_tests.h
-	tests/video_tests.h
-	tests/core/main.c
-	tests/core/milkassert.h
-)
-
-add_executable(milktests ${MILK_TEST_SRC_FILES})
-target_include_directories(milktests PUBLIC ${MILK_SRC_DIR})
-add_test(milktests milktests)
 
 if(WIN32)
 	if (MSVC)

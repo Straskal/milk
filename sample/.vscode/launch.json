@@ -9,6 +9,7 @@
             "type": "lua-local",
             "request": "launch",
             "cwd": "${workspaceFolder}/build",
+            "stopOnEntry": true,
             "program": {
                 "command": "milk"
             }

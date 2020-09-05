@@ -1,33 +1,29 @@
 #ifndef __MILK_H__
 #define __MILK_H__
 
-#include <stdbool.h>
+#include "scriptenv.h"
 
-#include "audio.h"
-#include "common.h"
-#include "gamepad.h"
-#include "video.h"
-
-typedef struct code
+typedef struct
 {
-	void *state;
-} Code;
+	Modules modules;
+	ScriptEnv scripts;
 
-typedef struct milk
-{
-	Input input;
-	Video video;
-	Audio audio;
-	Code  code;
-	bool  shouldQuit;
+#ifdef BUILD_WITH_CONSOLE
+#define COMMAND_MAX_LENGTH 36
+	struct Console
+	{
+		char candidate[COMMAND_MAX_LENGTH];
+		int candidateLength;
+		int ticks;
+		bool isEnabled;
+	} console;
+#endif
 } Milk;
 
 Milk *createMilk();
 void freeMilk(Milk *milk);
-void loadCode(Milk *milk);
-void unloadCode(Milk *milk);
-void invokeInit(Code *code);
-void invokeUpdate(Code *code);
-void invokeDraw(Code *code);
+void initializeMilk(Milk *milk);
+void updateMilk(Milk *milk);
+void drawMilk(Milk *milk);
 
 #endif
