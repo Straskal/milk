@@ -76,10 +76,10 @@ typedef struct
 } Command;
 
 static Command commands[] =
-		{
-				{"reload", __cmdReload},
-				{"fullscreen", __cmdFullscreen},
-				{"quit", __cmdQuit},
+	{
+		{"reload", __cmdReload},
+		{"fullscreen", __cmdFullscreen},
+		{"quit", __cmdQuit},
 };
 
 static void __initializeConsole(Milk *milk)

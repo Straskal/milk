@@ -5,9 +5,9 @@
 
 typedef struct
 {
-  uint32_t *pixels;
-  int width;
-  int height;
+    uint32_t *pixels;
+    int width;
+    int height;
 } Bitmap;
 
 Bitmap *loadBitmap(const char *filePath);

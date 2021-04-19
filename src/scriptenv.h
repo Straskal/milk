@@ -9,14 +9,14 @@
 
 typedef struct Modules
 {
-  Input input;
-  Video video;
-  Audio audio;
+    Input input;
+    Video video;
+    Audio audio;
 } Modules;
 
 typedef struct
 {
-  void *state;
+    void *state;
 } ScriptEnv;
 
 void openScriptEnv(ScriptEnv *scriptEnv, Modules *modules);

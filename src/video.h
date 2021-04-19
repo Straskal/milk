@@ -14,17 +14,17 @@
 
 typedef struct
 {
-  int top;
-  int left;
-  int bottom;
-  int right;
+    int top;
+    int left;
+    int bottom;
+    int right;
 } Rect;
 
 typedef struct
 {
-  uint32_t framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
-  uint32_t colorKey;
-  Rect clipRect;
+    uint32_t framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
+    uint32_t colorKey;
+    Rect clipRect;
 } Video;
 
 void initializeVideo(Video *video);
