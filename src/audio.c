@@ -207,6 +207,7 @@ void mixSamplesIntoStream(Audio *audio, int16_t *stream, int numSamples)
         }
 
         bool finished = readWaveStream(streamData, samplesToStream, audio->streamSlot.loop);
+        
         mixSamples(stream, streamData->chunk, streamData->sampleCount, streamData->channelCount, audio->streamSlot.volume);
 
         if (finished)
@@ -232,6 +233,7 @@ void mixSamplesIntoStream(Audio *audio, int16_t *stream, int numSamples)
                 }
 
                 mixSamples(stream, slots[i].position, samplesToMix, slots[i].soundData->channelCount, slots[i].volume);
+
                 slots[i].position += samplesToMix;
                 slots[i].remainingSamples -= samplesToMix;
             }
