@@ -114,7 +114,9 @@ WaveStream *wav_open_stream(const char *filename)
     WavHeader header;
 
     if ((file = fopen(filename, "rb")) == NULL)
+    {
         return NULL;
+    }
 
     if (!read_header(&header, file))
     {
