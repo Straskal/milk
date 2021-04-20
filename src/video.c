@@ -23,13 +23,14 @@
 #define EMBED_FONT_HEIGHT 64
 
 static uint32_t embeddedFontData[] =
-    {
+{
 #include "embed/font.inl"
 };
 
 void initializeVideo(Video *video)
 {
     memset(&video->framebuffer, 0, sizeof(video->framebuffer));
+
     resetDrawState(video);
 }
 
@@ -50,7 +51,7 @@ void setClip(Video *video, int x, int y, int w, int h)
     video->clipRect.bottom = CLAMP(y + h, 0, FRAMEBUFFER_HEIGHT);
 }
 
-#define FRAMEBUFFER_POS(x, y) (y * FRAMEBUFFER_WIDTH + x)
+#define FRAMEBUFFER_POS(x, y) ((y) * FRAMEBUFFER_WIDTH + (x))
 
 void clearFramebuffer(Video *video, uint32_t color)
 {
@@ -63,14 +64,18 @@ void clearFramebuffer(Video *video, uint32_t color)
         int end = start + length;
 
         for (int x = start; x < end; x++)
+        {
             video->framebuffer[x] = color;
+        }
     }
 }
 
 void drawPixel(Video *video, int x, int y, uint32_t color)
 {
     if (video->clipRect.left <= x && x < video->clipRect.right && video->clipRect.top <= y && y < video->clipRect.bottom)
+    {
         video->framebuffer[FRAMEBUFFER_POS(x, y)] = color;
+    }
 }
 
 void drawLine(Video *video, int x0, int y0, int x1, int y1, uint32_t color)
