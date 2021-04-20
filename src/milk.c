@@ -4,6 +4,7 @@
 #include "logs.h"
 #include "milk.h"
 #include "platform.h"
+#include "utils/create_main.h"
 
 #ifdef BUILD_WITH_CONSOLE
 #define CONSOLE_Y (FRAMEBUFFER_HEIGHT - 36)
@@ -70,6 +71,12 @@ static void __cmdQuit(Milk *milk)
 	platform_close();
 }
 
+static void cmd_create(Milk *milk)
+{
+    UNUSED(milk);
+    create_main_script();
+}
+
 typedef struct
 {
 	char *cmd;
@@ -81,6 +88,7 @@ static Command commands[] =
 		{"reload", __cmdReload},
 		{"fullscreen", __cmdFullscreen},
 		{"quit", __cmdQuit},
+        {"create", cmd_create},
 };
 
 static void __initializeConsole(Milk *milk)

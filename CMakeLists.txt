@@ -46,13 +46,13 @@ set(MILK_SRC_FILES
 	src/video.c
 	src/video.h
 	src/embed/font.inl
-)
+	src/utils/create_main.c
+	src/utils/create_main.h)
 
 set(MILK_MAIN_SRC_FILES
 	src/milk.c
 	src/milk.h
-	src/platform/sdlplatform.c
-)
+	src/platform/sdlplatform.c)
 
 add_executable(milk ${MILK_SRC_FILES} ${MILK_MAIN_SRC_FILES})
 target_compile_definitions(milk PUBLIC BUILD_WITH_CONSOLE)
