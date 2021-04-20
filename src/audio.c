@@ -32,7 +32,7 @@ void playSound(Audio *audio, Wave *wave, int slotId, int volume)
         slot->state = PLAYING;
         slot->soundData = wave;
         slot->position = wave->samples;
-        slot->remainingSamples = wave->sampleCount;
+        slot->remainingSamples = wave->sample_count;
         slot->volume = CLAMP(volume, 0, MAX_VOLUME);
 
         platform_unlockAudioDevice();
@@ -120,7 +120,7 @@ void playStream(Audio *audio, WaveStream *waveStream, int volume, bool loop)
 {
     platform_lockAudioDevice();
 
-    waveStreamSeekStart(waveStream);
+    wav_reset_stream(waveStream);
     audio->streamSlot.data = waveStream;
     audio->streamSlot.state = PLAYING;
     audio->streamSlot.volume = CLAMP(volume, 0, MAX_VOLUME);
@@ -178,10 +178,10 @@ static void mixSamples(int16_t *destination, const int16_t *source, int numSampl
     {
         sourceSample = (*source++ * volume) / MAX_VOLUME;
 
-        // There are only 1 or 2 channels, mono or stereo.
-        // Subtracting the amount of channels from 3 lets us know how many times to iterate.
+        // There are only 1 or 2 channel_count, mono or stereo.
+        // Subtracting the amount of channel_count from 3 lets us know how many times to iterate.
         // If there is only 1 channel, then we iterate twice for every sample, duplicating it on L and R.
-        // If there are 2 channels, then we iterate once per sample, as L and R are interleaved.
+        // If there are 2 channel_count, then we iterate once per sample, as L and R are interleaved.
         for (int i = 0; i < 3 - numChannels; i++)
         {
             destSample = CLAMP(sourceSample + *destination, S16_MIN, S16_MAX);
@@ -201,14 +201,14 @@ void mixSamplesIntoStream(Audio *audio, int16_t *stream, int numSamples)
         WaveStream *streamData = audio->streamSlot.data;
         int samplesToStream = numSamples;
 
-        if (streamData->channelCount == 1)
+        if (streamData->channel_count == 1)
         {
             samplesToStream /= 2;
         }
 
-        bool finished = readWaveStream(streamData, samplesToStream, audio->streamSlot.loop);
+        bool finished = wav_read_stream(streamData, samplesToStream, audio->streamSlot.loop);
 
-        mixSamples(stream, streamData->chunk, streamData->sampleCount, streamData->channelCount, audio->streamSlot.volume);
+        mixSamples(stream, streamData->chunk, streamData->sample_count, streamData->channel_count, audio->streamSlot.volume);
 
         if (finished)
         {
@@ -227,12 +227,12 @@ void mixSamplesIntoStream(Audio *audio, int16_t *stream, int numSamples)
             {
                 int samplesToMix = MIN(slots[i].remainingSamples, numSamples);
 
-                if (slots[i].soundData->channelCount == 1)
+                if (slots[i].soundData->channel_count == 1)
                 {
                     samplesToMix /= 2;
                 }
 
-                mixSamples(stream, slots[i].position, samplesToMix, slots[i].soundData->channelCount, slots[i].volume);
+                mixSamples(stream, slots[i].position, samplesToMix, slots[i].soundData->channel_count, slots[i].volume);
 
                 slots[i].position += samplesToMix;
                 slots[i].remainingSamples -= samplesToMix;

@@ -24,7 +24,7 @@
 typedef struct
 {
     uint32_t riff;
-    uint32_t fileSize;
+    uint32_t file_size;
     uint32_t wave;
 } RiffChunk;
 
@@ -33,11 +33,11 @@ typedef struct
     uint32_t marker;
     uint32_t size;
     uint16_t type;
-    uint16_t channels;
-    uint32_t sampleRate;
-    uint32_t byteRate;
-    uint16_t blockAlign;
-    uint16_t bitsPerSample;
+    uint16_t channel_count;
+    uint32_t sample_rate;
+    uint32_t byte_rate;
+    uint16_t block_align;
+    uint16_t bits_per_sample;
 } FormatChunk;
 
 typedef struct
@@ -53,31 +53,40 @@ typedef struct
     DataChunk data;
 } WavHeader;
 
-static bool __readHeader(WavHeader *header, FILE *file)
+static bool read_header(WavHeader *header, FILE *file)
 {
-    return fread(header, sizeof(WavHeader), 1, file) == 1 && VALID_FORMAT_TYPE(header->format.type) && VALID_RIFF_MARKER(header->riff.riff) && VALID_WAVE_MARKER(header->riff.wave) && VALID_FORMAT_MARKER(header->format.marker) && VALID_DATA_MARKER(header->data.marker) && VALID_CHANNEL_COUNT(header->format.channels) && VALID_SAMPLE_SIZE(header->format.bitsPerSample);
+    return fread(header, sizeof(WavHeader), 1, file) == 1
+        && VALID_FORMAT_TYPE(header->format.type)
+        && VALID_RIFF_MARKER(header->riff.riff)
+        && VALID_WAVE_MARKER(header->riff.wave)
+        && VALID_FORMAT_MARKER(header->format.marker)
+        && VALID_DATA_MARKER(header->data.marker)
+        && VALID_CHANNEL_COUNT(header->format.channel_count)
+        && VALID_SAMPLE_SIZE(header->format.bits_per_sample);
 }
 
-Wave *loadWave(const char *filename)
+Wave *wav_load(const char *filename)
 {
     FILE *file = NULL;
     WavHeader header;
 
     if ((file = fopen(filename, "rb")) == NULL)
+    {
         return NULL;
+    }
 
-    if (!__readHeader(&header, file))
+    if (!read_header(&header, file))
     {
         fclose(file);
         return NULL;
     }
 
-    int sampleSize = header.format.channels * header.format.bitsPerSample / 8;
-    int sampleCount = (int)header.data.size / sampleSize;
-    int signalSize = sampleSize * sampleCount;
-    int16_t *samples = (int16_t *)malloc((size_t)signalSize);
+    int sample_size_in_bytes = header.format.channel_count * header.format.bits_per_sample / 8;
+    int sample_count = (int)header.data.size / sample_size_in_bytes;
+    int signal_size = sample_size_in_bytes * sample_count;
+    int16_t *samples = (int16_t *)malloc((size_t)signal_size);
 
-    if (fread(samples, signalSize, 1, file) != 1)
+    if (fread(samples, signal_size, 1, file) != 1)
     {
         free(samples);
         fclose(file);
@@ -86,19 +95,20 @@ Wave *loadWave(const char *filename)
 
     Wave *wave = (Wave *)malloc(sizeof(Wave));
     wave->samples = samples;
-    wave->sampleCount = (int)(signalSize / sizeof(int16_t));
-    wave->channelCount = header.format.channels;
+    wave->sample_count = (int)(signal_size / sizeof(int16_t));
+    wave->channel_count = header.format.channel_count;
     fclose(file);
+
     return wave;
 }
 
-void freeWave(Wave *wave)
+void wav_free(Wave *wave)
 {
     free(wave->samples);
     free(wave);
 }
 
-WaveStream *openWaveStream(const char *filename)
+WaveStream *wav_open_stream(const char *filename)
 {
     FILE *file = NULL;
     WavHeader header;
@@ -106,60 +116,62 @@ WaveStream *openWaveStream(const char *filename)
     if ((file = fopen(filename, "rb")) == NULL)
         return NULL;
 
-    if (!__readHeader(&header, file))
+    if (!read_header(&header, file))
     {
         fclose(file);
         return NULL;
     }
 
-    uint32_t sampleSize = header.format.channels * header.format.bitsPerSample / 8;
-    uint32_t sampleCount = header.data.size / sampleSize;
-    uint32_t signalSize = sampleSize * sampleCount;
+    uint32_t sample_size_in_bytes = header.format.channel_count * header.format.bits_per_sample / 8;
+    uint32_t sample_count = header.data.size / sample_size_in_bytes;
+    uint32_t signal_size = sample_size_in_bytes * sample_count;
 
-    WaveStream *waveStream = (WaveStream *)malloc(sizeof(WaveStream));
-    waveStream->chunk = (int16_t *)calloc(1, AUDIO_CHUNK_SIZE);
-    waveStream->file = file;
-    waveStream->sampleCount = 0;
-    waveStream->channelCount = header.format.channels;
-    waveStream->start = ftell(file);
-    waveStream->end = waveStream->start + (long)signalSize;
-    return waveStream;
+    WaveStream *wav_stream = (WaveStream *)malloc(sizeof(WaveStream));
+    wav_stream->chunk = (int16_t *)calloc(1, AUDIO_CHUNK_SIZE);
+    wav_stream->file = file;
+    wav_stream->sample_count = 0;
+    wav_stream->channel_count = header.format.channel_count;
+    wav_stream->start = ftell(file);
+    wav_stream->end = wav_stream->start + (long)signal_size;
+
+    return wav_stream;
 }
 
-void closeWaveStream(WaveStream *waveStream)
+void wav_close_stream(WaveStream *wav_stream)
 {
-    fclose(waveStream->file);
-    free(waveStream->chunk);
-    free(waveStream);
+    fclose(wav_stream->file);
+    free(wav_stream->chunk);
+    free(wav_stream);
 }
 
-bool readWaveStream(WaveStream *waveStream, int numSamples, bool loop)
+bool wav_read_stream(WaveStream *wav_stream, int num_samples, bool loop)
 {
-    long totalBytesRead = 0;
-    long requestedBytes = numSamples * (long)sizeof(int16_t);
-    long remainingBytes = waveStream->end - waveStream->position;
-    long bytesToRead = MIN(remainingBytes, requestedBytes);
+    long total_bytes_read = 0;
+    long num_requested_bytes = num_samples * (long)sizeof(int16_t);
+    long num_remaining_bytes = wav_stream->end - wav_stream->position;
+    long num_bytes_to_read = MIN(num_remaining_bytes, num_requested_bytes);
 
-    fread(waveStream->chunk, (size_t)bytesToRead, 1, waveStream->file);
+    fread(wav_stream->chunk, (size_t)num_bytes_to_read, 1, wav_stream->file);
 
-    totalBytesRead += bytesToRead;
-    bool finished = ftell(waveStream->file) == waveStream->end;
+    total_bytes_read += num_bytes_to_read;
+    bool finished = ftell(wav_stream->file) == wav_stream->end;
 
     if (finished && loop)
     {
-        bytesToRead = requestedBytes - remainingBytes;
-        fseek(waveStream->file, waveStream->start, SEEK_SET);
-        fread(waveStream->chunk + (bytesToRead / sizeof(int16_t)) + 1, (size_t)bytesToRead, 1, waveStream->file);
-        totalBytesRead += bytesToRead;
+        num_bytes_to_read = num_requested_bytes - num_remaining_bytes;
+        fseek(wav_stream->file, wav_stream->start, SEEK_SET);
+        fread(wav_stream->chunk + (num_bytes_to_read / sizeof(int16_t)) + 1, (size_t)num_bytes_to_read, 1, wav_stream->file);
+        total_bytes_read += num_bytes_to_read;
     }
 
-    waveStream->sampleCount = (int)(totalBytesRead / sizeof(int16_t));
-    waveStream->position = ftell(waveStream->file);
+    wav_stream->sample_count = (int)(total_bytes_read / sizeof(int16_t));
+    wav_stream->position = ftell(wav_stream->file);
+
     return finished && !loop;
 }
 
-void waveStreamSeekStart(WaveStream *waveStream)
+void wav_reset_stream(WaveStream *wav_stream)
 {
-    fseek(waveStream->file, waveStream->start, SEEK_SET);
-    waveStream->position = waveStream->start;
+    fseek(wav_stream->file, wav_stream->start, SEEK_SET);
+    wav_stream->position = wav_stream->start;
 }

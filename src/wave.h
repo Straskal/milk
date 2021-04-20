@@ -7,8 +7,8 @@
 typedef struct
 {
     int16_t *samples;
-    int channelCount;
-    int sampleCount;
+    int channel_count;
+    int sample_count;
 } Wave;
 
 typedef struct
@@ -17,16 +17,16 @@ typedef struct
     long start;
     long end;
     FILE *file;
-    int channelCount;
-    int sampleCount;
+    int channel_count;
+    int sample_count;
     int16_t *chunk;
 } WaveStream;
 
-Wave *loadWave(const char *filename);
-void freeWave(Wave *wave);
-WaveStream *openWaveStream(const char *filename);
-void closeWaveStream(WaveStream *waveStream);
-bool readWaveStream(WaveStream *waveStream, int numSamples, bool loop);
-void waveStreamSeekStart(WaveStream *waveStream);
+Wave *wav_load(const char *filename);
+void wav_free(Wave *wave);
+WaveStream *wav_open_stream(const char *filename);
+void wav_close_stream(WaveStream *wav_stream);
+bool wav_read_stream(WaveStream *wav_stream, int num_samples, bool loop);
+void wav_reset_stream(WaveStream *wav_stream);
 
 #endif
