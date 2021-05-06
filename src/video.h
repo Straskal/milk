@@ -12,19 +12,17 @@
 #define SPRITE_SIZE 8
 #define FONT_SPRITE_SPACING 6
 
-typedef struct
-{
-  int top;
-  int left;
-  int bottom;
-  int right;
+typedef struct {
+    int top;
+    int left;
+    int bottom;
+    int right;
 } Rect;
 
-typedef struct
-{
-  uint32_t framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
-  uint32_t colorKey;
-  Rect clipRect;
+typedef struct {
+    uint32_t framebuffer[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
+    uint32_t colorKey;
+    Rect clipRect;
 } Video;
 
 void initializeVideo(Video *video);
