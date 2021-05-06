@@ -46,6 +46,9 @@ typedef struct
     uint32_t size;
 } DataChunk;
 
+// Reading a wav is easy.
+// The wav header tells you where the data begins, and where the data ends.
+// The data is not compressed, we we just straight up load the samples right from the file.
 typedef struct
 {
     RiffChunk riff;
