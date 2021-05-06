@@ -193,7 +193,7 @@ static void __drawBuffer(Video *video, uint32_t *buffer, int x, int y, int w, in
   }
 }
 
-#define BUFFER_CHUNK(bmp, row, column) (&bmp->pixels[row * bmp->width * SPRITE_SIZE + column * SPRITE_SIZE])
+#define BUFFER_CHUNK(bmp, row, column) (&(bmp)->pixels[row * (bmp)->width * SPRITE_SIZE + column * SPRITE_SIZE])
 
 void drawSprite(Video *video, Bitmap *bmp, int index, int x, int y, int w, int h, float scale, uint8_t flip, uint32_t color)
 {
@@ -245,7 +245,7 @@ void drawFont(Video *video, Bitmap *bmp, int x, int y, const char *text, int sca
         int row = FLOOR((curr - 33) / numColumns);
         int col = FLOOR((curr - 33) % numColumns);
 
-        __drawBuffer(video, BUFFER_CHUNK(bmp, row, col), xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, bitmap.width, scale, 0, color);
+        __drawBuffer(video, BUFFER_CHUNK(&bitmap, row, col), xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, bitmap.width, scale, 0, color);
 
         xCurrent += SPRITE_SIZE * scale;
       }
@@ -308,7 +308,7 @@ void drawWrappedFont(Video *video, Bitmap *bmp, int x, int y, int w, const char 
         int row = FLOOR((c - 33) / numColumns);
         int col = FLOOR((c - 33) % numColumns);
 
-        __drawBuffer(video, BUFFER_CHUNK(bmp, row, col), xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, bitmap.width, scale, 0, color);
+        __drawBuffer(video, BUFFER_CHUNK(&bitmap, row, col), xCurrent, yCurrent, SPRITE_SIZE, SPRITE_SIZE, bitmap.width, scale, 0, color);
 
         xCurrent += SPRITE_SIZE * scale;
       }
