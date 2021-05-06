@@ -76,10 +76,10 @@ typedef struct
 } Command;
 
 static Command commands[] =
-		{
-				{"reload", __cmdReload},
-				{"fullscreen", __cmdFullscreen},
-				{"quit", __cmdQuit},
+{
+	{"reload", __cmdReload},
+	{"fullscreen", __cmdFullscreen},
+	{"quit", __cmdQuit},
 };
 
 static void __initializeConsole(Milk *milk)
@@ -171,7 +171,7 @@ static void __drawConsole(Milk *milk)
 
 Milk *createMilk()
 {
-	Milk *milk = (Milk *)malloc(sizeof(Milk));
+	Milk *milk = malloc(sizeof(Milk));
 	initializeInput(&milk->modules.input);
 	initializeVideo(&milk->modules.video);
 	initializeAudio(&milk->modules.audio);

@@ -4,22 +4,22 @@
 #include "common.h"
 #include "wave.h"
 
-#define RIFF_MARKER_LE 0x46464952   // "RIFF"
-#define WAVE_MARKER_LE 0x45564157   // "WAVE"
-#define FORMAT_MARKER_LE 0x20746d66 // "fmt0"
-#define DATA_MARKER_LE 0x61746164   // "data"
+#define RIFF_MARKER_LE    0x46464952   // "RIFF"
+#define WAVE_MARKER_LE    0x45564157   // "WAVE"
+#define FORMAT_MARKER_LE  0x20746d66 // "fmt0"
+#define DATA_MARKER_LE    0x61746164   // "data"
 
-#define PCM 1
-#define MONO 1
-#define STEREO 2
+#define PCM     1
+#define MONO    1
+#define STEREO  2
 
-#define VALID_RIFF_MARKER(header) (header == RIFF_MARKER_LE)
-#define VALID_WAVE_MARKER(header) (header == WAVE_MARKER_LE)
-#define VALID_FORMAT_MARKER(header) (header == FORMAT_MARKER_LE)
-#define VALID_DATA_MARKER(header) (header == DATA_MARKER_LE)
-#define VALID_FORMAT_TYPE(format) (format == PCM)
+#define VALID_RIFF_MARKER(header)         (header == RIFF_MARKER_LE)
+#define VALID_WAVE_MARKER(header)         (header == WAVE_MARKER_LE)
+#define VALID_FORMAT_MARKER(header)       (header == FORMAT_MARKER_LE)
+#define VALID_DATA_MARKER(header)         (header == DATA_MARKER_LE)
+#define VALID_FORMAT_TYPE(format)         (format == PCM)
 #define VALID_CHANNEL_COUNT(channelCount) (channelCount == MONO || channelCount == STEREO)
-#define VALID_SAMPLE_SIZE(size) (size == AUDIO_BITS_PER_SAMPLE)
+#define VALID_SAMPLE_SIZE(size)           (size == AUDIO_BITS_PER_SAMPLE)
 
 typedef struct
 {
@@ -55,7 +55,10 @@ typedef struct
 
 static bool __readHeader(WavHeader *header, FILE *file)
 {
-  return fread(header, sizeof(WavHeader), 1, file) == 1 && VALID_FORMAT_TYPE(header->format.type) && VALID_RIFF_MARKER(header->riff.riff) && VALID_WAVE_MARKER(header->riff.wave) && VALID_FORMAT_MARKER(header->format.marker) && VALID_DATA_MARKER(header->data.marker) && VALID_CHANNEL_COUNT(header->format.channels) && VALID_SAMPLE_SIZE(header->format.bitsPerSample);
+  return fread(header, sizeof(WavHeader), 1, file) == 1 && VALID_FORMAT_TYPE(header->format.type)
+    && VALID_RIFF_MARKER(header->riff.riff) && VALID_WAVE_MARKER(header->riff.wave)
+    && VALID_FORMAT_MARKER(header->format.marker) && VALID_DATA_MARKER(header->data.marker)
+    && VALID_CHANNEL_COUNT(header->format.channels) && VALID_SAMPLE_SIZE(header->format.bitsPerSample);
 }
 
 Wave *loadWave(const char *filename)
@@ -75,7 +78,7 @@ Wave *loadWave(const char *filename)
   int sampleSize = header.format.channels * header.format.bitsPerSample / 8;
   int sampleCount = (int)header.data.size / sampleSize;
   int signalSize = sampleSize * sampleCount;
-  int16_t *samples = (int16_t *)malloc((size_t)signalSize);
+  int16_t *samples = malloc((size_t)signalSize);
 
   if (fread(samples, signalSize, 1, file) != 1)
   {
@@ -84,7 +87,7 @@ Wave *loadWave(const char *filename)
     return NULL;
   }
 
-  Wave *wave = (Wave *)malloc(sizeof(Wave));
+  Wave *wave = malloc(sizeof(Wave));
   wave->samples = samples;
   wave->sampleCount = (int)(signalSize / sizeof(int16_t));
   wave->channelCount = header.format.channels;
@@ -116,8 +119,8 @@ WaveStream *openWaveStream(const char *filename)
   uint32_t sampleCount = header.data.size / sampleSize;
   uint32_t signalSize = sampleSize * sampleCount;
 
-  WaveStream *waveStream = (WaveStream *)malloc(sizeof(WaveStream));
-  waveStream->chunk = (int16_t *)calloc(1, AUDIO_CHUNK_SIZE);
+  WaveStream *waveStream = malloc(sizeof(WaveStream));
+  waveStream->chunk = calloc(1, AUDIO_CHUNK_SIZE);
   waveStream->file = file;
   waveStream->sampleCount = 0;
   waveStream->channelCount = header.format.channels;
