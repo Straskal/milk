@@ -25,7 +25,6 @@ static void __toggleConsole(Milk *milk)
 	if (!(console->isEnabled && hasError()))
 	{
 		console->isEnabled = !console->isEnabled;
-
 		if (console->isEnabled)
 		{
 			__resetCandidate(console);
@@ -105,7 +104,6 @@ static void __executeCommand(Milk *milk)
 			break;
 		}
 	}
-
 	__resetCandidate(&milk->console);
 }
 

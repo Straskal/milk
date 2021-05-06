@@ -4,7 +4,6 @@
         "type_traits": "c",
         "cmath": "c",
         "typeinfo": "cpp",
-        "limits": "cpp",
-        "milk.h": "c"
+        "limits": "cpp"
     }
 }

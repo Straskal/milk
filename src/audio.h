@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+
 #include "wave.h"
 
 #define AUDIO_FREQUENCY 44100
