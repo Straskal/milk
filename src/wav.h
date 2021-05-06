@@ -4,8 +4,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-// An entire wav loaded into memory.
-// These are good for short burst sounds.
 typedef struct
 {
     int16_t *samples;
@@ -13,8 +11,6 @@ typedef struct
     int sampleCount;
 } Wav;
 
-// A wav that is being streamed.
-// The wav file is kept open, and we read chunks at a time.
 typedef struct
 {
     // Our current read position.
@@ -31,16 +27,26 @@ typedef struct
     int sampleCount;
 } WavStream;
 
+// Loads an entire wav audio into memory.
+// Wav are good for short burst sounds, since they are usually smaller in size.
 Wav *loadWave(const char *filename);
 
+// Frees a wav.
 void freeWave(Wav *wave);
 
+// Opens a wav stream.
+// Wav streams are good for music, since music files are usually larger in size.
+// We don't keep the whole thing loaded. We read and cache chunks at a time.
 WavStream *openWaveStream(const char *filename);
 
+// Closes a wav stream and releases the file.
 void closeWaveStream(WavStream *waveStream);
 
+// Reads n samples from a wav stream.
+// If loop is true, then the stream will wrap back to the start of the audio.
 bool readWaveStream(WavStream *waveStream, int numSamples, bool loop);
 
+// Resets a stream to its starting position.
 void waveStreamSeekStart(WavStream *waveStream);
 
 #endif
