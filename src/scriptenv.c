@@ -319,7 +319,7 @@ static int l_fontwrap(lua_State *L)
 
 static int l_wave(lua_State *L)
 {
-	Wave *wave = loadWave(lua_tostring(L, 1));
+	Wav *wave = loadWave(lua_tostring(L, 1));
 	if (!wave)
 		lua_pushnil(L);
 	else
@@ -334,7 +334,7 @@ static int l_wave(lua_State *L)
 static int l_wave_gc(lua_State *L)
 {
 	LuaObject *luaObj = lua_touserdata(L, 1);
-	Wave *wave = luaObj->handle;
+	Wav *wave = luaObj->handle;
 	stopInstances(audio_addr(L), wave);
 	freeWave(wave);
 	return 0;
@@ -343,7 +343,7 @@ static int l_wave_gc(lua_State *L)
 static int l_wavestream(lua_State *L)
 {
 	const char *filePath = lua_tostring(L, 1);
-	WaveStream *waveStream = openWaveStream(filePath);
+	WavStream *waveStream = openWaveStream(filePath);
 	if (!waveStream)
 		lua_pushnil(L);
 	else
@@ -358,7 +358,7 @@ static int l_wavestream(lua_State *L)
 static int l_wavestream_gc(lua_State *L)
 {
 	LuaObject *luaObj = lua_touserdata(L, 1);
-	WaveStream *waveStream = luaObj->handle;
+	WavStream *waveStream = luaObj->handle;
 	if (__getModules(L)->audio.streamSlot.data == waveStream)
 		stopStream(audio_addr(L));
 	closeWaveStream(waveStream);
@@ -368,7 +368,7 @@ static int l_wavestream_gc(lua_State *L)
 static int l_play(lua_State *L)
 {
 	LuaObject *luaObj = lua_touserdata(L, 1);
-	Wave *wave = luaObj->handle;
+	Wav *wave = luaObj->handle;
 	playSound(audio_addr(L), wave, (int)lua_tointeger(L, 2), (int)lua_tointeger(L, 3));
 	return 0;
 }
@@ -414,7 +414,7 @@ static int l_sndslot(lua_State *L)
 static int l_playstream(lua_State *L)
 {
 	LuaObject *luaObj = lua_touserdata(L, 1);
-	WaveStream *waveStream = luaObj->handle;
+	WavStream *waveStream = luaObj->handle;
 
 	bool loop = false;
 	if (lua_isboolean(L, 3))

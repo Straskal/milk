@@ -2,7 +2,7 @@
 
 #include "audio.h"
 #include "common.h"
-#include "wave.h"
+#include "wav.h"
 
 #define RIFF_MARKER_LE    0x46464952   // "RIFF"
 #define WAVE_MARKER_LE    0x45564157   // "WAVE"
@@ -61,7 +61,7 @@ static bool __readHeader(WavHeader *header, FILE *file)
     && VALID_CHANNEL_COUNT(header->format.channels) && VALID_SAMPLE_SIZE(header->format.bitsPerSample);
 }
 
-Wave *loadWave(const char *filename)
+Wav *loadWave(const char *filename)
 {
   FILE *file = NULL;
   WavHeader header;
@@ -87,7 +87,7 @@ Wave *loadWave(const char *filename)
     return NULL;
   }
 
-  Wave *wave = malloc(sizeof(Wave));
+  Wav *wave = malloc(sizeof(Wav));
   wave->samples = samples;
   wave->sampleCount = (int)(signalSize / sizeof(int16_t));
   wave->channelCount = header.format.channels;
@@ -95,13 +95,13 @@ Wave *loadWave(const char *filename)
   return wave;
 }
 
-void freeWave(Wave *wave)
+void freeWave(Wav *wave)
 {
   free(wave->samples);
   free(wave);
 }
 
-WaveStream *openWaveStream(const char *filename)
+WavStream *openWaveStream(const char *filename)
 {
   FILE *file = NULL;
   WavHeader header;
@@ -119,7 +119,7 @@ WaveStream *openWaveStream(const char *filename)
   uint32_t sampleCount = header.data.size / sampleSize;
   uint32_t signalSize = sampleSize * sampleCount;
 
-  WaveStream *waveStream = malloc(sizeof(WaveStream));
+  WavStream *waveStream = malloc(sizeof(WavStream));
   waveStream->chunk = calloc(1, AUDIO_CHUNK_SIZE);
   waveStream->file = file;
   waveStream->sampleCount = 0;
@@ -129,14 +129,14 @@ WaveStream *openWaveStream(const char *filename)
   return waveStream;
 }
 
-void closeWaveStream(WaveStream *waveStream)
+void closeWaveStream(WavStream *waveStream)
 {
   fclose(waveStream->file);
   free(waveStream->chunk);
   free(waveStream);
 }
 
-bool readWaveStream(WaveStream *waveStream, int numSamples, bool loop)
+bool readWaveStream(WavStream *waveStream, int numSamples, bool loop)
 {
   long totalBytesRead = 0;
   long requestedBytes = numSamples * (long)sizeof(int16_t);
@@ -161,7 +161,7 @@ bool readWaveStream(WaveStream *waveStream, int numSamples, bool loop)
   return finished && !loop;
 }
 
-void waveStreamSeekStart(WaveStream *waveStream)
+void waveStreamSeekStart(WavStream *waveStream)
 {
   fseek(waveStream->file, waveStream->start, SEEK_SET);
   waveStream->position = waveStream->start;

@@ -21,7 +21,7 @@ void disableAudio(Audio *audio)
   memset(&audio->streamSlot, 0, sizeof(audio->streamSlot));
 }
 
-void playSound(Audio *audio, Wave *wave, int slotId, int volume)
+void playSound(Audio *audio, Wav *wave, int slotId, int volume)
 {
   if (slotId >= 0 && slotId < MAX_SOUND_SLOTS)
   {
@@ -54,7 +54,7 @@ void stopSound(Audio *audio, int slotId)
   platform_unlockAudioDevice();
 }
 
-void stopInstances(Audio *audio, Wave *wave)
+void stopInstances(Audio *audio, Wav *wave)
 {
   platform_lockAudioDevice();
   SoundSlot *slots = audio->soundSlots;
@@ -101,7 +101,7 @@ SoundState getSoundState(Audio *audio, int slotId)
   return slotId >= 0 && slotId < MAX_SOUND_SLOTS ? audio->soundSlots[slotId].state : STOPPED;
 }
 
-void playStream(Audio *audio, WaveStream *waveStream, int volume, bool loop)
+void playStream(Audio *audio, WavStream *waveStream, int volume, bool loop)
 {
   platform_lockAudioDevice();
   waveStreamSeekStart(waveStream);
@@ -164,7 +164,7 @@ void mixSamplesIntoStream(Audio *audio, int16_t *stream, int numSamples)
 {
   if (audio->streamSlot.state == PLAYING)
   {
-    WaveStream *streamData = audio->streamSlot.data;
+    WavStream *streamData = audio->streamSlot.data;
 
     if (streamData->channelCount == 1)
       numSamples /= 2;

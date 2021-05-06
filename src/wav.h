@@ -11,7 +11,7 @@ typedef struct
     int16_t *samples;
     int channelCount;
     int sampleCount;
-} Wave;
+} Wav;
 
 // A wav that is being streamed.
 // The wav file is kept open, and we read chunks at a time.
@@ -29,18 +29,18 @@ typedef struct
     int16_t *chunk;
     int channelCount;
     int sampleCount;
-} WaveStream;
+} WavStream;
 
-Wave *loadWave(const char *filename);
+Wav *loadWave(const char *filename);
 
-void freeWave(Wave *wave);
+void freeWave(Wav *wave);
 
-WaveStream *openWaveStream(const char *filename);
+WavStream *openWaveStream(const char *filename);
 
-void closeWaveStream(WaveStream *waveStream);
+void closeWaveStream(WavStream *waveStream);
 
-bool readWaveStream(WaveStream *waveStream, int numSamples, bool loop);
+bool readWaveStream(WavStream *waveStream, int numSamples, bool loop);
 
-void waveStreamSeekStart(WaveStream *waveStream);
+void waveStreamSeekStart(WavStream *waveStream);
 
 #endif

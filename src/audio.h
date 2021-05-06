@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "wave.h"
+#include "wav.h"
 
 #define AUDIO_FREQUENCY 44100
 #define AUDIO_BITS_PER_SAMPLE 16
@@ -24,7 +24,7 @@ typedef enum
 
 typedef struct
 {
-  Wave *soundData;
+  Wav *soundData;
   SoundState state;
   int volume;
   int remainingSamples;
@@ -33,7 +33,7 @@ typedef struct
 
 typedef struct
 {
-  WaveStream *data;
+  WavStream *data;
   SoundState state;
   int volume;
   bool loop;
@@ -48,13 +48,13 @@ typedef struct
 
 void initializeAudio(Audio *audio);
 void disableAudio(Audio *audio);
-void playSound(Audio *audio, Wave *wave, int slotId, int volume);
+void playSound(Audio *audio, Wav *wave, int slotId, int volume);
 void stopSound(Audio *audio, int slotId);
-void stopInstances(Audio *audio, Wave *wave);
+void stopInstances(Audio *audio, Wav *wave);
 void pauseSound(Audio *audio, int slotId);
 void resumeSound(Audio *audio, int slotId);
 SoundState getSoundState(Audio *audio, int slotId);
-void playStream(Audio *audio, WaveStream *waveStream, int volume, bool loop);
+void playStream(Audio *audio, WavStream *waveStream, int volume, bool loop);
 void stopStream(Audio *audio);
 void pauseStream(Audio *audio);
 void resumeStream(Audio *audio);

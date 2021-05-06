@@ -39,8 +39,8 @@ set(MILK_SRC_FILES
 	src/platform.h
 	src/scriptenv.c
 	src/scriptenv.h
-	src/wave.c
-	src/wave.h
+	src/wav.c
+	src/wav.h
 	src/video.c
 	src/video.h
 	src/embed/font.inl
