@@ -23,4 +23,4 @@ jobs:
           command: 'cmake -DCMAKE_BUILD_TYPE=Release'
       - run:
           name: Build
-          command: 'cmake --build'
+          command: 'cmake --build .'
