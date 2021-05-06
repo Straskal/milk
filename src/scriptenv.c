@@ -38,36 +38,44 @@ static Modules *__getModules(lua_State *L)
 static int l_btn(lua_State *L)
 {
 	lua_pushboolean(L,
-					isButtonDown(
-						input_addr(L),
-						(ButtonState)(lua_tointeger(L, 1))));
+		isButtonDown(
+			input_addr(L),
+			(ButtonState)(lua_tointeger(L, 1))
+		)
+	);
 	return 1;
 }
 
 static int l_btnp(lua_State *L)
 {
 	lua_pushboolean(L,
-					isButtonPressed(
-						input_addr(L),
-						(ButtonState)(lua_tointeger(L, 1))));
+		isButtonPressed(
+			input_addr(L),
+			(ButtonState)(lua_tointeger(L, 1))
+		)
+	);
 	return 1;
 }
 
 static int l_key(lua_State *L)
 {
 	lua_pushboolean(L,
-					isKeyDown(
-						input_addr(L),
-						(lua_tointeger(L, 1))));
+		isKeyDown(
+			input_addr(L),
+			(lua_tointeger(L, 1))
+		)
+	);
 	return 1;
 }
 
 static int l_keyp(lua_State *L)
 {
 	lua_pushboolean(L,
-					isKeyPressed(
-						input_addr(L),
-						(lua_tointeger(L, 1))));
+		isKeyPressed(
+			input_addr(L),
+			(lua_tointeger(L, 1))
+		)
+	);
 	return 1;
 }
 
@@ -86,18 +94,22 @@ static int l_mouse(lua_State *L)
 static int l_mousebtn(lua_State *L)
 {
 	lua_pushboolean(L,
-					isMouseDown(
-						input_addr(L),
-						lua_tointeger(L, 1)));
+		isMouseDown(
+			input_addr(L),
+			lua_tointeger(L, 1)
+		)
+	);
 	return 1;
 }
 
 static int l_mousebtnp(lua_State *L)
 {
 	lua_pushboolean(L,
-					isMousePressed(
-						input_addr(L),
-						lua_tointeger(L, 1)));
+		isMousePressed(
+			input_addr(L),
+			lua_tointeger(L, 1)
+		)
+	);
 	return 1;
 }
 
@@ -133,7 +145,8 @@ static int l_clip(lua_State *L)
 		lua_tointeger(L, 1),
 		lua_tointeger(L, 2),
 		lua_tointeger(L, 3),
-		lua_tointeger(L, 4));
+		lua_tointeger(L, 4)
+	);
 	return 0;
 }
 
@@ -141,7 +154,8 @@ static int l_clrs(lua_State *L)
 {
 	clearFramebuffer(
 		video_addr(L),
-		(uint32_t)luaL_optinteger(L, 1, 0x000000));
+		(uint32_t)luaL_optinteger(L, 1, 0x000000)
+	);
 	return 0;
 }
 
@@ -151,7 +165,8 @@ static int l_pset(lua_State *L)
 		video_addr(L),
 		(int)FLOOR(lua_tonumber(L, 1)),
 		(int)FLOOR(lua_tonumber(L, 2)),
-		(uint32_t)lua_tointeger(L, 3));
+		(uint32_t)lua_tointeger(L, 3)
+	);
 	return 0;
 }
 
@@ -163,7 +178,8 @@ static int l_line(lua_State *L)
 		(int)lua_tointeger(L, 2),
 		(int)lua_tointeger(L, 3),
 		(int)lua_tointeger(L, 4),
-		(uint32_t)lua_tointeger(L, 5));
+		(uint32_t)lua_tointeger(L, 5)
+	);
 	return 0;
 }
 
@@ -175,7 +191,8 @@ static int l_rect(lua_State *L)
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
 		(int)lua_tointeger(L, 4),
-		(uint32_t)lua_tointeger(L, 5));
+		(uint32_t)lua_tointeger(L, 5)
+	);
 	return 0;
 }
 
@@ -187,7 +204,8 @@ static int l_rectfill(lua_State *L)
 		(int)floor(lua_tonumber(L, 2)),
 		(int)lua_tointeger(L, 3),
 		(int)lua_tointeger(L, 4),
-		(uint32_t)lua_tointeger(L, 5));
+		(uint32_t)lua_tointeger(L, 5)
+	);
 	return 0;
 }
 
@@ -205,7 +223,8 @@ static int l_sprite(lua_State *L)
 		(int)luaL_optinteger(L, 6, 1),
 		(float)luaL_optnumber(L, 7, 1.0),
 		(uint8_t)luaL_optinteger(L, 8, 0),
-		(uint32_t)luaL_optinteger(L, 9, 0));
+		(uint32_t)luaL_optinteger(L, 9, 0)
+	);
 	return 0;
 }
 
@@ -271,7 +290,8 @@ static int l_font(lua_State *L)
 		(int)floor(lua_tonumber(L, 3)),
 		lua_tostring(L, 4),
 		(int)floor(luaL_optinteger(L, 5, 1)),
-		(uint32_t)floor(luaL_optinteger(L, 6, 0xffffffff)));
+		(uint32_t)floor(luaL_optinteger(L, 6, 0xffffffff))
+	);
 	return 1;
 }
 
@@ -285,13 +305,15 @@ static int l_fontwrap(lua_State *L)
 			bmp = luaObj->handle;
 	}
 
-	drawWrappedFont(video_addr(L), bmp,
-					(int)floor(lua_tonumber(L, 2)),
-					(int)floor(lua_tonumber(L, 3)),
-					(int)floor(lua_tonumber(L, 4)),
-					lua_tostring(L, 5),
-					(int)floor(luaL_optinteger(L, 6, 1)),
-					(uint32_t)floor(luaL_optinteger(L, 7, 0xffffffff)));
+	drawWrappedFont
+		(video_addr(L), bmp,
+		(int)floor(lua_tonumber(L, 2)),
+		(int)floor(lua_tonumber(L, 3)),
+		(int)floor(lua_tonumber(L, 4)),
+		lua_tostring(L, 5),
+		(int)floor(luaL_optinteger(L, 6, 1)),
+		(uint32_t)floor(luaL_optinteger(L, 7, 0xffffffff))
+	);
 	return 1;
 }
 
@@ -355,7 +377,8 @@ static int l_pause(lua_State *L)
 {
 	pauseSound(
 		audio_addr(L),
-		(int)lua_tointeger(L, 1));
+		(int)lua_tointeger(L, 1)
+	);
 	return 0;
 }
 
@@ -363,7 +386,8 @@ static int l_resume(lua_State *L)
 {
 	resumeSound(
 		audio_addr(L),
-		(int)lua_tointeger(L, 1));
+		(int)lua_tointeger(L, 1)
+	);
 	return 0;
 }
 
@@ -371,16 +395,19 @@ static int l_stop(lua_State *L)
 {
 	stopSound(
 		audio_addr(L),
-		(int)lua_tointeger(L, 1));
+		(int)lua_tointeger(L, 1)
+	);
 	return 0;
 }
 
 static int l_sndslot(lua_State *L)
 {
 	lua_pushinteger(L,
-					getSoundState(
-						audio_addr(L),
-						(int)lua_tointeger(L, 1)));
+		getSoundState(
+			audio_addr(L),
+			(int)lua_tointeger(L, 1)
+		)
+	);
 	return 1;
 }
 
@@ -397,7 +424,8 @@ static int l_playstream(lua_State *L)
 		audio_addr(L),
 		waveStream,
 		(int)lua_tointeger(L, 2),
-		loop);
+		loop
+	);
 	return 0;
 }
 
