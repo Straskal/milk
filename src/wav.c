@@ -141,9 +141,11 @@ bool readWaveStream(WavStream *waveStream, int numSamples, bool loop)
 
     if (finished && loop) {
         bytesToRead = requestedBytes - remainingBytes;
-        fseek(waveStream->file, waveStream->start, SEEK_SET);
-        fread(waveStream->chunk + (bytesToRead / sizeof(int16_t)) + 1, (size_t) bytesToRead, 1, waveStream->file);
-        totalBytesRead += bytesToRead;
+        if (bytesToRead > 0) {
+            fseek(waveStream->file, waveStream->start, SEEK_SET);
+            fread(waveStream->chunk + (bytesToRead / sizeof(int16_t)) + 1, (size_t) bytesToRead, 1, waveStream->file);
+            totalBytesRead += bytesToRead;
+        }
     }
 
     waveStream->sampleCount = (int) (totalBytesRead / sizeof(int16_t));
