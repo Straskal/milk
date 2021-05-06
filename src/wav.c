@@ -62,11 +62,6 @@ static bool readHeader(WavHeader *header, FILE *file)
            && VALID_CHANNEL_COUNT(header->format.channels) && VALID_SAMPLE_SIZE(header->format.bitsPerSample);
 }
 
-static int getSampleSize(WavHeader* header)
-{
-    return header->format.channels * header->format.bitsPerSample / 8;
-}
-
 Wav *loadWave(const char *filename)
 {
     FILE *file = NULL;
