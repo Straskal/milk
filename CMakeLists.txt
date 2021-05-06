@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.12.4)
-
 project(libmilk)
 set(C_STANDARD 99)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
