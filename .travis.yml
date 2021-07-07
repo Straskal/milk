@@ -34,6 +34,11 @@ matrix:
 
 before_install:
   - eval "${MATRIX_EVAL}"
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+      echo 'export PATH="/usr/local/opt/lua@5.3/bin:$PATH"' >> /Users/travis/.bash_profile;
+      export LDFLAGS="-L/usr/local/opt/lua@5.3/lib";
+      export CPPFLAGS="-I/usr/local/opt/lua@5.3/include"
+    fi
 
 script:
   - mkdir build
